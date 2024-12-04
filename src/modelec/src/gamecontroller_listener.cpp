@@ -114,10 +114,9 @@ namespace Modelec {
         auto message = std_msgs::msg::String();
         int speed = 0;
         if (msg->axes[1] < 0.1 && msg->axes[1] > -0.1) {
-            RCLCPP_INFO(this->get_logger(), "speed: 0");
             speed = 0;
         } else {
-            speed = Modelec::mapValue(static_cast<int>(msg->axes[1]), -1, 1, -310, 310);
+            speed = static_cast<int>(Modelec::mapValue(static_cast<float>(msg->axes[1]), -1.0f, 1.0f, -310.0f, 310.0f));
         }
 
         if (speed != last_speed) {
@@ -128,10 +127,9 @@ namespace Modelec {
 
         int rotation = 0;
         if (msg->axes[3] < 0.1 && msg->axes[3] > -0.1) {
-            RCLCPP_INFO(this->get_logger(), "rotation: 0");
             rotation = 0;
         } else {
-            rotation = Modelec::mapValue(static_cast<int>(-msg->axes[3]), -1, 1, -310, 310);
+            rotation = static_cast<int>(Modelec::mapValue(static_cast<float>(-msg->axes[3]), -1.0f, 1.0f, -310.0f, 310.0f));
         }
 
         if (rotation != last_rotation) {

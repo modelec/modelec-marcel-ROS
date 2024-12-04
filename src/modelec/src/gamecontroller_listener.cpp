@@ -1,4 +1,5 @@
 #include "modelec/gamecontroller_listener.hpp"
+#include "modelec/utils.hpp"
 
 namespace Modelec {
     ControllerListener::ControllerListener() : Node("controller_listener")
@@ -113,7 +114,10 @@ namespace Modelec {
         auto message = std_msgs::msg::String();
         int speed = 0;
         if (msg->axes[1] < 0.1 && msg->axes[1] > -0.1) {
+            RCLCPP_INFO(this->get_logger(), "speed: 0");
             speed = 0;
+        } else {
+            speed = Modelec::mapValue(static_cast<int>(msg->axes[1]), -1, 1, -310, 310);
         }
 
         if (speed != last_speed) {
@@ -123,8 +127,11 @@ namespace Modelec {
         }
 
         int rotation = 0;
-        if (msg->axes[2] < 0.1 && msg->axes[2] > -0.1) {
+        if (msg->axes[3] < 0.1 && msg->axes[3] > -0.1) {
+            RCLCPP_INFO(this->get_logger(), "rotation: 0");
             rotation = 0;
+        } else {
+            rotation = Modelec::mapValue(static_cast<int>(-msg->axes[3]), -1, 1, -310, 310);
         }
 
         if (rotation != last_rotation) {

@@ -18,13 +18,6 @@ namespace Modelec {
         };
 
         int arm = ServoMode::ARM_BOTTOM;
-
-        bool button_2_was_pressed = false;
-        bool button_3_was_pressed = false;
-        bool button_1_was_pressed = false;
-        bool button_0_was_pressed = false;
-        bool button_9_was_pressed = false;
-        bool button_8_was_pressed = false;
     public:
         ControllerListener();
 
@@ -37,6 +30,13 @@ namespace Modelec {
 
         void CheckButton(const sensor_msgs::msg::Joy::SharedPtr msg);
         void CheckAxis(const sensor_msgs::msg::Joy::SharedPtr msg);
+
+        bool button_2_was_pressed = false;
+        bool button_3_was_pressed = false;
+        bool button_1_was_pressed = false;
+        bool button_0_was_pressed = false;
+        bool button_9_was_pressed = false;
+        bool button_8_was_pressed = false;
 
         int last_speed = 0;
         int last_rotation = 0;

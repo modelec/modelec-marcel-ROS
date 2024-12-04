@@ -85,6 +85,14 @@ target_include_directories(arm_controller PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
+add_executable(button_gpio_controller src/button_gpio_controller.cpp)
+ament_target_dependencies(button_gpio_controller rclcpp std_msgs modelec_interface)
+target_link_libraries(button_gpio_controller ${WIRINGPI_LIB})
+target_include_directories(button_gpio_controller PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
 # Install targets
 install(TARGETS
   usb_arduino_listener
@@ -95,6 +103,7 @@ install(TARGETS
   tirette_controller
   solenoid_controller
   arm_controller
+  button_gpio_controller
   DESTINATION lib/${PROJECT_NAME}
 )
 

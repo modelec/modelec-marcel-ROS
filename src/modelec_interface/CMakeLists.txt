@@ -16,9 +16,12 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ServoMoteur.msg"
   "msg/ServoMode.msg"
   "msg/Solenoid.msg"
+  "msg/Button.msg"
   "srv/NewServoMotor.srv"
   "srv/NewSolenoid.srv"
   "srv/Tirette.srv"
+  "srv/NewButton.srv"
+  "srv/Button.srv"
   DEPENDENCIES std_msgs
 )
 

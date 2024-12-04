@@ -1,0 +1,36 @@
+launch:
+
+- node:
+    pkg: modelec
+    exec: "usb_arduino_listener"
+    name: "usb_arduino_listener"
+
+- node:
+    pkg: 'modelec'
+    exec: 'usb_arduino_logic_processor'
+    name: 'usb_arduino_logic_processor'
+
+- node:
+    pkg: 'modelec'
+    exec: 'pca9685_controller'
+    name: 'pca9685_controller'
+
+- node:
+    pkg: 'modelec'
+    exec: 'solenoid_controller'
+    name: 'solenoid_controller'
+
+- node:
+    pkg: 'modelec'
+    exec: 'arm_controller'
+    name: 'arm_controller'
+
+- node:
+    pkg: 'joy'
+    exec: 'joy_node'
+    name: 'joy_node'
+
+- node:
+    pkg: 'modelec'
+    exec: 'gamecontroller_listener'
+    name: 'gamecontroller_listener'

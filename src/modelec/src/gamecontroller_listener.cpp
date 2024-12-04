@@ -82,8 +82,6 @@ namespace Modelec {
             auto message = ServoMode();
             if (arm == ServoMode::ARM_BOTTOM) {
                 arm = ServoMode::ARM_TOP;
-            } else if (arm == ServoMode::ARM_TOP) {
-                arm = ServoMode::ARM_MIDDLE;
             } else {
                 arm = ServoMode::ARM_BOTTOM;
             }

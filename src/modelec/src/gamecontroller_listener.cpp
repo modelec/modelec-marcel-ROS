@@ -120,7 +120,7 @@ namespace Modelec {
         }
 
         if (speed != last_speed) {
-            message.data = "V " + std::to_string(speed) + "\n";
+            message.data = "V " + std::to_string(speed);
             arduino_publisher_->publish(message);
             last_speed = speed;
         }
@@ -133,7 +133,7 @@ namespace Modelec {
         }
 
         if (rotation != last_rotation) {
-            message.data = "R " + std::to_string(rotation) + "\n";
+            message.data = "R " + std::to_string(rotation);
             arduino_publisher_->publish(message);
             last_rotation = rotation;
         }

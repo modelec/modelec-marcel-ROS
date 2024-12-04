@@ -18,6 +18,13 @@ namespace Modelec {
         };
 
         int arm = ServoMode::ARM_BOTTOM;
+
+        bool button_2_was_pressed = false;
+        bool button_3_was_pressed = false;
+        bool button_1_was_pressed = false;
+        bool button_0_was_pressed = false;
+        bool button_9_was_pressed = false;
+        bool button_8_was_pressed = false;
     public:
         ControllerListener();
 

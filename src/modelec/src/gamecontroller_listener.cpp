@@ -15,16 +15,7 @@ namespace Modelec {
 
     void ControllerListener::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
     {
-        // Handle the joystick input here
-        RCLCPP_INFO(this->get_logger(), "Joystick axes: [%f, %f, %f, %f, %f, %f]",
-                    msg->axes[0], msg->axes[1], msg->axes[2], msg->axes[3], msg->axes[4], msg->axes[5]);
-
-        RCLCPP_INFO(this->get_logger(), "Joystick buttons: [%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d]",
-                    msg->buttons[0], msg->buttons[1], msg->buttons[2], msg->buttons[3], 
-                    msg->buttons[4], msg->buttons[5], msg->buttons[6], msg->buttons[7], 
-                    msg->buttons[8], msg->buttons[9], msg->buttons[10], msg->buttons[11]);
-
-
+        // to check mapping : https://index.ros.org//p/joy/
         CheckButton(msg);
         CheckAxis(msg);
     }
@@ -32,6 +23,9 @@ namespace Modelec {
     void ControllerListener::CheckButton(const sensor_msgs::msg::Joy::SharedPtr msg)
     {
         if (msg->buttons[2] == 1) {
+            if (button_2_was_pressed) {
+                return;
+            }
             auto message = ServoMode();
             message.pin = 0;
             if (pinces[0] == ServoMode::PINCE_CLOSED) {
@@ -41,8 +35,13 @@ namespace Modelec {
             }
             message.mode = pinces[0];
             servo_publisher_->publish(message);
+        } else {
+            button_2_was_pressed = false;
         }
         if (msg->buttons[3] == 1) {
+            if (button_3_was_pressed) {
+                return;
+            }
             auto message = ServoMode();
             message.pin = 1;
             if (pinces[1] == ServoMode::PINCE_CLOSED) {
@@ -52,8 +51,13 @@ namespace Modelec {
             }
             message.mode = pinces[1];
             servo_publisher_->publish(message);
+        } else {
+            button_3_was_pressed = false;
         }
         if (msg->buttons[1] == 1) {
+            if (button_1_was_pressed) {
+                return;
+            }
             auto message = ServoMode();
             message.pin = 2;
             if (pinces[2] == ServoMode::PINCE_CLOSED) {
@@ -63,10 +67,15 @@ namespace Modelec {
             }
             message.mode = pinces[2];
             servo_publisher_->publish(message);
+        } else {
+            button_1_was_pressed = false;
         }
 
         // arm
         if (msg->buttons[0] == 1) {
+            if (button_0_was_pressed) {
+                return;
+            }
             auto message = ServoMode();
             if (arm == ServoMode::ARM_BOTTOM) {
                 arm = ServoMode::ARM_TOP;
@@ -77,12 +86,20 @@ namespace Modelec {
             }
             message.mode = arm;
             servo_publisher_->publish(message);
+        } else {
+            button_0_was_pressed = false;
         }
 
         if (msg->buttons[9] || msg->buttons[10]) {
+            if (button_9_was_pressed || button_8_was_pressed) {
+                return;
+            }
             auto message = std_msgs::msg::String();
             message.data = "W\n";
             arduino_publisher_->publish(message);
+        } else {
+            button_9_was_pressed = false;
+            button_8_was_pressed = false;
         }
     }
 

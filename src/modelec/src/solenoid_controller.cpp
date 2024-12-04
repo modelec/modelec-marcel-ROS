@@ -8,8 +8,8 @@ namespace Modelec {
         solenoid_subscriber_ = this->create_subscription<modelec_interface::msg::Solenoid>(
             "solenoid", 10, std::bind(&SolenoidController::activateSolenoid, this, std::placeholders::_1));
 
-        solenoid_add_subscriber_ = this->create_subscription<modelec_interface::msg::Solenoid>(
-            "add_solenoid", 10, std::bind(&SolenoidController::addSolenoidPin, this, std::placeholders::_1));
+        add_solenoid_service_ = this->create_service<modelec_interface::srv::NewSolenoid>(
+            "add_solenoid", std::bind(&SolenoidController::addSolenoid, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     void SolenoidController::activateSolenoid(const modelec_interface::msg::Solenoid::SharedPtr msg) {
@@ -19,9 +19,18 @@ namespace Modelec {
         }
     }
 
-    void SolenoidController::addSolenoidPin(const modelec_interface::msg::Solenoid::SharedPtr msg) {
-        solenoid_pin_.insert(msg->pin);
-        pinMode(msg->pin, OUTPUT);
+    void SolenoidController::addSolenoid(const std::shared_ptr<modelec_interface::srv::NewSolenoid::Request> request,
+                                         std::shared_ptr<modelec_interface::srv::NewSolenoid::Response> response) {
+        if (solenoid_pin_.find(request->pin) != solenoid_pin_.end()) {
+            response->success = false;
+            return;
+        }
+
+        pinMode(request->pin, OUTPUT);
+        digitalWrite(request->pin, LOW);
+        solenoid_pin_.insert(request->pin);
+
+        response->success = true;
     }
 }
 

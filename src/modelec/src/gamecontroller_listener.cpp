@@ -35,6 +35,7 @@ namespace Modelec {
             }
             message.mode = pinces[0];
             servo_publisher_->publish(message);
+            button_2_was_pressed = true;
         } else {
             button_2_was_pressed = false;
         }
@@ -51,6 +52,7 @@ namespace Modelec {
             }
             message.mode = pinces[1];
             servo_publisher_->publish(message);
+            button_3_was_pressed = true;
         } else {
             button_3_was_pressed = false;
         }
@@ -67,6 +69,7 @@ namespace Modelec {
             }
             message.mode = pinces[2];
             servo_publisher_->publish(message);
+            button_1_was_pressed = true;
         } else {
             button_1_was_pressed = false;
         }
@@ -85,7 +88,9 @@ namespace Modelec {
                 arm = ServoMode::ARM_BOTTOM;
             }
             message.mode = arm;
+            message.is_arm = true;
             servo_publisher_->publish(message);
+            button_0_was_pressed = true;
         } else {
             button_0_was_pressed = false;
         }

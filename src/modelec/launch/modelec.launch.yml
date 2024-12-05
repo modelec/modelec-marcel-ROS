@@ -12,8 +12,8 @@ launch:
 
 - node:
     pkg: 'modelec'
-    exec: 'pca9685_servo'
-    name: 'pca9685_servo'
+    exec: 'pca9685_controller'
+    name: 'pca9685_controller'
 
 - node:
     pkg: 'modelec'

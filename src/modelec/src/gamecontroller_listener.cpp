@@ -109,8 +109,6 @@ namespace Modelec {
 
     void ControllerListener::CheckAxis(const sensor_msgs::msg::Joy::SharedPtr msg)
     {
-        RCLCPP_INFO(this->get_logger(), "axes: %f %f %f %f", msg->axes[0], msg->axes[1], msg->axes[2], msg->axes[3]);
-        
         auto message = std_msgs::msg::String();
         int speed = 0;
         if (msg->axes[1] < 0.1 && msg->axes[1] > -0.1) {

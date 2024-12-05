@@ -1,0 +1,11 @@
+launch:
+
+- node:
+    pkg: 'joy'
+    exec: 'joy_node'
+    name: 'joy_node'
+
+- node:
+    pkg: 'modelec'
+    exec: 'gamecontroller_listener'
+    name: 'gamecontroller_listener'

@@ -58,7 +58,7 @@ namespace Modelec {
 
         int last_speed = 0;
         int last_rotation = 0;
-        int last_solar_1_angle = 0;
-        int last_solar_2_angle = 0;
+        float last_solar_1_angle = 0;
+        float last_solar_2_angle = 0;
     };
 }

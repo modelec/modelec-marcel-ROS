@@ -155,7 +155,7 @@ namespace Modelec {
             solarPannelAngleMessage.pin = solarPannelServos[0].pin;
             solarPannelAngleMessage.angle = solarPannelAngle;
             pca9685_publisher_->publish(solarPannelAngleMessage);*/
-            last_solar_1_angle = solarPannelAngle;
+            last_solar_1_angle = msg->axes[2];
         }
 
         /*if (msg->axes[5] != last_solar_2_angle) {
@@ -164,7 +164,7 @@ namespace Modelec {
             solarPannelAngleMessage.pin = solarPannelServos[1].pin;
             solarPannelAngleMessage.angle = solarPannelAngle;
             pca9685_publisher_->publish(solarPannelAngleMessage);
-            last_solar_2_angle = solarPannelAngle;
+            last_solar_2_angle = msg->axes[5];
         }*/
     }
 }

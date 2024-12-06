@@ -3,7 +3,7 @@
 
 namespace Modelec {
     ArmController::ArmController() : Node("pince_controller") {
-        publisher_ = this->create_publisher<modelec_interface::msg::PCA9685Servo>("servo_control", 10);
+        this->servo_spublisher_ = this->create_publisher<modelec_interface::msg::PCA9685Servo>("servo_control", 10);
         client_ = this->create_client<modelec_interface::srv::NewServoMotor>("add_servo");
 
         // ensure the server is up
@@ -43,18 +43,15 @@ namespace Modelec {
     void ArmController::ControlPince(const Mode::SharedPtr msg) {
         auto pince = pince_pins[msg->pin];
         if (msg->mode == pince.mode) {
+            RCLCPP_INFO(this->get_logger(), "Pince %d already in mode %d, no action required", msg->pin, msg->mode);
             return;
         }
 
-        RCLCPP_INFO(this->get_logger(), "Control pince %d to mode %d", msg->pin, msg->mode);
-
         auto message = modelec_interface::msg::PCA9685Servo();
-        message.pin = pince.pin;
+        message.pin = msg->pin;
         message.angle = pince.angles[msg->mode];
-        publisher_->publish(message);
+        servo_spublisher_->publish(message);
 
-        RCLCPP_INFO(this->get_logger(), "Pince %d set to mode %d", msg->pin, msg->mode);
-        
         pince_pins[msg->pin].mode = msg->mode;
     }
 
@@ -68,11 +65,11 @@ namespace Modelec {
                 auto message = modelec_interface::msg::PCA9685Servo();
                 message.pin = pince.second.pin;
                 message.angle = pince.second.angles[msg->mode];
-                publisher_->publish(message);
+                servo_spublisher_->publish(message);
             }
         }
 
-
+/*
         int direction = -1;
         if (arm.mode == Mode::ARM_BOTTOM && msg->mode == Mode::ARM_TOP) {
             direction = 1;
@@ -83,7 +80,7 @@ namespace Modelec {
         } else if (arm.mode == Mode::ARM_TOP && msg->mode == Mode::ARM_MIDDLE) {
             direction = -1;
         }
-/*
+
         int startAngle = arm.pins[ARM_1_PIN][arm.mode];
         for (int angle = startAngle; angle <= arm.pins[ARM_1_PIN][msg->mode]; angle += 2 * direction) {
             auto message = modelec_interface::msg::PCA9685Servo();

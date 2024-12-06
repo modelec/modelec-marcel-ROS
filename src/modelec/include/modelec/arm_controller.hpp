@@ -1,6 +1,5 @@
 #pragma once
 
-#include <modelec_interface/msg/pca9685_servo.hpp>
 #include <array>
 #include <rclcpp/rclcpp.hpp>
 #include <modelec_interface/msg/pca9685_servo.hpp>
@@ -35,7 +34,7 @@ namespace Modelec {
     public:
         ArmController();
     private:
-        rclcpp::Publisher<modelec_interface::msg::PCA9685Servo>::SharedPtr publisher_;
+        rclcpp::Publisher<modelec_interface::msg::PCA9685Servo>::SharedPtr servo_spublisher_;
         rclcpp::Subscription<modelec_interface::msg::ServoMode>::SharedPtr subscription_;
 
         std::unordered_map<int, Pince> pince_pins = {

@@ -26,6 +26,8 @@ namespace Modelec {
             if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), res) == rclcpp::FutureReturnCode::SUCCESS) {
                 if (!res.get()->success) {
                     RCLCPP_ERROR(this->get_logger(), "Failed to add servo on pin %d", servo.pin);
+                } else {
+                    RCLCPP_INFO(this->get_logger(), "Added servo on pin %d", servo.pin);
                 }
             } else {
                 RCLCPP_ERROR(this->get_logger(), "Service call failed");

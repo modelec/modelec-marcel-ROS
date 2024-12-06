@@ -46,10 +46,15 @@ namespace Modelec {
             return;
         }
 
+        RCLCPP_INFO(this->get_logger(), "Control pince %d to mode %d", msg->pin, msg->mode);
+
         auto message = modelec_interface::msg::PCA9685Servo();
         message.pin = pince.pin;
         message.angle = pince.angles[msg->mode];
         publisher_->publish(message);
+
+        RCLCPP_INFO(this->get_logger(), "Pince %d set to mode %d", msg->pin, msg->mode);
+        
         pince_pins[msg->pin].mode = msg->mode;
     }
 
@@ -78,9 +83,9 @@ namespace Modelec {
         } else if (arm.mode == Mode::ARM_TOP && msg->mode == Mode::ARM_MIDDLE) {
             direction = -1;
         }
-
+/*
         int startAngle = arm.pins[ARM_1_PIN][arm.mode];
-        for (int angle = startAngle; angle != arm.pins[ARM_1_PIN][msg->mode]; angle += 2 * direction) {
+        for (int angle = startAngle; angle <= arm.pins[ARM_1_PIN][msg->mode]; angle += 2 * direction) {
             auto message = modelec_interface::msg::PCA9685Servo();
             message.pin = ARM_1_PIN;
             message.angle = angle;
@@ -99,7 +104,7 @@ namespace Modelec {
 
         message.pin = ARM_2_PIN;
         message.angle = arm.pins[ARM_2_PIN][msg->mode];
-        publisher_->publish(message);
+        publisher_->publish(message);*/
     }
 }
 

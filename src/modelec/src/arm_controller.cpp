@@ -32,10 +32,11 @@ namespace Modelec {
 
         subscription_ = this->create_subscription<modelec_interface::msg::ServoMode>(
             "arm_control", 10, [this](const modelec_interface::msg::ServoMode::SharedPtr msg) {
-                // control the message
+                RCLCPP_INFO(this->get_logger(), "Received message");
                 if (msg->is_arm) {
                     ControlArm(msg);
                 } else if (pince_pins.find(msg->pin) != pince_pins.end()) {
+                    RCLCPP_INFO(this->get_logger(), "Control pince");
                     ControlPince(msg);
                 }
             });

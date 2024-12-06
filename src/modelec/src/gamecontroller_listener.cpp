@@ -97,26 +97,26 @@ namespace Modelec {
             button_0_was_pressed = false;
         }
 
-        if (msg->buttons[9]) {
-            if (button_9_was_pressed) {
+        if (msg->buttons[4]) {
+            if (button_4_was_pressed) {
                 return;
             }
             auto message = std_msgs::msg::String();
             message.data = "W\n";
             arduino_publisher_->publish(message);
-            button_9_was_pressed = true;
+            button_4_was_pressed = true;
         } else {
-            button_9_was_pressed = false;
+            button_4_was_pressed = false;
         }
 
-        if (msg->buttons[10]) {
-            if (button_10_was_pressed) {
+        if (msg->buttons[5]) {
+            if (button_5_was_pressed) {
                 return;
             }
             clear_pca_publisher_->publish(std_msgs::msg::Empty());
-            button_10_was_pressed = true;
+            button_5_was_pressed = true;
         } else {
-            button_10_was_pressed = false;
+            button_5_was_pressed = false;
         }
     }
 
@@ -149,8 +149,8 @@ namespace Modelec {
             last_rotation = rotation;
         }
 
-        if (msg->axes[4] != last_solar_1_angle) {
-            int solarPannelAngle = static_cast<int>(Modelec::mapValue(static_cast<float>(msg->axes[4]), -1.0f, 1.0f, solarPannelServos[0].startAngle, solarPannelServos[0].endAngle));
+        if (msg->axes[2] != last_solar_1_angle) {
+            int solarPannelAngle = static_cast<int>(Modelec::mapValue(static_cast<float>(msg->axes[2]), -1.0f, 1.0f, solarPannelServos[0].startAngle, solarPannelServos[0].endAngle));
             auto solarPannelAngleMessage = modelec_interface::msg::PCA9685Servo();
             solarPannelAngleMessage.pin = solarPannelServos[0].pin;
             solarPannelAngleMessage.angle = solarPannelAngle;

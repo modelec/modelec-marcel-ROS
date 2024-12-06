@@ -53,8 +53,8 @@ namespace Modelec {
         bool button_3_was_pressed = false;
         bool button_1_was_pressed = false;
         bool button_0_was_pressed = false;
-        bool button_9_was_pressed = false;
-        bool button_10_was_pressed = false;
+        bool button_4_was_pressed = false;
+        bool button_5_was_pressed = false;
 
         int last_speed = 0;
         int last_rotation = 0;

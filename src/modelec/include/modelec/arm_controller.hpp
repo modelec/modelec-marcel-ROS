@@ -23,6 +23,7 @@ namespace Modelec {
         struct Pince {
             int pin;
             int mode;
+            // angle mapping : 1 - PINCE_CLOSED | 2 - PINCE_MIDDLE | 3 - PINCE_OPEN | 4 - PINCE_FULLY_OPEN
             std::array<int, 4> angles;
         };
 

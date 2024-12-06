@@ -158,14 +158,14 @@ namespace Modelec {
             last_solar_1_angle = solarPannelAngle;
         }
 
-        if (msg->axes[5] != last_solar_2_angle) {
+        /*if (msg->axes[5] != last_solar_2_angle) {
             int solarPannelAngle = static_cast<int>(Modelec::mapValue(static_cast<float>(msg->axes[5]), -1.0f, 1.0f, solarPannelServos[1].endAngle, solarPannelServos[1].startAngle));
             auto solarPannelAngleMessage = modelec_interface::msg::PCA9685Servo();
             solarPannelAngleMessage.pin = solarPannelServos[1].pin;
             solarPannelAngleMessage.angle = solarPannelAngle;
             pca9685_publisher_->publish(solarPannelAngleMessage);
             last_solar_2_angle = solarPannelAngle;
-        }
+        }*/
     }
 }
 

@@ -31,7 +31,7 @@ namespace Modelec {
         };
         
         std::array<SolarPannelServo, 2> solarPannelServos = {
-            { { 6, 16, 40 }, { 7, 25, 3 } }
+            { { 6, 16.0f, 40.0f }, { 7, 25.0f, 3.0f } }
         };
 
     public:

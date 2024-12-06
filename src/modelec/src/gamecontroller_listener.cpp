@@ -14,6 +14,8 @@ namespace Modelec {
         arduino_publisher_ = this->create_publisher<std_msgs::msg::String>("send_to_arduino", 10);
 
         clear_pca_publisher_ = this->create_publisher<std_msgs::msg::Empty>("clear_pca9685", 10);
+
+        pca9685_publisher_ = this->create_publisher<modelec_interface::msg::PCA9685Servo>("servo_control", 10);
     }
 
     void ControllerListener::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg)

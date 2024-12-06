@@ -4,7 +4,7 @@
 #include <std_msgs/msg/string.hpp>
 #include <boost/asio.hpp>
 
-#define SERIAL_PORT "/dev/ttyACM0"
+#define SERIAL_PORT "/dev/ttyUSB0"
 #define MAX_MESSAGE_LEN 1048
 #define BAUDS 115200 //vitesse des données (bit/sec)
 

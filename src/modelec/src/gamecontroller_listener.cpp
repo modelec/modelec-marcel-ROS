@@ -16,6 +16,21 @@ namespace Modelec {
         clear_pca_publisher_ = this->create_publisher<std_msgs::msg::Empty>("clear_pca9685", 10);
 
         pca9685_publisher_ = this->create_publisher<modelec_interface::msg::PCA9685Servo>("servo_control", 10);
+
+        client_ = this->create_client<modelec_interface::srv::NewServoMotor>("add_servo");
+
+        for (auto servo : solarPannelServos) {
+            auto request = std::make_shared<modelec_interface::srv::NewServoMotor::Request>();
+            request->pin = servo.pin;
+            auto res = client_->async_send_request(request);
+            if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), res) == rclcpp::FutureReturnCode::SUCCESS) {
+                if (!res.get()->success) {
+                    RCLCPP_ERROR(this->get_logger(), "Failed to add servo on pin %d", servo.pin);
+                }
+            } else {
+                RCLCPP_ERROR(this->get_logger(), "Service call failed");
+            }
+        }
     }
 
     void ControllerListener::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg)

@@ -19,6 +19,15 @@ namespace Modelec {
 
         client_ = this->create_client<modelec_interface::srv::NewServoMotor>("add_servo");
 
+        // ensure the server is up
+        while (!client_->wait_for_service(std::chrono::seconds(1))) {
+            if (!rclcpp::ok()) {
+                RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
+                return;
+            }
+            RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
+        }
+
         for (auto servo : solarPannelServos) {
             auto request = std::make_shared<modelec_interface::srv::NewServoMotor::Request>();
             request->pin = servo.pin;

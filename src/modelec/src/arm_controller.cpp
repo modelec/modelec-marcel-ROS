@@ -6,6 +6,15 @@ namespace Modelec {
         publisher_ = this->create_publisher<modelec_interface::msg::PCA9685Servo>("servo_control", 10);
         client_ = this->create_client<modelec_interface::srv::NewServoMotor>("add_servo");
 
+        // ensure the server is up
+        while (!client_->wait_for_service(std::chrono::seconds(1))) {
+            if (!rclcpp::ok()) {
+                RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
+                return;
+            }
+            RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
+        }
+
         for (int pin : {PINCE_1_PIN, PINCE_2_PIN, PINCE_3_PIN, ARM_1_PIN, ARM_2_PIN}) {
             auto request = std::make_shared<modelec_interface::srv::NewServoMotor::Request>();
             request->pin = pin;

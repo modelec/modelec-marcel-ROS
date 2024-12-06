@@ -12,7 +12,7 @@ set(CMAKE_AUTOMOC ON)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(Qt5 COMPONENTS
+find_package(Qt6 COMPONENTS
         Core
         Gui
         Widgets
@@ -25,9 +25,9 @@ ament_target_dependencies(modelec_gui
   std_msgs
 )
 target_link_libraries(modelec_gui
-        Qt5::Core
-        Qt5::Gui
-        Qt5::Widgets
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Widgets
 )
 
 target_include_directories(modelec_gui PUBLIC

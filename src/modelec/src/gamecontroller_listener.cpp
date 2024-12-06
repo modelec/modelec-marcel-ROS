@@ -102,7 +102,7 @@ namespace Modelec {
                 return;
             }
             auto message = std_msgs::msg::String();
-            message.data = "W\n";
+            message.data = "W";
             arduino_publisher_->publish(message);
             button_4_was_pressed = true;
         } else {

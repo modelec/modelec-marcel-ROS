@@ -12,11 +12,14 @@ namespace Modelec {
         servo_publisher_ = this->create_publisher<ServoMode>("arm_control", 10);
 
         arduino_publisher_ = this->create_publisher<std_msgs::msg::String>("send_to_arduino", 10);
+
+        clear_pca_publisher_ = this->create_publisher<std_msgs::msg::Empty>("clear_pca9685", 10);
     }
 
     void ControllerListener::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
     {
         // to check mapping : https://index.ros.org//p/joy/
+        // bon en fait la doc dit de la merde pour voir les bon checker directement en loggant le topic joy
         CheckButton(msg);
         CheckAxis(msg);
     }
@@ -94,16 +97,26 @@ namespace Modelec {
             button_0_was_pressed = false;
         }
 
-        if (msg->buttons[9] || msg->buttons[10]) {
-            if (button_9_was_pressed || button_8_was_pressed) {
+        if (msg->buttons[9]) {
+            if (button_9_was_pressed) {
                 return;
             }
             auto message = std_msgs::msg::String();
             message.data = "W\n";
             arduino_publisher_->publish(message);
+            button_9_was_pressed = true;
         } else {
             button_9_was_pressed = false;
-            button_8_was_pressed = false;
+        }
+
+        if (msg->buttons[10]) {
+            if (button_10_was_pressed) {
+                return;
+            }
+            clear_pca_publisher_->publish(std_msgs::msg::Empty());
+            button_10_was_pressed = true;
+        } else {
+            button_10_was_pressed = false;
         }
     }
 

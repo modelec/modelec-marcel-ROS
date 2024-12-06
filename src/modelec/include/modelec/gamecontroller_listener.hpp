@@ -1,6 +1,8 @@
 #pragma once
 
+#include <rclcpp/publisher.hpp>
 #include <std_msgs/msg/string.hpp>
+#include <std_msgs/msg/empty.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joy.hpp>
 #include <modelec_interface/msg/servo_mode.hpp>
@@ -27,6 +29,7 @@ namespace Modelec {
         rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscription_;
         rclcpp::Publisher<ServoMode>::SharedPtr servo_publisher_;
         rclcpp::Publisher<std_msgs::msg::String>::SharedPtr arduino_publisher_;
+        rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr clear_pca_publisher_;
 
         void CheckButton(const sensor_msgs::msg::Joy::SharedPtr msg);
         void CheckAxis(const sensor_msgs::msg::Joy::SharedPtr msg);
@@ -36,7 +39,7 @@ namespace Modelec {
         bool button_1_was_pressed = false;
         bool button_0_was_pressed = false;
         bool button_9_was_pressed = false;
-        bool button_8_was_pressed = false;
+        bool button_10_was_pressed = false;
 
         int last_speed = 0;
         int last_rotation = 0;

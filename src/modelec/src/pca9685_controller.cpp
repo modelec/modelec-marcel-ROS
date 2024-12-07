@@ -84,7 +84,7 @@ namespace Modelec {
     // Clear all channels (reset devices)
     void PCA9685Controller::clearAllDevices() {
         for (int channel = 0; channel < 16; ++channel) {
-            setServoPWM(channel, 0);
+            SetPCA9685PWM(channel, 0, 0);
         }
     }
 

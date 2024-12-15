@@ -93,6 +93,21 @@ target_include_directories(button_gpio_controller PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
+add_executable(lidar_controller src/lidar_controller.cpp)
+ament_target_dependencies(lidar_controller rclcpp std_msgs sensor_msgs modelec_interface)
+target_include_directories(lidar_controller PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
+# Enable testing and linting
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  set(ament_cmake_copyright_FOUND TRUE)
+  set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
 # Install targets
 install(TARGETS
   usb_arduino_listener
@@ -112,18 +127,10 @@ install(DIRECTORY include/
   DESTINATION include/
 )
 
-# Install launch files
-install(DIRECTORY launch/
-  DESTINATION share/${PROJECT_NAME}/launch
+install(
+  DIRECTORY config description launch worlds
+  DESTINATION share/${PROJECT_NAME}
 )
-
-# Enable testing and linting
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
 
 # Finalize package
 ament_package()

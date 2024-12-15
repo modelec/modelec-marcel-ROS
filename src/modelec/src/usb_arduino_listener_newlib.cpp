@@ -109,27 +109,22 @@ namespace Modelec {
 
     // Reopen the connection with updated parameters
     try {
-      if (port.is_open()) {
-        port.close();  // Close the current port before reopening
-      }
+      serialClose(fd);
 
       if (!initializeConnection()) {
         RCLCPP_ERROR(this->get_logger(), "Failed to reopen the serial port, shutting down.");
         rclcpp::shutdown();  // Graceful shutdown if port opening fails
       }
 
-    } catch (boost::system::system_error &e) {
-      RCLCPP_ERROR(this->get_logger(), "Error during connection update: %s", e.what());
-      rclcpp::shutdown();
+    } catch (std::exception &e) {
+      RCLCPP_ERROR(this->get_logger(), "Error updating connection parameters: %s", e.what());
     }
   }
 
   void USBListener::write_to_arduino(const std::string &data) {
-    try {
-      boost::asio::write(port, boost::asio::buffer(data));
-    } catch (boost::system::system_error &e) {
-      RCLCPP_ERROR(this->get_logger(), "Error writing to serial port: %s", e.what());
-    }
+    serialPuts(fd, data.c_str());
+    serialFlush(fd);
+    RCLCPP_INFO(this->get_logger(), "Sent data: %s", data.c_str());
   }
 }
 

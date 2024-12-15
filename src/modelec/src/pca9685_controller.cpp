@@ -53,6 +53,8 @@ namespace Modelec {
             [this](const std::vector<rclcpp::Parameter> &parameters) {
                 return onParameterChange(parameters);
             });
+
+        clearAllDevices();
     }
 
     // Initialize PCA9685 in normal operation mode

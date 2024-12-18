@@ -105,4 +105,3 @@ AMENT_IGNORE
 
 .vscode
 .cache
-src/modelec/src

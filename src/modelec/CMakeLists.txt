@@ -22,10 +22,10 @@ find_package(modelec_interface REQUIRED)
 find_library(WIRINGPI_LIB wiringPi)
 
 # USB Arduino Listener Node
-add_executable(usb_arduino_listener src/usb_arduino_listener.cpp)
-ament_target_dependencies(usb_arduino_listener rclcpp std_msgs)
-target_link_libraries(usb_arduino_listener Boost::system)
-target_include_directories(usb_arduino_listener PUBLIC
+add_executable(serial_listener src/multiple_serial_listener.cpp)
+ament_target_dependencies(serial_listener rclcpp std_msgs modelec_interface)
+target_link_libraries(serial_listener Boost::system)
+target_include_directories(serial_listener PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
@@ -34,6 +34,14 @@ target_include_directories(usb_arduino_listener PUBLIC
 add_executable(usb_arduino_logic_processor src/usb_arduino_logic_processor.cpp)
 ament_target_dependencies(usb_arduino_logic_processor rclcpp std_msgs modelec_interface)
 target_include_directories(usb_arduino_logic_processor PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
+# USB Arduino Logic Processor Node
+add_executable(pcb_alim_interface src/pcb_alim_interface.cpp)
+ament_target_dependencies(pcb_alim_interface rclcpp std_msgs modelec_interface)
+target_include_directories(pcb_alim_interface PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
@@ -110,7 +118,7 @@ endif()
 
 # Install targets
 install(TARGETS
-  usb_arduino_listener
+  serial_listener
   usb_arduino_logic_processor
   pca9685_controller
   gamecontroller_listener

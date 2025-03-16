@@ -1,0 +1,7 @@
+string name
+string serial_port
+int64 bauds
+---
+bool status
+string publisher
+string subscriber

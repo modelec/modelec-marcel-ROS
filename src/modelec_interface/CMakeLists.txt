@@ -22,6 +22,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/Tirette.srv"
   "srv/NewButton.srv"
   "srv/Button.srv"
+  "srv/AddSerialListener.srv"
   DEPENDENCIES std_msgs
 )
 

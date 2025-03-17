@@ -1,0 +1,11 @@
+launch:
+
+- node:
+    pkg: modelec
+    exec: "serial_listener"
+    name: "serial_listener"
+
+- node:
+    pkg: 'modelec'
+    exec: 'usb_arduino_logic_processor'
+    name: 'usb_arduino_logic_processor'

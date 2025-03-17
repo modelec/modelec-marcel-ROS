@@ -5,7 +5,8 @@ namespace Modelec {
         add_serial_listener_service_ = create_service<modelec_interface::srv::AddSerialListener>("add_serial_listener", std::bind(&MultipleSerialListener::add_serial_listener, this, std::placeholders::_1, std::placeholders::_2));
         timer = create_wall_timer(std::chrono::milliseconds(READ_REFRESH_RATE), [this]() {
             for (auto &listener : serial_listeners) {
-                listener.second->asyncRead();
+                if (listener.second->IsOk())
+                    listener.second->read();
             }
         });
 
@@ -39,7 +40,7 @@ namespace Modelec {
         listener->publisher_ = create_publisher<std_msgs::msg::String>("raw_data/" + listener->name_, 10);
         listener->subscriber_ = create_subscription<std_msgs::msg::String>( 
             "send_to_serial/" + listener->name_, 10, [listener](std_msgs::msg::String::SharedPtr msg) {
-                listener->asyncWrite(msg->data);
+                listener->write(msg->data);
             });
 
         serial_listeners.insert({request->name, listener});
@@ -67,12 +68,11 @@ namespace Modelec {
             listener.second->SetMaxMessageLen(get_parameter("max_message_len").as_int());
         }
 
-        // change the timer refresh rate
         read_refresh_rate_ = get_parameter("read_refresh_rate").as_int();
         timer->cancel();
         timer = create_wall_timer(std::chrono::milliseconds(read_refresh_rate_), [this]() {
             for (auto &listener : serial_listeners) {
-                listener.second->asyncRead();
+                listener.second->read();
             }
         });
     }
@@ -89,37 +89,34 @@ namespace Modelec {
             status_ = false;
             return;
         }
-        asyncRead();  // Start asynchronous reading
     }
 
-    void MultipleSerialListener::SerialListener::asyncRead() {
+    void MultipleSerialListener::SerialListener::read() {
         if (!status_) return;
 
-        boost::asio::async_read_until(port_, read_buffer_, '\n', 
-            [this](boost::system::error_code ec, std::size_t) {
-                if (!ec) {
-                    std::istream is(&read_buffer_);
-                    std::string data;
-                    std::getline(is, data);
-                    std_msgs::msg::String msg;
-                    msg.data = data;
-                    publisher_->publish(msg);
-                } else {
-                    RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "Read error: %s", ec.message().c_str());
-                }
-                asyncRead(); // Continue reading asynchronously
-            });
+        std::vector<char> data(max_message_len_);
+        try {
+            // Attempt to read data from the serial port
+    
+            size_t len = port_.read_some(boost::asio::buffer(data.data(), max_message_len_));
+            if (len > 0) {
+                // Prepare and publish the message
+                auto msg = std_msgs::msg::String();
+                msg.data = std::string(data.begin(), data.begin() + len);
+                publisher_->publish(msg);
+            }
+        } catch (boost::system::system_error &e) {
+            RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "Read error: %s", e.what());
+        }
     }
+    
 
-    void MultipleSerialListener::SerialListener::asyncWrite(const std::string& data) {
-        if (!status_) return;
-
-        boost::asio::async_write(port_, boost::asio::buffer(data),
-            [](boost::system::error_code ec, std::size_t) {
-                if (ec) {
-                    RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "Write error: %s", ec.message().c_str());
-                }
-            });
+    void MultipleSerialListener::SerialListener::write(const std::string& data) {
+        try {
+            boost::asio::write(port_, boost::asio::buffer(data));
+        } catch (boost::system::system_error &e) {
+            RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "Write error: %s", e.what());
+        }
     }
 }
 

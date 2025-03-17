@@ -11,7 +11,7 @@ LogicProcessor::LogicProcessor() : Node("usb_logic_processor") {
   auto request = std::make_shared<modelec_interface::srv::AddSerialListener::Request>();
   request->name = "arduino";
   request->bauds = 115200;
-  request->serial_port = "/dev/ttyACM0";
+  request->serial_port = "/dev/pts/6";
   auto client = this->create_client<modelec_interface::srv::AddSerialListener>("add_serial_listener");
   while (!client->wait_for_service(std::chrono::seconds(1))) {
     if (!rclcpp::ok()) {
@@ -22,24 +22,32 @@ LogicProcessor::LogicProcessor() : Node("usb_logic_processor") {
   }
   auto result = client->async_send_request(request);
   if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) == rclcpp::FutureReturnCode::SUCCESS) {
-    if (!result.get()->status) {
-      RCLCPP_ERROR(this->get_logger(), "Failed to add serial listener");
+    if (auto res = result.get()) {
+      if (res->status) {
+
+        RCLCPP_INFO(this->get_logger(), "Publisher: %s", res->publisher.c_str());
+        RCLCPP_INFO(this->get_logger(), "Subscriber: %s", res->subscriber.c_str());
+
+        subscriber_ = this->create_subscription<std_msgs::msg::String>(
+          res->publisher, 10, [this](std_msgs::msg::String::SharedPtr msg) {
+              processData(msg->data);
+            });
+      
+        publisher_ = this->create_publisher<modelec_interface::msg::ArduinoData>(res->subscriber, 10);  
+      } else {
+        RCLCPP_ERROR(this->get_logger(), "Failed to add serial listener");
+      }
     } else {
-      RCLCPP_INFO(this->get_logger(), "Added serial listener");
+      RCLCPP_ERROR(this->get_logger(), "Failed to ask for a serial listener");
     }
   } else {
     RCLCPP_ERROR(this->get_logger(), "Service call failed");
   }
-
-    subscriber_ = this->create_subscription<std_msgs::msg::String>(
-        result.get()->publisher, 10, [this](std_msgs::msg::String::SharedPtr msg) {
-            processData(msg->data);
-        });
-    publisher_ = this->create_publisher<modelec_interface::msg::ArduinoData>("arduino_processed_data", 10);
 }
 
 void LogicProcessor::processData(const std::string &data) {
   auto processed_data = "Processed: " + data;
+  RCLCPP_INFO(this->get_logger(), "%s", processed_data.c_str());
   auto msg = modelec_interface::msg::ArduinoData();
   std::vector<std::string> d = split(data, ':');
 

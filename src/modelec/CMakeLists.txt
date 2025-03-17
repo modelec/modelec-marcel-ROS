@@ -127,6 +127,7 @@ install(TARGETS
   solenoid_controller
   arm_controller
   button_gpio_controller
+  pcb_alim_interface
   DESTINATION lib/${PROJECT_NAME}
 )
 

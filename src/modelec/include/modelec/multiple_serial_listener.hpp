@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <modelec_interface/srv/add_serial_listener.hpp>
+#include <thread>
 
 #define MAX_MESSAGE_LEN 1048
 #define READ_REFRESH_RATE 100 //ms
@@ -27,7 +28,7 @@ private:
         int bauds_;
         std::string serial_port_;
         int max_message_len_;
-        boost::asio::streambuf read_buffer_;
+        boost::asio::streambuf read_buf_;
         boost::asio::io_service& io_;
 
     public:
@@ -41,8 +42,8 @@ private:
 
         void SetMaxMessageLen(int max_message_len) { max_message_len_ = max_message_len; }
         bool IsOk() const { return status_; }
-        void asyncRead();
-        void asyncWrite(const std::string& data);
+        void read();
+        void write(const std::string& data);
     };
 
     std::map<std::string, std::shared_ptr<SerialListener>> serial_listeners;

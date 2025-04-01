@@ -24,7 +24,7 @@ namespace Modelec {
 
     void MultipleSerialListener::add_serial_listener(const std::shared_ptr<modelec_interface::srv::AddSerialListener::Request> request, std::shared_ptr<modelec_interface::srv::AddSerialListener::Response> response) {
         if (serial_listeners.find(request->name) != serial_listeners.end()) {
-            response->status = true;
+            response->success = true;
             response->publisher = serial_listeners[request->name]->publisher_->get_topic_name();
             response->subscriber = serial_listeners[request->name]->subscriber_->get_topic_name();
             return;
@@ -33,7 +33,7 @@ namespace Modelec {
         auto listener = std::make_shared<SerialListener>(request->name, request->bauds, request->serial_port, MAX_MESSAGE_LEN, io);
 
         if (!listener->IsOk()) {
-            response->status = false;
+            response->success = false;
             return;
         }
 
@@ -45,7 +45,7 @@ namespace Modelec {
 
         serial_listeners.insert({request->name, listener});
 
-        response->status = true;
+        response->success = true;
         response->publisher = listener->publisher_->get_topic_name();
         response->subscriber = listener->subscriber_->get_topic_name();
     }

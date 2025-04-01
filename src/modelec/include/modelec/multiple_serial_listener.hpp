@@ -4,7 +4,6 @@
 #include <boost/asio.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <modelec_interface/srv/add_serial_listener.hpp>
-#include <thread>
 
 #define MAX_MESSAGE_LEN 1048
 #define READ_REFRESH_RATE 100 //ms

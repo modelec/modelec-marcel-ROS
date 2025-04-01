@@ -14,7 +14,7 @@ namespace Modelec {
 
           // Service to create a new serial listener
         auto request = std::make_shared<modelec_interface::srv::AddSerialListener::Request>();
-        request->name = "arduino";
+        request->name = "odometry";
         request->bauds = 115200;
         request->serial_port = "/dev/ttyACM0";
         auto client = this->create_client<modelec_interface::srv::AddSerialListener>("add_serial_listener");
@@ -27,7 +27,7 @@ namespace Modelec {
         }
         auto result = client->async_send_request(request);
         if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) == rclcpp::FutureReturnCode::SUCCESS) {
-            if (!result.get()->status) {
+            if (!result.get()->success) {
             RCLCPP_ERROR(this->get_logger(), "Failed to add serial listener");
             } else {
             RCLCPP_INFO(this->get_logger(), "Added serial listener");
@@ -36,13 +36,13 @@ namespace Modelec {
             RCLCPP_ERROR(this->get_logger(), "Service call failed");
         }
 
-        arduino_publisher_ = this->create_publisher<std_msgs::msg::String>(result.get()->subscriber, 10);
+        odometry_publisher_ = this->create_publisher<std_msgs::msg::String>(result.get()->subscriber, 10);
 
         clear_pca_publisher_ = this->create_publisher<std_msgs::msg::Empty>("clear_pca9685", 10);
 
         pca9685_publisher_ = this->create_publisher<modelec_interface::msg::PCA9685Servo>("servo_control", 10);
 
-        client_ = this->create_client<modelec_interface::srv::NewServoMotor>("add_servo");
+        client_ = this->create_client<modelec_interface::srv::AddServoMotor>("add_servo");
 
         // ensure the server is up
         while (!client_->wait_for_service(std::chrono::seconds(1))) {
@@ -54,7 +54,7 @@ namespace Modelec {
         }
 
         for (auto servo : solarPannelServos) {
-            auto request = std::make_shared<modelec_interface::srv::NewServoMotor::Request>();
+            auto request = std::make_shared<modelec_interface::srv::AddServoMotor::Request>();
             request->pin = servo.pin;
             auto res = client_->async_send_request(request);
             if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), res) == rclcpp::FutureReturnCode::SUCCESS) {
@@ -156,7 +156,7 @@ namespace Modelec {
             }
             auto message = std_msgs::msg::String();
             message.data = "W";
-            arduino_publisher_->publish(message);
+            odometry_publisher_->publish(message);
             button_4_was_pressed = true;
         } else {
             button_4_was_pressed = false;
@@ -185,7 +185,7 @@ namespace Modelec {
 
         if (speed != last_speed) {
             message.data = "V " + std::to_string(speed);
-            arduino_publisher_->publish(message);
+            odometry_publisher_->publish(message);
             last_speed = speed;
         }
 
@@ -198,7 +198,7 @@ namespace Modelec {
 
         if (rotation != last_rotation) {
             message.data = "R " + std::to_string(rotation);
-            arduino_publisher_->publish(message);
+            odometry_publisher_->publish(message);
             last_rotation = rotation;
         }
 

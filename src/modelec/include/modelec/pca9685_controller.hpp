@@ -6,7 +6,7 @@
 #include <wiringPiI2C.h>
 
 #include <modelec_interface/msg/pca9685_servo.hpp>
-#include <modelec_interface/srv/new_servo_motor.hpp>
+#include <modelec_interface/srv/add_servo_motor.hpp>
 #include <std_msgs/msg/empty.hpp>
 
 #define PCA9685_FREQUENCY 25000000.0
@@ -31,7 +31,7 @@ namespace Modelec {
         std::unordered_set<int> active_servos;
 
         // service to add a servo
-        rclcpp::Service<modelec_interface::srv::NewServoMotor>::SharedPtr add_servo_service_;
+        rclcpp::Service<modelec_interface::srv::AddServoMotor>::SharedPtr add_servo_service_;
 
         OnSetParametersCallbackHandle::SharedPtr parameter_callback_handle_;
         rcl_interfaces::msg::SetParametersResult onParameterChange(const std::vector<rclcpp::Parameter> &parameters);

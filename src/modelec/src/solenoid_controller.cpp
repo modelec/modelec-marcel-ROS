@@ -8,7 +8,7 @@ namespace Modelec {
         solenoid_subscriber_ = this->create_subscription<modelec_interface::msg::Solenoid>(
             "solenoid", 10, std::bind(&SolenoidController::activateSolenoid, this, std::placeholders::_1));
 
-        add_solenoid_service_ = this->create_service<modelec_interface::srv::NewSolenoid>(
+        add_solenoid_service_ = this->create_service<modelec_interface::srv::AddSolenoid>(
             "add_solenoid", std::bind(&SolenoidController::addSolenoid, this, std::placeholders::_1, std::placeholders::_2));
     }
 
@@ -19,8 +19,8 @@ namespace Modelec {
         }
     }
 
-    void SolenoidController::addSolenoid(const std::shared_ptr<modelec_interface::srv::NewSolenoid::Request> request,
-                                         std::shared_ptr<modelec_interface::srv::NewSolenoid::Response> response) {
+    void SolenoidController::addSolenoid(const std::shared_ptr<modelec_interface::srv::AddSolenoid::Request> request,
+                                         std::shared_ptr<modelec_interface::srv::AddSolenoid::Response> response) {
         if (solenoid_pin_.find(request->pin) != solenoid_pin_.end()) {
             response->success = false;
             return;

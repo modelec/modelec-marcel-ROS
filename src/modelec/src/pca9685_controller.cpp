@@ -32,9 +32,9 @@ namespace Modelec {
                 this->clearAllDevices();
             });
 
-        add_servo_service_ = this->create_service<modelec_interface::srv::NewServoMotor>(
-            "add_servo", [this](const modelec_interface::srv::NewServoMotor::Request::SharedPtr request,
-                                modelec_interface::srv::NewServoMotor::Response::SharedPtr response) {
+        add_servo_service_ = this->create_service<modelec_interface::srv::AddServoMotor>(
+            "add_servo", [this](const modelec_interface::srv::AddServoMotor::Request::SharedPtr request,
+                                modelec_interface::srv::AddServoMotor::Response::SharedPtr response) {
                 if (active_servos.find(request->pin) == active_servos.end()) {
                     active_servos.insert(request->pin);
                     response->success = true;

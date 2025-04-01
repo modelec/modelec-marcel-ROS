@@ -8,7 +8,7 @@ namespace Modelec {
         rclcpp::shutdown();
     }
 
-    new_button_service_ = create_service<modelec_interface::srv::NewButton>("new_button", std::bind(&ButtonGpioController::new_button, this, std::placeholders::_1, std::placeholders::_2));
+    new_button_service_ = create_service<modelec_interface::srv::AddButton>("add_button", std::bind(&ButtonGpioController::new_button, this, std::placeholders::_1, std::placeholders::_2));
     button_server_ = create_service<modelec_interface::srv::Button>("button", std::bind(&ButtonGpioController::check_button, this, std::placeholders::_1, std::placeholders::_2));
     timer_ = create_wall_timer(std::chrono::seconds(1), [this]() {
       for (auto& button : buttons_) {
@@ -20,7 +20,7 @@ namespace Modelec {
     });
   }
 
-  void ButtonGpioController::new_button(const std::shared_ptr<modelec_interface::srv::NewButton::Request> request, std::shared_ptr<modelec_interface::srv::NewButton::Response> response) {
+  void ButtonGpioController::new_button(const std::shared_ptr<modelec_interface::srv::AddButton::Request> request, std::shared_ptr<modelec_interface::srv::AddButton::Response> response) {
     if (buttons_.find(request->pin) != buttons_.end()) {
       response->success = false;
       return;

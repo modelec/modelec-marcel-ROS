@@ -1,7 +1,7 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <modelec_interface/srv/new_button.hpp>
+#include <modelec_interface/srv/add_button.hpp>
 #include <modelec_interface/srv/button.hpp>
 #include <modelec_interface/msg/button.hpp>
 #include <wiringPi.h>
@@ -20,11 +20,11 @@ namespace Modelec {
 
     private:
         // service
-        rclcpp::Service<modelec_interface::srv::NewButton>::SharedPtr new_button_service_;
+        rclcpp::Service<modelec_interface::srv::AddButton>::SharedPtr new_button_service_;
         rclcpp::Service<modelec_interface::srv::Button>::SharedPtr button_server_;
 
         // service callbacks
-        void new_button(const std::shared_ptr<modelec_interface::srv::NewButton::Request> request, std::shared_ptr<modelec_interface::srv::NewButton::Response> response);
+        void new_button(const std::shared_ptr<modelec_interface::srv::AddButton::Request> request, std::shared_ptr<modelec_interface::srv::AddButton::Response> response);
         void check_button(const std::shared_ptr<modelec_interface::srv::Button::Request> request, std::shared_ptr<modelec_interface::srv::Button::Response> response);
 
         // timer

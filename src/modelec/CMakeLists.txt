@@ -31,9 +31,9 @@ target_include_directories(serial_listener PUBLIC
 )
 
 # USB Arduino Logic Processor Node
-add_executable(usb_arduino_logic_processor src/usb_arduino_logic_processor.cpp)
-ament_target_dependencies(usb_arduino_logic_processor rclcpp std_msgs modelec_interface)
-target_include_directories(usb_arduino_logic_processor PUBLIC
+add_executable(odometry_logic_processor src/odometry_logic_processor.cpp)
+ament_target_dependencies(odometry_logic_processor rclcpp std_msgs modelec_interface)
+target_include_directories(odometry_logic_processor PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
@@ -119,7 +119,7 @@ endif()
 # Install targets
 install(TARGETS
   serial_listener
-  usb_arduino_logic_processor
+  odometry_logic_processor
   pca9685_controller
   gamecontroller_listener
   move_controller

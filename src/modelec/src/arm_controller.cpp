@@ -4,7 +4,7 @@
 namespace Modelec {
     ArmController::ArmController() : Node("pince_controller") {
         this->servo_spublisher_ = this->create_publisher<modelec_interface::msg::PCA9685Servo>("servo_control", 10);
-        client_ = this->create_client<modelec_interface::srv::NewServoMotor>("add_servo");
+        client_ = this->create_client<modelec_interface::srv::AddServoMotor>("add_servo");
 
         // ensure the server is up
         while (!client_->wait_for_service(std::chrono::seconds(1))) {
@@ -16,7 +16,7 @@ namespace Modelec {
         }
 
         for (int pin : {PINCE_1_PIN, PINCE_2_PIN, PINCE_3_PIN, ARM_1_PIN, ARM_2_PIN}) {
-            auto request = std::make_shared<modelec_interface::srv::NewServoMotor::Request>();
+            auto request = std::make_shared<modelec_interface::srv::AddServoMotor::Request>();
             request->pin = pin;
             auto res = client_->async_send_request(request);
             if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), res) == rclcpp::FutureReturnCode::SUCCESS) {

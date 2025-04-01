@@ -4,7 +4,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <modelec_interface/msg/pca9685_servo.hpp>
 #include <modelec_interface/msg/servo_mode.hpp>
-#include <modelec_interface/srv/new_servo_motor.hpp>
+#include <modelec_interface/srv/add_servo_motor.hpp>
 #include <rclcpp/subscription.hpp>
 #include <map>
 
@@ -52,7 +52,7 @@ namespace Modelec {
         };
 
         // service lient to add a servo
-        rclcpp::Client<modelec_interface::srv::NewServoMotor>::SharedPtr client_;
+        rclcpp::Client<modelec_interface::srv::AddServoMotor>::SharedPtr client_;
 
         void ControlPince(const Mode::SharedPtr msg);
         void ControlArm(const Mode::SharedPtr msg);

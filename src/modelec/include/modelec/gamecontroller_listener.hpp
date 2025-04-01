@@ -9,7 +9,7 @@
 #include <sensor_msgs/msg/joy.hpp>
 #include <modelec_interface/msg/servo_mode.hpp>
 #include <modelec_interface/msg/pca9685_servo.hpp>
-#include <modelec_interface/srv/new_servo_motor.hpp>
+#include <modelec_interface/srv/add_servo_motor.hpp>
 #include <modelec/utils.hpp>
 
 namespace Modelec {
@@ -43,10 +43,10 @@ namespace Modelec {
 
         rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscription_;
         rclcpp::Publisher<ServoMode>::SharedPtr servo_publisher_;
-        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr arduino_publisher_;
+        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr odometry_publisher_;
         rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr clear_pca_publisher_;
         rclcpp::Publisher<modelec_interface::msg::PCA9685Servo>::SharedPtr pca9685_publisher_;
-        rclcpp::Client<modelec_interface::srv::NewServoMotor>::SharedPtr client_;
+        rclcpp::Client<modelec_interface::srv::AddServoMotor>::SharedPtr client_;
 
         void CheckButton(const sensor_msgs::msg::Joy::SharedPtr msg);
         void CheckAxis(const sensor_msgs::msg::Joy::SharedPtr msg);

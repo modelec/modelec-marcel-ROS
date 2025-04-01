@@ -1,4 +1,4 @@
-int64 pin
+uint8 pin
 string name
 ---
 bool success

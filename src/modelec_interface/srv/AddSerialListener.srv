@@ -2,6 +2,6 @@ string name
 string serial_port
 int64 bauds
 ---
-bool status
+bool success
 string publisher
 string subscriber

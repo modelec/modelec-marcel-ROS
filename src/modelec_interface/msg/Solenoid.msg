@@ -1,2 +1,2 @@
-int64 pin
+uint8 pin
 bool state

@@ -11,17 +11,11 @@ namespace Modelec {
         MoveController();
 
     private:
-        rclcpp::TimerBase::SharedPtr timer;
-        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher;
-        rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscriber;
+        rclcpp::TimerBase::SharedPtr timer_;
+        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
 
-        float speedX, speedZ;
+        float x = 0, y = 0, theta = 0;
 
-        float x, y, z, theta;
-        float x_target, y_target, z_target, theta_target;
-
-        void move();
-
-        void move_target_callback(const std_msgs::msg::String::SharedPtr msg);
+        void PublishPosition();
     };
 }

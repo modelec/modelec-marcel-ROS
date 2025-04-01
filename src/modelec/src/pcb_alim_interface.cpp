@@ -20,7 +20,7 @@ namespace Modelec
         }
         auto result = client->async_send_request(request);
         if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) == rclcpp::FutureReturnCode::SUCCESS) {
-            if (!result.get()->status) {
+            if (!result.get()->success) {
             RCLCPP_ERROR(this->get_logger(), "Failed to add serial listener");
             } else {
             RCLCPP_INFO(this->get_logger(), "Added serial listener");

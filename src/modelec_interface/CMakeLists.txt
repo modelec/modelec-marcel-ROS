@@ -11,16 +11,15 @@ find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/ArduinoData.msg"
+  "msg/OdometryData.msg"
   "msg/PCA9685Servo.msg"
-  "msg/ServoMoteur.msg"
   "msg/ServoMode.msg"
   "msg/Solenoid.msg"
   "msg/Button.msg"
-  "srv/NewServoMotor.srv"
-  "srv/NewSolenoid.srv"
+  "srv/AddServoMotor.srv"
+  "srv/AddSolenoid.srv"
   "srv/Tirette.srv"
-  "srv/NewButton.srv"
+  "srv/AddButton.srv"
   "srv/Button.srv"
   "srv/AddSerialListener.srv"
   DEPENDENCIES std_msgs

@@ -26,6 +26,7 @@ namespace Modelec {
 
         // Initialize the timer
         timer = this->create_wall_timer(std::chrono::milliseconds(REFRESH_RATE), [this]() {
+            // TODO : change that to publish in continue (so change the main program)
             bool lastState = tirette_state;
             tirette_state = digitalRead(GPIO_TIRETTE) == LOW;
 

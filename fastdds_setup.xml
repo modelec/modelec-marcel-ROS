@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+    <transport_descriptors>
+        <transport_descriptor>
+            <transport_id>TailscaleTransport</transport_id>
+            <type>UDPv4</type>
+        </transport_descriptor>
+    </transport_descriptors>
+    <participant profile_name="TailscaleSimple" is_default_profile="true">
+        <rtps>
+            <userTransports>
+                <transport_id>TailscaleTransport</transport_id>
+            </userTransports>
+            <useBuiltinTransports>true</useBuiltinTransports>
+            <builtin>
+                <initialPeersList>
+                    <!-- Repeat this part for each Tailscale peer, use Tailscale machine/host name (from the admin console) -->
+                    <locator>
+                        <udpv4>
+                             <!-- <address>Tailscale IPv4 address / domain name</address> -->
+                        </udpv4>
+                    </locator>
+                    <!-- End repeat -->
+                    <locator>
+                        <udpv4>
+                            <address>ubu-standard-pc-q35-ich9-2009</address> <!-- ackimixs -->
+                        </udpv4>
+                    </locator>
+                    <locator>
+                        <udpv4>
+                            <address>marcel.ayu-hops.ts.net</address>
+                        </udpv4>
+                    </locator>
+                </initialPeersList>
+            </builtin>
+        </rtps>
+    </participant>
+</profiles>

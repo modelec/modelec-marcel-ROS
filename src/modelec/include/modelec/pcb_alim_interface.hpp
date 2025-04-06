@@ -18,10 +18,11 @@ private:
     void PCBCallback(const std_msgs::msg::String::SharedPtr msg);
 
     void SendToPCB(const std::string &data);
+    void SendToPCB(const std::string& order, const std::string& elem, const std::string& data, const std::string& value = std::string());
 
-    void GetData(const std::string &elem, const std::string& value);
+    void GetData(const std::string &elem, const std::string& data, const std::string& value = std::string());
 
-    void SendOrder(const std::string &elem, const std::string& data, const std::string& value);
+    void SendOrder(const std::string &elem, const std::string& data, const std::string& value = std::string());
 
     // get data
     void GetEmergencyStopButtonState();

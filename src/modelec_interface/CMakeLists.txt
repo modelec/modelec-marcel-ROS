@@ -11,11 +11,18 @@ find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/OdometryData.msg"
+  "msg/Odometry/OdometryPos.msg"
+  "msg/Odometry/OdometrySpeed.msg"
+  "msg/Odometry/OdometryToF.msg"
+  "msg/Odometry/OdometryWaypointReach.msg"
+  "msg/Odometry/OdometryAddWaypoint.msg"
   "msg/PCA9685Servo.msg"
   "msg/ServoMode.msg"
   "msg/Solenoid.msg"
   "msg/Button.msg"
+  "srv/Odometry/OdometryPosition.srv"
+  "srv/Odometry/OdometrySpeed.srv"
+  "srv/Odometry/OdometryToF.srv"
   "srv/AddServoMotor.srv"
   "srv/AddSolenoid.srv"
   "srv/Tirette.srv"

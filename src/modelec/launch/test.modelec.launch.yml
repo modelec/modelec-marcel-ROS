@@ -1,7 +1,7 @@
 launch:
 
 - node:
-    pkg: modelec
+    pkg: 'modelec'
     exec: "serial_listener"
     name: "serial_listener"
 
@@ -9,3 +9,8 @@ launch:
     pkg: 'modelec'
     exec: 'usb_arduino_logic_processor'
     name: 'usb_arduino_logic_processor'
+
+- node:
+      pkg: 'modelec'
+      exec: 'pcb_odo_interface'
+      name: 'pcb_odo_interface'

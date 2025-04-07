@@ -17,7 +17,7 @@ namespace ModelecGUI {
 
         setupMenu();
 
-        resize(800, 600);
+        resize(1000, 700);
     }
 
     void ROS2QtGUI::setupMenu() {

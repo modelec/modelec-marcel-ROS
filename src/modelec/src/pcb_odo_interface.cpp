@@ -10,7 +10,7 @@ namespace Modelec
         auto request = std::make_shared<modelec_interface::srv::AddSerialListener::Request>();
         request->name = "pcb_odo";
         request->bauds = 115200;
-        request->serial_port = "/dev/serial1"; // TODO : check the real serial port
+        request->serial_port = "/dev/pts/6"; // TODO : check the real serial port
         auto client = this->create_client<modelec_interface::srv::AddSerialListener>("add_serial_listener");
         while (!client->wait_for_service(std::chrono::seconds(1)))
         {
@@ -25,24 +25,35 @@ namespace Modelec
         if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
             rclcpp::FutureReturnCode::SUCCESS)
         {
-            if (!result.get()->success)
+            if (auto res = result.get())
             {
-                RCLCPP_ERROR(this->get_logger(), "Failed to add serial listener");
+                if (res->success)
+                {
+                    RCLCPP_INFO(this->get_logger(), "Publisher: %s", res->publisher.c_str());
+                    RCLCPP_INFO(this->get_logger(), "Subscriber: %s", res->subscriber.c_str());
+
+                    pcb_subscriber_ = this->create_subscription<std_msgs::msg::String>(
+                        res->publisher, 10, [this](std_msgs::msg::String::SharedPtr msg)
+                        {
+                            PCBCallback(msg);
+                        });
+
+                    pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(res->subscriber, 10);
+                }
+                else
+                {
+                    RCLCPP_ERROR(this->get_logger(), "Failed to add serial listener");
+                }
             }
             else
             {
-                RCLCPP_INFO(this->get_logger(), "Added serial listener");
+                RCLCPP_ERROR(this->get_logger(), "Failed to ask for a serial listener");
             }
         }
         else
         {
             RCLCPP_ERROR(this->get_logger(), "Service call failed");
         }
-
-        pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(result.get()->subscriber, 10);
-        pcb_subscriber_ = this->create_subscription<std_msgs::msg::String>(
-            result.get()->publisher, 10,
-            std::bind(&PCBOdoInterface::PCBCallback, this, std::placeholders::_1));
 
         odo_pos_publisher_ = this->create_publisher<modelec_interface::msg::OdometryPos>(
             "odometry/position", 10);
@@ -54,14 +65,14 @@ namespace Modelec
             "odometry/tof", 10);
 
         odo_waypoint_reach_publisher_ = this->create_publisher<modelec_interface::msg::OdometryWaypointReach>(
-            "odometry/waypoint-reach", 10);
+            "odometry/waypoint_reach", 10);
 
         odo_add_waypoint_subscriber_ = this->create_subscription<modelec_interface::msg::OdometryAddWaypoint>(
-            "odometry/add-waypoint", 10,
+            "odometry/add_waypoint", 10,
             std::bind(&PCBOdoInterface::AddWaypointCallback, this, std::placeholders::_1));
 
         odo_set_pos_subscriber_ = this->create_subscription<modelec_interface::msg::OdometryPos>(
-            "odometry/set-position", 10,
+            "odometry/set_position", 10,
             std::bind(&PCBOdoInterface::SetPosCallback, this, std::placeholders::_1));
 
         // Services
@@ -101,7 +112,7 @@ namespace Modelec
                 message.theta = theta;
 
                 odo_pos_publisher_->publish(message);
-                ResolvePositionRequest({ x, y, theta });
+                ResolvePositionRequest({x, y, theta});
             }
             else if (tokens[1] == "SPEED")
             {
@@ -115,7 +126,7 @@ namespace Modelec
                 message.theta = theta;
 
                 odo_speed_publisher_->publish(message);
-                ResolveSpeedRequest({ x, y, theta });
+                ResolveSpeedRequest({x, y, theta});
             }
             else if (tokens[1] == "DIST")
             {
@@ -175,7 +186,7 @@ namespace Modelec
     }
 
     void PCBOdoInterface::HandleGetSpeed(const std::shared_ptr<modelec_interface::srv::OdometrySpeed::Request>,
-        std::shared_ptr<modelec_interface::srv::OdometrySpeed::Response> response)
+                                         std::shared_ptr<modelec_interface::srv::OdometrySpeed::Response> response)
     {
         std::promise<OdometryData> promise;
         auto future = promise.get_future();
@@ -252,10 +263,6 @@ namespace Modelec
             pos_promises_.pop();
             promise.set_value(position);
         }
-        else
-        {
-            RCLCPP_WARN(this->get_logger(), "Received Position response but no promise waiting");
-        }
     }
 
     void PCBOdoInterface::SendToPCB(const std::string& data) const
@@ -266,7 +273,7 @@ namespace Modelec
     }
 
     void PCBOdoInterface::SendToPCB(const std::string& order, const std::string& elem,
-        const std::vector<std::string>& data) const
+                                    const std::vector<std::string>& data) const
     {
         std::string command = order + ";" + elem;
         for (const auto& d : data)
@@ -299,7 +306,7 @@ namespace Modelec
 
     void PCBOdoInterface::GetToF(const int& tof) const
     {
-        GetData("DIST", { std::to_string(tof) });
+        GetData("DIST", {std::to_string(tof)});
     }
 
     void PCBOdoInterface::SetRobotPos(const modelec_interface::msg::OdometryPos::SharedPtr msg) const
@@ -324,7 +331,8 @@ namespace Modelec
         AddWaypoint(msg->id, msg->is_end, msg->x, msg->y, msg->theta);
     }
 
-    void PCBOdoInterface::AddWaypoint(const int index, const bool IsStopPoint, const long x, const long y, const long theta) const
+    void PCBOdoInterface::AddWaypoint(const int index, const bool IsStopPoint, const long x, const long y,
+                                      const long theta) const
     {
         std::vector<std::string> data = {
             std::to_string(index),

@@ -12,6 +12,7 @@ set(CMAKE_AUTOMOC ON)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(modelec_interface REQUIRED)
 find_package(Qt6 COMPONENTS
         Core
         Gui
@@ -23,6 +24,7 @@ add_executable(modelec_gui src/modelec_gui.cpp src/main.cpp include/modelec_gui/
 ament_target_dependencies(modelec_gui
   rclcpp
   std_msgs
+  modelec_interface
 )
 target_link_libraries(modelec_gui
         Qt6::Core

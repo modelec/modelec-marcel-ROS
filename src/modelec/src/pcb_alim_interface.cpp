@@ -24,24 +24,32 @@ namespace Modelec
         if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
             rclcpp::FutureReturnCode::SUCCESS)
         {
-            if (!result.get()->success)
+            if (auto res = result.get())
             {
-                RCLCPP_ERROR(this->get_logger(), "Failed to add serial listener");
+                if (res->success)
+                {
+                    RCLCPP_INFO(this->get_logger(), "Publisher: %s", res->publisher.c_str());
+                    RCLCPP_INFO(this->get_logger(), "Subscriber: %s", res->subscriber.c_str());
+
+                    pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(result.get()->subscriber, 10);
+                    pcb_subscriber_ = this->create_subscription<std_msgs::msg::String>(
+                        result.get()->publisher, 10,
+                        std::bind(&PCBAlimInterface::PCBCallback, this, std::placeholders::_1));
+                }
+                else
+                {
+                    RCLCPP_ERROR(this->get_logger(), "Failed to add serial listener");
+                }
             }
             else
             {
-                RCLCPP_INFO(this->get_logger(), "Added serial listener");
+                RCLCPP_ERROR(this->get_logger(), "Failed to ask for a serial listener");
             }
         }
         else
         {
             RCLCPP_ERROR(this->get_logger(), "Service call failed");
         }
-
-        pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(result.get()->subscriber, 10);
-        pcb_subscriber_ = this->create_subscription<std_msgs::msg::String>(
-            result.get()->publisher, 10,
-            std::bind(&PCBAlimInterface::PCBCallback, this, std::placeholders::_1));
     }
 
     void PCBAlimInterface::PCBCallback(const std_msgs::msg::String::SharedPtr msg)
@@ -57,7 +65,7 @@ namespace Modelec
     }
 
     void PCBAlimInterface::SendToPCB(const std::string& order, const std::string& elem, const std::string& data,
-        const std::string& value)
+                                     const std::string& value)
     {
         std::string command = order + ";" + elem;
         if (!data.empty())

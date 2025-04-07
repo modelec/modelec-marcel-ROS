@@ -103,7 +103,7 @@ namespace Modelec
             std::bind(&PCBOdoInterface::HandleGetSpeed, this, std::placeholders::_1, std::placeholders::_2));
 
         get_position_service_ = create_service<modelec_interface::srv::OdometryPosition>(
-            "odometry/position",
+            "odometry/get_position",
             std::bind(&PCBOdoInterface::HandleGetPosition, this, std::placeholders::_1, std::placeholders::_2));
 
         set_start_service_ = create_service<modelec_interface::srv::OdometryStart>(

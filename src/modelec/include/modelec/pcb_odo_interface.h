@@ -13,12 +13,15 @@
 #include <modelec_interface/msg/odometry_waypoint_reach.hpp>
 #include <modelec_interface/msg/odometry_add_waypoint.hpp>
 #include <modelec_interface/msg/odometry_start.hpp>
+#include <modelec_interface/msg/odometry_pid.hpp>
 
 #include <modelec_interface/srv/odometry_position.hpp>
 #include <modelec_interface/srv/odometry_speed.hpp>
 #include <modelec_interface/srv/odometry_to_f.hpp>
 #include <modelec_interface/srv/add_serial_listener.hpp>
 #include <modelec_interface/srv/odometry_start.hpp>
+#include <modelec_interface/srv/odometry_get_pid.hpp>
+#include <modelec_interface/srv/odometry_set_pid.hpp>
 
 namespace Modelec {
 
@@ -37,6 +40,13 @@ public:
         long theta;
     };
 
+    struct PIDData
+    {
+        float p;
+        float i;
+        float d;
+    };
+
 private:
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pcb_publisher_;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr pcb_subscriber_;
@@ -47,17 +57,22 @@ private:
     rclcpp::Publisher<modelec_interface::msg::OdometrySpeed>::SharedPtr odo_speed_publisher_;
     rclcpp::Publisher<modelec_interface::msg::OdometryToF>::SharedPtr odo_tof_publisher_;
     rclcpp::Publisher<modelec_interface::msg::OdometryWaypointReach>::SharedPtr odo_waypoint_reach_publisher_;
+    rclcpp::Publisher<modelec_interface::msg::OdometryPid>::SharedPtr odo_pid_publisher_;
 
     rclcpp::Subscription<modelec_interface::msg::OdometryAddWaypoint>::SharedPtr odo_add_waypoint_subscriber_;
     rclcpp::Subscription<modelec_interface::msg::OdometryPos>::SharedPtr odo_set_pos_subscriber_;
+    rclcpp::Subscription<modelec_interface::msg::OdometryPid>::SharedPtr odo_set_pid_subscriber_;
 
     void AddWaypointCallback(const modelec_interface::msg::OdometryAddWaypoint::SharedPtr msg) const;
     void SetPosCallback(const modelec_interface::msg::OdometryPos::SharedPtr msg) const;
+    void SetPIDCallback(const modelec_interface::msg::OdometryPid::SharedPtr msg) const;
 
     rclcpp::Service<modelec_interface::srv::OdometryToF>::SharedPtr get_tof_service_;
     rclcpp::Service<modelec_interface::srv::OdometrySpeed>::SharedPtr get_speed_service_;
     rclcpp::Service<modelec_interface::srv::OdometryPosition>::SharedPtr get_position_service_;
     rclcpp::Service<modelec_interface::srv::OdometryStart>::SharedPtr set_start_service_;
+    rclcpp::Service<modelec_interface::srv::OdometryGetPid>::SharedPtr get_pid_service_;
+    rclcpp::Service<modelec_interface::srv::OdometrySetPid>::SharedPtr set_pid_service_;
 
     // Promises and mutexes to synchronize service responses asynchronously
     std::queue<std::promise<long>> tof_promises_;
@@ -72,6 +87,12 @@ private:
     std::queue<std::promise<bool>> start_promises_;
     std::mutex start_mutex_;
 
+    std::queue<std::promise<PIDData>> get_pid_promises_;
+    std::mutex get_pid_mutex_;
+
+    std::queue<std::promise<bool>> set_pid_promises_;
+    std::mutex set_pid_mutex_;
+
     // Service handlers using async wait with promises
     void HandleGetTof(const std::shared_ptr<modelec_interface::srv::OdometryToF::Request> request,
                       std::shared_ptr<modelec_interface::srv::OdometryToF::Response> response);
@@ -85,11 +106,19 @@ private:
     void HandleGetStart(const std::shared_ptr<modelec_interface::srv::OdometryStart::Request> request,
                            std::shared_ptr<modelec_interface::srv::OdometryStart::Response> response);
 
+    void HandleGetPID(const std::shared_ptr<modelec_interface::srv::OdometryGetPid::Request> request,
+                           std::shared_ptr<modelec_interface::srv::OdometryGetPid::Response> response);
+
+    void HandleSetPID(const std::shared_ptr<modelec_interface::srv::OdometrySetPid::Request> request,
+                           std::shared_ptr<modelec_interface::srv::OdometrySetPid::Response> response);
+
     // Resolving methods called by subscriber callback
     void ResolveToFRequest(long distance);
     void ResolveSpeedRequest(const OdometryData& speed);
     void ResolvePositionRequest(const OdometryData& position);
     void ResolveStartRequest(bool start);
+    void ResolveGetPIDRequest(const PIDData& pid);
+    void ResolveSetPIDRequest(bool success);
 
 public:
     void SendToPCB(const std::string &data) const;
@@ -110,6 +139,10 @@ public:
 
     void SetStart(const modelec_interface::msg::OdometryStart::SharedPtr msg) const;
     void SetStart(bool start) const;
+
+    void GetPID() const;
+    void SetPID(const modelec_interface::msg::OdometryPid::SharedPtr msg) const;
+    void SetPID(float p, float i, float d) const;
 };
 
 } // namespace Modelec

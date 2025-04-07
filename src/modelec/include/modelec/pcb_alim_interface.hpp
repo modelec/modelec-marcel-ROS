@@ -9,6 +9,11 @@ class PCBAlimInterface : public rclcpp::Node
 {
 public:
     PCBAlimInterface();
+    rclcpp::CallbackGroup::SharedPtr pcb_callback_group_;
+    std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> pcb_executor_;
+    std::thread pcb_executor_thread_;
+
+    ~PCBAlimInterface() override;
 
 private:
 

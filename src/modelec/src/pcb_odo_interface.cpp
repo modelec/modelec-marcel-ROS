@@ -67,7 +67,7 @@ namespace Modelec
         }
 
         odo_pos_publisher_ = this->create_publisher<modelec_interface::msg::OdometryPos>(
-            "odometry/position", 10);
+            "odometry/get_position", 10);
 
         odo_speed_publisher_ = this->create_publisher<modelec_interface::msg::OdometrySpeed>(
             "odometry/speed", 10);
@@ -78,6 +78,9 @@ namespace Modelec
         odo_waypoint_reach_publisher_ = this->create_publisher<modelec_interface::msg::OdometryWaypointReach>(
             "odometry/waypoint_reach", 10);
 
+        odo_pid_publisher_ = this->create_publisher<modelec_interface::msg::OdometryPid>(
+            "odometry/get_pid", 10);
+
         odo_add_waypoint_subscriber_ = this->create_subscription<modelec_interface::msg::OdometryAddWaypoint>(
             "odometry/add_waypoint", 10,
             std::bind(&PCBOdoInterface::AddWaypointCallback, this, std::placeholders::_1));
@@ -85,6 +88,10 @@ namespace Modelec
         odo_set_pos_subscriber_ = this->create_subscription<modelec_interface::msg::OdometryPos>(
             "odometry/set_position", 10,
             std::bind(&PCBOdoInterface::SetPosCallback, this, std::placeholders::_1));
+
+        odo_set_pid_subscriber_ = this->create_subscription<modelec_interface::msg::OdometryPid>(
+            "odometry/set_pid", 10,
+            std::bind(&PCBOdoInterface::SetPIDCallback, this, std::placeholders::_1));
 
         // Services
         get_tof_service_ = create_service<modelec_interface::srv::OdometryToF>(
@@ -102,6 +109,14 @@ namespace Modelec
         set_start_service_ = create_service<modelec_interface::srv::OdometryStart>(
             "odometry/start",
             std::bind(&PCBOdoInterface::HandleGetStart, this, std::placeholders::_1, std::placeholders::_2));
+
+        get_pid_service_ = create_service<modelec_interface::srv::OdometryGetPid>(
+            "odometry/get_pid",
+            std::bind(&PCBOdoInterface::HandleGetPID, this, std::placeholders::_1, std::placeholders::_2));
+
+        set_pid_service_ = create_service<modelec_interface::srv::OdometrySetPid>(
+            "odometry/set_pid",
+            std::bind(&PCBOdoInterface::HandleSetPID, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     PCBOdoInterface::~PCBOdoInterface()
@@ -174,6 +189,20 @@ namespace Modelec
 
                 odo_waypoint_reach_publisher_->publish(message);
             }
+            else if (tokens[1] == "PID")
+            {
+                float p = std::stof(tokens[2]);
+                float i = std::stof(tokens[3]);
+                float d = std::stof(tokens[4]);
+
+                auto message = modelec_interface::msg::OdometryPid();
+                message.p = p;
+                message.i = i;
+                message.d = d;
+
+                odo_pid_publisher_->publish(message);
+                ResolveGetPIDRequest({p, i, d});
+            }
         }
         else if (tokens[0] == "OK")
         {
@@ -201,6 +230,11 @@ namespace Modelec
     void PCBOdoInterface::SetPosCallback(const modelec_interface::msg::OdometryPos::SharedPtr msg) const
     {
         SetRobotPos(msg);
+    }
+
+    void PCBOdoInterface::SetPIDCallback(const modelec_interface::msg::OdometryPid::SharedPtr msg) const
+    {
+        SetPID(msg);
     }
 
     void PCBOdoInterface::HandleGetTof(
@@ -275,6 +309,43 @@ namespace Modelec
         response->success = future.get();
     }
 
+    void PCBOdoInterface::HandleGetPID(const std::shared_ptr<modelec_interface::srv::OdometryGetPid::Request>,
+        std::shared_ptr<modelec_interface::srv::OdometryGetPid::Response> response)
+    {
+        std::promise<PIDData> promise;
+        auto future = promise.get_future();
+
+        {
+            std::lock_guard<std::mutex> lock(get_pid_mutex_);
+            get_pid_promises_.push(std::move(promise));
+        }
+
+        GetPID();
+
+        PIDData result = future.get();
+
+        response->p = result.p;
+        response->i = result.i;
+        response->d = result.d;
+    }
+
+    void PCBOdoInterface::HandleSetPID(const std::shared_ptr<modelec_interface::srv::OdometrySetPid::Request> request,
+        std::shared_ptr<modelec_interface::srv::OdometrySetPid::Response> response)
+    {
+        std::promise<bool> promise;
+        auto future = promise.get_future();
+
+        {
+            std::lock_guard<std::mutex> lock(set_pid_mutex_);
+            set_pid_promises_.push(std::move(promise));
+        }
+
+        SetPID(request->p, request->i, request->d);
+
+        bool result = future.get();
+        response->success = result;
+    }
+
     void PCBOdoInterface::ResolveToFRequest(const long distance)
     {
         std::lock_guard<std::mutex> lock(tof_mutex_);
@@ -320,6 +391,30 @@ namespace Modelec
             promise.set_value(start);
         } else {
             RCLCPP_DEBUG(get_logger(), "No pending Start request to resolve.");
+        }
+    }
+
+    void PCBOdoInterface::ResolveGetPIDRequest(const PIDData& pid)
+    {
+        std::lock_guard<std::mutex> lock(get_pid_mutex_);
+        if (!get_pid_promises_.empty()) {
+            auto promise = std::move(get_pid_promises_.front());
+            get_pid_promises_.pop();
+            promise.set_value(pid);
+        } else {
+            RCLCPP_DEBUG(get_logger(), "No pending PID request to resolve.");
+        }
+    }
+
+    void PCBOdoInterface::ResolveSetPIDRequest(bool success)
+    {
+        std::lock_guard<std::mutex> lock(set_pid_mutex_);
+        if (!set_pid_promises_.empty()) {
+            auto promise = std::move(set_pid_promises_.front());
+            set_pid_promises_.pop();
+            promise.set_value(success);
+        } else {
+            RCLCPP_DEBUG(get_logger(), "No pending Set PID request to resolve.");
         }
     }
 
@@ -412,16 +507,29 @@ namespace Modelec
     {
         SendOrder("START", {std::to_string(start)});
     }
+
+    void PCBOdoInterface::GetPID() const
+    {
+        GetData("PID");
+    }
+
+    void PCBOdoInterface::SetPID(const modelec_interface::msg::OdometryPid::SharedPtr msg) const
+    {
+        SetPID(msg->p, msg->i, msg->d);
+    }
+
+    void PCBOdoInterface::SetPID(float p, float i, float d) const
+    {
+        std::vector<std::string> data = {
+            std::to_string(p),
+            std::to_string(i),
+            std::to_string(d)
+        };
+
+        SendOrder("PID", data);
+    }
+
 } // Modelec
-
-
-/*int main(int argc, char** argv)
-{
-    rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<Modelec::PCBOdoInterface>());
-    rclcpp::shutdown();
-    return 0;
-}*/
 
 int main(int argc, char **argv)
 {
@@ -430,7 +538,7 @@ int main(int argc, char **argv)
 
     // Increase number of threads explicitly!
     rclcpp::executors::MultiThreadedExecutor executor(
-        rclcpp::ExecutorOptions(), 4 /* or more threads! */);
+        rclcpp::ExecutorOptions(), 2 /* or more threads! */);
 
     executor.add_node(node);
     executor.spin();

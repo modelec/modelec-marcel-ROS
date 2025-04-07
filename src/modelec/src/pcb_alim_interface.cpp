@@ -31,10 +31,23 @@ namespace Modelec
                     RCLCPP_INFO(this->get_logger(), "Publisher: %s", res->publisher.c_str());
                     RCLCPP_INFO(this->get_logger(), "Subscriber: %s", res->subscriber.c_str());
 
-                    pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(result.get()->subscriber, 10);
+                    pcb_callback_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+
+                    rclcpp::SubscriptionOptions options;
+                    options.callback_group = pcb_callback_group_;
+
                     pcb_subscriber_ = this->create_subscription<std_msgs::msg::String>(
                         result.get()->publisher, 10,
-                        std::bind(&PCBAlimInterface::PCBCallback, this, std::placeholders::_1));
+                        std::bind(&PCBAlimInterface::PCBCallback, this, std::placeholders::_1), options);
+
+                    pcb_executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+                    pcb_executor_->add_callback_group(pcb_callback_group_, this->get_node_base_interface());
+
+                    pcb_executor_thread_ = std::thread([this]() {
+                        pcb_executor_->spin();
+                    });
+
+                    pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(result.get()->subscriber, 10);
                 }
                 else
                 {
@@ -49,6 +62,14 @@ namespace Modelec
         else
         {
             RCLCPP_ERROR(this->get_logger(), "Service call failed");
+        }
+    }
+
+    PCBAlimInterface::~PCBAlimInterface()
+    {
+        pcb_executor_->cancel();
+        if (pcb_executor_thread_.joinable()) {
+            pcb_executor_thread_.join();
         }
     }
 
@@ -205,10 +226,17 @@ namespace Modelec
     }
 } // namespace Modelec
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<Modelec::PCBAlimInterface>());
+    auto node = std::make_shared<Modelec::PCBAlimInterface>();
+
+    // Increase number of threads explicitly!
+    rclcpp::executors::MultiThreadedExecutor executor(
+        rclcpp::ExecutorOptions(), 2 /* or more threads! */);
+
+    executor.add_node(node);
+    executor.spin();
     rclcpp::shutdown();
     return 0;
 }

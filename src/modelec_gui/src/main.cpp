@@ -15,7 +15,7 @@ int main(int argc, char **argv)
     auto node = rclcpp::Node::make_shared("qt_gui_node");
 
     // Create the GUI and pass the node to it
-    ROS2QtGUI window(node);  // Pass the node to the GUI component
+    ModelecGUI::ROS2QtGUI window(node);  // Pass the node to the GUI component
     window.show();
 
     // Create an executor for ROS 2 to manage the node

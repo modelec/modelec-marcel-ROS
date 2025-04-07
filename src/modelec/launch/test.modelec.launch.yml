@@ -11,6 +11,6 @@ launch:
       name: 'pcb_odo_interface'
 
 - node:
-    pkg: 'modelec_gui'
-    exec: "modelec_gui"
-    name: "modelec_gui"
+      pkg: 'modelec_gui'
+      exec: "modelec_gui"
+      name: "modelec_gui"

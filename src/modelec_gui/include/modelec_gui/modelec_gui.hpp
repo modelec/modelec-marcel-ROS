@@ -9,17 +9,19 @@
 #include <std_msgs/msg/string.hpp>
 #include <modelec_interface/msg/odometry_pos.hpp>
 #include <modelec_interface/srv/odometry_speed.hpp>
+#include <modelec_interface/srv/odometry_start.hpp>
 
 class ROS2QtGUI : public QWidget {
   Q_OBJECT
 
 public:
-  explicit ROS2QtGUI(QWidget *parent = nullptr);
+  explicit ROS2QtGUI(rclcpp::Node::SharedPtr node, QWidget *parent = nullptr);
   ~ROS2QtGUI() override; // Explicitly declare destructor
 
   rclcpp::Node::SharedPtr get_node() const { return node_; }
 
 private:
+  QPushButton* startButton_;
   QLineEdit *xBox_, *yBox_, *thetaBox_;
   QVBoxLayout *mainLayout_;
   QHBoxLayout *posLayout_;
@@ -32,6 +34,7 @@ private:
 
   // client
   rclcpp::Client<modelec_interface::srv::OdometrySpeed>::SharedPtr client_;
+  rclcpp::Client<modelec_interface::srv::OdometryStart>::SharedPtr client_start_;
 
   void PositionCallback(const modelec_interface::msg::OdometryPos::SharedPtr msg);
 };

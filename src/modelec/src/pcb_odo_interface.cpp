@@ -10,7 +10,7 @@ namespace Modelec
         auto request = std::make_shared<modelec_interface::srv::AddSerialListener::Request>();
         request->name = "pcb_odo";
         request->bauds = 115200;
-        request->serial_port = "/dev/pts/6"; // TODO : check the real serial port
+        request->serial_port = "/dev/pts/4"; // TODO : check the real serial port
         auto client = this->create_client<modelec_interface::srv::AddSerialListener>("add_serial_listener");
         while (!client->wait_for_service(std::chrono::seconds(1)))
         {
@@ -32,11 +32,22 @@ namespace Modelec
                     RCLCPP_INFO(this->get_logger(), "Publisher: %s", res->publisher.c_str());
                     RCLCPP_INFO(this->get_logger(), "Subscriber: %s", res->subscriber.c_str());
 
+                    pcb_callback_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+
+                    rclcpp::SubscriptionOptions options;
+                    options.callback_group = pcb_callback_group_;
+
                     pcb_subscriber_ = this->create_subscription<std_msgs::msg::String>(
-                        res->publisher, 10, [this](std_msgs::msg::String::SharedPtr msg)
-                        {
-                            PCBCallback(msg);
-                        });
+                        res->publisher, 10,
+                        std::bind(&PCBOdoInterface::PCBCallback, this, std::placeholders::_1),
+                        options);
+
+                    pcb_executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+                    pcb_executor_->add_callback_group(pcb_callback_group_, this->get_node_base_interface());
+
+                    pcb_executor_thread_ = std::thread([this]() {
+                        pcb_executor_->spin();
+                    });
 
                     pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(res->subscriber, 10);
                 }
@@ -87,10 +98,23 @@ namespace Modelec
         get_position_service_ = create_service<modelec_interface::srv::OdometryPosition>(
             "odometry/position",
             std::bind(&PCBOdoInterface::HandleGetPosition, this, std::placeholders::_1, std::placeholders::_2));
+
+        set_start_service_ = create_service<modelec_interface::srv::OdometryStart>(
+            "odometry/start",
+            std::bind(&PCBOdoInterface::HandleGetStart, this, std::placeholders::_1, std::placeholders::_2));
+    }
+
+    PCBOdoInterface::~PCBOdoInterface()
+    {
+        pcb_executor_->cancel();
+        if (pcb_executor_thread_.joinable()) {
+            pcb_executor_thread_.join();
+        }
     }
 
     void PCBOdoInterface::PCBCallback(const std_msgs::msg::String::SharedPtr msg)
     {
+        RCLCPP_DEBUG(this->get_logger(), "Received from PCB: %s", msg->data.c_str());
         std::vector<std::string> tokens = split(msg->data, ';');
         if (tokens.size() < 2)
         {
@@ -112,6 +136,7 @@ namespace Modelec
                 message.theta = theta;
 
                 odo_pos_publisher_->publish(message);
+
                 ResolvePositionRequest({x, y, theta});
             }
             else if (tokens[1] == "SPEED")
@@ -152,11 +177,19 @@ namespace Modelec
         }
         else if (tokens[0] == "OK")
         {
-            RCLCPP_INFO(this->get_logger(), "PCB response: %s", msg->data.c_str());
+            if (tokens[1] == "START")
+            {
+                bool start = std::stoi(tokens[2]);
+                ResolveStartRequest(start);
+            }
+            else
+            {
+                RCLCPP_INFO(this->get_logger(), "PCB response: %s", msg->data.c_str());
+            }
         }
         else if (tokens[0] == "KO")
         {
-            RCLCPP_ERROR(this->get_logger(), "PCB error: %s", msg->data.c_str());
+            RCLCPP_WARN(this->get_logger(), "PCB error: %s", msg->data.c_str());
         }
     }
 
@@ -170,11 +203,13 @@ namespace Modelec
         SetRobotPos(msg);
     }
 
-    void PCBOdoInterface::HandleGetTof(const std::shared_ptr<modelec_interface::srv::OdometryToF::Request> request,
-                                       std::shared_ptr<modelec_interface::srv::OdometryToF::Response> response)
+    void PCBOdoInterface::HandleGetTof(
+        const std::shared_ptr<modelec_interface::srv::OdometryToF::Request> request,
+        std::shared_ptr<modelec_interface::srv::OdometryToF::Response> response)
     {
         std::promise<long> promise;
         auto future = promise.get_future();
+
         {
             std::lock_guard<std::mutex> lock(tof_mutex_);
             tof_promises_.push(std::move(promise));
@@ -185,11 +220,13 @@ namespace Modelec
         response->distance = future.get();
     }
 
-    void PCBOdoInterface::HandleGetSpeed(const std::shared_ptr<modelec_interface::srv::OdometrySpeed::Request>,
-                                         std::shared_ptr<modelec_interface::srv::OdometrySpeed::Response> response)
+    void PCBOdoInterface::HandleGetSpeed(
+        const std::shared_ptr<modelec_interface::srv::OdometrySpeed::Request>,
+        std::shared_ptr<modelec_interface::srv::OdometrySpeed::Response> response)
     {
         std::promise<OdometryData> promise;
         auto future = promise.get_future();
+
         {
             std::lock_guard<std::mutex> lock(speed_mutex_);
             speed_promises_.push(std::move(promise));
@@ -198,7 +235,6 @@ namespace Modelec
         GetSpeed();
 
         OdometryData result = future.get();
-
         response->x = result.x;
         response->y = result.y;
         response->theta = result.theta;
@@ -210,6 +246,7 @@ namespace Modelec
     {
         std::promise<OdometryData> promise;
         auto future = promise.get_future();
+
         {
             std::lock_guard<std::mutex> lock(pos_mutex_);
             pos_promises_.push(std::move(promise));
@@ -218,50 +255,71 @@ namespace Modelec
         GetPos();
 
         OdometryData result = future.get();
-
         response->x = result.x;
         response->y = result.y;
         response->theta = result.theta;
     }
 
+    void PCBOdoInterface::HandleGetStart(const std::shared_ptr<modelec_interface::srv::OdometryStart::Request> request,
+        std::shared_ptr<modelec_interface::srv::OdometryStart::Response> response)
+    {
+        std::promise<bool> promise;
+        auto future = promise.get_future();
+
+        {
+            std::lock_guard<std::mutex> lock(start_mutex_);
+            start_promises_.push(std::move(promise));
+        }
+
+        SetStart(request->start);
+        response->success = future.get();
+    }
+
     void PCBOdoInterface::ResolveToFRequest(const long distance)
     {
         std::lock_guard<std::mutex> lock(tof_mutex_);
-        if (!tof_promises_.empty())
-        {
-            std::promise<long> promise = std::move(tof_promises_.front());
+        if (!tof_promises_.empty()) {
+            auto promise = std::move(tof_promises_.front());
             tof_promises_.pop();
             promise.set_value(distance);
-        }
-        else
-        {
-            RCLCPP_WARN(this->get_logger(), "Received ToF response but no promise waiting");
+        } else {
+            RCLCPP_DEBUG(get_logger(), "No pending ToF request to resolve.");
         }
     }
 
     void PCBOdoInterface::ResolveSpeedRequest(const OdometryData& speed)
     {
         std::lock_guard<std::mutex> lock(speed_mutex_);
-        if (!speed_promises_.empty())
-        {
-            std::promise<OdometryData> promise = std::move(speed_promises_.front());
+        if (!speed_promises_.empty()) {
+            auto promise = std::move(speed_promises_.front());
             speed_promises_.pop();
             promise.set_value(speed);
-        }
-        else
-        {
-            RCLCPP_WARN(this->get_logger(), "Received Speed response but no promise waiting");
+        } else {
+            RCLCPP_DEBUG(get_logger(), "No pending Speed request to resolve.");
         }
     }
 
     void PCBOdoInterface::ResolvePositionRequest(const OdometryData& position)
     {
         std::lock_guard<std::mutex> lock(pos_mutex_);
-        if (!pos_promises_.empty())
-        {
-            std::promise<OdometryData> promise = std::move(pos_promises_.front());
+        if (!pos_promises_.empty()) {
+            auto promise = std::move(pos_promises_.front());
             pos_promises_.pop();
             promise.set_value(position);
+        } else {
+            RCLCPP_DEBUG(get_logger(), "No pending Position request to resolve.");
+        }
+    }
+
+    void PCBOdoInterface::ResolveStartRequest(bool start)
+    {
+        std::lock_guard<std::mutex> lock(start_mutex_);
+        if (!start_promises_.empty()) {
+            auto promise = std::move(start_promises_.front());
+            start_promises_.pop();
+            promise.set_value(start);
+        } else {
+            RCLCPP_DEBUG(get_logger(), "No pending Start request to resolve.");
         }
     }
 
@@ -344,13 +402,38 @@ namespace Modelec
 
         SendOrder("WAYPOINT", data);
     }
+
+    void PCBOdoInterface::SetStart(const modelec_interface::msg::OdometryStart::SharedPtr msg) const
+    {
+        SetStart(msg->start);
+    }
+
+    void PCBOdoInterface::SetStart(bool start) const
+    {
+        SendOrder("START", {std::to_string(start)});
+    }
 } // Modelec
 
 
-int main(int argc, char** argv)
+/*int main(int argc, char** argv)
 {
     rclcpp::init(argc, argv);
     rclcpp::spin(std::make_shared<Modelec::PCBOdoInterface>());
+    rclcpp::shutdown();
+    return 0;
+}*/
+
+int main(int argc, char **argv)
+{
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<Modelec::PCBOdoInterface>();
+
+    // Increase number of threads explicitly!
+    rclcpp::executors::MultiThreadedExecutor executor(
+        rclcpp::ExecutorOptions(), 4 /* or more threads! */);
+
+    executor.add_node(node);
+    executor.spin();
     rclcpp::shutdown();
     return 0;
 }

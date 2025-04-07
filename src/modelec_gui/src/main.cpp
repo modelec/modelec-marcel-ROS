@@ -1,24 +1,40 @@
+#include <rclcpp/rclcpp.hpp>
+#include <QApplication>
+#include <QThread>
 #include "modelec_gui/modelec_gui.hpp"
 
-int main(int argc, char *argv[]) {
-  rclcpp::init(argc, argv);
-  QApplication app(argc, argv);
+int main(int argc, char **argv)
+{
+    // Initialize the Qt application
+    QApplication app(argc, argv);
 
-  // Create the ROS2QtGUI instance, which is the Qt GUI and ROS node
-  auto gui = std::make_shared<ROS2QtGUI>();
-  gui->show();
+    // Initialize ROS 2
+    rclcpp::init(argc, argv);
 
-  // Create and start the ROS 2 executor in a separate thread
-  auto exec = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
-  exec->add_node(gui->get_node());  // Ensure this is the correct way to add your node
+    // Create the node only once
+    auto node = rclcpp::Node::make_shared("qt_gui_node");
 
-  std::thread spin_thread([exec]() { exec->spin(); });
+    // Create the GUI and pass the node to it
+    ROS2QtGUI window(node);  // Pass the node to the GUI component
+    window.show();
 
-  int result = app.exec();
+    // Create an executor for ROS 2 to manage the node
+    rclcpp::executors::MultiThreadedExecutor executor;
 
-  // Shutdown ROS 2 and join the thread
-  exec->cancel();
-  spin_thread.join();
-  rclcpp::shutdown();
-  return result;
+    // Add the node to the executor once
+    executor.add_node(node);
+
+    // Run ROS 2 in a separate thread
+    std::thread ros_thread([&executor]() {
+        executor.spin();  // Execute the node's callbacks
+    });
+
+    // Start the Qt application event loop
+    int ret = app.exec();
+
+    // Ensure the ROS 2 executor thread ends correctly
+    ros_thread.join();
+    rclcpp::shutdown(); // Shutdown ROS 2
+
+    return ret; // Return the application result
 }

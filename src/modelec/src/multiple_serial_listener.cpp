@@ -1,26 +1,102 @@
-#include <modelec/multiple_serial_listener.hpp>
+#include "modelec/multiple_serial_listener.hpp"
+#include <boost/system/error_code.hpp>
+#include <boost/asio/serial_port.hpp>
+#include <boost/asio.hpp>
+#include <chrono>
+#include <thread>
 
 namespace Modelec
 {
-    MultipleSerialListener::MultipleSerialListener() : Node("multiple_serial_listener"), io()
+    SerialListener::SerialListener(const std::string& name, int bauds, const std::string& serial_port,
+                                   int max_message_len, boost::asio::io_service& io)
+        : bauds_(bauds), serial_port_(serial_port), max_message_len_(max_message_len), io_(io), name_(name), port_(io)
+    {
+        try
+        {
+            port_.open(serial_port_);
+            port_.set_option(boost::asio::serial_port_base::baud_rate(bauds_));
+            status_ = true;
+        }
+        catch (boost::system::system_error& e)
+        {
+            RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "Failed to open serial port: %s", e.what());
+            status_ = false;
+            return;
+        }
+
+        read_buffer_.resize(max_message_len_);
+        start_async_read();
+
+        io_thread_ = std::thread([this]() {
+            try {
+                io_.run();
+            } catch (const std::exception& e) {
+                RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "IO thread exception: %s", e.what());
+            }
+        });
+    }
+
+    SerialListener::~SerialListener()
+    {
+        if (port_.is_open()) port_.close();
+        io_.stop();
+        if (io_thread_.joinable()) io_thread_.join();
+    }
+
+    void SerialListener::start_async_read()
+    {
+        port_.async_read_some(
+            boost::asio::buffer(read_buffer_),
+            [this](const boost::system::error_code& ec, std::size_t bytes_transferred) {
+                if (!ec && bytes_transferred > 0) {
+                    auto msg = std_msgs::msg::String();
+                    msg.data = std::string(read_buffer_.begin(), read_buffer_.begin() + bytes_transferred);
+                    publisher_->publish(msg);
+
+                    start_async_read();  // continue reading
+                } else {
+                    RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "Async read error: %s", ec.message().c_str());
+                }
+            });
+    }
+
+    void SerialListener::write(std_msgs::msg::String::SharedPtr msg)
+    {
+        std::lock_guard<std::mutex> lock(write_mutex_);
+        bool write_in_progress = !write_queue_.empty();
+        write_queue_.push_back(msg->data);
+
+        if (!write_in_progress) {
+            start_async_write();
+        }
+    }
+
+    void SerialListener::start_async_write()
+    {
+        if (write_queue_.empty()) return;
+
+        boost::asio::async_write(
+            port_,
+            boost::asio::buffer(write_queue_.front()),
+            [this](const boost::system::error_code& ec, std::size_t /*length*/) {
+                std::lock_guard<std::mutex> lock(write_mutex_);
+                if (!ec) {
+                    write_queue_.pop_front();
+                    if (!write_queue_.empty()) {
+                        start_async_write();  // continue writing
+                    }
+                } else {
+                    RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "Async write error: %s", ec.message().c_str());
+                }
+            });
+    }
+
+    MultipleSerialListener::MultipleSerialListener()
+        : Node("multiple_serial_listener"), io()
     {
         add_serial_listener_service_ = create_service<modelec_interface::srv::AddSerialListener>(
             "add_serial_listener", std::bind(&MultipleSerialListener::add_serial_listener, this, std::placeholders::_1,
                                              std::placeholders::_2));
-        timer = create_wall_timer(std::chrono::milliseconds(READ_REFRESH_RATE), [this]()
-        {
-            for (auto& listener : serial_listeners)
-            {
-                if (listener.second->IsOk())
-                    listener.second->read();
-            }
-        });
-
-        parameter_callback_handle_ = this->add_on_set_parameters_callback(
-            [this](const std::vector<rclcpp::Parameter>& parameters)
-            {
-                return onParameterChange(parameters);
-            });
     }
 
     MultipleSerialListener::~MultipleSerialListener()
@@ -54,12 +130,10 @@ namespace Modelec
             return;
         }
 
-        listener->publisher_ = create_publisher<std_msgs::msg::String>("raw_data/" + listener->name_, 10);
+        listener->publisher_ = create_publisher<std_msgs::msg::String>("raw_data/" + request->name, 10);
         listener->subscriber_ = create_subscription<std_msgs::msg::String>(
-            "send_to_serial/" + listener->name_, 10, [listener](std_msgs::msg::String::SharedPtr msg)
-            {
-                listener->write(msg->data);
-            });
+            "send_to_serial/" + request->name, rclcpp::QoS(10).reliability(rclcpp::ReliabilityPolicy::BestEffort),
+            std::bind(&SerialListener::write, listener.get(), std::placeholders::_1));
 
         serial_listeners.insert({request->name, listener});
 
@@ -76,8 +150,7 @@ namespace Modelec
 
         for (const auto& parameter : parameters)
         {
-            if (parameter.get_name() == "bauds" || parameter.get_name() == "serial_port" || parameter.get_name() ==
-                "max_message_len")
+            if (parameter.get_name() == "bauds" || parameter.get_name() == "serial_port" || parameter.get_name() == "max_message_len")
             {
                 updateConnection();
             }
@@ -91,72 +164,6 @@ namespace Modelec
         for (auto& listener : serial_listeners)
         {
             listener.second->SetMaxMessageLen(get_parameter("max_message_len").as_int());
-        }
-
-        read_refresh_rate_ = get_parameter("read_refresh_rate").as_int();
-        timer->cancel();
-        timer = create_wall_timer(std::chrono::milliseconds(read_refresh_rate_), [this]()
-        {
-            for (auto& listener : serial_listeners)
-            {
-                listener.second->read();
-            }
-        });
-    }
-
-    MultipleSerialListener::SerialListener::SerialListener(const std::string& name, int bauds,
-                                                           const std::string& serial_port, int max_message_len,
-                                                           boost::asio::io_service& io)
-        : bauds_(bauds), serial_port_(serial_port), max_message_len_(max_message_len), io_(io), name_(name), port_(io)
-    {
-        try
-        {
-            port_.open(serial_port_);
-            port_.set_option(boost::asio::serial_port_base::baud_rate(bauds_));
-            status_ = true;
-        }
-        catch (boost::system::system_error& e)
-        {
-            RCLCPP_ERROR(rclcpp::get_logger("MultipleSerialListener"), "Failed to open serial port: %s", e.what());
-            status_ = false;
-            return;
-        }
-    }
-
-    void MultipleSerialListener::SerialListener::read()
-    {
-        if (!status_) return;
-
-        std::vector<char> data(max_message_len_);
-        try
-        {
-            // Attempt to read data from the serial port
-
-            size_t len = port_.read_some(boost::asio::buffer(data.data(), max_message_len_));
-            if (len > 0)
-            {
-                // Prepare and publish the message
-                auto msg = std_msgs::msg::String();
-                msg.data = std::string(data.begin(), data.begin() + len);
-                publisher_->publish(msg);
-            }
-        }
-        catch (boost::system::system_error& e)
-        {
-            RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "Read error: %s", e.what());
-        }
-    }
-
-
-    void MultipleSerialListener::SerialListener::write(const std::string& data)
-    {
-        try
-        {
-            boost::asio::write(port_, boost::asio::buffer(data));
-        }
-        catch (boost::system::system_error& e)
-        {
-            RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "Write error: %s", e.what());
         }
     }
 }

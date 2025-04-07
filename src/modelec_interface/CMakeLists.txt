@@ -27,6 +27,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/Odometry/OdometrySpeed.srv"
   "srv/Odometry/OdometryToF.srv"
   "srv/Odometry/OdometryStart.srv"
+  "srv/Odometry/OdometryAddWaypoint.srv"
   "srv/Odometry/PID/OdometryGetPid.srv"
   "srv/Odometry/PID/OdometrySetPid.srv"
   "srv/AddServoMotor.srv"

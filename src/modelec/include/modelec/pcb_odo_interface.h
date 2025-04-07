@@ -22,6 +22,7 @@
 #include <modelec_interface/srv/odometry_start.hpp>
 #include <modelec_interface/srv/odometry_get_pid.hpp>
 #include <modelec_interface/srv/odometry_set_pid.hpp>
+#include <modelec_interface/srv/odometry_add_waypoint.hpp>
 
 namespace Modelec {
 
@@ -73,6 +74,7 @@ private:
     rclcpp::Service<modelec_interface::srv::OdometryStart>::SharedPtr set_start_service_;
     rclcpp::Service<modelec_interface::srv::OdometryGetPid>::SharedPtr get_pid_service_;
     rclcpp::Service<modelec_interface::srv::OdometrySetPid>::SharedPtr set_pid_service_;
+    rclcpp::Service<modelec_interface::srv::OdometryAddWaypoint>::SharedPtr add_waypoint_service_;
 
     // Promises and mutexes to synchronize service responses asynchronously
     std::queue<std::promise<long>> tof_promises_;
@@ -93,6 +95,9 @@ private:
     std::queue<std::promise<bool>> set_pid_promises_;
     std::mutex set_pid_mutex_;
 
+    std::queue<std::promise<bool>> add_waypoint_promises_;
+    std::mutex add_waypoint_mutex_;
+
     // Service handlers using async wait with promises
     void HandleGetTof(const std::shared_ptr<modelec_interface::srv::OdometryToF::Request> request,
                       std::shared_ptr<modelec_interface::srv::OdometryToF::Response> response);
@@ -112,6 +117,9 @@ private:
     void HandleSetPID(const std::shared_ptr<modelec_interface::srv::OdometrySetPid::Request> request,
                            std::shared_ptr<modelec_interface::srv::OdometrySetPid::Response> response);
 
+    void HandleAddWaypoint(const std::shared_ptr<modelec_interface::srv::OdometryAddWaypoint::Request> request,
+                           std::shared_ptr<modelec_interface::srv::OdometryAddWaypoint::Response> response);
+
     // Resolving methods called by subscriber callback
     void ResolveToFRequest(long distance);
     void ResolveSpeedRequest(const OdometryData& speed);
@@ -119,6 +127,7 @@ private:
     void ResolveStartRequest(bool start);
     void ResolveGetPIDRequest(const PIDData& pid);
     void ResolveSetPIDRequest(bool success);
+    void ResolveAddWaypointRequest(bool success);
 
 public:
     void SendToPCB(const std::string &data) const;

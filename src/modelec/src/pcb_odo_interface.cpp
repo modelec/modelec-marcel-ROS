@@ -117,6 +117,10 @@ namespace Modelec
         set_pid_service_ = create_service<modelec_interface::srv::OdometrySetPid>(
             "odometry/set_pid",
             std::bind(&PCBOdoInterface::HandleSetPID, this, std::placeholders::_1, std::placeholders::_2));
+
+        add_waypoint_service_ = create_service<modelec_interface::srv::OdometryAddWaypoint>(
+            "odometry/add_waypoint",
+            std::bind(&PCBOdoInterface::HandleAddWaypoint, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     PCBOdoInterface::~PCBOdoInterface()
@@ -210,6 +214,11 @@ namespace Modelec
             {
                 bool start = std::stoi(tokens[2]);
                 ResolveStartRequest(start);
+            }
+            else if (tokens[1] == "WAYPOINT")
+            {
+                bool success = true;
+                ResolveAddWaypointRequest(success);
             }
             else
             {
@@ -346,6 +355,22 @@ namespace Modelec
         response->success = result;
     }
 
+    void PCBOdoInterface::HandleAddWaypoint(
+        const std::shared_ptr<modelec_interface::srv::OdometryAddWaypoint::Request> request,
+        std::shared_ptr<modelec_interface::srv::OdometryAddWaypoint::Response> response)
+    {
+        std::promise<bool> promise;
+        auto future = promise.get_future();
+
+        {
+            std::lock_guard<std::mutex> lock(add_waypoint_mutex_);
+            add_waypoint_promises_.push(std::move(promise));
+        }
+        AddWaypoint(request->id, request->is_end, request->x, request->y, request->theta);
+        bool result = future.get();
+        response->success = result;
+    }
+
     void PCBOdoInterface::ResolveToFRequest(const long distance)
     {
         std::lock_guard<std::mutex> lock(tof_mutex_);
@@ -415,6 +440,18 @@ namespace Modelec
             promise.set_value(success);
         } else {
             RCLCPP_DEBUG(get_logger(), "No pending Set PID request to resolve.");
+        }
+    }
+
+    void PCBOdoInterface::ResolveAddWaypointRequest(bool success)
+    {
+        std::lock_guard<std::mutex> lock(add_waypoint_mutex_);
+        if (!add_waypoint_promises_.empty()) {
+            auto promise = std::move(add_waypoint_promises_.front());
+            add_waypoint_promises_.pop();
+            promise.set_value(success);
+        } else {
+            RCLCPP_DEBUG(get_logger(), "No pending Add Waypoint request to resolve.");
         }
     }
 

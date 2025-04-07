@@ -118,6 +118,27 @@ namespace ModelecGUI
         speedLayout_->addWidget(ySpeedBox_);
         speedLayout_->addWidget(thetaSpeedBox_);
 
+        startTest_ = new QPushButton("Start Test");
+        connect(startTest_, &QPushButton::clicked, this, [this]() {
+            auto firstRequest = std::make_shared<modelec_interface::msg::OdometryAddWaypoint>();
+            firstRequest->id = 0;
+            firstRequest->is_end = false;
+            firstRequest->x = 100.0;
+            firstRequest->y = 0.0;
+            firstRequest->theta = 0.0;
+
+            pub_add_waypoint_->publish(*firstRequest);
+
+            auto secondRequest = std::make_shared<modelec_interface::msg::OdometryAddWaypoint>();
+            secondRequest->id = 1;
+            secondRequest->is_end = true;
+            secondRequest->x = 0.0;
+            secondRequest->y = 0.0;
+            secondRequest->theta = 0.0;
+
+            pub_add_waypoint_->publish(*secondRequest);
+        });
+
         mainLayout_ = new QVBoxLayout(this);
         mainLayout_->addWidget(startButton_);
         mainLayout_->addLayout(posLayout_);
@@ -126,12 +147,16 @@ namespace ModelecGUI
         mainLayout_->addWidget(setPID_);
         mainLayout_->addWidget(askSpeed_);
         mainLayout_->addLayout(speedLayout_);
+        mainLayout_->addWidget(startTest_);
         setLayout(mainLayout_);
 
         // Set up subscription
         sub_ = node_->create_subscription<modelec_interface::msg::OdometryPos>(
             "/odometry/get_position", 10,
             std::bind(&TestPage::PositionCallback, this, std::placeholders::_1));
+
+        pub_add_waypoint_ = node_->create_publisher<modelec_interface::msg::OdometryAddWaypoint>(
+            "/odometry/add_waypoint", 10);
 
         // Set up service client
         client_ = node_->create_client<modelec_interface::srv::OdometrySpeed>("odometry/speed");

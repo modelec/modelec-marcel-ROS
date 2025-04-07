@@ -108,6 +108,13 @@ target_include_directories(lidar_controller PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
+add_executable(speed_result src/speed_result.cpp)
+ament_target_dependencies(speed_result rclcpp std_msgs sensor_msgs modelec_interface)
+target_include_directories(speed_result PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
 # Enable testing and linting
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -119,6 +126,7 @@ endif()
 # Install targets
 install(TARGETS
   serial_listener
+  pcb_alim_interface
   pcb_odo_interface
   pca9685_controller
   gamecontroller_listener
@@ -127,7 +135,7 @@ install(TARGETS
   solenoid_controller
   arm_controller
   button_gpio_controller
-  pcb_alim_interface
+  speed_result
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -8,6 +8,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <modelec_interface/msg/odometry_pos.hpp>
+#include <modelec_interface/msg/odometry_add_waypoint.hpp>
 #include <modelec_interface/srv/odometry_speed.hpp>
 #include <modelec_interface/srv/odometry_start.hpp>
 #include <modelec_interface/srv/odometry_get_pid.hpp>
@@ -40,9 +41,13 @@ namespace ModelecGUI {
         QLineEdit *xSpeedBox_, *ySpeedBox_, *thetaSpeedBox_;
         QHBoxLayout *speedLayout_;
 
+        QPushButton *startTest_;
+
         rclcpp::Node::SharedPtr node_;
 
         rclcpp::Subscription<modelec_interface::msg::OdometryPos>::SharedPtr sub_;
+
+        rclcpp::Publisher<modelec_interface::msg::OdometryAddWaypoint>::SharedPtr pub_add_waypoint_;
 
         // client
         rclcpp::Client<modelec_interface::srv::OdometrySpeed>::SharedPtr client_;

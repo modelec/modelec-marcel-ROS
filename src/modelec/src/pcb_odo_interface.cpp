@@ -1,4 +1,4 @@
-#include <modelec/pcb_odo_interface.h>
+#include <modelec/pcb_odo_interface.hpp>
 #include <modelec/utils.hpp>
 #include <modelec_interface/srv/add_serial_listener.hpp>
 

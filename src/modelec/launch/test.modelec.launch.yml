@@ -14,3 +14,8 @@ launch:
       pkg: 'modelec_gui'
       exec: "modelec_gui"
       name: "modelec_gui"
+
+- node:
+      pkg: 'modelec'
+      exec: 'speed_result'
+      name: 'speed_result'

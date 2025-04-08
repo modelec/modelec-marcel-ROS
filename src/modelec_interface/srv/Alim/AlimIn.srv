@@ -1,0 +1,10 @@
+string VOLT="VOLT"
+string AMPS="AMPS"
+string STATE="STATE"
+string VALID="VALID"
+
+int16 input
+string type "STATE"
+---
+bool success
+int64 result

@@ -272,7 +272,26 @@ namespace Modelec
         }
         else if (tokens[0] == "KO")
         {
-            RCLCPP_WARN(this->get_logger(), "PCB error: %s", msg->data.c_str());
+            if (tokens[1] == "START")
+            {
+                bool start = false;
+                ResolveStartRequest(start);
+            }
+            else if (tokens[1] == "WAYPOINT")
+            {
+                bool success = false;
+                ResolveAddWaypointRequest(success);
+            }
+
+            else if (tokens[1] == "PID")
+            {
+                bool success = false;
+                ResolveSetPIDRequest(success);
+            }
+            else
+            {
+                RCLCPP_WARN(this->get_logger(), "PCB error: %s", msg->data.c_str());
+            }
         }
     }
 

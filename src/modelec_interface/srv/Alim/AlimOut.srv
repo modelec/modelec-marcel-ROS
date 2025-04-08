@@ -1,0 +1,15 @@
+string OUT_5V="OUT5V"
+string OUT_5V1="OUT5V1"
+string OUT_12V="OUT12V"
+string OUT_24V="OUT24V"
+
+string STATE="STATE"
+string VOLT="VOLT"
+string AMPS="AMPS"
+
+string out
+string type "STATE"
+int8 enable -1
+---
+bool success
+int64 result

@@ -39,7 +39,9 @@ namespace Modelec
 
                     pcb_subscriber_ = this->create_subscription<std_msgs::msg::String>(
                         res->publisher, 10,
-                        std::bind(&PCBOdoInterface::PCBCallback, this, std::placeholders::_1),
+                        [this](const std_msgs::msg::String::SharedPtr msg) {
+                            PCBCallback(msg);
+                        },
                         options);
 
                     pcb_executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
@@ -83,44 +85,81 @@ namespace Modelec
 
         odo_add_waypoint_subscriber_ = this->create_subscription<modelec_interface::msg::OdometryAddWaypoint>(
             "odometry/add_waypoint", 10,
-            std::bind(&PCBOdoInterface::AddWaypointCallback, this, std::placeholders::_1));
+            [this](const modelec_interface::msg::OdometryAddWaypoint::SharedPtr msg)
+            {
+                AddWaypointCallback(msg);
+            });
 
         odo_set_pos_subscriber_ = this->create_subscription<modelec_interface::msg::OdometryPos>(
             "odometry/set_position", 10,
-            std::bind(&PCBOdoInterface::SetPosCallback, this, std::placeholders::_1));
+            [this](const modelec_interface::msg::OdometryPos::SharedPtr msg)
+            {
+                SetPosCallback(msg);
+            });
 
         odo_set_pid_subscriber_ = this->create_subscription<modelec_interface::msg::OdometryPid>(
             "odometry/set_pid", 10,
-            std::bind(&PCBOdoInterface::SetPIDCallback, this, std::placeholders::_1));
+            [this](const modelec_interface::msg::OdometryPid::SharedPtr msg)
+            {
+                SetPIDCallback(msg);
+            });
 
         // Services
         get_tof_service_ = create_service<modelec_interface::srv::OdometryToF>(
             "odometry/tof",
-            std::bind(&PCBOdoInterface::HandleGetTof, this, std::placeholders::_1, std::placeholders::_2));
+            [this](const std::shared_ptr<modelec_interface::srv::OdometryToF::Request> request,
+                std::shared_ptr<modelec_interface::srv::OdometryToF::Response> response)
+            {
+                HandleGetTof(request, response);
+            });
 
         get_speed_service_ = create_service<modelec_interface::srv::OdometrySpeed>(
             "odometry/speed",
-            std::bind(&PCBOdoInterface::HandleGetSpeed, this, std::placeholders::_1, std::placeholders::_2));
+            [this](const std::shared_ptr<modelec_interface::srv::OdometrySpeed::Request> request,
+                std::shared_ptr<modelec_interface::srv::OdometrySpeed::Response> response)
+            {
+                HandleGetSpeed(request, response);
+            });
 
         get_position_service_ = create_service<modelec_interface::srv::OdometryPosition>(
             "odometry/get_position",
-            std::bind(&PCBOdoInterface::HandleGetPosition, this, std::placeholders::_1, std::placeholders::_2));
+            [this](const std::shared_ptr<modelec_interface::srv::OdometryPosition::Request> request,
+                std::shared_ptr<modelec_interface::srv::OdometryPosition::Response> response)
+            {
+                HandleGetPosition(request, response);
+            });
 
         set_start_service_ = create_service<modelec_interface::srv::OdometryStart>(
             "odometry/start",
-            std::bind(&PCBOdoInterface::HandleGetStart, this, std::placeholders::_1, std::placeholders::_2));
+            [this](const std::shared_ptr<modelec_interface::srv::OdometryStart::Request> request,
+                std::shared_ptr<modelec_interface::srv::OdometryStart::Response> response)
+            {
+                HandleGetStart(request, response);
+            });
 
         get_pid_service_ = create_service<modelec_interface::srv::OdometryGetPid>(
             "odometry/get_pid",
-            std::bind(&PCBOdoInterface::HandleGetPID, this, std::placeholders::_1, std::placeholders::_2));
+            [this](const std::shared_ptr<modelec_interface::srv::OdometryGetPid::Request> request,
+                std::shared_ptr<modelec_interface::srv::OdometryGetPid::Response> response)
+            {
+                HandleGetPID(request, response);
+            });
 
         set_pid_service_ = create_service<modelec_interface::srv::OdometrySetPid>(
             "odometry/set_pid",
-            std::bind(&PCBOdoInterface::HandleSetPID, this, std::placeholders::_1, std::placeholders::_2));
+            [this](const std::shared_ptr<modelec_interface::srv::OdometrySetPid::Request> request,
+                std::shared_ptr<modelec_interface::srv::OdometrySetPid::Response> response)
+            {
+                HandleSetPID(request, response);
+            });
 
         add_waypoint_service_ = create_service<modelec_interface::srv::OdometryAddWaypoint>(
             "odometry/add_waypoint",
-            std::bind(&PCBOdoInterface::HandleAddWaypoint, this, std::placeholders::_1, std::placeholders::_2));
+            [this](const std::shared_ptr<modelec_interface::srv::OdometryAddWaypoint::Request> request,
+                std::shared_ptr<modelec_interface::srv::OdometryAddWaypoint::Response> response)
+            {
+                HandleAddWaypoint(request, response);
+            });
     }
 
     PCBOdoInterface::~PCBOdoInterface()
@@ -219,6 +258,12 @@ namespace Modelec
             {
                 bool success = true;
                 ResolveAddWaypointRequest(success);
+            }
+
+            else if (tokens[1] == "PID")
+            {
+                bool success = true;
+                ResolveSetPIDRequest(success);
             }
             else
             {

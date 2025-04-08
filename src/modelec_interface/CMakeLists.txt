@@ -18,7 +18,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Odometry/OdometryAddWaypoint.msg"
   "msg/Odometry/OdometryStart.msg"
   "msg/Odometry/PID/OdometryPid.msg"
-  "msg/WriteSerial.msg"
   "msg/PCA9685Servo.msg"
   "msg/ServoMode.msg"
   "msg/Solenoid.msg"

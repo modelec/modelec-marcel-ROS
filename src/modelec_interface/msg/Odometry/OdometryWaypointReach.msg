@@ -1,1 +1,1 @@
-int8 id
+uint8 id

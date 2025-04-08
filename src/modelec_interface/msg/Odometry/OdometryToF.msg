@@ -1,2 +1,2 @@
-int8 n
+uint8 n
 int64 distance

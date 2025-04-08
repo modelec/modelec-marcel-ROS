@@ -1,4 +1,4 @@
-int8 id
+uint8 id
 bool is_end
 int64 x
 int64 y

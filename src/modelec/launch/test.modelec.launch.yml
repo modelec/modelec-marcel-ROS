@@ -11,6 +11,11 @@ launch:
       name: 'pcb_odo_interface'
 
 - node:
+      pkg: 'modelec'
+      exec: 'pcb_alim_interface'
+      name: 'pcb_alim_interface'
+
+- node:
       pkg: 'modelec_gui'
       exec: "modelec_gui"
       name: "modelec_gui"

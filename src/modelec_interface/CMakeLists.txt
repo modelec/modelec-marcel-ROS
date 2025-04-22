@@ -11,6 +11,7 @@ find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Alim/AlimEmg.msg"
   "msg/Odometry/OdometryPos.msg"
   "msg/Odometry/OdometrySpeed.msg"
   "msg/Odometry/OdometryToF.msg"

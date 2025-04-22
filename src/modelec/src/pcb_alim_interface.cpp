@@ -10,7 +10,7 @@ namespace Modelec
         auto request = std::make_shared<modelec_interface::srv::AddSerialListener::Request>();
         request->name = "pcb_alim";
         request->bauds = 115200;
-        request->serial_port = "/dev/serial0"; // TODO : check the real serial port
+        request->serial_port = "/dev/pts/12"; // TODO : check the real serial port
         auto client = this->create_client<modelec_interface::srv::AddSerialListener>("add_serial_listener");
         while (!client->wait_for_service(std::chrono::seconds(1)))
         {
@@ -38,7 +38,7 @@ namespace Modelec
                     options.callback_group = pcb_callback_group_;
 
                     pcb_subscriber_ = this->create_subscription<std_msgs::msg::String>(
-                        result.get()->publisher, 10,
+                        res->publisher, 10,
                         [this](const std_msgs::msg::String::SharedPtr msg)
                         {
                             PCBCallback(msg);
@@ -52,7 +52,7 @@ namespace Modelec
                         pcb_executor_->spin();
                     });
 
-                    pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(result.get()->subscriber, 10);
+                    pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(res->subscriber, 10);
                 }
                 else
                 {
@@ -115,6 +115,13 @@ namespace Modelec
             {
                 HandleGetPCBTempData(request, response);
             });
+
+        pcb_emg_subscriber_ = this->create_subscription<modelec_interface::msg::AlimEmg>(
+            "alim/emg", 10,
+            [this](const modelec_interface::msg::AlimEmg::SharedPtr msg)
+            {
+                PCBEmgCallback(msg);
+            });
     }
 
     PCBAlimInterface::~PCBAlimInterface()
@@ -175,8 +182,7 @@ namespace Modelec
             else if (tokens[1] == "EMG")
             {
                 bool success = true;
-                bool value = (tokens[3] == "1");
-                ResolveSetPCBEmgRequest({success, value});
+                ResolveSetPCBEmgRequest(success);
             }
         }
         else if (tokens[0] == "KO")
@@ -191,15 +197,19 @@ namespace Modelec
             else if (tokens[1] == "EMG")
             {
                 bool success = false;
-                int value = -1;
 
-                ResolveSetPCBEmgRequest({success, value});
+                ResolveSetPCBEmgRequest(success);
             }
         }
         else
         {
             RCLCPP_ERROR(this->get_logger(), "Unknown message type: %s", tokens[0].c_str());
         }
+    }
+
+    void PCBAlimInterface::PCBEmgCallback(const modelec_interface::msg::AlimEmg::SharedPtr msg) const
+    {
+        SendOrder("EMG", {"STATE", msg->activate == true ? "1" : "0"});
     }
 
     void PCBAlimInterface::HandleGetPCBOutData(const std::shared_ptr<modelec_interface::srv::AlimOut::Request> request,
@@ -259,7 +269,7 @@ namespace Modelec
         response->result = result.value;
     }
 
-    void PCBAlimInterface::HandleGetPCBBauData(const std::shared_ptr<modelec_interface::srv::AlimBau::Request> request,
+    void PCBAlimInterface::HandleGetPCBBauData(const std::shared_ptr<modelec_interface::srv::AlimBau::Request>,
                                                std::shared_ptr<modelec_interface::srv::AlimBau::Response> response)
     {
         std::promise<PCBBau> promise;
@@ -294,7 +304,7 @@ namespace Modelec
     }
 
     void PCBAlimInterface::HandleGetPCBTempData(
-        const std::shared_ptr<modelec_interface::srv::AlimTemp::Request> request,
+        const std::shared_ptr<modelec_interface::srv::AlimTemp::Request>,
         std::shared_ptr<modelec_interface::srv::AlimTemp::Response> response)
     {
         std::promise<PCBData> promise;
@@ -354,6 +364,51 @@ namespace Modelec
         else
         {
             RCLCPP_DEBUG(this->get_logger(), "No pending request for PCB in data");
+        }
+    }
+
+    void PCBAlimInterface::ResolveGetPCBBauRequest(const PCBBau& value)
+    {
+        std::lock_guard<std::mutex> lock(pcb_bau_mutex_);
+        if (!pcb_bau_promises_.empty())
+        {
+            auto promise = std::move(pcb_bau_promises_.front());
+            pcb_bau_promises_.pop();
+            promise.set_value(value);
+        }
+        else
+        {
+            RCLCPP_DEBUG(this->get_logger(), "No pending request for PCB bau data");
+        }
+    }
+
+    void PCBAlimInterface::ResolveSetPCBEmgRequest(bool value)
+    {
+        std::lock_guard<std::mutex> lock(pcb_emg_mutex_);
+        if (!pcb_emg_promises_.empty())
+        {
+            auto promise = std::move(pcb_emg_promises_.front());
+            pcb_emg_promises_.pop();
+            promise.set_value(value);
+        }
+        else
+        {
+            RCLCPP_DEBUG(this->get_logger(), "No pending request for PCB emg data");
+        }
+    }
+
+    void PCBAlimInterface::ResolveGetPCBTempRequest(const PCBData& value)
+    {
+        std::lock_guard<std::mutex> lock(pcb_temp_mutex_);
+        if (!pcb_temp_promises_.empty())
+        {
+            auto promise = std::move(pcb_temp_promises_.front());
+            pcb_temp_promises_.pop();
+            promise.set_value(value);
+        }
+        else
+        {
+            RCLCPP_DEBUG(this->get_logger(), "No pending request for PCB temp data");
         }
     }
 

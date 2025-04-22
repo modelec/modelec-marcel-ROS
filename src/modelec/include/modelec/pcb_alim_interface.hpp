@@ -7,6 +7,7 @@
 #include <modelec_interface/srv/alim_bau.hpp>
 #include <modelec_interface/srv/alim_emg.hpp>
 #include <modelec_interface/srv/alim_temp.hpp>
+#include <modelec_interface/msg/alim_emg.hpp>
 
 namespace Modelec
 {
@@ -37,6 +38,10 @@ private:
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr pcb_subscriber_;
 
     void PCBCallback(const std_msgs::msg::String::SharedPtr msg);
+
+    rclcpp::Subscription<modelec_interface::msg::AlimEmg>::SharedPtr pcb_emg_subscriber_;
+
+    void PCBEmgCallback(const modelec_interface::msg::AlimEmg::SharedPtr msg) const;
 
     rclcpp::Service<modelec_interface::srv::AlimOut>::SharedPtr pcb_out_service_;
     rclcpp::Service<modelec_interface::srv::AlimIn>::SharedPtr pcb_in_service_;
@@ -87,7 +92,7 @@ private:
     void ResolveSetPCBOutRequest(const PCBData& value);
     void ResolveGetPCBInRequest(const PCBData& value);
     void ResolveGetPCBBauRequest(const PCBBau& value);
-    void ResolveSetPCBEmgRequest(const PCBData& value);
+    void ResolveSetPCBEmgRequest(bool value);
     void ResolveGetPCBTempRequest(const PCBData& value);
 
 public:

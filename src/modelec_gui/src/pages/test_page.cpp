@@ -11,9 +11,9 @@ namespace ModelecGUI
         connect(startButton_, &QPushButton::clicked, this, [this]() {
             // Create a request for the speed service
             RCLCPP_INFO(node_->get_logger(), "Start button clicked.");
-            auto request = std::make_shared<modelec_interface::srv::OdometryStart::Request>();
+            auto request = std::make_shared<modelec_interfaces::srv::OdometryStart::Request>();
             request->start = true;
-            client_start_->async_send_request(request, [this](rclcpp::Client<modelec_interface::srv::OdometryStart>::SharedFuture response) {
+            client_start_->async_send_request(request, [this](rclcpp::Client<modelec_interfaces::srv::OdometryStart>::SharedFuture response) {
                 if (response.get()->success)
                 {
                     RCLCPP_INFO(node_->get_logger(), "Start command sent successfully.");
@@ -42,10 +42,10 @@ namespace ModelecGUI
         askPID_ = new QPushButton("Ask PID");
         connect(askPID_, &QPushButton::clicked, this, [this]() {
             // Create a request for the PID service
-            auto request = std::make_shared<modelec_interface::srv::OdometryGetPid::Request>();
+            auto request = std::make_shared<modelec_interfaces::srv::OdometryGetPid::Request>();
 
             // Make the asynchronous service call
-            client_get_pid_->async_send_request(request, [this](rclcpp::Client<modelec_interface::srv::OdometryGetPid>::SharedFuture response) {
+            client_get_pid_->async_send_request(request, [this](rclcpp::Client<modelec_interfaces::srv::OdometryGetPid>::SharedFuture response) {
                 if (auto res = response.get()) {
                     QMetaObject::invokeMethod(this, [this, res]() {
                         pPIDBox_->setText(QString("%1").arg(res->p));
@@ -69,13 +69,13 @@ namespace ModelecGUI
         setPID_ = new QPushButton("Set PID");
         connect(setPID_, &QPushButton::clicked, this, [this]() {
             // Create a request for the PID service
-            auto request = std::make_shared<modelec_interface::srv::OdometrySetPid::Request>();
+            auto request = std::make_shared<modelec_interfaces::srv::OdometrySetPid::Request>();
             request->p = pPIDBox_->text().toFloat();
             request->i = iPIDBox_->text().toFloat();
             request->d = dPIDBox_->text().toFloat();
 
             // Make the asynchronous service call
-            client_set_pid_->async_send_request(request, [this](rclcpp::Client<modelec_interface::srv::OdometrySetPid>::SharedFuture response) {
+            client_set_pid_->async_send_request(request, [this](rclcpp::Client<modelec_interfaces::srv::OdometrySetPid>::SharedFuture response) {
                 if (response.get()->success)
                 {
                     RCLCPP_INFO(node_->get_logger(), "Set PID command sent successfully.");
@@ -90,10 +90,10 @@ namespace ModelecGUI
         askSpeed_ = new QPushButton("Ask speed");
         connect(askSpeed_, &QPushButton::clicked, this, [this]() {
             // Create a request for the speed service
-            auto request = std::make_shared<modelec_interface::srv::OdometrySpeed::Request>();
+            auto request = std::make_shared<modelec_interfaces::srv::OdometrySpeed::Request>();
 
             // Make the asynchronous service call
-            client_->async_send_request(request, [this](rclcpp::Client<modelec_interface::srv::OdometrySpeed>::SharedFuture response) {
+            client_->async_send_request(request, [this](rclcpp::Client<modelec_interfaces::srv::OdometrySpeed>::SharedFuture response) {
                 if (auto res = response.get()) {
                     QMetaObject::invokeMethod(this, [this, res]() {
                         xSpeedBox_->setText(QString("x: %1").arg(res->x));
@@ -120,7 +120,7 @@ namespace ModelecGUI
 
         startTest_ = new QPushButton("Start Test");
         connect(startTest_, &QPushButton::clicked, this, [this]() {
-            auto firstRequest = std::make_shared<modelec_interface::msg::OdometryAddWaypoint>();
+            auto firstRequest = std::make_shared<modelec_interfaces::msg::OdometryAddWaypoint>();
             firstRequest->id = 0;
             firstRequest->is_end = false;
             firstRequest->x = 100.0;
@@ -129,7 +129,7 @@ namespace ModelecGUI
 
             pub_add_waypoint_->publish(*firstRequest);
 
-            auto secondRequest = std::make_shared<modelec_interface::msg::OdometryAddWaypoint>();
+            auto secondRequest = std::make_shared<modelec_interfaces::msg::OdometryAddWaypoint>();
             secondRequest->id = 1;
             secondRequest->is_end = true;
             secondRequest->x = 0.0;
@@ -151,15 +151,15 @@ namespace ModelecGUI
         setLayout(mainLayout_);
 
         // Set up subscription
-        sub_ = node_->create_subscription<modelec_interface::msg::OdometryPos>(
+        sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "/odometry/get_position", 10,
             std::bind(&TestPage::PositionCallback, this, std::placeholders::_1));
 
-        pub_add_waypoint_ = node_->create_publisher<modelec_interface::msg::OdometryAddWaypoint>(
+        pub_add_waypoint_ = node_->create_publisher<modelec_interfaces::msg::OdometryAddWaypoint>(
             "/odometry/add_waypoint", 10);
 
         // Set up service client
-        client_ = node_->create_client<modelec_interface::srv::OdometrySpeed>("odometry/speed");
+        client_ = node_->create_client<modelec_interfaces::srv::OdometrySpeed>("odometry/speed");
 
         // Wait for the service to be available
         while (!client_->wait_for_service(std::chrono::seconds(1))) {
@@ -170,7 +170,7 @@ namespace ModelecGUI
             RCLCPP_INFO(node_->get_logger(), "Service not available, waiting again...");
         }
 
-        client_start_ = node_->create_client<modelec_interface::srv::OdometryStart>("odometry/start");
+        client_start_ = node_->create_client<modelec_interfaces::srv::OdometryStart>("odometry/start");
 
         while (!client_start_->wait_for_service(std::chrono::seconds(1))) {
             if (!rclcpp::ok()) {
@@ -180,7 +180,7 @@ namespace ModelecGUI
             RCLCPP_INFO(node_->get_logger(), "Service not available, waiting again...");
         }
 
-        client_get_pid_ = node_->create_client<modelec_interface::srv::OdometryGetPid>("odometry/get_pid");
+        client_get_pid_ = node_->create_client<modelec_interfaces::srv::OdometryGetPid>("odometry/get_pid");
 
         while (!client_get_pid_->wait_for_service(std::chrono::seconds(1))) {
             if (!rclcpp::ok()) {
@@ -190,7 +190,7 @@ namespace ModelecGUI
             RCLCPP_INFO(node_->get_logger(), "Service not available, waiting again...");
         }
 
-        client_set_pid_ = node_->create_client<modelec_interface::srv::OdometrySetPid>("odometry/set_pid");
+        client_set_pid_ = node_->create_client<modelec_interfaces::srv::OdometrySetPid>("odometry/set_pid");
         while (!client_set_pid_->wait_for_service(std::chrono::seconds(1))) {
             if (!rclcpp::ok()) {
                 RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
@@ -202,7 +202,7 @@ namespace ModelecGUI
 
     TestPage::~TestPage() = default;
 
-    void TestPage::PositionCallback(const modelec_interface::msg::OdometryPos::SharedPtr msg)
+    void TestPage::PositionCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
         QMetaObject::invokeMethod(this, [this, msg]() {
             xBox_->setText(QString("x: %1").arg(msg->x));

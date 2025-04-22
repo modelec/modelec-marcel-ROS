@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>modelec_gui</name>
-  <version>0.0.0</version>
+  <name>modelec_core</name>
+  <version>0.1.0</version>
   <description>TODO: Package description</description>
   <maintainer email="contact@modelec.club">modelec</maintainer>
   <license>GPL-3.0-only</license>
@@ -10,9 +10,16 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>modelec_interfaces</depend>
+  <depend>modelec_utils</depend>
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
 
+  <build_depend>boost</build_depend>
+  <exec_depend>boost</exec_depend>
+  <exec_depend>ros2launch</exec_depend>
+  
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

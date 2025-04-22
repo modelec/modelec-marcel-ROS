@@ -1,0 +1,31 @@
+launch:
+
+- node:
+    pkg: 'modelec_com'
+    exec: "serial_listener"
+    name: "serial_listener"
+
+- node:
+      pkg: 'modelec_com'
+      exec: 'pcb_odo_interface'
+      name: 'pcb_odo_interface'
+
+- node:
+    pkg: 'modelec_com'
+    exec: 'pcb_alim_interface'
+    name: 'pcb_alim_interface'
+
+- node:
+    pkg: 'modelec_com'
+    exec: 'pca9685_controller'
+    name: 'pca9685_controller'
+
+- node:
+    pkg: 'modelec'
+    exec: 'solenoid_controller'
+    name: 'solenoid_controller'
+
+- node:
+    pkg: 'modelec'
+    exec: 'arm_controller'
+    name: 'arm_controller'

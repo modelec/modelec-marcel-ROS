@@ -40,8 +40,12 @@ public:
 
     ~SerialListener();
 
+    void close();
+
     void SetMaxMessageLen(int max_message_len) { max_message_len_ = max_message_len; }
     bool IsOk() const { return status_; }
+
+    void SetOk() { status_ = true; }
 
     void write(std_msgs::msg::String::SharedPtr msg);
 };

@@ -3,6 +3,7 @@
 #include <QMenuBar>
 #include <utility>
 #include <modelec_gui/pages/home_page.hpp>
+#include <modelec_gui/pages/map_page.hpp>
 #include <modelec_gui/pages/test_page.hpp>
 
 namespace ModelecGUI {
@@ -13,6 +14,7 @@ namespace ModelecGUI {
         // Add pages to stack
         stackedWidget->addWidget(new HomePage(this));
         stackedWidget->addWidget(new TestPage(get_node(), this));
+        stackedWidget->addWidget(new MapPage(get_node(), this));
         setCentralWidget(stackedWidget);
 
         setupMenu();
@@ -23,14 +25,25 @@ namespace ModelecGUI {
     void ROS2QtGUI::setupMenu() {
         QMenuBar *menuBar = this->menuBar();
 
-        QMenu *optionsMenu = menuBar->addMenu("Options");
+        QMenu *optionsMenu = menuBar->addMenu("View");
 
         home_action_ = new QAction("Home", this);
         test_action_ = new QAction("Test", this);
+        map_action_ = new QAction("Map", this);
+
+        playmat_map_menu_ = new QMenu("playmat");
+        playmat_map_ = new QAction("Map", this);
+        playmat_grid_ = new QAction("Grid", this);
+
         exit_action_ = new QAction("Exit", this);
 
         optionsMenu->addAction(home_action_);
         optionsMenu->addAction(test_action_);
+        optionsMenu->addSeparator();
+        optionsMenu->addAction(map_action_);
+        optionsMenu->addMenu(playmat_map_menu_);
+        playmat_map_menu_->addAction(playmat_map_);
+        playmat_map_menu_->addAction(playmat_grid_);
         optionsMenu->addSeparator();
         optionsMenu->addAction(exit_action_);
 
@@ -40,6 +53,24 @@ namespace ModelecGUI {
 
         connect(test_action_, &QAction::triggered, this, [this]() {
             stackedWidget->setCurrentIndex(1);
+        });
+
+        connect(map_action_, &QAction::triggered, this, [this]() {
+            stackedWidget->setCurrentIndex(2);
+        });
+
+        connect(playmat_map_, &QAction::triggered, this, [this]() {
+            auto map_page = dynamic_cast<MapPage *>(stackedWidget->currentWidget());
+            if (map_page) {
+                map_page->setPlaymatMap();
+            }
+        });
+
+        connect(playmat_grid_, &QAction::triggered, this, [this]() {
+            auto map_page = dynamic_cast<MapPage *>(stackedWidget->currentWidget());
+            if (map_page) {
+                map_page->setPlaymatGrid();
+            }
         });
 
         connect(exit_action_, &QAction::triggered, this, [this]() {

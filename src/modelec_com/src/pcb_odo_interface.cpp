@@ -10,7 +10,7 @@ namespace Modelec
         auto request = std::make_shared<modelec_interfaces::srv::AddSerialListener::Request>();
         request->name = "pcb_odo";
         request->bauds = 115200;
-        request->serial_port = "/dev/pts/7"; // TODO : check the real serial port
+        request->serial_port = "/dev/pts/6"; // TODO : check the real serial port
         auto client = this->create_client<modelec_interfaces::srv::AddSerialListener>("add_serial_listener");
         while (!client->wait_for_service(std::chrono::seconds(1)))
         {
@@ -84,7 +84,7 @@ namespace Modelec
             "odometry/get_pid", 10);
 
         odo_add_waypoint_subscriber_ = this->create_subscription<modelec_interfaces::msg::OdometryAddWaypoint>(
-            "odometry/add_waypoint", 10,
+            "odometry/add_waypoint", 30,
             [this](const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg)
             {
                 AddWaypointCallback(msg);
@@ -534,6 +534,7 @@ namespace Modelec
         {
             command += ";" + d;
         }
+        command += "\n";
 
         SendToPCB(command);
     }
@@ -586,7 +587,7 @@ namespace Modelec
     }
 
     void PCBOdoInterface::AddWaypoint(const int index, const bool IsStopPoint, const long x, const long y,
-                                      const long theta) const
+                                      const double theta) const
     {
         std::vector<std::string> data = {
             std::to_string(index),

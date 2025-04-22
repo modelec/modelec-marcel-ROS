@@ -1,5 +1,6 @@
 #include <modelec_gui/pages/home_page.hpp>
-#include <modelec_gui/pages/test_page.hpp>
+
+#include <QVBoxLayout>
 
 namespace ModelecGUI
 {

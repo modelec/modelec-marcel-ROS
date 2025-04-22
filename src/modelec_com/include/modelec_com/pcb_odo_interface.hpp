@@ -145,7 +145,7 @@ public:
     void SetRobotPos(long x, long y, long theta) const;
 
     void AddWaypoint(modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg) const;
-    void AddWaypoint(int index, bool IsStopPoint, long x, long y, long theta) const;
+    void AddWaypoint(int index, bool IsStopPoint, long x, long y, double theta) const;
 
     void SetStart(const modelec_interfaces::msg::OdometryStart::SharedPtr msg) const;
     void SetStart(bool start) const;

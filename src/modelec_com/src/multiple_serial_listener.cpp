@@ -38,20 +38,36 @@ namespace Modelec
 
     SerialListener::~SerialListener()
     {
-        if (port_.is_open()) port_.close();
-        io_.stop();
-        if (io_thread_.joinable()) io_thread_.join();
+        if (status_)
+        {
+            close();
+        }
+    }
+
+    void SerialListener::close()
+    {
+        if (status_) {
+            if (port_.is_open()) port_.close();
+            io_.stop();
+            if (io_thread_.joinable()) io_thread_.join();
+            status_ = false;
+        }
     }
 
     void SerialListener::start_async_read()
     {
+        if (!status_) start_async_read();
+
         port_.async_read_some(
             boost::asio::buffer(read_buffer_),
             [this](const boost::system::error_code& ec, std::size_t bytes_transferred) {
                 if (!ec && bytes_transferred > 0) {
                     auto msg = std_msgs::msg::String();
                     msg.data = std::string(read_buffer_.begin(), read_buffer_.begin() + bytes_transferred);
-                    publisher_->publish(msg);
+                    if (publisher_)
+                    {
+                        publisher_->publish(msg);
+                    }
 
                     start_async_read();  // continue reading
                 } else {
@@ -103,7 +119,7 @@ namespace Modelec
     {
         for (auto& listener : serial_listeners)
         {
-            listener.second->port_.close();
+            listener.second->close();
         }
     }
 
@@ -140,6 +156,8 @@ namespace Modelec
         response->success = true;
         response->publisher = listener->publisher_->get_topic_name();
         response->subscriber = listener->subscriber_->get_topic_name();
+
+        RCLCPP_INFO(rclcpp::get_logger("MultipleSerialListener"), "Serial listener %s fully created", request->name.c_str());
     }
 
     rcl_interfaces::msg::SetParametersResult MultipleSerialListener::onParameterChange(

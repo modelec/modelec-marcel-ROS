@@ -26,7 +26,12 @@ namespace ModelecGUI
 
         QAction* home_action_;
         QAction* test_action_;
+        QAction* map_action_;
         QAction* exit_action_;
+
+        QMenu* playmat_map_menu_;
+        QAction* playmat_map_;
+        QAction* playmat_grid_;
 
     };
 }

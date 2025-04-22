@@ -21,6 +21,6 @@ launch:
       name: "modelec_gui"
 
 - node:
-      pkg: 'modelec'
+      pkg: 'modelec_core'
       exec: 'speed_result'
       name: 'speed_result'

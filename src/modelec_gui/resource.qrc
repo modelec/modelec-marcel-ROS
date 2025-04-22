@@ -1,0 +1,7 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>img/playmat/2025_FINAL.svg</file>
+        <file>img/playmat/grid_v1.svg</file>
+    </qresource>
+</RCC>

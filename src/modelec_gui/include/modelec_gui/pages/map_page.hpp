@@ -31,13 +31,9 @@ namespace ModelecGUI {
 
         void mousePressEvent(QMouseEvent* event) override;
 
-        void onStartButtonClicked();
-
         void onOdometryReceived(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
         QSvgRenderer* renderer;
-
-        QPushButton* startButton;
 
         QVBoxLayout* v_layout;
         QHBoxLayout* h_layout;
@@ -45,10 +41,15 @@ namespace ModelecGUI {
         QPoint robotPosPoint = QPoint(0, 0);
         std::vector<QPoint> qpoints;
         std::vector<modelec_interfaces::msg::OdometryAddWaypoint> points;
+        modelec_interfaces::msg::OdometryPos go_to_point;
+
+        bool lastWapointWasEnd = false;
 
         rclcpp::Node::SharedPtr node_;
 
-        rclcpp::Publisher<modelec_interfaces::msg::OdometryAddWaypoint>::SharedPtr add_waypoint_publisher_;
-        rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr odometry_subscriber_;
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryAddWaypoint>::SharedPtr add_waypoint_sub_;
+
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr odometry_sub_;
+        rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr go_to_pub_;
     };
 }

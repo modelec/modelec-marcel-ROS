@@ -152,7 +152,7 @@ namespace ModelecGUI
 
         // Set up subscription
         sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
-            "/odometry/get_position", 10,
+            "/odometry/position", 10,
             std::bind(&TestPage::PositionCallback, this, std::placeholders::_1));
 
         pub_add_waypoint_ = node_->create_publisher<modelec_interfaces::msg::OdometryAddWaypoint>(

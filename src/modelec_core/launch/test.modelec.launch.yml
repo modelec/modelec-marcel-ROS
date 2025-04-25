@@ -24,3 +24,8 @@ launch:
       pkg: 'modelec_core'
       exec: 'speed_result'
       name: 'speed_result'
+
+- node:
+      pkg: 'modelec_strat'
+      exec: 'strat_fsm'
+      name: 'strat_fsm'

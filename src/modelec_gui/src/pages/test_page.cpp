@@ -5,7 +5,7 @@
 namespace ModelecGUI
 {
 
-    TestPage::TestPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent), node_(std::move(node))
+    TestPage::TestPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent), node_(node)
     {
         startButton_ = new QPushButton("Start");
         connect(startButton_, &QPushButton::clicked, this, [this]() {
@@ -41,12 +41,15 @@ namespace ModelecGUI
 
         askPID_ = new QPushButton("Ask PID");
         connect(askPID_, &QPushButton::clicked, this, [this]() {
+            RCLCPP_INFO(node_->get_logger(), "Ask PID button clicked.");
             // Create a request for the PID service
             auto request = std::make_shared<modelec_interfaces::srv::OdometryGetPid::Request>();
 
             // Make the asynchronous service call
             client_get_pid_->async_send_request(request, [this](rclcpp::Client<modelec_interfaces::srv::OdometryGetPid>::SharedFuture response) {
+                RCLCPP_INFO(node_->get_logger(), "Received PID response.");
                 if (auto res = response.get()) {
+                    RCLCPP_INFO(node_->get_logger(), "PID values received: p=%f, i=%f, d=%f", res->p, res->i, res->d);
                     QMetaObject::invokeMethod(this, [this, res]() {
                         pPIDBox_->setText(QString("%1").arg(res->p));
                         iPIDBox_->setText(QString("%1").arg(res->i));
@@ -158,10 +161,7 @@ namespace ModelecGUI
         pub_add_waypoint_ = node_->create_publisher<modelec_interfaces::msg::OdometryAddWaypoint>(
             "/odometry/add_waypoint", 10);
 
-        // Set up service client
         client_ = node_->create_client<modelec_interfaces::srv::OdometrySpeed>("odometry/speed");
-
-        // Wait for the service to be available
         while (!client_->wait_for_service(std::chrono::seconds(1))) {
             if (!rclcpp::ok()) {
                 RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
@@ -171,7 +171,6 @@ namespace ModelecGUI
         }
 
         client_start_ = node_->create_client<modelec_interfaces::srv::OdometryStart>("odometry/start");
-
         while (!client_start_->wait_for_service(std::chrono::seconds(1))) {
             if (!rclcpp::ok()) {
                 RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");

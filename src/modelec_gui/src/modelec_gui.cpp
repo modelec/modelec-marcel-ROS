@@ -35,6 +35,8 @@ namespace ModelecGUI {
         playmat_map_ = new QAction("Map", this);
         playmat_grid_ = new QAction("Grid", this);
 
+        toggle_show_obstacle_action_ = new QAction("Toggle Show Obstacle", this);
+
         exit_action_ = new QAction("Exit", this);
 
         optionsMenu->addAction(home_action_);
@@ -44,6 +46,7 @@ namespace ModelecGUI {
         optionsMenu->addMenu(playmat_map_menu_);
         playmat_map_menu_->addAction(playmat_map_);
         playmat_map_menu_->addAction(playmat_grid_);
+        optionsMenu->addAction(toggle_show_obstacle_action_);
         optionsMenu->addSeparator();
         optionsMenu->addAction(exit_action_);
 
@@ -70,6 +73,14 @@ namespace ModelecGUI {
             auto map_page = dynamic_cast<MapPage *>(stackedWidget->currentWidget());
             if (map_page) {
                 map_page->setPlaymatGrid();
+            }
+        });
+
+        connect(toggle_show_obstacle_action_, &QAction::triggered, this, [this]() {
+            auto map_page = dynamic_cast<MapPage *>(stackedWidget->currentWidget());
+            if (map_page)
+            {
+                map_page->toggleShowObstacle();
             }
         });
 

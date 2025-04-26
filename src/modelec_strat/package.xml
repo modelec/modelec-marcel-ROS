@@ -13,6 +13,8 @@
   <depend>modelec_utils</depend>
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>tinyxml2</depend>
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>
 

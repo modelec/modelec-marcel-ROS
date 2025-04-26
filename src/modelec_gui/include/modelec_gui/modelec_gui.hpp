@@ -33,5 +33,7 @@ namespace ModelecGUI
         QAction* playmat_map_;
         QAction* playmat_grid_;
 
+        QAction* toggle_show_obstacle_action_;
+
     };
 }

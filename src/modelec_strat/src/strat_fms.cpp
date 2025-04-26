@@ -11,7 +11,7 @@ namespace Modelec
         nav_ = std::make_unique<NavigationHelper>(shared_from_this());
         mission_manager_ = std::make_unique<MissionManager>(shared_from_this());
         action_executor_ = std::make_unique<ActionExecutor>(shared_from_this());
-        RCLCPP_INFO(this->get_logger(), "Strat fully initialized");
+        RCLCPP_INFO(this->get_logger(), "StratFMS fully initialized");
     }
 }
 

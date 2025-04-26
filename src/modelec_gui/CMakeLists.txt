@@ -14,6 +14,7 @@ set(CMAKE_AUTOUIC ON)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(modelec_interfaces REQUIRED)
 find_package(modelec_utils COMPONENTS
         modelec_utils
@@ -45,6 +46,7 @@ add_executable(modelec_gui
 ament_target_dependencies(modelec_gui
         rclcpp
         std_msgs
+        std_srvs
         modelec_interfaces
 )
 target_link_libraries(modelec_gui

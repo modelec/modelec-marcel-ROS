@@ -10,7 +10,7 @@ namespace Modelec
     public:
         ActionExecutor();
 
-        ActionExecutor(rclcpp::Node::SharedPtr node);
+        ActionExecutor(const rclcpp::Node::SharedPtr& node);
 
         rclcpp::Node::SharedPtr getNode() const;
 

@@ -6,7 +6,7 @@
 
 namespace ModelecGUI
 {
-    MapPage::MapPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent), renderer(new QSvgRenderer(QString(":/img/playmat/grid_v1.svg"), this)), node_(std::move(node))
+    MapPage::MapPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent), renderer(new QSvgRenderer(QString(":/img/playmat/2025_FINAL.svg"), this)), node_(node)
     {
         v_layout = new QVBoxLayout(this);
         v_layout->addStretch();
@@ -22,7 +22,7 @@ namespace ModelecGUI
         qpoints = {};
         points = {};
 
-        add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryAddWaypoint>("odometry/add_waypoint", 10,
+        add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryAddWaypoint>("odometry/add_waypoint", 100,
             [this](const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg) {
                 if (lastWapointWasEnd)
                 {
@@ -50,7 +50,53 @@ namespace ModelecGUI
                 update();
         });
 
+        obstacle_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>("nav/obstacle", 40,
+            [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
+                OnObstacleReceived(msg);
+        });
+
         go_to_pub_ = node_->create_publisher<modelec_interfaces::msg::OdometryPos>("nav/go_to", 10);
+
+        // client to nav/map
+        map_client_ = node_->create_client<modelec_interfaces::srv::MapSize>("nav/map_size");
+        while (!map_client_->wait_for_service(std::chrono::seconds(1))) {
+            if (!rclcpp::ok()) {
+                RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+                return;
+            }
+            RCLCPP_INFO(node_->get_logger(), "Waiting for the service...");
+        }
+
+        auto result = map_client_->async_send_request(std::make_shared<modelec_interfaces::srv::MapSize::Request>());
+        if (rclcpp::spin_until_future_complete(node_->get_node_base_interface(), result) ==
+            rclcpp::FutureReturnCode::SUCCESS)
+        {
+            if (auto res = result.get())
+            {
+                RCLCPP_INFO(node_->get_logger(), "Map received: %d x %d", res->width, res->height);
+                map_width_ = res->width;
+                map_height_ = res->height;
+                /* TODO - obstacle
+                 * idea
+                 * send only the size of the map
+                 * and then send the obstacle with id throw the topic obstacle
+                 * problem : if not initialized, idk what to do
+                 * maybe solution ask to send back the obstacle throw an other service
+                 */
+            }
+        }
+
+        ask_map_obstacle_client_ = node_->create_client<std_srvs::srv::Empty>("nav/ask_map_obstacle");
+        while (!ask_map_obstacle_client_->wait_for_service(std::chrono::seconds(1))) {
+            if (!rclcpp::ok()) {
+                RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+                return;
+            }
+            RCLCPP_INFO(node_->get_logger(), "Waiting for the service...");
+        }
+
+        auto result2 = ask_map_obstacle_client_->async_send_request(std::make_shared<std_srvs::srv::Empty::Request>());
+        rclcpp::spin_until_future_complete(node_->get_node_base_interface(), result2);
     }
 
     void MapPage::setPlaymatGrid()
@@ -63,6 +109,11 @@ namespace ModelecGUI
     {
         renderer->load(QString(":/img/playmat/2025_FINAL.svg"));
         update();
+    }
+
+    void MapPage::toggleShowObstacle()
+    {
+        show_obstacle_ = !show_obstacle_;
     }
 
     void MapPage::paintEvent(QPaintEvent* paint_event)
@@ -100,6 +151,16 @@ namespace ModelecGUI
             painter.setPen(Qt::NoPen);
             painter.drawEllipse(qpoints[i], radius, radius);
         }
+
+        if (show_obstacle_)
+        {
+            float ratioBetweenMapAndWidget = height() / 2000.0f;
+            for (auto & [index, obs] : obstacle_)
+            {
+                painter.setBrush(Qt::black);
+                painter.drawRect(obs.x * ratioBetweenMapAndWidget, height() - (obs.y + obs.height) * ratioBetweenMapAndWidget, obs.width * ratioBetweenMapAndWidget, obs.height * ratioBetweenMapAndWidget);
+            }
+        }
     }
 
     void MapPage::mousePressEvent(QMouseEvent* event)
@@ -109,6 +170,7 @@ namespace ModelecGUI
         modelec_interfaces::msg::OdometryPos msg;
         msg.x = Modelec::mapValue(event->pos().x(), 0, width(), 0, 3000);
         msg.y = 2000 - Modelec::mapValue(event->pos().y(), 0, height(), 0, 2000);
+        msg.theta = 0;
 
         go_to_pub_->publish(msg);
 
@@ -136,5 +198,10 @@ namespace ModelecGUI
         points.push_back(msg);
 
         update();*/
+    }
+
+    void MapPage::OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg)
+    {
+        obstacle_.emplace(msg->id, *msg);
     }
 }

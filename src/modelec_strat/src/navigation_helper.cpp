@@ -6,9 +6,9 @@ namespace Modelec {
     {
     }
 
-    NavigationHelper::NavigationHelper(rclcpp::Node::SharedPtr node) : node_(std::move(node))
+    NavigationHelper::NavigationHelper(const rclcpp::Node::SharedPtr& node) : node_(node)
     {
-        pathfinding_ = std::make_unique<Pathfinding>(std::move(node));
+        pathfinding_ = std::make_unique<Pathfinding>(node);
 
         waypoint_reach_sub_ = node_->create_subscription<WaypointReachMsg>(
             "odometry/waypoint_reach", 10,
@@ -16,7 +16,7 @@ namespace Modelec {
                 OnWaypointReach(msg);
             });
 
-        waypoint_pub_ = node_->create_publisher<WaypointMsg>("odometry/add_waypoint", 30);
+        waypoint_pub_ = node_->create_publisher<WaypointMsg>("odometry/add_waypoint", 100);
 
         pos_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 20,
@@ -40,6 +40,14 @@ namespace Modelec {
         for (auto & w : waypoints_)
         {
             waypoint_pub_->publish(w.toMsg());
+        }
+    }
+
+    void NavigationHelper::SendWaypoint(const std::vector<WaypointMsg>& waypoints) const
+    {
+        for (auto & w : waypoints)
+        {
+            waypoint_pub_->publish(w);
         }
     }
 
@@ -148,14 +156,7 @@ namespace Modelec {
 
     void NavigationHelper::GoTo(const PosMsg::SharedPtr& goal)
     {
-        auto waypointList = FindPath(goal);
-        waypoints_.clear();
-        for (const auto& waypoint : waypointList)
-        {
-            waypoints_.emplace_back(waypoint);
-        }
-
-        SendWaypoint();
+        SendWaypoint(FindPath(goal));
     }
 
     WaypointListMsg NavigationHelper::FindPath(const PosMsg::SharedPtr& goal)

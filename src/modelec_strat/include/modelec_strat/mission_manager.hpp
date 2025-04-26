@@ -10,7 +10,7 @@ namespace Modelec
     public:
         MissionManager();
 
-        MissionManager(rclcpp::Node::SharedPtr node);
+        MissionManager(const rclcpp::Node::SharedPtr& node);
 
         rclcpp::Node::SharedPtr getNode() const;
 

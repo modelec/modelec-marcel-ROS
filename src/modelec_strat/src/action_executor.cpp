@@ -6,7 +6,7 @@ namespace Modelec
     {
     }
 
-    ActionExecutor::ActionExecutor(rclcpp::Node::SharedPtr node) : node_(std::move(node))
+    ActionExecutor::ActionExecutor(const rclcpp::Node::SharedPtr& node) : node_(node)
     {
     }
 

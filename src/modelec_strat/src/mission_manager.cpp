@@ -6,7 +6,7 @@ namespace Modelec
     {
     }
 
-    MissionManager::MissionManager(rclcpp::Node::SharedPtr node) : node_(std::move(node))
+    MissionManager::MissionManager(const rclcpp::Node::SharedPtr& node) : node_(node)
     {
     }
 

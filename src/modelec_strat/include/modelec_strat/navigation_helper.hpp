@@ -13,11 +13,12 @@ namespace Modelec {
     public:
         NavigationHelper();
 
-        NavigationHelper(rclcpp::Node::SharedPtr node);
+        NavigationHelper(const rclcpp::Node::SharedPtr& node);
 
         rclcpp::Node::SharedPtr getNode() const;
 
         void SendWaypoint() const;
+        void SendWaypoint(const std::vector<WaypointMsg> &waypoints) const;
 
         void AddWaypoint(const PosMsg &pos, int index);
         void AddWaypoint(const WaypointMsg &waypoint);

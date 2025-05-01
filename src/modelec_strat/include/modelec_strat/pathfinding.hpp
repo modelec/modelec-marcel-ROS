@@ -34,13 +34,6 @@ namespace Modelec {
         WaypointMsg toMsg() const;
     };
 
-    /*
-     * - Pathfinding DStar Lite
-     *
-     *
-     *
-     */
-
     class Pathfinding {
     public:
         Pathfinding();
@@ -53,6 +46,10 @@ namespace Modelec {
                       const PosMsg::SharedPtr& goal);
 
         bool LoadObstaclesFromXML(const std::string& filename);
+
+        //void SetStartAndGoal(const PosMsg::SharedPtr& start, const PosMsg::SharedPtr& goal);
+
+        void SetCurrentPos(const PosMsg::SharedPtr& pos);
 
     protected:
         void HandleMapRequest(
@@ -67,25 +64,38 @@ namespace Modelec {
             const std::shared_ptr<std_srvs::srv::Empty::Request> request,
             const std::shared_ptr<std_srvs::srv::Empty::Response> response);
 
-    private:
-        int robot_width_mm_;
-        int robot_length_mm_;
+        void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
-        int grid_width_;
-        int grid_height_;
+        //bool EnemyOnPath(const modelec_interfaces::msg::OdometryPos& enemy_pos);
+        //void Replan();
+
+    private:
+        rclcpp::Node::SharedPtr node_;
 
         std::vector<std::vector<int>> grid_;
+        int grid_width_ = 0;
+        int grid_height_ = 0;
+        int map_width_mm_ = 0;
+        int map_height_mm_ = 0;
+        float robot_width_mm_ = 0;
+        float robot_length_mm_ = 0;
 
         std::map<int, modelec_interfaces::msg::Obstacle> obstacle_map_;
 
-        rclcpp::Node::SharedPtr node_;
+        PosMsg::SharedPtr current_start_;
+        PosMsg::SharedPtr current_goal_;
+        WaypointListMsg current_waypoints_;
+
+        modelec_interfaces::msg::OdometryPos last_enemy_pos_;
+        bool has_enemy_pos_ = false;
+
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
+        rclcpp::Publisher<modelec_interfaces::msg::Obstacle>::SharedPtr map_pub_;
+        rclcpp::Publisher<WaypointMsg>::SharedPtr waypoint_pub_;
 
         rclcpp::Service<modelec_interfaces::srv::Map>::SharedPtr map_srv_;
         rclcpp::Service<modelec_interfaces::srv::MapSize>::SharedPtr map_size_srv_;
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr ask_obstacle_srv_;
-
-        rclcpp::Publisher<modelec_interfaces::msg::Obstacle>::SharedPtr map_pub_;
-
     };
 
 }

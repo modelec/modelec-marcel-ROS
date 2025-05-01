@@ -157,6 +157,7 @@ namespace Modelec {
     void NavigationHelper::GoTo(const PosMsg::SharedPtr& goal)
     {
         SendWaypoint(FindPath(goal));
+        //pathfinding_->SetStartAndGoal(current_pos_, goal);
     }
 
     WaypointListMsg NavigationHelper::FindPath(const PosMsg::SharedPtr& goal)
@@ -178,6 +179,7 @@ namespace Modelec {
     void NavigationHelper::OnPos(const PosMsg::SharedPtr msg)
     {
         current_pos_ = msg;
+        pathfinding_->SetCurrentPos(msg);
     }
 
 }

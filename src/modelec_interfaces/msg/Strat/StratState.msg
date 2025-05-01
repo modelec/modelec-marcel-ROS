@@ -1,0 +1,12 @@
+int32 INIT=0
+int32 WAIT_START=1
+int32 SELECT_MISSION=2
+
+int32 DO_PREPARE_CONCERT=3
+int32 DO_PROMOTION=4
+
+int32 DO_GO_HOME=5
+int32 STOP=6
+
+int32 state
+string reason

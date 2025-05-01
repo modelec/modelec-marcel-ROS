@@ -1,0 +1,150 @@
+#include <modelec_strat/enemy_manager.hpp>
+#include <cmath>
+
+namespace Modelec
+{
+    EnemyManager::EnemyManager() : Node("enemy_manager")
+    {
+        current_pos_sub_ = this->create_subscription<modelec_interfaces::msg::OdometryPos>(
+            "odometry/position", 10,
+            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
+                OnCurrentPos(msg);
+            });
+
+        laser_scan_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
+            "scan", 10,
+            [this](const sensor_msgs::msg::LaserScan::SharedPtr msg) {
+                OnLidarData(msg);
+            });
+
+        enemy_pos_pub_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
+            "enemy/position", 10);
+
+        timer_ = this->create_wall_timer(
+            std::chrono::seconds(1),
+            std::bind(&EnemyManager::TimerCallback, this)
+        );
+
+        last_publish_time_ = this->now();
+    }
+
+    void EnemyManager::OnCurrentPos(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+    {
+        current_pos_ = *msg;
+    }
+
+    void EnemyManager::OnLidarData(const sensor_msgs::msg::LaserScan::SharedPtr msg)
+    {
+        if (std::isnan(current_pos_.x) || std::isnan(current_pos_.y))
+        {
+            RCLCPP_WARN(this->get_logger(), "Current robot position unknown, cannot compute enemy position");
+            return;
+        }
+
+        const double robot_x = current_pos_.x;
+        const double robot_y = current_pos_.y;
+        const double robot_theta = current_pos_.theta;
+
+        double angle = msg->angle_min;
+
+        double min_distance = std::numeric_limits<double>::max();
+        double best_x = 0.0;
+        double best_y = 0.0;
+
+        for (size_t i = 0; i < msg->ranges.size(); ++i)
+        {
+            float range = msg->ranges[i];
+
+            if (std::isnan(range) || range < msg->range_min || range > msg->range_max)
+            {
+                angle += msg->angle_increment;
+                continue;
+            }
+
+            // Convert to local robot frame
+            double x_local = range * std::cos(angle) * 1000.0; // meters -> mm
+            double y_local = range * std::sin(angle) * 1000.0; // meters -> mm
+
+            // Rotate + translate into global frame
+            double x_global = robot_x + (x_local * std::cos(robot_theta) - y_local * std::sin(robot_theta));
+            double y_global = robot_y + (x_local * std::sin(robot_theta) + y_local * std::cos(robot_theta));
+
+            // Ignore points outside of the table
+            if (x_global < 0 || x_global > 3000 || y_global < 0 || y_global > 2000)
+            {
+                angle += msg->angle_increment;
+                continue;
+            }
+
+            if (range < min_distance)
+            {
+                min_distance = range;
+                best_x = x_global;
+                best_y = y_global;
+            }
+
+            angle += msg->angle_increment;
+        }
+
+        if (min_distance < std::numeric_limits<double>::max())
+        {
+            modelec_interfaces::msg::OdometryPos enemy_pos;
+            enemy_pos.x = best_x;
+            enemy_pos.y = best_y;
+            enemy_pos.theta = 0.0;
+
+            bool need_publish = false;
+
+            if (!enemy_initialized_)
+            {
+                need_publish = true;
+                enemy_initialized_ = true;
+            }
+            else
+            {
+                float dx = enemy_pos.x - last_enemy_pos_.x;
+                float dy = enemy_pos.y - last_enemy_pos_.y;
+                float distance_squared = dx * dx + dy * dy;
+
+                constexpr float min_move_threshold_mm = 50.0f;
+                if (distance_squared > min_move_threshold_mm * min_move_threshold_mm)
+                {
+                    need_publish = true;
+                }
+            }
+
+            if (need_publish)
+            {
+                last_enemy_pos_ = enemy_pos;
+                last_publish_time_ = this->now();
+                enemy_pos_pub_->publish(enemy_pos);
+                RCLCPP_INFO(this->get_logger(), "Enemy moved: x=%ld, y=%ld", enemy_pos.x, enemy_pos.y);
+            }
+        }
+        else
+        {
+            RCLCPP_INFO(this->get_logger(), "No enemy detected in Lidar scan");
+        }
+    }
+
+    void EnemyManager::TimerCallback()
+    {
+        if (!enemy_initialized_)
+            return;
+
+        rclcpp::Duration duration_since_last = this->now() - last_publish_time_;
+        if (duration_since_last.seconds() >= 2.0)
+        {
+            enemy_pos_pub_->publish(last_enemy_pos_);
+            last_publish_time_ = this->now();
+            RCLCPP_INFO(this->get_logger(), "Periodic refresh of enemy position");
+        }
+    }
+}
+
+int main(int argc, char **argv) {
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<Modelec::EnemyManager>());
+    rclcpp::shutdown();
+    return 0;
+}

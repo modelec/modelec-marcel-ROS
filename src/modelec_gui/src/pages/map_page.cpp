@@ -22,6 +22,10 @@ namespace ModelecGUI
         qpoints = {};
         points = {};
 
+        enemy_pos_.x = 1775;
+        enemy_pos_.y = 200;
+        enemy_pos_.theta = 3.1415/2;
+
         add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryAddWaypoint>("odometry/add_waypoint", 100,
             [this](const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg) {
                 if (lastWapointWasEnd)
@@ -56,6 +60,8 @@ namespace ModelecGUI
         });
 
         go_to_pub_ = node_->create_publisher<modelec_interfaces::msg::OdometryPos>("nav/go_to", 10);
+
+        enemy_pos_pub_ = node_->create_publisher<modelec_interfaces::msg::OdometryPos>("enemy/position", 10);
 
         // client to nav/map
         map_client_ = node_->create_client<modelec_interfaces::srv::MapSize>("nav/map_size");
@@ -123,7 +129,6 @@ namespace ModelecGUI
         QPainter painter(this);
         renderer->render(&painter, rect()); // Scales SVG to widget size
 
-
         painter.setRenderHint(QPainter::Antialiasing);
 
         // --- Draw lines ---
@@ -160,6 +165,9 @@ namespace ModelecGUI
                 painter.setBrush(Qt::black);
                 painter.drawRect(obs.x * ratioBetweenMapAndWidget, height() - (obs.y + obs.height) * ratioBetweenMapAndWidget, obs.width * ratioBetweenMapAndWidget, obs.height * ratioBetweenMapAndWidget);
             }
+
+            painter.setBrush(Qt::red);
+            painter.drawRect((enemy_pos_.x - 150.0f) * ratioBetweenMapAndWidget, height() - (enemy_pos_.y + 150.0f) * ratioBetweenMapAndWidget, 300.0f*ratioBetweenMapAndWidget, 300.0f*ratioBetweenMapAndWidget);
         }
     }
 
@@ -167,37 +175,23 @@ namespace ModelecGUI
     {
         QWidget::mousePressEvent(event);
 
-        modelec_interfaces::msg::OdometryPos msg;
-        msg.x = Modelec::mapValue(event->pos().x(), 0, width(), 0, 3000);
-        msg.y = 2000 - Modelec::mapValue(event->pos().y(), 0, height(), 0, 2000);
-        msg.theta = 0;
-
-        go_to_pub_->publish(msg);
-
-        /*
-        qpoints.push_back(event->pos());
-
-        modelec_interfaces::msg::OdometryAddWaypoint msg;
-        msg.x = Modelec::mapValue(event->pos().x(), 0, width(), 0, 3000);
-        msg.y = 2000 - Modelec::mapValue(event->pos().y(), 0, height(), 0, 2000);
-        msg.is_end = false;
-        msg.id = points.size();
-
-        if (points.empty())
+        if (event->button() == Qt::LeftButton)
         {
-            QPointF vec = QPoint(msg.x, msg.y) - robotPosPoint;
-            msg.theta = std::atan2(vec.y(), vec.x());
+            modelec_interfaces::msg::OdometryPos msg;
+            msg.x = Modelec::mapValue(event->pos().x(), 0, width(), 0, 3000);
+            msg.y = 2000 - Modelec::mapValue(event->pos().y(), 0, height(), 0, 2000);
+            msg.theta = 0;
+
+            go_to_pub_->publish(msg);
         }
-        else
+        else if (event->button() == Qt::RightButton)
         {
-            auto lastPoint = points.back();
-            QPointF vec = QPoint(msg.x, msg.y) - QPoint(lastPoint.x, lastPoint.y);
-            msg.theta = std::atan2(vec.y(), vec.x());
+            enemy_pos_.x = Modelec::mapValue(event->pos().x(), 0, width(), 0, 3000);
+            enemy_pos_.y = 2000 - Modelec::mapValue(event->pos().y(), 0, height(), 0, 2000);
+            enemy_pos_.theta = 0;
+
+            enemy_pos_pub_->publish(enemy_pos_);
         }
-
-        points.push_back(msg);
-
-        update();*/
     }
 
     void MapPage::OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg)

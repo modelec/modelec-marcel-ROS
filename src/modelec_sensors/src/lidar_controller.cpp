@@ -1,6 +1,7 @@
 #include <modelec_sensors/lidar_controller.hpp>
 
 namespace Modelec {
+    // TODO - DEPRECATED
     LidarController::LidarController() : Node("lidar_controller") {
         subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
             "scan", 10, [this](const sensor_msgs::msg::LaserScan::SharedPtr msg) {

@@ -69,5 +69,9 @@ namespace ModelecGUI {
         rclcpp::Client<modelec_interfaces::srv::MapSize>::SharedPtr map_client_;
         rclcpp::Subscription<modelec_interfaces::msg::Obstacle>::SharedPtr obstacle_sub_;
         rclcpp::Client<std_srvs::srv::Empty>::SharedPtr ask_map_obstacle_client_;
+
+
+        modelec_interfaces::msg::OdometryPos enemy_pos_;
+        rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_pub_;
     };
 }

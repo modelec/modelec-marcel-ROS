@@ -27,6 +27,9 @@ namespace Modelec {
 
     Pathfinding::Pathfinding(const rclcpp::Node::SharedPtr& node) : node_(node)
     {
+        map_width_mm_ = 3000.0f;
+        map_height_mm_ = 2000.0f;
+
         robot_length_mm_ = 300.0f;
         robot_width_mm_ = 300.0f;
 
@@ -65,6 +68,14 @@ namespace Modelec {
                 HandleMapSizeRequest(request, response);
             });
 
+        enemy_pos_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
+            "enemy/position", 10,
+            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
+                OnEnemyPosition(msg);
+            });
+
+        waypoint_pub_ = node_->create_publisher<WaypointMsg>(
+            "odometry/add_waypoint", 100);
     }
 
     rclcpp::Node::SharedPtr Pathfinding::getNode() const
@@ -72,15 +83,47 @@ namespace Modelec {
         return node_;
     }
 
+    /*bool Pathfinding::EnemyOnPath(const modelec_interfaces::msg::OdometryPos& enemy_pos)
+    {
+        int ex = enemy_pos.x;
+        int ey = enemy_pos.y;
+
+        for (const auto& wp : current_waypoints_)
+        {
+            int wx = wp.x;
+            int wy = wp.y;
+
+            if (std::abs(wx - ex) + std::abs(wy - ey) <= 300)
+                return true;
+        }
+        return false;
+    }*/
+
+    /*void Pathfinding::Replan()
+    {
+        if (!current_start_ || !current_goal_)
+            return;
+
+        current_waypoints_ = FindPath(current_start_, current_goal_);
+
+        for (const auto& wp : current_waypoints_)
+        {
+            waypoint_pub_->publish(wp);
+        }
+    }*/
+
     WaypointListMsg Pathfinding::FindPath(const PosMsg::SharedPtr& start, const PosMsg::SharedPtr& goal)
     {
+        if (!start || !goal)
+        {
+            RCLCPP_WARN(node_->get_logger(), "Start or Goal position is null");
+            return WaypointListMsg();
+        }
+
         WaypointListMsg waypoints;
 
-        // Constantes de ta map
-        constexpr float map_width_mm = 3000.0f;  // mm
-        constexpr float map_height_mm = 2000.0f; // mm
-        const float cell_size_mm_x = map_width_mm / grid_width_;
-        const float cell_size_mm_y = map_height_mm / grid_height_;
+        const float cell_size_mm_x = map_width_mm_ / grid_width_;
+        const float cell_size_mm_y = map_height_mm_ / grid_height_;
 
         // Robot dimensions
         const int inflate_x = std::ceil((robot_width_mm_ / 2.0f) / cell_size_mm_x);
@@ -92,6 +135,46 @@ namespace Modelec {
         for (auto& row : grid_)
         {
             row.assign(grid_width_, 0); // 0 = free
+        }
+
+        if (has_enemy_pos_)
+        {
+            int ex = (last_enemy_pos_.x / cell_size_mm_x) - inflate_x;
+            int ey = (grid_height_ - 1) - ((last_enemy_pos_.y / cell_size_mm_y) - inflate_y);
+
+            const int inflate_enemy_x = std::ceil(150.0 / cell_size_mm_x + inflate_x);
+            const int inflate_enemy_y = std::ceil(150.0 / cell_size_mm_y + inflate_y);
+
+            for (int y = ey - inflate_enemy_y; y <= ey + inflate_enemy_y; ++y)
+            {
+                for (int x = ex - inflate_enemy_x; x <= ex + inflate_enemy_x; ++x)
+                {
+                    if (x >= 0 && y >= 0 && x < grid_width_ && y < grid_height_)
+                    {
+                        grid_[y][x] = 1;
+                    }
+                }
+            }
+        }
+
+        // Bord gauche et droit
+        for (int y = 0; y < grid_height_; ++y)
+        {
+            for (int x = 0; x < inflate_x; ++x)
+            {
+                grid_[y][x] = 1; // bord gauche
+                grid_[y][grid_width_ - 1 - x] = 1; // bord droit
+            }
+        }
+
+        // Bord haut et bas
+        for (int x = 0; x < grid_width_; ++x)
+        {
+            for (int y = 0; y < inflate_y; ++y)
+            {
+                grid_[y][x] = 1; // bord bas
+                grid_[grid_height_ - 1 - y][x] = 1; // bord haut
+            }
         }
 
         // 2. Fill obstacles with inflation
@@ -353,6 +436,23 @@ namespace Modelec {
         return true;
     }
 
+    /*void Pathfinding::SetStartAndGoal(const PosMsg::SharedPtr& start, const PosMsg::SharedPtr& goal)
+    {
+        current_start_ = start;
+        current_goal_ = goal;
+        current_waypoints_ = FindPath(start, goal);
+
+        for (const auto& wp : current_waypoints_)
+        {
+            waypoint_pub_->publish(wp);
+        }
+    }*/
+
+    void Pathfinding::SetCurrentPos(const PosMsg::SharedPtr& pos)
+    {
+        current_start_ = pos;
+    }
+
     void Pathfinding::HandleMapRequest(const std::shared_ptr<modelec_interfaces::srv::Map::Request>,
                                        const std::shared_ptr<modelec_interfaces::srv::Map::Response> response)
     {
@@ -382,6 +482,20 @@ namespace Modelec {
         {
             map_pub_->publish(obs);
         }
+    }
+
+    void Pathfinding::OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+    {
+        last_enemy_pos_ = *msg;
+        has_enemy_pos_ = true;
+
+        RCLCPP_INFO(node_->get_logger(), "Enemy position updated: x=%ld, y=%ld", msg->x, msg->y);
+
+        /*if (EnemyOnPath(last_enemy_pos_))
+        {
+            RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
+            Replan();
+        }*/
     }
 
     Waypoint::Waypoint(const modelec_interfaces::msg::OdometryPos& pos, int index, bool isLast)

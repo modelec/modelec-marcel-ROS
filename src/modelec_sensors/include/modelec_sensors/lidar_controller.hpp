@@ -5,9 +5,9 @@
 #include <sensor_msgs/msg/laser_scan.hpp>
 
 namespace Modelec {
-    class LidarController : public rclcpp::Node {
-    private:
+    // TODO - DEPRECATED
 
+    class LidarController : public rclcpp::Node {
     public:
         LidarController();
     private:

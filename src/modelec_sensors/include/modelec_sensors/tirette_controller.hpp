@@ -16,10 +16,11 @@ namespace Modelec {
         TiretteController();
 
     private:
-        rclcpp::Service<TiretteInterface>::SharedPtr service;
-        rclcpp::TimerBase::SharedPtr timer;
-        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher;
-        bool tirette_state;
+        rclcpp::Service<TiretteInterface>::SharedPtr service_;
+        rclcpp::TimerBase::SharedPtr timer_;
+        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_;
+        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_change_;
+        int tirette_state_;
 
         void check_tirette(const std::shared_ptr<TiretteInterface::Request> request, std::shared_ptr<TiretteInterface::Response> response);
     };

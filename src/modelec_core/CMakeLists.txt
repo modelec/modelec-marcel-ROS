@@ -26,14 +26,6 @@ target_include_directories(gamecontroller_listener PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-add_executable(move_controller src/move_controller.cpp)
-ament_target_dependencies(move_controller rclcpp std_msgs sensor_msgs modelec_interfaces)
-target_link_libraries(move_controller modelec_utils::modelec_utils)
-target_include_directories(move_controller PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-
 add_executable(solenoid_controller src/solenoid_controller.cpp)
 ament_target_dependencies(solenoid_controller rclcpp modelec_interfaces)
 target_link_libraries(solenoid_controller ${WIRINGPI_LIB} modelec_utils::modelec_utils)
@@ -77,7 +69,6 @@ endif()
 # Install targets
 install(TARGETS
   gamecontroller_listener
-  move_controller
   solenoid_controller
   arm_controller
   button_gpio_controller

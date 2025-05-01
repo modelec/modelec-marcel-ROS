@@ -23,12 +23,17 @@
                     <!-- End repeat -->
                     <locator>
                         <udpv4>
-                            <address>ubu-standard-pc-q35-ich9-2009</address> <!-- ackimixs -->
+                            <address>acki-windows-2.tail1f0d2.ts.net</address> <!-- ackimixs -->
                         </udpv4>
                     </locator>
                     <locator>
                         <udpv4>
                             <address>marcel.ayu-hops.ts.net</address>
+                        </udpv4>
+                    </locator>
+                    <locator>
+                        <udpv4>
+                            <address>robot-v1.ayu-hops.ts.net</address>
                         </udpv4>
                     </locator>
                 </initialPeersList>

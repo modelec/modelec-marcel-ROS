@@ -1,33 +1,25 @@
 <Obstacles>
     <!-- TOP -->
-    <!--
     <Obstacle id="1" x="600" y="1800" width="450" height="200" type="estrade"/>
     <Obstacle id="2" x="1050" y="1550" width="900" height="450" type="estrade"/>
     <Obstacle id="3" x="1950" y="1800" width="450" height="200" type="estrade"/>
-    -->
 
     <!-- Gradin TOP TO BOTTOM    LEFT -->
-    <!--
     <Obstacle id="10" x="600" y="1650" width="450" height="150" type="gradin"/>
     <Obstacle id="11" x="0" y="1100" width="150" height="450" type="gradin"/>
     <Obstacle id="12" x="900" y="900" width="400" height="100" type="gradin"/>
     <Obstacle id="13" x="0" y="200" width="130" height="400" type="gradin"/>
     <Obstacle id="14" x="570" y="200" width="400" height="100" type="gradin"/>
-    -->
 
     <!-- Gradin TOP TO BOTTOM    RIGHT -->
-    <!--
     <Obstacle id="20" x="1950" y="1650" width="450" height="150" type="gradin"/>
     <Obstacle id="21" x="2850" y="1100" width="150" height="450" type="gradin"/>
     <Obstacle id="22" x="1700" y="900" width="400" height="100" type="gradin"/>
     <Obstacle id="23" x="2850" y="200" width="130" height="400" type="gradin"/>
     <Obstacle id="24" x="2000" y="200" width="400" height="100" type="gradin"/>
-    -->
 
     <!-- PAMI Start -->
-    <!--
     <Obstacle id="30" x="0" y="1550" width="150" height="450" type="pami-start"/>
     <Obstacle id="31" x="2850" y="1550" width="150" height="450" type="pami-start"/>
-    -->
 
 </Obstacles>

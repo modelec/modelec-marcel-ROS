@@ -1,10 +1,22 @@
 #include <modelec_strat/enemy_manager.hpp>
 #include <cmath>
+#include <modelec_strat/config.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 namespace Modelec
 {
     EnemyManager::EnemyManager() : Node("enemy_manager")
     {
+        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
+        if (!Config::load(config_path))
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
+        }
+
+        min_move_threshold_mm_ = Config::get<float>("config.enemy.detection.min_move_threshold_mm", 50);
+
+        refresh_rate_s_ = Config::get<float>("config.enemy.detection.refresh_rate", 1.0);
+
         current_pos_sub_ = this->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10,
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
@@ -106,8 +118,7 @@ namespace Modelec
                 float dy = enemy_pos.y - last_enemy_pos_.y;
                 float distance_squared = dx * dx + dy * dy;
 
-                constexpr float min_move_threshold_mm = 50.0f;
-                if (distance_squared > min_move_threshold_mm * min_move_threshold_mm)
+                if (distance_squared > min_move_threshold_mm_ * min_move_threshold_mm_)
                 {
                     need_publish = true;
                 }
@@ -133,7 +144,7 @@ namespace Modelec
             return;
 
         rclcpp::Duration duration_since_last = this->now() - last_publish_time_;
-        if (duration_since_last.seconds() >= 2.0)
+        if (duration_since_last.seconds() >= refresh_rate_s_)
         {
             enemy_pos_pub_->publish(last_enemy_pos_);
             last_publish_time_ = this->now();

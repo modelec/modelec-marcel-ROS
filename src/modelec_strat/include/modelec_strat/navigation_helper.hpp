@@ -17,6 +17,8 @@ namespace Modelec {
 
         rclcpp::Node::SharedPtr getNode() const;
 
+        std::shared_ptr<Pathfinding> getPathfinding() const;
+
         void SendWaypoint() const;
         void SendWaypoint(const std::vector<WaypointMsg> &waypoints) const;
 
@@ -42,7 +44,7 @@ namespace Modelec {
     private:
         rclcpp::Node::SharedPtr node_;
 
-        std::unique_ptr<Pathfinding> pathfinding_;
+        std::shared_ptr<Pathfinding> pathfinding_;
 
         std::list<Waypoint> waypoints_;
 

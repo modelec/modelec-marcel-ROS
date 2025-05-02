@@ -1,0 +1,31 @@
+<config>
+    <enemy>
+        <size>
+            <width_mm>300</width_mm>
+            <length_mm>300</length_mm>
+
+            <margin_mm>50</margin_mm>
+        </size>
+        <detection>
+            <min_move_threshold_mm>50</min_move_threshold_mm>
+            <refresh_rate>0.5</refresh_rate>
+        </detection>
+    </enemy>
+
+    <robot>
+        <size>
+            <width_mm>300</width_mm>
+            <length_mm>300</length_mm>
+        </size>
+    </robot>
+
+    <map>
+        <size>
+            <grid_width>300</grid_width>
+            <grid_height>200</grid_height>
+
+            <map_width_mm>3000</map_width_mm>
+            <map_height_mm>2000</map_height_mm>
+        </size>
+    </map>
+</config>

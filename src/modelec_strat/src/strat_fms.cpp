@@ -1,3 +1,5 @@
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <modelec_strat/config.hpp>
 #include <modelec_strat/strat_fms.hpp>
 
 namespace Modelec
@@ -15,6 +17,12 @@ namespace Modelec
             });
 
         state_pub_ = create_publisher<modelec_interfaces::msg::StratState>("/strat/state", 10);
+
+        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
+        if (!Config::load(config_path))
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
+        }
     }
 
     void StratFMS::Init()
@@ -22,6 +30,7 @@ namespace Modelec
         nav_ = std::make_shared<NavigationHelper>(shared_from_this());
         mission_manager_ = std::make_unique<MissionManager>(shared_from_this());
         action_executor_ = std::make_unique<ActionExecutor>(shared_from_this());
+
         RCLCPP_INFO(this->get_logger(), "StratFMS fully initialized");
 
         timer_ = create_wall_timer(std::chrono::milliseconds(100), [this]

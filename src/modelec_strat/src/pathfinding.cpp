@@ -1,4 +1,7 @@
+#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_strat/pathfinding.hpp>
+
+#include <modelec_strat/config.hpp>
 
 namespace Modelec {
 
@@ -27,22 +30,43 @@ namespace Modelec {
 
     Pathfinding::Pathfinding(const rclcpp::Node::SharedPtr& node) : node_(node)
     {
-        map_width_mm_ = 3000.0f;
-        map_height_mm_ = 2000.0f;
+        map_width_mm_ = Config::get<int>("config.map.size.map_width_mm", 3000);
+        map_height_mm_ = Config::get<int>("config.map.size.map_height_mm", 2000);
 
-        robot_length_mm_ = 300.0f;
-        robot_width_mm_ = 300.0f;
+        robot_length_mm_ = Config::get<int>("config.robot.size.length_mm", 300);
+        robot_width_mm_ = Config::get<int>("config.robot.size.width_mm", 300);
 
-        grid_width_ = 300;
-        grid_height_ = 200;
+        enemy_length_mm_ = Config::get<int>("config.enemy.size.length_mm", 300);
+        enemy_width_mm_ = Config::get<int>("config.enemy.size.width_mm", 300);
 
-        if (!LoadObstaclesFromXML("/home/acki/ros2_ws/src/modelec_strat/map/obstacles.xml"))
+        enemy_margin_mm_ = Config::get<int>("config.enemy.size.margin_mm", 50);
+
+        grid_width_ = Config::get<int>("config.map.size.grid_width", 300);
+        grid_height_ = Config::get<int>("config.map.size.grid_height", 200);
+
+        std::string obstacles_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/obstacles.xml";
+        if (!LoadObstaclesFromXML(obstacles_path))
         {
-            RCLCPP_WARN(node_->get_logger(), "Failed to load obstacles from XML");
+            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacles from XML");
         }
 
         map_pub_ = node_->create_publisher<modelec_interfaces::msg::Obstacle>(
             "nav/obstacle", 40);
+
+        obstacle_add_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>(
+            "nav/obstacle/add", 10,
+            [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
+                RCLCPP_INFO(node_->get_logger(), "Obstacle add request received");
+                obstacle_map_[msg->id] = Obstacle(*msg);
+                map_pub_->publish(*msg);
+            });
+
+        obstacle_remove_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>(
+            "nav/obstacle/remove", 10,
+            [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
+                RCLCPP_INFO(node_->get_logger(), "Obstacle remove request received");
+                obstacle_map_.erase(msg->id);
+            });
 
         ask_obstacle_srv_ = node_->create_service<std_srvs::srv::Empty>(
             "nav/ask_map_obstacle",
@@ -139,11 +163,11 @@ namespace Modelec {
 
         if (has_enemy_pos_)
         {
-            int ex = (last_enemy_pos_.x / cell_size_mm_x) - inflate_x;
-            int ey = (grid_height_ - 1) - ((last_enemy_pos_.y / cell_size_mm_y) - inflate_y);
+            int ex = (last_enemy_pos_.x / cell_size_mm_x);
+            int ey = ((map_height_mm_ - last_enemy_pos_.y) / cell_size_mm_y);
 
-            const int inflate_enemy_x = std::ceil(150.0 / cell_size_mm_x + inflate_x);
-            const int inflate_enemy_y = std::ceil(150.0 / cell_size_mm_y + inflate_y);
+            const int inflate_enemy_x = std::ceil((enemy_margin_mm_ + (enemy_width_mm_/2)) / cell_size_mm_x) + inflate_x;
+            const int inflate_enemy_y = std::ceil((enemy_margin_mm_ + (enemy_length_mm_/2)) / cell_size_mm_y) + inflate_y;
 
             for (int y = ey - inflate_enemy_y; y <= ey + inflate_enemy_y; ++y)
             {
@@ -180,10 +204,10 @@ namespace Modelec {
         // 2. Fill obstacles with inflation
         for (const auto& [id, obstacle] : obstacle_map_)
         {
-            int x_start = std::max(0, (int)(obstacle.x / cell_size_mm_x) - inflate_x);
-            int y_start = std::max(0, (int)(obstacle.y / cell_size_mm_y) - inflate_y);
-            int x_end = std::min(grid_width_ - 1, (int)((obstacle.x + obstacle.width) / cell_size_mm_x) + inflate_x);
-            int y_end = std::min(grid_height_ - 1, (int)((obstacle.y + obstacle.height) / cell_size_mm_y) + inflate_y);
+            int x_start = std::max(0, (int)(obstacle.x() / cell_size_mm_x) - inflate_x);
+            int y_start = std::max(0, (int)(obstacle.y() / cell_size_mm_y) - inflate_y);
+            int x_end = std::min(grid_width_ - 1, (int)((obstacle.x() + obstacle.width()) / cell_size_mm_x) + inflate_x);
+            int y_end = std::min(grid_height_ - 1, (int)((obstacle.y() + obstacle.height()) / cell_size_mm_y) + inflate_y);
 
             // Inverser l'axe Y
             y_start = (grid_height_ - 1) - y_start;
@@ -396,46 +420,6 @@ namespace Modelec {
         return waypoints;
     }
 
-
-    bool Pathfinding::LoadObstaclesFromXML(const std::string& filename)
-    {
-        tinyxml2::XMLDocument doc;
-        if (doc.LoadFile(filename.c_str()) != tinyxml2::XML_SUCCESS)
-        {
-            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacle XML file: %s", filename.c_str());
-            return false;
-        }
-
-        tinyxml2::XMLElement* root = doc.FirstChildElement("Obstacles");
-        if (!root)
-        {
-            RCLCPP_ERROR(node_->get_logger(), "No <Obstacles> root element in file");
-            return false;
-        }
-
-        for (tinyxml2::XMLElement* obstacleElem = root->FirstChildElement("Obstacle");
-             obstacleElem != nullptr;
-             obstacleElem = obstacleElem->NextSiblingElement("Obstacle"))
-        {
-            modelec_interfaces::msg::Obstacle obs;
-
-            if (obstacleElem->QueryIntAttribute("id", &obs.id) != tinyxml2::XML_SUCCESS ||
-                obstacleElem->QueryIntAttribute("x", &obs.x) != tinyxml2::XML_SUCCESS ||
-                obstacleElem->QueryIntAttribute("y", &obs.y) != tinyxml2::XML_SUCCESS ||
-                obstacleElem->QueryIntAttribute("width", &obs.width) != tinyxml2::XML_SUCCESS ||
-                obstacleElem->QueryIntAttribute("height", &obs.height) != tinyxml2::XML_SUCCESS)
-            {
-                RCLCPP_WARN(node_->get_logger(), "Incomplete obstacle definition in XML, skipping one obstacle");
-                continue;
-            }
-
-            obstacle_map_[obs.id] = obs;
-        }
-
-        RCLCPP_INFO(node_->get_logger(), "Loaded %zu obstacles from XML", obstacle_map_.size());
-        return true;
-    }
-
     /*void Pathfinding::SetStartAndGoal(const PosMsg::SharedPtr& start, const PosMsg::SharedPtr& goal)
     {
         current_start_ = start;
@@ -480,7 +464,7 @@ namespace Modelec {
     {
         for (auto & [index, obs] : obstacle_map_)
         {
-            map_pub_->publish(obs);
+            map_pub_->publish(obs.toMsg());
         }
     }
 
@@ -496,6 +480,34 @@ namespace Modelec {
             RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
             Replan();
         }*/
+    }
+
+    bool Pathfinding::LoadObstaclesFromXML(const std::string& filename)
+    {
+        tinyxml2::XMLDocument doc;
+        if (doc.LoadFile(filename.c_str()) != tinyxml2::XML_SUCCESS)
+        {
+            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacle XML file: %s", filename.c_str());
+            return false;
+        }
+
+        tinyxml2::XMLElement* root = doc.FirstChildElement("Obstacles");
+        if (!root)
+        {
+            RCLCPP_ERROR(node_->get_logger(), "No <Obstacles> root element in file");
+            return false;
+        }
+
+        for (tinyxml2::XMLElement* obstacleElem = root->FirstChildElement("Obstacle");
+             obstacleElem != nullptr;
+             obstacleElem = obstacleElem->NextSiblingElement("Obstacle"))
+        {
+            Obstacle obs(obstacleElem);
+            obstacle_map_[obs.id()] = obs;
+        }
+
+        RCLCPP_INFO(node_->get_logger(), "Loaded %zu obstacles from XML", obstacle_map_.size());
+        return true;
     }
 
     Waypoint::Waypoint(const modelec_interfaces::msg::OdometryPos& pos, int index, bool isLast)

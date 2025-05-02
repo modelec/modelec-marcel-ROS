@@ -20,7 +20,6 @@ namespace ModelecGUI
         this->setLayout(v_layout);
 
         qpoints = {};
-        points = {};
 
         enemy_pos_.x = 1775;
         enemy_pos_.y = 200;
@@ -31,8 +30,9 @@ namespace ModelecGUI
                 if (lastWapointWasEnd)
                 {
                     qpoints.clear();
-                    points.clear();
                     lastWapointWasEnd = false;
+
+                    qpoints.push_back(QPoint(robotPosPoint.x(), robotPosPoint.y()));
                 }
 
                 if (msg->is_end)
@@ -42,7 +42,6 @@ namespace ModelecGUI
 
                 qpoints.push_back(QPoint(Modelec::mapValue(static_cast<int>(msg->x), 0, 3000, 0, width()),
                                           height() - Modelec::mapValue(static_cast<int>(msg->y), 0, 2000, 0, height())));
-                points.push_back(*msg);
                 update();
         });
 
@@ -82,13 +81,6 @@ namespace ModelecGUI
                 RCLCPP_INFO(node_->get_logger(), "Map received: %d x %d", res->width, res->height);
                 map_width_ = res->width;
                 map_height_ = res->height;
-                /* TODO - obstacle
-                 * idea
-                 * send only the size of the map
-                 * and then send the obstacle with id throw the topic obstacle
-                 * problem : if not initialized, idk what to do
-                 * maybe solution ask to send back the obstacle throw an other service
-                 */
             }
         }
 
@@ -133,22 +125,15 @@ namespace ModelecGUI
 
         // --- Draw lines ---
         painter.setPen(QPen(Qt::red, 2)); // Red lines, 2px wide
-        if (!points.empty())
-            painter.drawLine(robotPosPoint, qpoints[0]);
-
-        for (size_t i = 0; i + 1 < points.size(); ++i) {
+        for (size_t i = 0; i + 1 < qpoints.size(); ++i) {
             painter.drawLine(qpoints[i], qpoints[i + 1]);
         }
 
         // --- Draw colored points ---
         const int radius = 5;
 
-        painter.setBrush(Qt::green);
-        painter.setPen(Qt::NoPen);
-        painter.drawEllipse(robotPosPoint, radius, radius); // Robot position
-
-        for (size_t i = 0; i < points.size(); ++i) {
-            if (i == points.size() - 1)
+        for (size_t i = 0; i < qpoints.size(); ++i) {
+            if (i == qpoints.size() - 1)
                 painter.setBrush(Qt::blue);  // Last = blue
             else
                 painter.setBrush(Qt::red);   // Middle = red
@@ -156,6 +141,10 @@ namespace ModelecGUI
             painter.setPen(Qt::NoPen);
             painter.drawEllipse(qpoints[i], radius, radius);
         }
+
+        painter.setBrush(Qt::green);
+        painter.setPen(Qt::NoPen);
+        painter.drawEllipse(robotPosPoint, radius, radius); // Robot position
 
         if (show_obstacle_)
         {
@@ -184,6 +173,7 @@ namespace ModelecGUI
 
             go_to_pub_->publish(msg);
         }
+
         else if (event->button() == Qt::RightButton)
         {
             enemy_pos_.x = Modelec::mapValue(event->pos().x(), 0, width(), 0, 3000);
@@ -192,6 +182,21 @@ namespace ModelecGUI
 
             enemy_pos_pub_->publish(enemy_pos_);
         }
+    }
+
+    void MapPage::mouseReleaseEvent(QMouseEvent* event)
+    {
+        QWidget::mouseReleaseEvent(event);
+    }
+
+    void MapPage::mouseDoubleClickEvent(QMouseEvent* event)
+    {
+        QWidget::mouseDoubleClickEvent(event);
+    }
+
+    void MapPage::mouseMoveEvent(QMouseEvent* event)
+    {
+        QWidget::mouseMoveEvent(event);
     }
 
     void MapPage::OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg)

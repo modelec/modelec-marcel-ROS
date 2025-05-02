@@ -22,6 +22,7 @@ namespace ModelecGUI {
     class MapPage : public QWidget
     {
         Q_OBJECT
+
     public:
         MapPage(rclcpp::Node::SharedPtr node, QWidget *parent = nullptr);
 
@@ -38,6 +39,12 @@ namespace ModelecGUI {
 
         void mousePressEvent(QMouseEvent* event) override;
 
+        void mouseReleaseEvent(QMouseEvent* event) override;
+
+        void mouseDoubleClickEvent(QMouseEvent* event) override;
+
+        void mouseMoveEvent(QMouseEvent* event) override;
+
         void onOdometryReceived(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
         void OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg);
@@ -49,10 +56,10 @@ namespace ModelecGUI {
 
         QPoint robotPosPoint = QPoint(0, 0);
         std::vector<QPoint> qpoints;
-        std::vector<modelec_interfaces::msg::OdometryAddWaypoint> points;
+        //std::vector<modelec_interfaces::msg::OdometryAddWaypoint> points;
         modelec_interfaces::msg::OdometryPos go_to_point;
 
-        bool lastWapointWasEnd = false;
+        bool lastWapointWasEnd = true;
 
         std::map<int, modelec_interfaces::msg::Obstacle> obstacle_;
         bool show_obstacle_ = true;

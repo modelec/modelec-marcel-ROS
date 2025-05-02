@@ -8,7 +8,7 @@ namespace Modelec {
 
     NavigationHelper::NavigationHelper(const rclcpp::Node::SharedPtr& node) : node_(node)
     {
-        pathfinding_ = std::make_unique<Pathfinding>(node);
+        pathfinding_ = std::make_shared<Pathfinding>(node);
 
         waypoint_reach_sub_ = node_->create_subscription<WaypointReachMsg>(
             "odometry/waypoint_reach", 10,
@@ -33,6 +33,11 @@ namespace Modelec {
     rclcpp::Node::SharedPtr NavigationHelper::getNode() const
     {
         return node_;
+    }
+
+    std::shared_ptr<Pathfinding> NavigationHelper::getPathfinding() const
+    {
+        return pathfinding_;
     }
 
     void NavigationHelper::SendWaypoint() const

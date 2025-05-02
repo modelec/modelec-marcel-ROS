@@ -16,10 +16,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(modelec_interfaces REQUIRED)
-find_package(modelec_utils COMPONENTS
-        modelec_utils
-        REQUIRED
-)
+find_package(modelec_utils REQUIRED)
 
 find_package(Qt6 COMPONENTS
         Core

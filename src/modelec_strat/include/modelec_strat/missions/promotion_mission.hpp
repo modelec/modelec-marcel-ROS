@@ -23,6 +23,7 @@ namespace Modelec
         enum Step {
             GO_TO_FRONT,
             DEPLOY_BANNER,
+            GO_FORWARD,
             DONE
         } step_;
 

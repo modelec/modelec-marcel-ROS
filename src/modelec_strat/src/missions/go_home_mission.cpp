@@ -10,7 +10,7 @@ namespace Modelec
     {
         node_ = node;
 
-        // go home
+        nav_->GoTo(400, 1600.0, -M_PI_2);
 
         status_ = MissionStatus::RUNNING;
     }

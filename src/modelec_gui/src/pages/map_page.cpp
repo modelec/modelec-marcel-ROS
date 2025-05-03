@@ -3,19 +3,27 @@
 
 #include <QMouseEvent>
 #include <utility>
+#include <modelec_utils/config.hpp>
+#include <cmath>
 
 namespace ModelecGUI
 {
     MapPage::MapPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent), renderer(new QSvgRenderer(QString(":/img/playmat/2025_FINAL.svg"), this)), node_(node)
     {
+        ratioBetweenMapAndWidgetX_ = width() / 3000.0f;
+        ratioBetweenMapAndWidgetY_ = height() / 2000.0f;
+
         v_layout = new QVBoxLayout(this);
-        v_layout->addStretch();
+
+        tirette_button_ = new QPushButton("Tirette", this);
 
         h_layout = new QHBoxLayout(this);
         h_layout->addStretch();
+        h_layout->addWidget(tirette_button_);
         h_layout->addStretch();
 
         v_layout->addLayout(h_layout);
+        v_layout->addStretch();
 
         this->setLayout(v_layout);
 
@@ -25,6 +33,12 @@ namespace ModelecGUI
         enemy_pos_.y = 200;
         enemy_pos_.theta = 3.1415/2;
 
+        robot_length_ = Modelec::Config::get<int>("config.robot.size.length_mm", 200);
+        robot_width_ = Modelec::Config::get<int>("config.robot.size.width_mm", 300);
+
+        enemy_length_ = Modelec::Config::get<int>("config.enemy.size.length_mm", 300);
+        enemy_width_ = Modelec::Config::get<int>("config.enemy.size.width_mm", 300);
+
         add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryAddWaypoint>("odometry/add_waypoint", 100,
             [this](const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg) {
                 if (lastWapointWasEnd)
@@ -32,7 +46,7 @@ namespace ModelecGUI
                     qpoints.clear();
                     lastWapointWasEnd = false;
 
-                    qpoints.push_back(QPoint(robotPosPoint.x(), robotPosPoint.y()));
+                    qpoints.push_back(QPoint(robotPos.x * ratioBetweenMapAndWidgetX_, height() - robotPos.y * ratioBetweenMapAndWidgetY_));
                 }
 
                 if (msg->is_end)
@@ -40,27 +54,40 @@ namespace ModelecGUI
                     lastWapointWasEnd = true;
                 }
 
-                qpoints.push_back(QPoint(Modelec::mapValue(static_cast<int>(msg->x), 0, 3000, 0, width()),
-                                          height() - Modelec::mapValue(static_cast<int>(msg->y), 0, 2000, 0, height())));
+                qpoints.push_back(QPoint(msg->x * ratioBetweenMapAndWidgetX_, height() - msg->y * ratioBetweenMapAndWidgetY_));
                 update();
         });
 
         // lambda
         odometry_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>("odometry/position", 10,
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
-                robotPosPoint.setX(Modelec::mapValue(static_cast<int>(msg->x), 0, 3000, 0, width()));
-                robotPosPoint.setY(height() - Modelec::mapValue(static_cast<int>(msg->y), 0, 2000, 0, height()));
+                robotPos = *msg;
                 update();
         });
 
-        obstacle_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>("nav/obstacle", 40,
+        obstacle_added_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>("nav/obstacle/added", 40,
             [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
                 OnObstacleReceived(msg);
         });
 
+        obstacle_removed_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>("nav/obstacle/removed", 40,
+            [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
+                obstacle_.erase(msg->id);
+        });
+
+
+
         go_to_pub_ = node_->create_publisher<modelec_interfaces::msg::OdometryPos>("nav/go_to", 10);
 
         enemy_pos_pub_ = node_->create_publisher<modelec_interfaces::msg::OdometryPos>("enemy/position", 10);
+
+        tirette_pub_ = node_->create_publisher<std_msgs::msg::Bool>("tirette", 10);
+
+        connect(tirette_button_, &QPushButton::clicked, this, [this]() {
+            std_msgs::msg::Bool msg;
+            msg.data = true;
+            tirette_pub_->publish(msg);
+        });
 
         // client to nav/map
         map_client_ = node_->create_client<modelec_interfaces::srv::MapSize>("nav/map_size");
@@ -120,6 +147,7 @@ namespace ModelecGUI
 
         QPainter painter(this);
         renderer->render(&painter, rect()); // Scales SVG to widget size
+        painter.save();
 
         painter.setRenderHint(QPainter::Antialiasing);
 
@@ -128,6 +156,8 @@ namespace ModelecGUI
         for (size_t i = 0; i + 1 < qpoints.size(); ++i) {
             painter.drawLine(qpoints[i], qpoints[i + 1]);
         }
+
+        painter.setPen(Qt::NoPen);
 
         // --- Draw colored points ---
         const int radius = 5;
@@ -138,26 +168,43 @@ namespace ModelecGUI
             else
                 painter.setBrush(Qt::red);   // Middle = red
 
-            painter.setPen(Qt::NoPen);
             painter.drawEllipse(qpoints[i], radius, radius);
         }
 
-        painter.setBrush(Qt::green);
-        painter.setPen(Qt::NoPen);
-        painter.drawEllipse(robotPosPoint, radius, radius); // Robot position
+        painter.restore();
 
         if (show_obstacle_)
         {
-            float ratioBetweenMapAndWidget = height() / 2000.0f;
             for (auto & [index, obs] : obstacle_)
             {
+                painter.save();
+
+                QPoint obsPoint(obs.x * ratioBetweenMapAndWidgetX_, height() - obs.y * ratioBetweenMapAndWidgetY_);
+                painter.translate(obsPoint);
+                painter.rotate(90 - obs.theta * (180.0 / M_PI));
                 painter.setBrush(Qt::black);
-                painter.drawRect(obs.x * ratioBetweenMapAndWidget, height() - (obs.y + obs.height) * ratioBetweenMapAndWidget, obs.width * ratioBetweenMapAndWidget, obs.height * ratioBetweenMapAndWidget);
+
+                QRect toDraw(-(obs.width * ratioBetweenMapAndWidgetX_ / 2), -(obs.height * ratioBetweenMapAndWidgetY_ / 2),
+                       obs.width * ratioBetweenMapAndWidgetX_, obs.height * ratioBetweenMapAndWidgetY_);
+
+                painter.drawRect(toDraw);
+
+                painter.restore();
             }
 
+            // -- Draw enemy position --
             painter.setBrush(Qt::red);
-            painter.drawRect((enemy_pos_.x - 150.0f) * ratioBetweenMapAndWidget, height() - (enemy_pos_.y + 150.0f) * ratioBetweenMapAndWidget, 300.0f*ratioBetweenMapAndWidget, 300.0f*ratioBetweenMapAndWidget);
+            painter.drawRect((enemy_pos_.x - (enemy_width_ / 2)) * ratioBetweenMapAndWidgetX_, height() - (enemy_pos_.y + (enemy_length_ / 2)) * ratioBetweenMapAndWidgetY_, enemy_width_*ratioBetweenMapAndWidgetX_, enemy_length_*ratioBetweenMapAndWidgetY_);
         }
+
+        // -- Draw robot position --
+        painter.translate(robotPos.x * ratioBetweenMapAndWidgetX_, height() - robotPos.y * ratioBetweenMapAndWidgetY_);
+        painter.rotate(90 - robotPos.theta * (180.0 / M_PI));
+
+        QRect rect(-(robot_width_ * ratioBetweenMapAndWidgetX_ / 2), -(robot_length_ * ratioBetweenMapAndWidgetY_ / 2),
+                   robot_width_ * ratioBetweenMapAndWidgetX_, robot_length_ * ratioBetweenMapAndWidgetY_);
+        painter.setBrush(Qt::green);
+        painter.drawRect(rect);
     }
 
     void MapPage::mousePressEvent(QMouseEvent* event)
@@ -202,5 +249,13 @@ namespace ModelecGUI
     void MapPage::OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg)
     {
         obstacle_.emplace(msg->id, *msg);
+    }
+
+    void MapPage::resizeEvent(QResizeEvent* event)
+    {
+        QWidget::resizeEvent(event);
+
+        ratioBetweenMapAndWidgetX_ = width() / 3000.0f;
+        ratioBetweenMapAndWidgetY_ = height() / 2000.0f;
     }
 }

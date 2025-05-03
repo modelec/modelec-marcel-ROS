@@ -1,5 +1,5 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
-#include <modelec_strat/config.hpp>
+#include <modelec_utils/config.hpp>
 #include <modelec_strat/strat_fms.hpp>
 
 namespace Modelec
@@ -74,21 +74,17 @@ namespace Modelec
             {
                 auto elapsed = now - match_start_time_;
                 // select mission in a good way there.
-                if (elapsed.seconds() < 10)
+                if (elapsed.seconds() < 2)
                 {
-                    transition(State::DO_PROMOTION, "Start by preparing the concert");
+                    transition(State::DO_PROMOTION, "Start promotion");
                 }
-                else if (elapsed.seconds() < 30)
+                else if (elapsed.seconds() < 20)
                 {
-                    transition(State::DO_PROMOTION, "Proceed to promotion");
-                }
-                else if (elapsed.seconds() >= 100.0)
-                {
-                    transition(State::DO_GO_HOME, "Cleanup and finish match");
+                    transition(State::DO_PREPARE_CONCERT, "Proceed to concert");
                 }
                 else
                 {
-                    transition(State::STOP, "Nothing more to do");
+                    transition(State::DO_GO_HOME, "Cleanup and finish match");
                 }
                 break;
             }

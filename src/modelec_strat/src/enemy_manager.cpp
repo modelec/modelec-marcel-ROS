@@ -1,6 +1,6 @@
 #include <modelec_strat/enemy_manager.hpp>
 #include <cmath>
-#include <modelec_strat/config.hpp>
+#include <modelec_utils/config.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 namespace Modelec

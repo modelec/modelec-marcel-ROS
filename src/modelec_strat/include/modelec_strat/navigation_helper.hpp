@@ -32,9 +32,10 @@ namespace Modelec {
 
         bool HasArrived() const;
 
-        void GoTo(const PosMsg::SharedPtr &goal);
+        void GoTo(const PosMsg::SharedPtr &goal, bool isClose = false);
+        void GoTo(int x, int y, double theta, bool isClose = false);
 
-        WaypointListMsg FindPath(const PosMsg::SharedPtr &goal);
+        WaypointListMsg FindPath(const PosMsg::SharedPtr &goal, bool isClose = false);
 
     protected:
         void OnWaypointReach(const WaypointReachMsg::SharedPtr msg);

@@ -18,7 +18,7 @@ find_library(WIRINGPI_LIB wiringPi)
 
 add_executable(lidar_controller src/lidar_controller.cpp)
 ament_target_dependencies(lidar_controller rclcpp std_msgs sensor_msgs modelec_interfaces)
-target_link_libraries(lidar_controller modelec_utils::modelec_utils)
+target_link_libraries(lidar_controller modelec_utils::utils)
 target_include_directories(lidar_controller PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -26,7 +26,7 @@ target_include_directories(lidar_controller PUBLIC
 
 add_executable(tirette_controller ../modelec_sensors/src/tirette_controller.cpp)
 ament_target_dependencies(tirette_controller rclcpp std_msgs modelec_interfaces)
-target_link_libraries(tirette_controller ${WIRINGPI_LIB} modelec_utils::modelec_utils)
+target_link_libraries(tirette_controller ${WIRINGPI_LIB} modelec_utils::utils)
 target_include_directories(tirette_controller PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>

@@ -16,6 +16,7 @@
         <size>
             <width_mm>300</width_mm>
             <length_mm>300</length_mm>
+            <margin_mm>0</margin_mm>
         </size>
     </robot>
 

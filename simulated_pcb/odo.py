@@ -4,13 +4,13 @@ import math
 import threading
 
 class SimulatedPCB:
-    def __init__(self, port='/dev/pts/6', baud=115200):
+    def __init__(self, port='/dev/pts/8', baud=115200):
         self.ser = serial.Serial(port, baud, timeout=1)
         self.running = True
         self.start = False
 
         self.x = 1225.0
-        self.y = 200.0
+        self.y = 300.0
         self.theta = math.pi / 2
         self.vx = 0.0
         self.vy = 0.0
@@ -27,6 +27,9 @@ class SimulatedPCB:
         self.thread = threading.Thread(target=self.run)
         self.thread.start()
 
+    def normalize_angle(self, angle):
+        return (angle + math.pi) % (2 * math.pi) - math.pi
+
     def update_position(self):
         now = time.time()
         dt = now - self.last_update
@@ -39,13 +42,13 @@ class SimulatedPCB:
                 dy = wp['y'] - self.y
                 distance = math.hypot(dx, dy)
                 angle = math.atan2(dy, dx)
+                angle_diff = self.normalize_angle(wp['theta'] - self.theta)
 
-                # Behavior differs by type
                 if wp['type'] == 1:
-                    # Final waypoint: stop only when 100% accurate
-                    if distance < 5.0:
+                    if distance < 5.0 and abs(angle_diff) < 0.05:
                         self.vx = 0.0
                         self.vy = 0.0
+                        self.vtheta = 0.0
                         self.ser.write(f'SET;WAYPOINT;{wp["id"]}\n'.encode('utf-8'))
                         self.current_wp_id = wp['id']
                         self.waypoint_order.pop(0)
@@ -54,11 +57,12 @@ class SimulatedPCB:
                         speed = min(200.0, distance * 1.5)
                         self.vx = speed * math.cos(angle)
                         self.vy = speed * math.sin(angle)
+                        self.vtheta = max(-1.0, min(1.0, angle_diff))
                 else:
-                    # Normal pass-through waypoint
                     speed = min(300.0, distance * 2)
                     self.vx = speed * math.cos(angle)
                     self.vy = speed * math.sin(angle)
+                    self.vtheta = 0.0
                     if distance < 100:
                         self.ser.write(f'SET;WAYPOINT;{wp["id"]}\n'.encode('utf-8'))
                         self.current_wp_id = wp['id']
@@ -67,14 +71,15 @@ class SimulatedPCB:
             else:
                 self.vx = 0.0
                 self.vy = 0.0
+                self.vtheta = 0.0
 
             self.x += self.vx * dt
             self.y += self.vy * dt
             self.theta += self.vtheta * dt
-            self.theta = (self.theta + math.pi) % (2 * math.pi) - math.pi
+            self.theta = self.normalize_angle(self.theta)
 
             if now - self.last_send > 0.1:
-                self.ser.write(f'SET;POS;{int(self.x)};{int(self.y)};{self.theta:.3f}\n'.encode())
+                self.ser.write(f'SET;POS;{int(self.x)};{int(self.y)};{self.theta:.5f}\n'.encode())
                 self.last_send = now
 
     def run(self):

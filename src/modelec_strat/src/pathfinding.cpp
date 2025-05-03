@@ -1,7 +1,6 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_strat/pathfinding.hpp>
-
-#include <modelec_strat/config.hpp>
+#include <modelec_utils/config.hpp>
 
 namespace Modelec {
 
@@ -35,6 +34,7 @@ namespace Modelec {
 
         robot_length_mm_ = Config::get<int>("config.robot.size.length_mm", 300);
         robot_width_mm_ = Config::get<int>("config.robot.size.width_mm", 300);
+        margin_mm_ = Config::get<int>("config.robot.size.margin_mm", 100);
 
         enemy_length_mm_ = Config::get<int>("config.enemy.size.length_mm", 300);
         enemy_width_mm_ = Config::get<int>("config.enemy.size.width_mm", 300);
@@ -50,23 +50,25 @@ namespace Modelec {
             RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacles from XML");
         }
 
-        map_pub_ = node_->create_publisher<modelec_interfaces::msg::Obstacle>(
-            "nav/obstacle", 40);
-
         obstacle_add_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>(
-            "nav/obstacle/add", 10,
+            "obstacle/add", 10,
             [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
                 RCLCPP_INFO(node_->get_logger(), "Obstacle add request received");
-                obstacle_map_[msg->id] = Obstacle(*msg);
-                map_pub_->publish(*msg);
+                AddObstacle(Obstacle(*msg));
             });
 
+        obstacle_add_pub_ = node_->create_publisher<modelec_interfaces::msg::Obstacle>(
+            "nav/obstacle/added", 40);
+
         obstacle_remove_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>(
-            "nav/obstacle/remove", 10,
+            "obstacle/remove", 10,
             [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
                 RCLCPP_INFO(node_->get_logger(), "Obstacle remove request received");
-                obstacle_map_.erase(msg->id);
+                RemoveObstacle(msg->id);
             });
+
+        obstacle_remove_pub_ = node_->create_publisher<modelec_interfaces::msg::Obstacle>(
+            "nav/obstacle/removed", 40);
 
         ask_obstacle_srv_ = node_->create_service<std_srvs::srv::Empty>(
             "nav/ask_map_obstacle",
@@ -136,7 +138,7 @@ namespace Modelec {
         }
     }*/
 
-    WaypointListMsg Pathfinding::FindPath(const PosMsg::SharedPtr& start, const PosMsg::SharedPtr& goal)
+    WaypointListMsg Pathfinding::FindPath(const PosMsg::SharedPtr& start, const PosMsg::SharedPtr& goal, bool isClose)
     {
         if (!start || !goal)
         {
@@ -150,8 +152,8 @@ namespace Modelec {
         const float cell_size_mm_y = map_height_mm_ / grid_height_;
 
         // Robot dimensions
-        const int inflate_x = std::ceil((robot_width_mm_ / 2.0f) / cell_size_mm_x);
-        const int inflate_y = std::ceil((robot_length_mm_ / 2.0f) / cell_size_mm_y);
+        const int inflate_x = isClose ? 0 : std::ceil((robot_width_mm_ + margin_mm_ / 2.0f) / cell_size_mm_x);
+        const int inflate_y = isClose ? 0 : std::ceil((robot_length_mm_ + margin_mm_ / 2.0f) / cell_size_mm_y);
 
         // 1. Build fresh empty grid
         grid_.clear();
@@ -204,21 +206,71 @@ namespace Modelec {
         // 2. Fill obstacles with inflation
         for (const auto& [id, obstacle] : obstacle_map_)
         {
-            int x_start = std::max(0, (int)(obstacle.x() / cell_size_mm_x) - inflate_x);
-            int y_start = std::max(0, (int)(obstacle.y() / cell_size_mm_y) - inflate_y);
-            int x_end = std::min(grid_width_ - 1, (int)((obstacle.x() + obstacle.width()) / cell_size_mm_x) + inflate_x);
-            int y_end = std::min(grid_height_ - 1, (int)((obstacle.y() + obstacle.height()) / cell_size_mm_y) + inflate_y);
+            float cx = obstacle.x();
+            float cy = obstacle.y();
+            float width = obstacle.width() + inflate_x * cell_size_mm_x;
+            float height = obstacle.height() + inflate_y * cell_size_mm_y;
+            float theta = M_PI_2 - obstacle.theta();
 
-            // Inverser l'axe Y
-            y_start = (grid_height_ - 1) - y_start;
-            y_end = (grid_height_ - 1) - y_end;
-            if (y_start > y_end) std::swap(y_start, y_end);
+            float dx = width / 2.0f;
+            float dy = height / 2.0f;
 
+            // Compute corners in local space and rotate+translate to world
+            std::vector<std::pair<float, float>> corners = {
+                {-dx, -dy}, {dx, -dy}, {dx, dy}, {-dx, dy}
+            };
+
+            for (auto& [x, y] : corners)
+            {
+                float rx = x * std::cos(theta) - y * std::sin(theta);
+                float ry = x * std::sin(theta) + y * std::cos(theta);
+                x = rx + cx;
+                y = ry + cy;
+            }
+
+            // Compute bounding box in grid space
+            float min_x = corners[0].first;
+            float max_x = corners[0].first;
+            float min_y = corners[0].second;
+            float max_y = corners[0].second;
+
+            for (const auto& [x, y] : corners)
+            {
+                min_x = std::min(min_x, x);
+                max_x = std::max(max_x, x);
+                min_y = std::min(min_y, y);
+                max_y = std::max(max_y, y);
+            }
+
+            int x_start = std::max(0, (int)(min_x / cell_size_mm_x));
+            int x_end   = std::min(grid_width_ - 1, (int)(max_x / cell_size_mm_x));
+            int y_start = std::max(0, (int)(min_y / cell_size_mm_y));
+            int y_end   = std::min(grid_height_ - 1, (int)(max_y / cell_size_mm_y));
+
+            // Mark cells that fall inside rotated rectangle
             for (int y = y_start; y <= y_end; ++y)
             {
                 for (int x = x_start; x <= x_end; ++x)
                 {
-                    grid_[y][x] = 1; // mark as obstacle
+                    // Convert cell center to world space
+                    float wx = (x + 0.5f) * cell_size_mm_x;
+                    float wy = (y + 0.5f) * cell_size_mm_y;
+
+                    // Inverse transform: world -> obstacle local space
+                    float dx_ = wx - cx;
+                    float dy_ = wy - cy;
+
+                    float lx = dx_ * std::cos(-theta) - dy_ * std::sin(-theta);
+                    float ly = dx_ * std::sin(-theta) + dy_ * std::cos(-theta);
+
+                    if (std::abs(lx) <= dx + 1 && std::abs(ly) <= dy + 1)
+                    {
+                        int gy = (grid_height_ - 1) - y;
+                        if (x >= 0 && gy >= 0 && x < grid_width_ && gy < grid_height_)
+                        {
+                            grid_[gy][x] = 1;
+                        }
+                    }
                 }
             }
         }
@@ -239,7 +291,14 @@ namespace Modelec {
 
         if (grid_[start_y][start_x] == 1 || grid_[goal_y][goal_x] == 1)
         {
-            RCLCPP_WARN(node_->get_logger(), "Start or Goal inside an obstacle");
+            if (grid_[start_y][start_x] == 1)
+            {
+                RCLCPP_WARN(node_->get_logger(), "Start inside an obstacle");
+            }
+            else
+            {
+                RCLCPP_WARN(node_->get_logger(), "Goal inside an obstacle");
+            }
             return waypoints;
         }
 
@@ -407,7 +466,7 @@ namespace Modelec {
             WaypointMsg wp;
             wp.x = x * cell_size_mm_x;
             wp.y = (grid_height_ - 1 - y) * cell_size_mm_y;
-            wp.theta = 0;
+            wp.theta = i == smooth_path.size() - 1 ? goal->theta : 0.0f; // last waypoint takes goal theta
             wp.id = id++;
             wp.is_end = false;
             waypoints.push_back(wp);
@@ -437,6 +496,27 @@ namespace Modelec {
         current_start_ = pos;
     }
 
+    Obstacle Pathfinding::GetObstacle(int id) const
+    {
+        return obstacle_map_.at(id);
+    }
+
+    void Pathfinding::RemoveObstacle(int id)
+    {
+        obstacle_map_.erase(id);
+
+        modelec_interfaces::msg::Obstacle msg;
+        msg.id = id;
+        obstacle_remove_pub_->publish(msg);
+    }
+
+    void Pathfinding::AddObstacle(const Obstacle& obstacle)
+    {
+        obstacle_map_[obstacle.id()] = obstacle;
+        modelec_interfaces::msg::Obstacle msg = obstacle.toMsg();
+        obstacle_add_pub_->publish(msg);
+    }
+
     void Pathfinding::HandleMapRequest(const std::shared_ptr<modelec_interfaces::srv::Map::Request>,
                                        const std::shared_ptr<modelec_interfaces::srv::Map::Response> response)
     {
@@ -464,7 +544,7 @@ namespace Modelec {
     {
         for (auto & [index, obs] : obstacle_map_)
         {
-            map_pub_->publish(obs.toMsg());
+            obstacle_add_pub_->publish(obs.toMsg());
         }
     }
 

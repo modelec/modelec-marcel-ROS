@@ -39,7 +39,7 @@ public:
     struct OdometryData {
         long x;
         long y;
-        long theta;
+        double theta;
     };
 
     struct PIDData

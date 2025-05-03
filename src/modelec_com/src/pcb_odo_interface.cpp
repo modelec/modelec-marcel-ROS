@@ -10,7 +10,7 @@ namespace Modelec
         auto request = std::make_shared<modelec_interfaces::srv::AddSerialListener::Request>();
         request->name = "pcb_odo";
         request->bauds = 115200;
-        request->serial_port = "/dev/pts/7"; // TODO : check the real serial port
+        request->serial_port = "/dev/pts/9"; // TODO : check the real serial port
         auto client = this->create_client<modelec_interfaces::srv::AddSerialListener>("add_serial_listener");
         while (!client->wait_for_service(std::chrono::seconds(1)))
         {
@@ -186,7 +186,7 @@ namespace Modelec
             {
                 long x = std::stol(tokens[2]);
                 long y = std::stol(tokens[3]);
-                long theta = std::stol(tokens[4]);
+                double theta = std::stod(tokens[4]);
 
                 auto message = modelec_interfaces::msg::OdometryPos();
                 message.x = x;
@@ -201,7 +201,7 @@ namespace Modelec
             {
                 long x = std::stol(tokens[2]);
                 long y = std::stol(tokens[3]);
-                long theta = std::stol(tokens[4]);
+                double theta = std::stod(tokens[4]);
 
                 auto message = modelec_interfaces::msg::OdometrySpeed();
                 message.x = x;

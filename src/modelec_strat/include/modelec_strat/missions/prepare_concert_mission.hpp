@@ -17,8 +17,10 @@ namespace Modelec {
     private:
         enum Step {
             GO_TO_COLUMN,
+            GO_CLOSE_TO_COLUMN,
             TAKE_COLUMN,
             GO_TO_PLATFORM,
+            GO_CLOSE_TO_PLATFORM,
             PLACE_PLATFORM,
             DONE
         } step_;
@@ -26,6 +28,8 @@ namespace Modelec {
         MissionStatus status_;
         std::shared_ptr<NavigationHelper> nav_;
         rclcpp::Node::SharedPtr node_;
+
+        Obstacle column_;
     };
 
 }

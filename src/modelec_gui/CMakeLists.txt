@@ -15,6 +15,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(ament_index_cpp REQUIRED)
+
 find_package(modelec_interfaces REQUIRED)
 find_package(modelec_utils REQUIRED)
 
@@ -45,13 +47,15 @@ ament_target_dependencies(modelec_gui
         std_msgs
         std_srvs
         modelec_interfaces
+        ament_index_cpp
 )
 target_link_libraries(modelec_gui
         Qt6::Core
         Qt6::Gui
         Qt6::Widgets
         Qt6::Svg
-        modelec_utils::modelec_utils
+        modelec_utils::utils
+        modelec_utils::config
 )
 
 target_include_directories(modelec_gui PUBLIC

@@ -159,15 +159,32 @@ namespace Modelec {
         return waypoints_.back().reached;
     }
 
-    void NavigationHelper::GoTo(const PosMsg::SharedPtr& goal)
+    void NavigationHelper::GoTo(const PosMsg::SharedPtr& goal, bool isClose)
     {
-        SendWaypoint(FindPath(goal));
-        //pathfinding_->SetStartAndGoal(current_pos_, goal);
+        waypoints_.clear();
+
+        auto wml = FindPath(goal, isClose);
+
+        for (auto & w : wml)
+        {
+            waypoints_.emplace_back(w);
+        }
+
+        SendWaypoint();
     }
 
-    WaypointListMsg NavigationHelper::FindPath(const PosMsg::SharedPtr& goal)
+    void NavigationHelper::GoTo(int x, int y, double theta, bool isClose)
     {
-        return pathfinding_->FindPath(current_pos_, goal);
+        PosMsg::SharedPtr goal = std::make_shared<PosMsg>();
+        goal->x = x;
+        goal->y = y;
+        goal->theta = theta;
+        GoTo(goal, isClose);
+    }
+
+    WaypointListMsg NavigationHelper::FindPath(const PosMsg::SharedPtr& goal, bool isClose)
+    {
+        return pathfinding_->FindPath(current_pos_, goal, isClose);
     }
 
     void NavigationHelper::OnWaypointReach(const WaypointReachMsg::SharedPtr msg)

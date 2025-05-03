@@ -2,8 +2,8 @@
 
 namespace Modelec
 {
-    Obstacle::Obstacle(int id, int x, int y, int w, int h, const std::string& type)
-        : id_(id), x_(x), y_(y), w_(w), h_(h), type_(type)
+    Obstacle::Obstacle(int id, int x, int y, double theta, int w, int h, const std::string& type)
+        : id_(id), x_(x), y_(y), w_(w), h_(h), theta_(theta), type_(type)
     {
     }
 
@@ -13,6 +13,7 @@ namespace Modelec
         if (obstacleElem->QueryIntAttribute("id", &id_) != tinyxml2::XML_SUCCESS ||
             obstacleElem->QueryIntAttribute("x", &x_) != tinyxml2::XML_SUCCESS ||
             obstacleElem->QueryIntAttribute("y", &y_) != tinyxml2::XML_SUCCESS ||
+            obstacleElem->QueryDoubleAttribute("theta", &theta_) != tinyxml2::XML_SUCCESS ||
             obstacleElem->QueryIntAttribute("width", &w_) != tinyxml2::XML_SUCCESS ||
             obstacleElem->QueryIntAttribute("height", &h_) != tinyxml2::XML_SUCCESS ||
             obstacleElem->QueryStringAttribute("type", &type) != tinyxml2::XML_SUCCESS)
@@ -24,7 +25,7 @@ namespace Modelec
     }
 
     Obstacle::Obstacle(const modelec_interfaces::msg::Obstacle& msg)
-        : id_(msg.id), x_(msg.x), y_(msg.y), w_(msg.width), h_(msg.height), type_("unknown")
+        : id_(msg.id), x_(msg.x), y_(msg.y), w_(msg.width), h_(msg.height), theta_(msg.theta), type_("unknown")
     {
     }
 
@@ -37,6 +38,7 @@ namespace Modelec
         msg.y = y_;
         msg.width = w_;
         msg.height = h_;
+        msg.theta = theta_;
 
         return msg;
     }

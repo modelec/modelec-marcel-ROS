@@ -45,13 +45,19 @@ namespace Modelec {
         rclcpp::Node::SharedPtr getNode() const;
 
         WaypointListMsg FindPath(const PosMsg::SharedPtr& start,
-                      const PosMsg::SharedPtr& goal);
+                                 const PosMsg::SharedPtr& goal, bool isClose = false);
 
         //void SetStartAndGoal(const PosMsg::SharedPtr& start, const PosMsg::SharedPtr& goal);
 
         bool LoadObstaclesFromXML(const std::string& filename);
 
         void SetCurrentPos(const PosMsg::SharedPtr& pos);
+
+        Obstacle GetObstacle(int id) const;
+
+        void RemoveObstacle(int id);
+
+        void AddObstacle(const Obstacle& obstacle);
 
     protected:
         void HandleMapRequest(
@@ -84,6 +90,7 @@ namespace Modelec {
         int enemy_width_mm_ = 0;
         int enemy_length_mm_ = 0;
         int enemy_margin_mm_ = 0;
+        int margin_mm_ = 0;
 
 
         std::map<int, Obstacle> obstacle_map_;
@@ -96,11 +103,13 @@ namespace Modelec {
         bool has_enemy_pos_ = false;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
-        rclcpp::Publisher<modelec_interfaces::msg::Obstacle>::SharedPtr map_pub_;
         rclcpp::Publisher<WaypointMsg>::SharedPtr waypoint_pub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::Obstacle>::SharedPtr obstacle_add_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::Obstacle>::SharedPtr obstacle_remove_sub_;
+
+        rclcpp::Publisher<modelec_interfaces::msg::Obstacle>::SharedPtr obstacle_add_pub_;
+        rclcpp::Publisher<modelec_interfaces::msg::Obstacle>::SharedPtr obstacle_remove_pub_;
 
         rclcpp::Service<modelec_interfaces::srv::Map>::SharedPtr map_srv_;
         rclcpp::Service<modelec_interfaces::srv::MapSize>::SharedPtr map_size_srv_;

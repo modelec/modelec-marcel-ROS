@@ -1,4 +1,4 @@
-#include <modelec_strat/obstacle.hpp>
+#include <modelec_strat/obstacle/obstacle.hpp>
 
 namespace Modelec
 {

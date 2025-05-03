@@ -1,4 +1,5 @@
 #include <modelec_strat/missions/prepare_concert_mission.hpp>
+#include <modelec_strat/obstacle/column.hpp>
 
 namespace Modelec
 {
@@ -9,11 +10,20 @@ namespace Modelec
 
     void PrepareConcertMission::start(rclcpp::Node::SharedPtr node)
     {
-        column_ = nav_->getPathfinding()->GetObstacle(14);
+        if (auto col = nav_->getPathfinding()->GetClosestColumn(nav_->GetCurrentPos()))
+        {
+            column_ = col;
+        } else
+        {
+            status_ = MissionStatus::FAILED;
+            return;
+        }
 
         node_ = node;
 
-        nav_->GoTo(775, 480, -M_PI_2);
+        auto pos = column_->position().GetTakeBasePosition();
+
+        nav_->GoTo(pos.x, pos.y, pos.theta);
 
         status_ = MissionStatus::RUNNING;
     }
@@ -27,26 +37,40 @@ namespace Modelec
         switch (step_)
         {
         case GO_TO_COLUMN:
-            nav_->GoTo(775, 460, -M_PI_2, true);
+            {
+                auto pos = column_->position().GetTakeClosePosition();
+                nav_->GoTo(pos.x, pos.y, pos.theta, true);
+            }
 
             step_ = GO_CLOSE_TO_COLUMN;
             break;
         case GO_CLOSE_TO_COLUMN:
-            nav_->getPathfinding()->RemoveObstacle(column_.id());
+            nav_->getPathfinding()->RemoveObstacle(column_->id());
 
             step_ = TAKE_COLUMN;
             break;
         case TAKE_COLUMN:
             {
-                nav_->GoTo(2500, 875, 0);
+                auto pos = column_->position().GetTakeBasePosition();
+                nav_->GoTo(pos.x, pos.y, pos.theta, true);
+            }
+
+            step_ = GO_BACK;
+            break;
+        case GO_BACK:
+            {
+                closestDepoZone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), 0);
+                closestDepoZonePoint_ = closestDepoZone_->GetNextPotPos();
+                auto p = closestDepoZonePoint_.GetTakeBasePosition();
+                nav_->GoTo(p.x, p.y, p.theta);
             }
 
             step_ = GO_TO_PLATFORM;
             break;
-
         case GO_TO_PLATFORM:
             {
-                nav_->GoTo(2700, 875, 0, true);
+                auto p = closestDepoZonePoint_.GetTakeClosePosition();
+                nav_->GoTo(p.x, p.y, p.theta, true);
             }
 
             step_ = GO_CLOSE_TO_PLATFORM;
@@ -54,9 +78,10 @@ namespace Modelec
 
         case GO_CLOSE_TO_PLATFORM:
             {
-                column_.setX(2925);
-                column_.setY(875);
-                column_.setTheta(0);
+                column_->setX(closestDepoZonePoint_.x);
+                column_->setY(closestDepoZonePoint_.y);
+                column_->setTheta(closestDepoZonePoint_.theta);
+                column_->SetAtObjective(true);
                 nav_->getPathfinding()->AddObstacle(column_);
             }
 
@@ -64,6 +89,15 @@ namespace Modelec
             break;
 
         case PLACE_PLATFORM:
+            {
+                auto p = closestDepoZonePoint_.GetTakeBasePosition();
+                nav_->GoTo(p.x, p.y, p.theta, true);
+            }
+
+            step_ = GO_BACK_2;
+            break;
+
+        case GO_BACK_2:
             step_ = DONE;
             status_ = MissionStatus::DONE;
             break;

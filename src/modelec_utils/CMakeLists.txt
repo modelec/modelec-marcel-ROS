@@ -25,6 +25,7 @@ target_link_libraries(config PUBLIC tinyxml2::tinyxml2)
 # === modelec::utils ===
 add_library(utils
         src/utils.cpp
+        src/point.cpp
 )
 
 target_include_directories(utils PUBLIC

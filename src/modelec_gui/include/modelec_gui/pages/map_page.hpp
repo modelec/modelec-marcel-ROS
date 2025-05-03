@@ -18,8 +18,10 @@
 #include <modelec_interfaces/srv/map_size.hpp>
 #include <modelec_interfaces/msg/obstacle.hpp>
 #include <modelec_interfaces/msg/odometry_waypoint_reach.hpp>
+#include <modelec_interfaces/msg/strat_state.hpp>
 
 #include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/int64.hpp>
 
 namespace ModelecGUI {
     class MapPage : public QWidget
@@ -61,6 +63,9 @@ namespace ModelecGUI {
 
         QPushButton* tirette_button_;
 
+        QLabel* timer_label_;
+        QLabel* score_label_;
+
         modelec_interfaces::msg::OdometryPos robotPos;
         std::vector<QPoint> qpoints;
         //std::vector<modelec_interfaces::msg::OdometryAddWaypoint> points;
@@ -97,5 +102,11 @@ namespace ModelecGUI {
 
         modelec_interfaces::msg::OdometryPos enemy_pos_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_pub_;
+        rclcpp::Subscription<std_msgs::msg::Int64>::SharedPtr strat_start_sub_;
+
+        bool isGameStarted_ = false;
+        long int start_time_ = 0;
+
+        rclcpp::Subscription<modelec_interfaces::msg::StratState>::SharedPtr strat_state_sub_;
     };
 }

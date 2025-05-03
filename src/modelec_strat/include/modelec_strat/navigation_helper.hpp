@@ -5,6 +5,7 @@
 #include <modelec_interfaces/msg/odometry_waypoint_reach.hpp>
 #include <modelec_interfaces/msg/odometry_pos.hpp>
 
+#include "deposite_zone.hpp"
 #include "pathfinding.hpp"
 
 namespace Modelec {
@@ -37,6 +38,12 @@ namespace Modelec {
 
         WaypointListMsg FindPath(const PosMsg::SharedPtr &goal, bool isClose = false);
 
+        PosMsg::SharedPtr GetCurrentPos() const;
+
+        bool LoadDepositeZoneFromXML(const std::string &filename);
+
+        std::shared_ptr<DepositeZone> GetClosestDepositeZone(const PosMsg::SharedPtr &pos, int teamId);
+
     protected:
         void OnWaypointReach(const WaypointReachMsg::SharedPtr msg);
 
@@ -50,6 +57,8 @@ namespace Modelec {
         std::list<Waypoint> waypoints_;
 
         PosMsg::SharedPtr current_pos_;
+
+        std::map<int, std::shared_ptr<DepositeZone>> deposite_zones_;
 
         rclcpp::Subscription<WaypointReachMsg>::SharedPtr waypoint_reach_sub_;
         rclcpp::Publisher<WaypointMsg>::SharedPtr waypoint_pub_;

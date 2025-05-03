@@ -17,9 +17,20 @@ namespace ModelecGUI
 
         tirette_button_ = new QPushButton("Tirette", this);
 
+        timer_label_ = new QLabel("00", this);
+        timer_label_->setAlignment(Qt::AlignCenter);
+        timer_label_->setFont(QFont("Arial", 24));
+        timer_label_->setStyleSheet("QLabel { color: white; }");
+        score_label_ = new QLabel("Score: 0", this);
+        score_label_->setAlignment(Qt::AlignCenter);
+        score_label_->setFont(QFont("Arial", 24));
+        score_label_->setStyleSheet("QLabel { color: white; }");
+
         h_layout = new QHBoxLayout(this);
         h_layout->addStretch();
+        h_layout->addWidget(score_label_);
         h_layout->addWidget(tirette_button_);
+        h_layout->addWidget(timer_label_);
         h_layout->addStretch();
 
         v_layout->addLayout(h_layout);
@@ -38,6 +49,8 @@ namespace ModelecGUI
 
         enemy_length_ = Modelec::Config::get<int>("config.enemy.size.length_mm", 300);
         enemy_width_ = Modelec::Config::get<int>("config.enemy.size.width_mm", 300);
+
+
 
         add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryAddWaypoint>("odometry/add_waypoint", 100,
             [this](const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg) {
@@ -75,13 +88,26 @@ namespace ModelecGUI
                 obstacle_.erase(msg->id);
         });
 
-
-
         go_to_pub_ = node_->create_publisher<modelec_interfaces::msg::OdometryPos>("nav/go_to", 10);
 
         enemy_pos_pub_ = node_->create_publisher<modelec_interfaces::msg::OdometryPos>("enemy/position", 10);
 
         tirette_pub_ = node_->create_publisher<std_msgs::msg::Bool>("tirette", 10);
+
+        strat_start_sub_ = node_->create_subscription<std_msgs::msg::Int64>("/strat/start_time", 10,
+            [this](const std_msgs::msg::Int64::SharedPtr msg){
+                isGameStarted_ = true;
+                start_time_ = msg->data;
+        });
+
+        strat_state_sub_ = node_->create_subscription<modelec_interfaces::msg::StratState>("/strat/state", 10,
+            [this](const modelec_interfaces::msg::StratState::SharedPtr msg){
+                if (msg->state == modelec_interfaces::msg::StratState::STOP)
+                {
+                    RCLCPP_INFO(node_->get_logger(), "Game stop");
+                    isGameStarted_ = false;
+                }
+        });
 
         connect(tirette_button_, &QPushButton::clicked, this, [this]() {
             std_msgs::msg::Bool msg;
@@ -144,6 +170,15 @@ namespace ModelecGUI
     void MapPage::paintEvent(QPaintEvent* paint_event)
     {
         QWidget::paintEvent(paint_event);
+
+        if (isGameStarted_)
+        {
+            auto now = std::chrono::system_clock::now().time_since_epoch();
+            auto start = std::chrono::nanoseconds(start_time_);
+            auto elapsed = now - start;
+            auto elapsed_s = std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
+            timer_label_->setText(QString::number(elapsed_s));
+        }
 
         QPainter painter(this);
         renderer->render(&painter, rect()); // Scales SVG to widget size

@@ -1,5 +1,6 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_strat/pathfinding.hpp>
+#include <modelec_strat/obstacle/column.hpp>
 #include <modelec_utils/config.hpp>
 
 namespace Modelec {
@@ -54,7 +55,7 @@ namespace Modelec {
             "obstacle/add", 10,
             [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
                 RCLCPP_INFO(node_->get_logger(), "Obstacle add request received");
-                AddObstacle(Obstacle(*msg));
+                AddObstacle(std::make_shared<Obstacle>(*msg));
             });
 
         obstacle_add_pub_ = node_->create_publisher<modelec_interfaces::msg::Obstacle>(
@@ -152,8 +153,8 @@ namespace Modelec {
         const float cell_size_mm_y = map_height_mm_ / grid_height_;
 
         // Robot dimensions
-        const int inflate_x = isClose ? 0 : std::ceil((robot_width_mm_ + margin_mm_ / 2.0f) / cell_size_mm_x);
-        const int inflate_y = isClose ? 0 : std::ceil((robot_length_mm_ + margin_mm_ / 2.0f) / cell_size_mm_y);
+        const int inflate_x = isClose ? 0 : std::ceil(((robot_width_mm_ + margin_mm_) / 2.0f) / cell_size_mm_x);
+        const int inflate_y = isClose ? 0 : std::ceil(((robot_length_mm_ + margin_mm_) / 2.0f) / cell_size_mm_y);
 
         // 1. Build fresh empty grid
         grid_.clear();
@@ -206,11 +207,11 @@ namespace Modelec {
         // 2. Fill obstacles with inflation
         for (const auto& [id, obstacle] : obstacle_map_)
         {
-            float cx = obstacle.x();
-            float cy = obstacle.y();
-            float width = obstacle.width() + inflate_x * cell_size_mm_x;
-            float height = obstacle.height() + inflate_y * cell_size_mm_y;
-            float theta = M_PI_2 - obstacle.theta();
+            float cx = obstacle->x();
+            float cy = obstacle->y();
+            float width = obstacle->width() + inflate_x * cell_size_mm_x;
+            float height = obstacle->height() + inflate_y * cell_size_mm_y;
+            float theta = M_PI_2 - obstacle->theta();
 
             float dx = width / 2.0f;
             float dy = height / 2.0f;
@@ -496,7 +497,7 @@ namespace Modelec {
         current_start_ = pos;
     }
 
-    Obstacle Pathfinding::GetObstacle(int id) const
+    std::shared_ptr<Obstacle> Pathfinding::GetObstacle(int id) const
     {
         return obstacle_map_.at(id);
     }
@@ -510,11 +511,33 @@ namespace Modelec {
         obstacle_remove_pub_->publish(msg);
     }
 
-    void Pathfinding::AddObstacle(const Obstacle& obstacle)
+    void Pathfinding::AddObstacle(const std::shared_ptr<Obstacle>& obstacle)
     {
-        obstacle_map_[obstacle.id()] = obstacle;
-        modelec_interfaces::msg::Obstacle msg = obstacle.toMsg();
+        obstacle_map_[obstacle->id()] = obstacle;
+        modelec_interfaces::msg::Obstacle msg = obstacle->toMsg();
         obstacle_add_pub_->publish(msg);
+    }
+
+    std::shared_ptr<ColumnObstacle> Pathfinding::GetClosestColumn(const PosMsg::SharedPtr& pos)
+    {
+        std::shared_ptr<ColumnObstacle> closest_obstacle = nullptr;
+        auto robotPos = Point(pos->x, pos->y, pos->theta);
+        float distance = std::numeric_limits<float>::max();
+
+        for (const auto& obstacle : obstacle_map_) {
+            if (auto obs = std::dynamic_pointer_cast<ColumnObstacle>(obstacle.second)) {
+                if (!obs->IsAtObjective())
+                {
+                    auto dist = Point::distance(robotPos, obs->position());
+                    if (dist < distance) {
+                        distance = dist;
+                        closest_obstacle = obs;
+                    }
+                }
+            }
+        }
+
+        return closest_obstacle;
     }
 
     void Pathfinding::HandleMapRequest(const std::shared_ptr<modelec_interfaces::srv::Map::Request>,
@@ -544,7 +567,7 @@ namespace Modelec {
     {
         for (auto & [index, obs] : obstacle_map_)
         {
-            obstacle_add_pub_->publish(obs.toMsg());
+            obstacle_add_pub_->publish(obs->toMsg());
         }
     }
 
@@ -582,8 +605,16 @@ namespace Modelec {
              obstacleElem != nullptr;
              obstacleElem = obstacleElem->NextSiblingElement("Obstacle"))
         {
-            Obstacle obs(obstacleElem);
-            obstacle_map_[obs.id()] = obs;
+            std::shared_ptr<Obstacle> obs = std::make_shared<Obstacle>(obstacleElem);
+            obstacle_map_[obs->id()] = obs;
+        }
+
+        for (tinyxml2::XMLElement* obstacleElem = root->FirstChildElement("Gradin");
+             obstacleElem != nullptr;
+             obstacleElem = obstacleElem->NextSiblingElement("Gradin"))
+        {
+            std::shared_ptr<ColumnObstacle> obs = std::make_shared<ColumnObstacle>(obstacleElem);
+            obstacle_map_[obs->id()] = obs;
         }
 
         RCLCPP_INFO(node_->get_logger(), "Loaded %zu obstacles from XML", obstacle_map_.size());

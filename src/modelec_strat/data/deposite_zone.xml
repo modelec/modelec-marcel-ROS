@@ -1,0 +1,63 @@
+<Map>
+    <!-- YELLOW ZONE -->
+    <DepositeZone id="0" team="0" max_pot="1">
+        <Pos x="775" y="75" theta="1.5708" />
+        <PotPos>
+            <Pos x="775" y="75" theta="1.5708" />
+        </PotPos>
+    </DepositeZone>
+
+    <DepositeZone id="1" team="0" max_pot="2">
+        <Pos x="1225" y="225" theta="1.5708" />
+        <PotPos>
+            <Pos x="1225" y="100" theta="1.5708" />
+            <Pos x="1225" y="250" theta="1.5708" />
+        </PotPos>
+    </DepositeZone>
+
+    <DepositeZone id="2" team="0" max_pot="1">
+        <Pos x="2775" y="75" theta="1.5708" />
+        <PotPos>
+            <Pos x="2775" y="75" theta="1.5708" />
+        </PotPos>
+    </DepositeZone>
+
+    <DepositeZone id="3" team="0" max_pot="2">
+        <Pos x="2775" y="875" theta="3.1415" />
+        <PotPos>
+            <Pos x="2875" y="875" theta="3.1415" />
+            <Pos x="2700" y="875" theta="3.1415" />
+        </PotPos>
+    </DepositeZone>
+
+    <!-- BLUE ZONE -->
+    <DepositeZone id="10" team="1" max_pot="1">
+        <Pos x="2225" y="75" theta="1.5708" />
+        <PotPos>
+            <Pos x="2225" y="75" theta="1.5708" />
+        </PotPos>
+    </DepositeZone>
+
+    <DepositeZone id="11" team="1" max_pot="2">
+        <Pos x="1775" y="225" theta="1.5708" />
+        <PotPos>
+            <Pos x="1775" y="100" theta="1.5708" />
+            <Pos x="1775" y="250" theta="1.5708" />
+        </PotPos>
+    </DepositeZone>
+
+    <DepositeZone id="12" team="1" max_pot="1">
+        <Pos x="225" y="75" theta="1.5708" />
+        <PotPos>
+            <Pos x="225" y="75" theta="1.5708" />
+        </PotPos>
+    </DepositeZone>
+
+    <DepositeZone id="13" team="1" max_pot="2">
+        <Pos x="225" y="875" theta="0" />
+        <PotPos>
+            <Pos x="125" y="875" theta="0" />
+            <Pos x="300" y="875" theta="0" />
+        </PotPos>
+    </DepositeZone>
+</Map>

@@ -15,7 +15,7 @@ find_package(ament_index_cpp REQUIRED)
 find_package(modelec_interfaces REQUIRED)
 find_package(modelec_utils REQUIRED)
 
-add_executable(strat_fsm src/strat_fms.cpp src/navigation_helper.cpp src/pathfinding.cpp src/action_executor.cpp src/mission_manager.cpp src/missions/prepare_concert_mission.cpp src/missions/promotion_mission.cpp src/missions/go_home_mission.cpp src/obstacle.cpp)
+add_executable(strat_fsm src/strat_fms.cpp src/navigation_helper.cpp src/pathfinding.cpp src/action_executor.cpp src/mission_manager.cpp src/missions/prepare_concert_mission.cpp src/missions/promotion_mission.cpp src/missions/go_home_mission.cpp src/obstacle/obstacle.cpp src/obstacle/column.cpp src/deposite_zone.cpp)
 ament_target_dependencies(strat_fsm rclcpp std_msgs std_srvs modelec_interfaces ament_index_cpp)
 target_link_libraries(strat_fsm modelec_utils::utils modelec_utils::config)
 target_include_directories(strat_fsm PUBLIC

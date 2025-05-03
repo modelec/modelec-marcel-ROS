@@ -14,7 +14,9 @@
 #include <modelec_interfaces/srv/map_size.hpp>
 #include <modelec_interfaces/msg/obstacle.hpp>
 
-#include "obstacle.hpp"
+#include <modelec_strat/obstacle/obstacle.hpp>
+
+#include "obstacle/column.hpp"
 
 
 namespace Modelec {
@@ -53,11 +55,17 @@ namespace Modelec {
 
         void SetCurrentPos(const PosMsg::SharedPtr& pos);
 
-        Obstacle GetObstacle(int id) const;
+        std::shared_ptr<Obstacle> GetObstacle(int id) const;
 
         void RemoveObstacle(int id);
 
-        void AddObstacle(const Obstacle& obstacle);
+        void AddObstacle(const std::shared_ptr<Obstacle>& obstacle);
+
+        template <typename T,
+          typename = std::enable_if_t<std::is_base_of<Obstacle, T>::value>>
+        std::shared_ptr<T> GetClosestObstacle(const PosMsg::SharedPtr& pos) const;
+
+        std::shared_ptr<ColumnObstacle> GetClosestColumn(const PosMsg::SharedPtr& pos);
 
     protected:
         void HandleMapRequest(
@@ -93,7 +101,7 @@ namespace Modelec {
         int margin_mm_ = 0;
 
 
-        std::map<int, Obstacle> obstacle_map_;
+        std::map<int, std::shared_ptr<Obstacle>> obstacle_map_;
 
         PosMsg::SharedPtr current_start_;
         PosMsg::SharedPtr current_goal_;
@@ -116,4 +124,23 @@ namespace Modelec {
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr ask_obstacle_srv_;
     };
 
+    template <typename T, typename>
+    std::shared_ptr<T> Pathfinding::GetClosestObstacle(const PosMsg::SharedPtr& pos) const
+    {
+        std::shared_ptr<T> closest_obstacle = nullptr;
+        auto robotPos = Point(pos->x, pos->y, pos->theta);
+        float distance = std::numeric_limits<float>::max();
+
+        for (const auto& obstacle : obstacle_map_) {
+            if (auto obs = std::dynamic_pointer_cast<T>(obstacle.second)) {
+                auto dist = Point::distance(robotPos, obs->position());
+                if (dist < distance) {
+                    distance = dist;
+                    closest_obstacle = obs;
+                }
+            }
+        }
+
+        return closest_obstacle;
+    }
 }

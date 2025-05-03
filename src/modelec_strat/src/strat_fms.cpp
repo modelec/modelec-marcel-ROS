@@ -18,6 +18,8 @@ namespace Modelec
 
         state_pub_ = create_publisher<modelec_interfaces::msg::StratState>("/strat/state", 10);
 
+        start_time_pub_ = create_publisher<std_msgs::msg::Int64>("/strat/start_time", 10);
+
         std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
         if (!Config::load(config_path))
         {
@@ -66,6 +68,13 @@ namespace Modelec
             if (started_)
             {
                 match_start_time_ = now;
+
+                std_msgs::msg::Int64 msg;
+                msg.data = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    std::chrono::system_clock::now().time_since_epoch())
+                               .count();
+                start_time_pub_->publish(msg);
+
                 transition(State::SELECT_MISSION, "Match started");
             }
             break;
@@ -78,7 +87,7 @@ namespace Modelec
                 {
                     transition(State::DO_PROMOTION, "Start promotion");
                 }
-                else if (elapsed.seconds() < 20)
+                else if (elapsed.seconds() < 80)
                 {
                     transition(State::DO_PREPARE_CONCERT, "Proceed to concert");
                 }

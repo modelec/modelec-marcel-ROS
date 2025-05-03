@@ -1,5 +1,6 @@
 #include <modelec_strat/navigation_helper.hpp>
 #include <utility>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 namespace Modelec {
     NavigationHelper::NavigationHelper()
@@ -28,6 +29,12 @@ namespace Modelec {
             "nav/go_to", 10, [this](const PosMsg::SharedPtr msg) {
                 GoTo(msg);
             });
+
+        std::string deposite_zone_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/deposite_zone.xml";
+        if (!LoadDepositeZoneFromXML(deposite_zone_path))
+        {
+            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacles from XML");
+        }
     }
 
     rclcpp::Node::SharedPtr NavigationHelper::getNode() const
@@ -185,6 +192,60 @@ namespace Modelec {
     WaypointListMsg NavigationHelper::FindPath(const PosMsg::SharedPtr& goal, bool isClose)
     {
         return pathfinding_->FindPath(current_pos_, goal, isClose);
+    }
+
+    PosMsg::SharedPtr NavigationHelper::GetCurrentPos() const
+    {
+        return current_pos_;
+    }
+
+    bool NavigationHelper::LoadDepositeZoneFromXML(const std::string& filename)
+    {
+        tinyxml2::XMLDocument doc;
+        if (doc.LoadFile(filename.c_str()) != tinyxml2::XML_SUCCESS)
+        {
+            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacle XML file: %s", filename.c_str());
+            return false;
+        }
+
+        tinyxml2::XMLElement* root = doc.FirstChildElement("Map");
+        if (!root)
+        {
+            RCLCPP_ERROR(node_->get_logger(), "No <Obstacles> root element in file");
+            return false;
+        }
+
+        for (tinyxml2::XMLElement* elem = root->FirstChildElement("DepositeZone");
+             elem != nullptr;
+             elem = elem->NextSiblingElement("DepositeZone"))
+        {
+            std::shared_ptr<DepositeZone> obs = std::make_shared<DepositeZone>(elem);
+            deposite_zones_[obs->GetId()] = obs;
+        }
+
+        RCLCPP_INFO(node_->get_logger(), "Loaded %zu obstacles from XML", deposite_zones_.size());
+        return true;
+    }
+
+    std::shared_ptr<DepositeZone> NavigationHelper::GetClosestDepositeZone(const PosMsg::SharedPtr& pos, int teamId)
+    {
+        std::shared_ptr<DepositeZone> closest_zone = nullptr;
+        double min_distance = std::numeric_limits<double>::max();
+        auto posPoint = Point(pos->x, pos->y, pos->theta);
+        for (const auto& zone : deposite_zones_)
+        {
+            if (zone.second->GetTeam() == teamId)
+            {
+                double distance = Point::distance(posPoint, zone.second->GetPosition());
+                if (distance < min_distance)
+                {
+                    min_distance = distance;
+                    closest_zone = zone.second;
+                }
+            }
+        }
+
+        return closest_zone;
     }
 
     void NavigationHelper::OnWaypointReach(const WaypointReachMsg::SharedPtr msg)

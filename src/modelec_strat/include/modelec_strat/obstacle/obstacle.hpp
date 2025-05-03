@@ -6,6 +6,8 @@
 
 #include <tinyxml2.h>
 
+#include <modelec_utils/point.hpp>
+
 namespace Modelec {
     class Obstacle {
     public:
@@ -15,7 +17,9 @@ namespace Modelec {
         Obstacle(const modelec_interfaces::msg::Obstacle& msg);
         Obstacle(const Obstacle& other) = default;
 
-        modelec_interfaces::msg::Obstacle toMsg() const;
+        virtual ~Obstacle() = default;
+
+        virtual modelec_interfaces::msg::Obstacle toMsg() const;
 
         int id() const { return id_; }
         int x() const { return x_; }
@@ -24,6 +28,7 @@ namespace Modelec {
         int width() const { return w_; }
         int height() const { return h_; }
         const std::string& type() const { return type_; }
+        Point position() const { return Point(x_, y_, theta_); }
 
         void setId(int id) { id_ = id; }
         void setX(int x) { x_ = x; }
@@ -39,11 +44,17 @@ namespace Modelec {
             theta_ = theta;
         }
 
+        void setPosition(const Point& p) {
+            x_ = p.x;
+            y_ = p.y;
+            theta_ = p.theta;
+        }
+
         void setSize(int w, int h) {
             w_ = w;
             h_ = h;
         }
-    private:
+    protected:
         int id_, x_, y_, w_, h_;
         double theta_;
         std::string type_;

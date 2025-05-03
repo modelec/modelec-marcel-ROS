@@ -11,6 +11,7 @@
 #include "missions/go_home_mission.hpp"
 
 #include "std_msgs/msg/bool.hpp"
+#include <std_msgs/msg/int64.hpp>
 
 #include "modelec_interfaces/msg/strat_state.hpp"
 
@@ -62,5 +63,6 @@ namespace Modelec
 
         rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr tirette_sub_;
         rclcpp::Publisher<modelec_interfaces::msg::StratState>::SharedPtr state_pub_;
+        rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr start_time_pub_;
     };
 }

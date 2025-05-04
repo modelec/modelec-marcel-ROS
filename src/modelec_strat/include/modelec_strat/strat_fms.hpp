@@ -56,6 +56,7 @@ namespace Modelec
         rclcpp::Time match_start_time_;
         bool started_ = false;
         std::unique_ptr<Mission> current_mission_;
+        int team_id_ = 0;
 
         std::shared_ptr<NavigationHelper> nav_;
         std::unique_ptr<MissionManager> mission_manager_;

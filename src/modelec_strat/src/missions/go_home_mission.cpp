@@ -2,7 +2,7 @@
 
 namespace Modelec
 {
-    GoHomeMission::GoHomeMission(const std::shared_ptr<NavigationHelper>& nav) : status_(MissionStatus::READY), nav_(nav)
+    GoHomeMission::GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const rclcpp::Time& start_time) : step_(GO_HOME), status_(MissionStatus::READY), nav_(nav), start_time_(start_time)
     {
     }
 
@@ -10,17 +10,42 @@ namespace Modelec
     {
         node_ = node;
 
-        nav_->GoTo(400, 1600.0, -M_PI_2);
+        auto pos = nav_->GetHomePosition();
+        home_point_ = Point(pos->x, pos->y, pos->theta);
+        nav_->GoTo(home_point_.GetTakeBasePosition());
 
         status_ = MissionStatus::RUNNING;
     }
 
     void GoHomeMission::update()
     {
-        if (nav_->HasArrived())
+        if (!nav_->HasArrived()) return;
+
+        switch (step_)
         {
-            status_ = MissionStatus::DONE;
+            case GO_HOME:
+                if ((node_->now() - start_time_).seconds() < 94)
+                {
+                    break;
+                }
+
+                nav_->GoTo(home_point_.GetTakePosition(0), true);
+
+                step_ = GO_CLOSE;
+                break;
+
+            case GO_CLOSE:
+                step_ = DONE;
+                status_ = MissionStatus::DONE;
+
+                break;
+            default:
+                break;
         }
+    }
+
+    void GoHomeMission::clear()
+    {
     }
 
     MissionStatus GoHomeMission::getStatus() const

@@ -1,8 +1,7 @@
 #pragma once
 
+#include <modelec_strat/missions/mission_base.hpp>
 #include <modelec_strat/navigation_helper.hpp>
-
-#include "mission_base.hpp"
 
 namespace Modelec
 {
@@ -17,6 +16,7 @@ namespace Modelec
 
         void start(rclcpp::Node::SharedPtr node) override;
         void update() override;
+        void clear() override;
         MissionStatus getStatus() const override;
         std::string name() const override { return "Promotion"; }
 

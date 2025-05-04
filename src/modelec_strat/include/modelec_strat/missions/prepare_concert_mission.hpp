@@ -12,6 +12,7 @@ namespace Modelec {
 
         void start(rclcpp::Node::SharedPtr node) override;
         void update() override;
+        void clear() override;
         MissionStatus getStatus() const override;
         std::string name() const override { return "PrepareConcert"; }
 

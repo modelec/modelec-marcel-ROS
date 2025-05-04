@@ -45,6 +45,10 @@ namespace Modelec
         }
     }
 
+    void PromotionMission::clear()
+    {
+    }
+
     MissionStatus PromotionMission::getStatus() const
     {
         return status_;

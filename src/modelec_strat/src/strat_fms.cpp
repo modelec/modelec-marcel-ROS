@@ -111,8 +111,14 @@ namespace Modelec
             }
             else if (current_mission_->getStatus() == MissionStatus::FAILED)
             {
+                current_mission_->clear();
                 current_mission_.reset();
                 transition(State::SELECT_MISSION, "PrepareConcert failed");
+            }
+            else if (current_mission_->getStatus() == MissionStatus::FINISH_ALL)
+            {
+                current_mission_.reset();
+                transition(State::DO_GO_HOME, "Finish all finished");
             }
             break;
 
@@ -138,7 +144,7 @@ namespace Modelec
         case State::DO_GO_HOME:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<GoHomeMission>(nav_);
+                current_mission_ = std::make_unique<GoHomeMission>(nav_, match_start_time_);
                 current_mission_->start(shared_from_this());
             }
             current_mission_->update();

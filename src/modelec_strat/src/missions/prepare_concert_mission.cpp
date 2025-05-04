@@ -10,12 +10,19 @@ namespace Modelec
 
     void PrepareConcertMission::start(rclcpp::Node::SharedPtr node)
     {
+
+        if (!nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), nav_->GetTeamId()))
+        {
+            status_ = MissionStatus::FINISH_ALL;
+            return;
+        }
+
         if (auto col = nav_->GetPathfinding()->GetClosestColumn(nav_->GetCurrentPos()))
         {
             column_ = col;
         } else
         {
-            status_ = MissionStatus::FAILED;
+            status_ = MissionStatus::FINISH_ALL;
             return;
         }
 
@@ -24,6 +31,12 @@ namespace Modelec
         auto pos = column_->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
 
         auto res = nav_->GoTo(pos.x, pos.y, pos.theta, false, Pathfinding::FREE | Pathfinding::WALL);
+        if (res != Pathfinding::FREE)
+        {
+            RCLCPP_WARN(node_->get_logger(), "Can't go to column %d", column_->id());
+            status_ = MissionStatus::FAILED;
+            return;
+        }
 
         status_ = MissionStatus::RUNNING;
     }
@@ -52,7 +65,7 @@ namespace Modelec
         case TAKE_COLUMN:
             {
                 // TODO
-                closestDepoZone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), 0);
+                closestDepoZone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), nav_->GetTeamId());
                 if (!closestDepoZone_)
                 {
                     status_ = MissionStatus::FAILED;
@@ -79,7 +92,7 @@ namespace Modelec
             break;
         case GO_BACK:
             {
-                closestDepoZone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), 0);
+                closestDepoZone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), nav_->GetTeamId());
                 if (!closestDepoZone_)
                 {
                     status_ = MissionStatus::FAILED;
@@ -141,6 +154,11 @@ namespace Modelec
         default:
             break;
         }
+    }
+
+    void PrepareConcertMission::clear()
+    {
+        // TODO : if is doing construction, stop everything and release everything
     }
 
     MissionStatus PrepareConcertMission::getStatus() const

@@ -161,8 +161,19 @@ namespace Modelec
         const float cell_size_mm_y = map_height_mm_ / grid_height_;
 
         // Robot dimensions
-        const int inflate_x = isClose ? 0 : std::ceil(((robot_width_mm_ + margin_mm_) / 2.0f) / cell_size_mm_x);
-        const int inflate_y = isClose ? 0 : std::ceil(((robot_length_mm_ + margin_mm_) / 2.0f) / cell_size_mm_y);
+        int inflate_x;
+        int inflate_y;
+
+        if (isClose)
+        {
+            inflate_x = std::ceil(((robot_width_mm_) / 2.0f) / cell_size_mm_x);
+            inflate_y = std::ceil(((robot_length_mm_) / 2.0f) / cell_size_mm_y);
+        }
+        else
+        {
+            inflate_x = std::ceil(((robot_width_mm_ + margin_mm_) / 2.0f) / cell_size_mm_x);
+            inflate_y = std::ceil(((robot_length_mm_ + margin_mm_) / 2.0f) / cell_size_mm_y);
+        }
 
         // 1. Build fresh empty grid
         grid_.clear();

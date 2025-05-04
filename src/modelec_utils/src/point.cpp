@@ -17,6 +17,11 @@ namespace Modelec
         return pos;
     }
 
+    Point Point::GetTakePosition(int distance) const
+    {
+        return GetTakePosition(distance, theta);
+    }
+
     Point Point::GetTakeBasePosition() const
     {
         return GetTakePosition(300, theta);

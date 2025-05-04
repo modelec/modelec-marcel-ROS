@@ -2,6 +2,8 @@
 #include <utility>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
+#include "../../modelec_utils/include/modelec_utils/config.hpp"
+
 namespace Modelec {
     NavigationHelper::NavigationHelper()
     {
@@ -45,6 +47,11 @@ namespace Modelec {
     std::shared_ptr<Pathfinding> NavigationHelper::GetPathfinding() const
     {
         return pathfinding_;
+    }
+
+    int NavigationHelper::GetTeamId() const
+    {
+        return team_id_;
     }
 
     void NavigationHelper::SendWaypoint() const
@@ -196,6 +203,11 @@ namespace Modelec {
         return GoTo(goal, isClose, collisionMask);
     }
 
+    int NavigationHelper::GoTo(const Point& goal, bool isClose, int collisionMask)
+    {
+        return GoTo(goal.x, goal.y, goal.theta, isClose, collisionMask);
+    }
+
     int NavigationHelper::CanGoTo(const PosMsg::SharedPtr& goal, bool isClose, int collisionMask)
     {
         return FindPath(goal, isClose, collisionMask).first;
@@ -208,6 +220,11 @@ namespace Modelec {
         goal->y = y;
         goal->theta = theta;
         return CanGoTo(goal, isClose, collisionMask);
+    }
+
+    int NavigationHelper::CanGoTo(const Point& goal, bool isClose, int collisionMask)
+    {
+        return CanGoTo(goal.x, goal.y, goal.theta, isClose, collisionMask);
     }
 
     std::pair<int, WaypointListMsg> NavigationHelper::FindPath(const PosMsg::SharedPtr& goal, bool isClose,
@@ -268,6 +285,25 @@ namespace Modelec {
         }
 
         return closest_zone;
+    }
+
+    PosMsg::SharedPtr NavigationHelper::GetHomePosition()
+    {
+        PosMsg::SharedPtr home = std::make_shared<PosMsg>();
+        // TODO : handle Team Id
+        if (team_id_ == YELLOW)
+        {
+            home->x = Config::get<int>("config.spawn.yellow@x", 0);
+            home->y = Config::get<int>("config.spawn.yellow@y", 0);
+            home->theta = Config::get<double>("config.spawn.yellow@theta", 0);
+        }
+        else
+        {
+            home->x = Config::get<int>("config.spawn.blue@x", 0);
+            home->y = Config::get<int>("config.spawn.blue@y", 0);
+            home->theta = Config::get<double>("config.spawn.blue@theta", 0);
+        }
+        return home;
     }
 
     void NavigationHelper::OnWaypointReach(const WaypointReachMsg::SharedPtr msg)

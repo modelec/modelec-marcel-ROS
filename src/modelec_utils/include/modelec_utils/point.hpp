@@ -13,6 +13,7 @@ namespace Modelec
         static double distance(const Point& p1, const Point& p2);
 
         Point GetTakePosition(int distance, double angle) const;
+        Point GetTakePosition(int distance) const;
 
         Point GetTakeBasePosition() const;
         Point GetTakeClosePosition() const;

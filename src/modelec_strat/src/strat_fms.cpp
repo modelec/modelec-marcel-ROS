@@ -64,7 +64,6 @@ namespace Modelec
             break;
 
         case State::WAIT_START:
-            RCLCPP_INFO_ONCE(get_logger(), "State: WAIT_START");
             if (started_)
             {
                 match_start_time_ = now;
@@ -110,6 +109,11 @@ namespace Modelec
                 current_mission_.reset();
                 transition(State::SELECT_MISSION, "PrepareConcert finished");
             }
+            else if (current_mission_->getStatus() == MissionStatus::FAILED)
+            {
+                current_mission_.reset();
+                transition(State::SELECT_MISSION, "PrepareConcert failed");
+            }
             break;
 
         case State::DO_PROMOTION:
@@ -123,6 +127,11 @@ namespace Modelec
             {
                 current_mission_.reset();
                 transition(State::SELECT_MISSION, "Promotion finished");
+            }
+            else if (current_mission_->getStatus() == MissionStatus::FAILED)
+            {
+                current_mission_.reset();
+                transition(State::SELECT_MISSION, "Promotion failed");
             }
             break;
 

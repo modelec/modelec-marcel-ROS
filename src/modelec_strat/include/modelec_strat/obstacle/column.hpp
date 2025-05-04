@@ -1,6 +1,7 @@
 #pragma once
 
 #include "obstacle.hpp"
+#include <modelec_interfaces/msg/odometry_pos.hpp>
 
 namespace Modelec
 {
@@ -17,7 +18,14 @@ namespace Modelec
         bool IsAtObjective() const;
         void SetAtObjective(bool atObjective);
 
+        Point GetOptimizedGetPos(const modelec_interfaces::msg::OdometryPos::SharedPtr& msg) const;
+        Point GetOptimizedGetPos(const Point& currentPos) const;
+
+        std::vector<Point> GetAllPossiblePositions() const;
+
     protected:
         bool isAtObjective = false;
+
+        std::vector<double> possible_angles_;
     };
 }

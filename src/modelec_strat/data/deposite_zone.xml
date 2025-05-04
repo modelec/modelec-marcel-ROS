@@ -7,11 +7,12 @@
         </PotPos>
     </DepositeZone>
 
-    <DepositeZone id="1" team="0" max_pot="2">
+    <DepositeZone id="1" team="0" max_pot="3">
         <Pos x="1225" y="225" theta="1.5708" />
         <PotPos>
-            <Pos x="1225" y="100" theta="1.5708" />
-            <Pos x="1225" y="250" theta="1.5708" />
+            <Pos x="1225" y="75" theta="1.5708" />
+            <Pos x="1225" y="225" theta="1.5708" />
+            <Pos x="1225" y="400" theta="1.5708" />
         </PotPos>
     </DepositeZone>
 
@@ -22,11 +23,12 @@
         </PotPos>
     </DepositeZone>
 
-    <DepositeZone id="3" team="0" max_pot="2">
+    <DepositeZone id="3" team="0" max_pot="3">
         <Pos x="2775" y="875" theta="3.1415" />
         <PotPos>
-            <Pos x="2875" y="875" theta="3.1415" />
-            <Pos x="2700" y="875" theta="3.1415" />
+            <Pos x="2925" y="875" theta="3.1415" />
+            <Pos x="2775" y="875" theta="3.1415" />
+            <Pos x="2600" y="875" theta="3.1415" />
         </PotPos>
     </DepositeZone>
 
@@ -38,11 +40,12 @@
         </PotPos>
     </DepositeZone>
 
-    <DepositeZone id="11" team="1" max_pot="2">
+    <DepositeZone id="11" team="1" max_pot="3">
         <Pos x="1775" y="225" theta="1.5708" />
         <PotPos>
-            <Pos x="1775" y="100" theta="1.5708" />
-            <Pos x="1775" y="250" theta="1.5708" />
+            <Pos x="1775" y="75" theta="1.5708" />
+            <Pos x="1775" y="225" theta="1.5708" />
+            <Pos x="1775" y="400" theta="1.5708" />
         </PotPos>
     </DepositeZone>
 
@@ -53,11 +56,12 @@
         </PotPos>
     </DepositeZone>
 
-    <DepositeZone id="13" team="1" max_pot="2">
+    <DepositeZone id="13" team="1" max_pot="3">
         <Pos x="225" y="875" theta="0" />
         <PotPos>
-            <Pos x="125" y="875" theta="0" />
-            <Pos x="300" y="875" theta="0" />
+            <Pos x="75" y="875" theta="0" />
+            <Pos x="225" y="875" theta="0" />
+            <Pos x="400" y="875" theta="0" />
         </PotPos>
     </DepositeZone>
 </Map>

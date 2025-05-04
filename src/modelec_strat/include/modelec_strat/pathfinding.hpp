@@ -40,14 +40,23 @@ namespace Modelec {
 
     class Pathfinding {
     public:
+        enum
+        {
+            FREE = 1 << 0,
+            WALL = 1 << 1,
+            OBSTACLE = 1 << 2,
+            ENEMY = 1 << 3,
+        };
+
         Pathfinding();
 
         Pathfinding(const rclcpp::Node::SharedPtr& node);
 
         rclcpp::Node::SharedPtr getNode() const;
 
-        WaypointListMsg FindPath(const PosMsg::SharedPtr& start,
-                                 const PosMsg::SharedPtr& goal, bool isClose = false);
+        std::pair<int, WaypointListMsg> FindPath(const PosMsg::SharedPtr& start,
+                                                 const PosMsg::SharedPtr& goal, bool isClose = false,
+                                                 int collisionMask = FREE);
 
         //void SetStartAndGoal(const PosMsg::SharedPtr& start, const PosMsg::SharedPtr& goal);
 
@@ -65,7 +74,7 @@ namespace Modelec {
           typename = std::enable_if_t<std::is_base_of<Obstacle, T>::value>>
         std::shared_ptr<T> GetClosestObstacle(const PosMsg::SharedPtr& pos) const;
 
-        std::shared_ptr<ColumnObstacle> GetClosestColumn(const PosMsg::SharedPtr& pos);
+        std::shared_ptr<ColumnObstacle> GetClosestColumn(const PosMsg::SharedPtr& pos, const std::vector<int>& blacklistedId = {});
 
     protected:
         void HandleMapRequest(
@@ -84,6 +93,8 @@ namespace Modelec {
 
         //bool EnemyOnPath(const modelec_interfaces::msg::OdometryPos& enemy_pos);
         //void Replan();
+
+        bool TestCollision(int x, int y, int collisionMask = FREE);
 
     private:
         rclcpp::Node::SharedPtr node_;

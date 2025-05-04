@@ -16,9 +16,9 @@ namespace Modelec {
 
         NavigationHelper(const rclcpp::Node::SharedPtr& node);
 
-        rclcpp::Node::SharedPtr getNode() const;
+        rclcpp::Node::SharedPtr GetNode() const;
 
-        std::shared_ptr<Pathfinding> getPathfinding() const;
+        std::shared_ptr<Pathfinding> GetPathfinding() const;
 
         void SendWaypoint() const;
         void SendWaypoint(const std::vector<WaypointMsg> &waypoints) const;
@@ -33,16 +33,20 @@ namespace Modelec {
 
         bool HasArrived() const;
 
-        void GoTo(const PosMsg::SharedPtr &goal, bool isClose = false);
-        void GoTo(int x, int y, double theta, bool isClose = false);
+        int GoTo(const PosMsg::SharedPtr& goal, bool isClose = false, int collisionMask = Pathfinding::FREE);
+        int GoTo(int x, int y, double theta, bool isClose = false, int collisionMask = Pathfinding::FREE);
 
-        WaypointListMsg FindPath(const PosMsg::SharedPtr &goal, bool isClose = false);
+        int CanGoTo(const PosMsg::SharedPtr& goal, bool isClose = false, int collisionMask = Pathfinding::FREE);
+        int CanGoTo(int x, int y, double theta, bool isClose = false, int collisionMask = Pathfinding::FREE);
+
+        std::pair<int, WaypointListMsg> FindPath(const PosMsg::SharedPtr& goal, bool isClose = false,
+                                                 int collisionMask = Pathfinding::FREE);
 
         PosMsg::SharedPtr GetCurrentPos() const;
 
         bool LoadDepositeZoneFromXML(const std::string &filename);
 
-        std::shared_ptr<DepositeZone> GetClosestDepositeZone(const PosMsg::SharedPtr &pos, int teamId);
+        std::shared_ptr<DepositeZone> GetClosestDepositeZone(const PosMsg::SharedPtr &pos, int teamId, const std::vector<int>& blacklistedId = {});
 
     protected:
         void OnWaypointReach(const WaypointReachMsg::SharedPtr msg);

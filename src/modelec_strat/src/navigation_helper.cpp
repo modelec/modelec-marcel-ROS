@@ -27,7 +27,7 @@ namespace Modelec {
 
         go_to_sub_ = node_->create_subscription<PosMsg>(
             "nav/go_to", 10, [this](const PosMsg::SharedPtr msg) {
-                GoTo(msg);
+                GoTo(msg, false, Pathfinding::FREE | Pathfinding::WALL);
             });
 
         std::string deposite_zone_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/deposite_zone.xml";
@@ -37,12 +37,12 @@ namespace Modelec {
         }
     }
 
-    rclcpp::Node::SharedPtr NavigationHelper::getNode() const
+    rclcpp::Node::SharedPtr NavigationHelper::GetNode() const
     {
         return node_;
     }
 
-    std::shared_ptr<Pathfinding> NavigationHelper::getPathfinding() const
+    std::shared_ptr<Pathfinding> NavigationHelper::GetPathfinding() const
     {
         return pathfinding_;
     }
@@ -166,32 +166,54 @@ namespace Modelec {
         return waypoints_.back().reached;
     }
 
-    void NavigationHelper::GoTo(const PosMsg::SharedPtr& goal, bool isClose)
+    int NavigationHelper::GoTo(const PosMsg::SharedPtr& goal, bool isClose, int collisionMask)
     {
+        auto [res, wl] = FindPath(goal, isClose, collisionMask);
+
+        if (wl.empty() || res != Pathfinding::FREE)
+        {
+            return res;
+        }
+
         waypoints_.clear();
 
-        auto wml = FindPath(goal, isClose);
-
-        for (auto & w : wml)
+        for (auto & w : wl)
         {
             waypoints_.emplace_back(w);
         }
 
         SendWaypoint();
+
+        return res;
     }
 
-    void NavigationHelper::GoTo(int x, int y, double theta, bool isClose)
+    int NavigationHelper::GoTo(int x, int y, double theta, bool isClose, int collisionMask)
     {
         PosMsg::SharedPtr goal = std::make_shared<PosMsg>();
         goal->x = x;
         goal->y = y;
         goal->theta = theta;
-        GoTo(goal, isClose);
+        return GoTo(goal, isClose, collisionMask);
     }
 
-    WaypointListMsg NavigationHelper::FindPath(const PosMsg::SharedPtr& goal, bool isClose)
+    int NavigationHelper::CanGoTo(const PosMsg::SharedPtr& goal, bool isClose, int collisionMask)
     {
-        return pathfinding_->FindPath(current_pos_, goal, isClose);
+        return FindPath(goal, isClose, collisionMask).first;
+    }
+
+    int NavigationHelper::CanGoTo(int x, int y, double theta, bool isClose, int collisionMask)
+    {
+        PosMsg::SharedPtr goal = std::make_shared<PosMsg>();
+        goal->x = x;
+        goal->y = y;
+        goal->theta = theta;
+        return CanGoTo(goal, isClose, collisionMask);
+    }
+
+    std::pair<int, WaypointListMsg> NavigationHelper::FindPath(const PosMsg::SharedPtr& goal, bool isClose,
+                                                               int collisionMask)
+    {
+        return pathfinding_->FindPath(current_pos_, goal, isClose, collisionMask);
     }
 
     PosMsg::SharedPtr NavigationHelper::GetCurrentPos() const
@@ -227,20 +249,20 @@ namespace Modelec {
         return true;
     }
 
-    std::shared_ptr<DepositeZone> NavigationHelper::GetClosestDepositeZone(const PosMsg::SharedPtr& pos, int teamId)
+    std::shared_ptr<DepositeZone> NavigationHelper::GetClosestDepositeZone(const PosMsg::SharedPtr& pos, int teamId, const std::vector<int>& blacklistedId)
     {
         std::shared_ptr<DepositeZone> closest_zone = nullptr;
         double min_distance = std::numeric_limits<double>::max();
         auto posPoint = Point(pos->x, pos->y, pos->theta);
-        for (const auto& zone : deposite_zones_)
+        for (const auto& [id, zone] : deposite_zones_)
         {
-            if (zone.second->GetTeam() == teamId)
+            if (zone->GetTeam() == teamId && zone->RemainingPotPos() > 0 && blacklistedId.end() == std::find(blacklistedId.begin(), blacklistedId.end(), id))
             {
-                double distance = Point::distance(posPoint, zone.second->GetPosition());
+                double distance = Point::distance(posPoint, zone->GetPosition());
                 if (distance < min_distance)
                 {
                     min_distance = distance;
-                    closest_zone = zone.second;
+                    closest_zone = zone;
                 }
             }
         }

@@ -8,22 +8,23 @@ namespace Modelec
         return sqrt(std::pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
     }
 
-    Point Point::GetTakeBasePosition()
+    Point Point::GetTakePosition(int distance, double angle) const
     {
         Point pos;
-        pos.x = x + 400 * cos(theta);
-        pos.y = y + 400 * sin(theta);
-        pos.theta = theta + M_PI;
+        pos.x = x + distance * cos(angle);
+        pos.y = y + distance * sin(angle);
+        pos.theta = angle + M_PI;
         return pos;
     }
 
-    Point Point::GetTakeClosePosition()
+    Point Point::GetTakeBasePosition() const
     {
-        Point pos;
-        pos.x = x + 210 * cos(theta);
-        pos.y = y + 210 * sin(theta);
-        pos.theta = theta + M_PI;
-        return pos;
+        return GetTakePosition(300, theta);
+    }
+
+    Point Point::GetTakeClosePosition() const
+    {
+        return GetTakePosition(210, theta);
     }
 
 }

@@ -4,7 +4,7 @@ import math
 import threading
 
 class SimulatedPCB:
-    def __init__(self, port='/dev/pts/6', baud=115200):
+    def __init__(self, port='/dev/pts/9', baud=115200):
         self.ser = serial.Serial(port, baud, timeout=1)
         self.running = True
         self.start = False
@@ -45,7 +45,7 @@ class SimulatedPCB:
                 angle_diff = self.normalize_angle(wp['theta'] - self.theta)
 
                 if wp['type'] == 1:
-                    if distance < 5.0 and abs(angle_diff) < 0.05:
+                    if distance < 5.0 and abs(angle_diff) < 0.15:
                         self.vx = 0.0
                         self.vy = 0.0
                         self.vtheta = 0.0
@@ -54,12 +54,12 @@ class SimulatedPCB:
                         self.waypoint_order.pop(0)
                         del self.waypoints[wp['id']]
                     else:
-                        speed = min(200.0, distance * 1.5)
+                        speed = min(300.0, distance * 3)
                         self.vx = speed * math.cos(angle)
                         self.vy = speed * math.sin(angle)
-                        self.vtheta = max(-1.0, min(1.0, angle_diff))
+                        self.vtheta = max(-9.0, min(9.0, angle_diff * 2))
                 else:
-                    speed = min(300.0, distance * 2)
+                    speed = min(600.0, distance * 4)
                     self.vx = speed * math.cos(angle)
                     self.vy = speed * math.sin(angle)
                     self.vtheta = 0.0

@@ -1,0 +1,26 @@
+launch:
+
+- node:
+    pkg: 'modelec_com'
+    exec: "serial_listener"
+    name: "serial_listener"
+
+- node:
+      pkg: 'modelec_com'
+      exec: 'pcb_odo_interface'
+      name: 'pcb_odo_interface'
+
+- node:
+      pkg: 'modelec_com'
+      exec: 'pcb_alim_interface'
+      name: 'pcb_alim_interface'
+
+- node:
+      pkg: 'modelec_core'
+      exec: 'speed_result'
+      name: 'speed_result'
+
+- node:
+      pkg: 'modelec_strat'
+      exec: 'strat_fsm'
+      name: 'strat_fsm'

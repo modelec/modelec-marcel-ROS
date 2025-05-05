@@ -101,13 +101,6 @@ namespace Modelec
                 HandleMapSizeRequest(request, response);
             });
 
-        enemy_pos_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
-            "enemy/position", 10,
-            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
-            {
-                OnEnemyPosition(msg);
-            });
-
         waypoint_pub_ = node_->create_publisher<WaypointMsg>(
             "odometry/add_waypoint", 100);
     }
@@ -608,14 +601,6 @@ namespace Modelec
     {
         last_enemy_pos_ = *msg;
         has_enemy_pos_ = true;
-
-        RCLCPP_INFO(node_->get_logger(), "Enemy position updated: x=%ld, y=%ld", msg->x, msg->y);
-
-        /*if (EnemyOnPath(last_enemy_pos_))
-        {
-            RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
-            Replan();
-        }*/
     }
 
     bool Pathfinding::TestCollision(int x, int y, int collisionMask)

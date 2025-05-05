@@ -10,7 +10,7 @@ namespace Modelec
         auto request = std::make_shared<modelec_interfaces::srv::AddSerialListener::Request>();
         request->name = "pcb_odo";
         request->bauds = 115200;
-        request->serial_port = "/dev/pts/10"; // TODO : check the real serial port
+        request->serial_port = "/dev/pts/7"; // TODO : check the real serial port
         auto client = this->create_client<modelec_interfaces::srv::AddSerialListener>("add_serial_listener");
         while (!client->wait_for_service(std::chrono::seconds(1)))
         {

@@ -32,6 +32,13 @@ namespace Modelec {
                 GoTo(msg, false, Pathfinding::FREE | Pathfinding::WALL);
             });
 
+        enemy_pos_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
+            "enemy/position", 10,
+            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+            {
+                OnEnemyPosition(msg);
+            });
+
         std::string deposite_zone_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/deposite_zone.xml";
         if (!LoadDepositeZoneFromXML(deposite_zone_path))
         {
@@ -175,6 +182,8 @@ namespace Modelec {
 
     int NavigationHelper::GoTo(const PosMsg::SharedPtr& goal, bool isClose, int collisionMask)
     {
+        last_go_to_ = {goal, isClose, collisionMask};
+
         auto [res, wl] = FindPath(goal, isClose, collisionMask);
 
         if (wl.empty() || res != Pathfinding::FREE)
@@ -304,6 +313,59 @@ namespace Modelec {
             home->theta = Config::get<double>("config.spawn.blue@theta", 0);
         }
         return home;
+    }
+
+    void NavigationHelper::OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+    {
+        pathfinding_->OnEnemyPosition(msg);
+
+        if (EnemyOnPath(*msg))
+        {
+            RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
+            Replan();
+        }
+    }
+
+    bool NavigationHelper::EnemyOnPath(const modelec_interfaces::msg::OdometryPos msg)
+    {
+        for (size_t i = -1; i + 1 < waypoints_.size(); ++i)
+        {
+            auto wp = i == -1 ? Waypoint(*current_pos_, -1, false) : waypoints_[i];
+            auto next_wp = waypoints_[i + 1];
+            if (DoesLineIntersectCircle(
+                    Point(wp.x, wp.y, wp.theta),
+                    Point(next_wp.x, next_wp.y, next_wp.theta),
+                    Point(msg.x, msg.y, msg.theta), (pathfinding_->enemy_length_mm_ + pathfinding_->robot_length_mm_ + pathfinding_->enemy_margin_mm_) / 2.0f))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool NavigationHelper::DoesLineIntersectCircle(const Point& start, const Point& end, const Point& center, float radius)
+    {
+        float num = std::abs((end.y - start.y) * center.x - (end.x - start.x) * center.y + end.x * start.y - end.y * start.x);
+        float den = std::sqrt((end.y - start.y) * (end.y - start.y) + (end.x - start.x) * (end.x - start.x));
+        float dist = num / den;
+        return dist < radius;
+    }
+
+    void NavigationHelper::Replan()
+    {
+        if (last_go_to_.goal)
+        {
+            if (GoTo(last_go_to_.goal, last_go_to_.isClose, last_go_to_.collisionMask) != Pathfinding::FREE)
+            {
+                if (GoTo(last_go_to_.goal, true, last_go_to_.collisionMask) != Pathfinding::FREE)
+                {
+                    // TODO : change to reset all the waypoints
+                    GoTo(current_pos_, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE | Pathfinding::ENEMY);
+                    // TODO : Handle case where no path is found
+                }
+            }
+        }
     }
 
     void NavigationHelper::OnWaypointReach(const WaypointReachMsg::SharedPtr msg)

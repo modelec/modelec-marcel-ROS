@@ -60,10 +60,26 @@ namespace Modelec {
 
         PosMsg::SharedPtr GetHomePosition();
 
+        void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
+
+        bool DoesLineIntersectCircle(const Point& start, const Point& end,
+                             const Point& center, float radius);
+
+        bool EnemyOnPath(const modelec_interfaces::msg::OdometryPos msg);
+
+        void Replan();
+
     protected:
         void OnWaypointReach(const WaypointReachMsg::SharedPtr msg);
 
         void OnPos(const PosMsg::SharedPtr msg);
+
+        struct
+        {
+            PosMsg::SharedPtr goal;
+            bool isClose;
+            int collisionMask;
+        } last_go_to_;
 
     private:
         rclcpp::Node::SharedPtr node_;
@@ -72,7 +88,7 @@ namespace Modelec {
 
         int team_id_ = YELLOW;
 
-        std::list<Waypoint> waypoints_;
+        std::vector<Waypoint> waypoints_;
 
         PosMsg::SharedPtr current_pos_;
 
@@ -83,5 +99,7 @@ namespace Modelec {
 
         rclcpp::Subscription<PosMsg>::SharedPtr go_to_sub_;
         rclcpp::Subscription<PosMsg>::SharedPtr pos_sub_;
+
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
     };
 }

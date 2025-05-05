@@ -48,6 +48,17 @@ namespace Modelec {
             ENEMY = 1 << 3,
         };
 
+        int grid_width_ = 0;
+        int grid_height_ = 0;
+        int map_width_mm_ = 0;
+        int map_height_mm_ = 0;
+        int robot_width_mm_ = 0;
+        int robot_length_mm_ = 0;
+        int enemy_width_mm_ = 0;
+        int enemy_length_mm_ = 0;
+        int enemy_margin_mm_ = 0;
+        int margin_mm_ = 0;
+
         Pathfinding();
 
         Pathfinding(const rclcpp::Node::SharedPtr& node);
@@ -76,6 +87,8 @@ namespace Modelec {
 
         std::shared_ptr<ColumnObstacle> GetClosestColumn(const PosMsg::SharedPtr& pos, const std::vector<int>& blacklistedId = {});
 
+        void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
+
     protected:
         void HandleMapRequest(
             const std::shared_ptr<modelec_interfaces::srv::Map::Request> request,
@@ -89,8 +102,6 @@ namespace Modelec {
             const std::shared_ptr<std_srvs::srv::Empty::Request> request,
             const std::shared_ptr<std_srvs::srv::Empty::Response> response);
 
-        void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
-
         //bool EnemyOnPath(const modelec_interfaces::msg::OdometryPos& enemy_pos);
         //void Replan();
 
@@ -100,17 +111,6 @@ namespace Modelec {
         rclcpp::Node::SharedPtr node_;
 
         std::vector<std::vector<int>> grid_;
-        int grid_width_ = 0;
-        int grid_height_ = 0;
-        int map_width_mm_ = 0;
-        int map_height_mm_ = 0;
-        int robot_width_mm_ = 0;
-        int robot_length_mm_ = 0;
-        int enemy_width_mm_ = 0;
-        int enemy_length_mm_ = 0;
-        int enemy_margin_mm_ = 0;
-        int margin_mm_ = 0;
-
 
         std::map<int, std::shared_ptr<Obstacle>> obstacle_map_;
 

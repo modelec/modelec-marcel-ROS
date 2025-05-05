@@ -41,9 +41,17 @@ namespace Modelec {
 
         bool HasArrived() const;
 
+        bool RotateTo(const PosMsg::SharedPtr& pos);
+        bool RotateTo(const Point& pos);
+        void Rotate(double angle);
+
         int GoTo(const PosMsg::SharedPtr& goal, bool isClose = false, int collisionMask = Pathfinding::FREE);
         int GoTo(int x, int y, double theta, bool isClose = false, int collisionMask = Pathfinding::FREE);
         int GoTo(const Point& goal, bool isClose = false, int collisionMask = Pathfinding::FREE);
+
+        int GoToRotateFirst(const PosMsg::SharedPtr& goal, bool isClose = false, int collisionMask = Pathfinding::FREE);
+        int GoToRotateFirst(int x, int y, double theta, bool isClose = false, int collisionMask = Pathfinding::FREE);
+        int GoToRotateFirst(const Point& goal, bool isClose = false, int collisionMask = Pathfinding::FREE);
 
         int CanGoTo(const PosMsg::SharedPtr& goal, bool isClose = false, int collisionMask = Pathfinding::FREE);
         int CanGoTo(int x, int y, double theta, bool isClose = false, int collisionMask = Pathfinding::FREE);
@@ -88,6 +96,8 @@ namespace Modelec {
 
         int team_id_ = YELLOW;
 
+        float factor_close_enemy_ = 0;
+
         std::vector<Waypoint> waypoints_;
 
         PosMsg::SharedPtr current_pos_;
@@ -103,5 +113,8 @@ namespace Modelec {
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
 
         modelec_interfaces::msg::OdometryPos last_enemy_pos_;
+
+        bool await_rotate_ = false;
+        std::vector<Waypoint> send_back_waypoints_;
     };
 }

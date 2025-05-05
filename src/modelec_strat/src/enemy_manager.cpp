@@ -17,6 +17,8 @@ namespace Modelec
 
         refresh_rate_s_ = Config::get<float>("config.enemy.detection.refresh_rate", 1.0);
 
+        max_stationary_time_s_ = Config::get<float>("config.enemy.detection.max_stationary_time_s", 10.0);
+
         current_pos_sub_ = this->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10,
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
@@ -31,6 +33,18 @@ namespace Modelec
 
         enemy_pos_pub_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
             "enemy/position", 10);
+
+        state_sub_ = create_subscription<modelec_interfaces::msg::StratState>("/strat/state", 10,
+            [this](const modelec_interfaces::msg::StratState::SharedPtr msg)
+            {
+                if (!game_stated_ && msg->state == modelec_interfaces::msg::StratState::SELECT_MISSION)
+                {
+                    game_stated_ = true;
+                }
+            });
+
+        enemy_long_time_pub_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
+    "enemy/long-time", 10);
 
         timer_ = this->create_wall_timer(
             std::chrono::seconds(1),
@@ -128,8 +142,20 @@ namespace Modelec
             {
                 last_enemy_pos_ = enemy_pos;
                 last_publish_time_ = this->now();
+                last_movement_time_ = this->now();  // Mise à jour du dernier vrai mouvement
                 enemy_pos_pub_->publish(enemy_pos);
                 RCLCPP_INFO(this->get_logger(), "Enemy moved: x=%ld, y=%ld", enemy_pos.x, enemy_pos.y);
+            }
+            else
+            {
+                auto now = this->now();
+                if ((now - last_movement_time_).seconds() > max_stationary_time_s_)
+                {
+                    enemy_long_time_pub_->publish(last_enemy_pos_);
+                    RCLCPP_WARN(this->get_logger(), "Enemy has been stationary for too long at x=%ld y=%ld", last_enemy_pos_.x, last_enemy_pos_.y);
+
+                    last_movement_time_ = now;
+                }
             }
         }
         else

@@ -8,7 +8,9 @@
         <detection>
             <min_move_threshold_mm>50</min_move_threshold_mm>
             <refresh_rate>0.5</refresh_rate>
+            <max_stationary_time_s>10</max_stationary_time_s>
         </detection>
+        <factor_close_enemy>-0.3</factor_close_enemy>
     </enemy>
 
     <robot>

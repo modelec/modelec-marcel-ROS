@@ -30,7 +30,7 @@ namespace Modelec
 
                 auto pos = column_->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
 
-                auto res = nav_->GoTo(pos.x, pos.y, pos.theta, false, Pathfinding::FREE | Pathfinding::WALL);
+                auto res = nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL);
                 if (res != Pathfinding::FREE)
                 {
                     blacklistId.push_back(column_->id());
@@ -64,7 +64,7 @@ namespace Modelec
         case GO_TO_COLUMN:
             {
                 auto pos = column_->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
-                nav_->GoTo(pos.x, pos.y, pos.theta, true, Pathfinding::FREE | Pathfinding::WALL);
+                nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::WALL);
             }
 
             step_ = GO_CLOSE_TO_COLUMN;
@@ -86,16 +86,16 @@ namespace Modelec
 
                 closestDepoZonePoint_ = closestDepoZone_->GetNextPotPos();
                 auto p = closestDepoZonePoint_.GetTakeBasePosition();
-                auto res = nav_->CanGoTo(p.x, p.y, p.theta, false, Pathfinding::FREE | Pathfinding::WALL);
+                auto res = nav_->CanGoTo(p, false, Pathfinding::FREE | Pathfinding::WALL);
                 if (res != Pathfinding::FREE)
                 {
                     auto pos = column_->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
-                    nav_->GoTo(pos.x, pos.y, pos.theta, true, Pathfinding::FREE | Pathfinding::WALL);
+                    nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::WALL);
                     step_ = GO_BACK;
                 }
                 else
                 {
-                    nav_->GoTo(p.x, p.y, p.theta, false, Pathfinding::FREE | Pathfinding::WALL);
+                    nav_->GoToRotateFirst(p, false, Pathfinding::FREE | Pathfinding::WALL);
                     closestDepoZone_->ValidNextPotPos();
                     step_ = GO_TO_PLATFORM;
                 }
@@ -113,13 +113,13 @@ namespace Modelec
 
                 closestDepoZonePoint_ = closestDepoZone_->ValidNextPotPos();
                 auto p = closestDepoZonePoint_.GetTakeBasePosition();
-                if (nav_->CanGoTo(p.x, p.y, p.theta, false, Pathfinding::FREE | Pathfinding::WALL) != Pathfinding::FREE)
+                if (nav_->CanGoTo(p, false, Pathfinding::FREE | Pathfinding::WALL) != Pathfinding::FREE)
                 {
-                    nav_->GoTo(p.x, p.y, p.theta, true, Pathfinding::FREE | Pathfinding::WALL);
+                    nav_->GoToRotateFirst(p, true, Pathfinding::FREE | Pathfinding::WALL);
                 }
                 else
                 {
-                    nav_->CanGoTo(p.x, p.y, p.theta, false, Pathfinding::FREE | Pathfinding::WALL);
+                    nav_->GoToRotateFirst(p, false, Pathfinding::FREE | Pathfinding::WALL);
                 }
             }
 

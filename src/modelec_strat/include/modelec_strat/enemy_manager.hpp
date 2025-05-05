@@ -3,6 +3,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <modelec_interfaces/msg/odometry_pos.hpp>
+#include <modelec_interfaces/msg/strat_state.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 
 namespace Modelec
@@ -23,8 +24,12 @@ namespace Modelec
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr current_pos_sub_;
         rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr laser_scan_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::StratState>::SharedPtr state_sub_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_pub_;
+        rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_long_time_pub_;
         rclcpp::TimerBase::SharedPtr timer_;
+
+        rclcpp::Time last_movement_time_;
 
         modelec_interfaces::msg::OdometryPos current_pos_;
 
@@ -34,5 +39,8 @@ namespace Modelec
 
         float min_move_threshold_mm_ = 0.0f;
         float refresh_rate_s_ = 0.0f;
+
+        bool game_stated_ = false;
+        float max_stationary_time_s_ = 10.0f;
     };
 }

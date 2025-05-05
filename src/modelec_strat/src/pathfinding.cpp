@@ -42,6 +42,8 @@ namespace Modelec
 
         enemy_margin_mm_ = Config::get<int>("config.enemy.size.margin_mm", 50);
 
+        factor_close_enemy_ = Config::get<float>("config.enemy.factor_close_enemy", -0.5f);
+
         grid_width_ = Config::get<int>("config.map.size.grid_width", 300);
         grid_height_ = Config::get<int>("config.map.size.grid_height", 200);
 
@@ -498,18 +500,6 @@ namespace Modelec
         return {FREE, waypoints};
     }
 
-    /*void Pathfinding::SetStartAndGoal(const PosMsg::SharedPtr& start, const PosMsg::SharedPtr& goal)
-    {
-        current_start_ = start;
-        current_goal_ = goal;
-        current_waypoints_ = FindPath(start, goal);
-
-        for (const auto& wp : current_waypoints_)
-        {
-            waypoint_pub_->publish(wp);
-        }
-    }*/
-
     void Pathfinding::SetCurrentPos(const PosMsg::SharedPtr& pos)
     {
         current_start_ = pos;
@@ -557,7 +547,7 @@ namespace Modelec
                         auto dist = Point::distance(robotPos, possiblePos);
                         auto distEnemy = Point::distance(enemyPos, possiblePos);
 
-                        auto s = dist * 2 + distEnemy;
+                        auto s = dist + distEnemy * factor_close_enemy_;
 
                         if (s < score)
                         {

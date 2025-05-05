@@ -13,6 +13,8 @@ namespace Modelec {
     {
         pathfinding_ = std::make_shared<Pathfinding>(node);
 
+        factor_close_enemy_ = Config::get<float>("config.enemy.factor_close_enemy", -0.5f);
+
         waypoint_reach_sub_ = node_->create_subscription<WaypointReachMsg>(
             "odometry/waypoint_reach", 10,
             [this](const WaypointReachMsg::SharedPtr msg) {
@@ -180,6 +182,45 @@ namespace Modelec {
         return waypoints_.back().reached;
     }
 
+    bool NavigationHelper::RotateTo(const PosMsg::SharedPtr& pos)
+    {
+        double angle = std::atan2(pos->y - current_pos_->y, pos->x - current_pos_->x);
+
+        if (std::abs(angle - current_pos_->theta) > M_PI / 3)
+        {
+            Rotate(angle);
+            return true;
+        }
+        return false;
+    }
+
+    bool NavigationHelper::RotateTo(const Point& pos)
+    {
+        double angle = std::atan2(pos.y - current_pos_->y, pos.x - current_pos_->x);
+
+        if (std::abs(angle - current_pos_->theta) > M_PI / 3)
+        {
+            Rotate(angle);
+            return true;
+        }
+        return false;
+    }
+
+    void NavigationHelper::Rotate(double angle)
+    {
+        waypoints_.clear();
+
+        WaypointMsg startAngle;
+        startAngle.x = current_pos_->x;
+        startAngle.y = current_pos_->y;
+        startAngle.theta = angle;
+        startAngle.id = 0;
+        startAngle.is_end = true;
+
+        waypoints_.emplace_back(startAngle);
+        SendWaypoint();
+    }
+
     int NavigationHelper::GoTo(const PosMsg::SharedPtr& goal, bool isClose, int collisionMask)
     {
         last_go_to_ = {goal, isClose, collisionMask};
@@ -215,6 +256,58 @@ namespace Modelec {
     int NavigationHelper::GoTo(const Point& goal, bool isClose, int collisionMask)
     {
         return GoTo(goal.x, goal.y, goal.theta, isClose, collisionMask);
+    }
+
+    int NavigationHelper::GoToRotateFirst(const PosMsg::SharedPtr& goal, bool isClose, int collisionMask)
+    {
+        last_go_to_ = {goal, isClose, collisionMask};
+
+        auto [res, wl] = FindPath(goal, isClose, collisionMask);
+
+        if (wl.empty() || res != Pathfinding::FREE)
+        {
+            return res;
+        }
+
+        auto p = Point(wl[0].x, wl[0].y, wl[0].theta);
+        if (RotateTo(p))
+        {
+            await_rotate_ = true;
+
+            send_back_waypoints_.clear();
+
+            for (auto & w : wl)
+            {
+                send_back_waypoints_.emplace_back(w);
+            }
+        }
+        else
+        {
+            waypoints_.clear();
+
+            for (auto & w : wl)
+            {
+                waypoints_.emplace_back(w);
+            }
+
+            SendWaypoint();
+        }
+
+        return res;
+    }
+
+    int NavigationHelper::GoToRotateFirst(int x, int y, double theta, bool isClose, int collisionMask)
+    {
+        PosMsg::SharedPtr goal = std::make_shared<PosMsg>();
+        goal->x = x;
+        goal->y = y;
+        goal->theta = theta;
+        return GoToRotateFirst(goal, isClose, collisionMask);
+    }
+
+    int NavigationHelper::GoToRotateFirst(const Point& goal, bool isClose, int collisionMask)
+    {
+        return GoToRotateFirst(goal.x, goal.y, goal.theta, isClose, collisionMask);
     }
 
     int NavigationHelper::CanGoTo(const PosMsg::SharedPtr& goal, bool isClose, int collisionMask)
@@ -271,7 +364,7 @@ namespace Modelec {
             deposite_zones_[obs->GetId()] = obs;
         }
 
-        RCLCPP_INFO(node_->get_logger(), "Loaded %zu obstacles from XML", deposite_zones_.size());
+        RCLCPP_INFO(node_->get_logger(), "Loaded %zu zone from XML", deposite_zones_.size());
         return true;
     }
 
@@ -289,7 +382,7 @@ namespace Modelec {
             {
                 double distance = Point::distance(posPoint, zone->GetPosition());
                 double enemy_distance = Point::distance(enemyPos, zone->GetPosition());
-                double s = distance * 2 + enemy_distance;
+                double s = distance + enemy_distance * factor_close_enemy_;
                 if (s < score)
                 {
                     score = s;
@@ -381,6 +474,18 @@ namespace Modelec {
             if (waypoint.id == msg->id)
             {
                 waypoint.reached = true;
+
+                if (await_rotate_)
+                {
+                    await_rotate_ = false;
+
+                    waypoints_.clear();
+                    for (auto & w : send_back_waypoints_)
+                    {
+                        waypoints_.emplace_back(w);
+                    }
+                    SendWaypoint();
+                }
             }
         }
     }

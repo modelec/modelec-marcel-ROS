@@ -58,6 +58,7 @@ namespace Modelec {
         int enemy_length_mm_ = 0;
         int enemy_margin_mm_ = 0;
         int margin_mm_ = 0;
+        float factor_close_enemy_ = 0;
 
         Pathfinding();
 

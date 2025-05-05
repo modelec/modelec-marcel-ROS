@@ -101,5 +101,7 @@ namespace Modelec {
         rclcpp::Subscription<PosMsg>::SharedPtr pos_sub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
+
+        modelec_interfaces::msg::OdometryPos last_enemy_pos_;
     };
 }

@@ -539,9 +539,11 @@ namespace Modelec
     std::shared_ptr<ColumnObstacle> Pathfinding::GetClosestColumn(const PosMsg::SharedPtr& pos,
                                                                   const std::vector<int>& blacklistedId)
     {
+        // TODO score (count dist and dist with enemy)
         std::shared_ptr<ColumnObstacle> closest_obstacle = nullptr;
         auto robotPos = Point(pos->x, pos->y, pos->theta);
-        float distance = std::numeric_limits<float>::max();
+        auto enemyPos = Point(last_enemy_pos_.x, last_enemy_pos_.y, last_enemy_pos_.theta);
+        float score = std::numeric_limits<float>::max();
 
         for (const auto& [id, obstacle] : obstacle_map_)
         {
@@ -553,9 +555,13 @@ namespace Modelec
                     for (auto possiblePos : obs->GetAllPossiblePositions())
                     {
                         auto dist = Point::distance(robotPos, possiblePos);
-                        if (dist < distance)
+                        auto distEnemy = Point::distance(enemyPos, possiblePos);
+
+                        auto s = dist * 2 + distEnemy;
+
+                        if (s < score)
                         {
-                            distance = dist;
+                            score = s;
                             closest_obstacle = obs;
                         }
                     }

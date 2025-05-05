@@ -10,6 +10,7 @@ namespace Modelec
 
     void PrepareConcertMission::start(rclcpp::Node::SharedPtr node)
     {
+        node_ = node;
 
         if (!nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), nav_->GetTeamId()))
         {
@@ -17,24 +18,35 @@ namespace Modelec
             return;
         }
 
-        if (auto col = nav_->GetPathfinding()->GetClosestColumn(nav_->GetCurrentPos()))
+        int timeout = 0;
+        std::vector<int> blacklistId = {};
+        bool canGo = false;
+
+        while (!canGo && timeout < 10)
         {
-            column_ = col;
-        } else
-        {
-            status_ = MissionStatus::FINISH_ALL;
-            return;
+            if (auto col = nav_->GetPathfinding()->GetClosestColumn(nav_->GetCurrentPos(), blacklistId))
+            {
+                column_ = col;
+
+                auto pos = column_->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
+
+                auto res = nav_->GoTo(pos.x, pos.y, pos.theta, false, Pathfinding::FREE | Pathfinding::WALL);
+                if (res != Pathfinding::FREE)
+                {
+                    blacklistId.push_back(column_->id());
+                }
+                else
+                {
+                    canGo = true;
+                }
+            }
+
+            timeout++;
         }
 
-        node_ = node;
-
-        auto pos = column_->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
-
-        auto res = nav_->GoTo(pos.x, pos.y, pos.theta, false, Pathfinding::FREE | Pathfinding::WALL);
-        if (res != Pathfinding::FREE)
+        if (!canGo)
         {
-            RCLCPP_WARN(node_->get_logger(), "Can't go to column %d", column_->id());
-            status_ = MissionStatus::FAILED;
+            status_ = MissionStatus::FINISH_ALL;
             return;
         }
 

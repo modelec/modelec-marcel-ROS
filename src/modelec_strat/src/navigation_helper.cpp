@@ -277,17 +277,22 @@ namespace Modelec {
 
     std::shared_ptr<DepositeZone> NavigationHelper::GetClosestDepositeZone(const PosMsg::SharedPtr& pos, int teamId, const std::vector<int>& blacklistedId)
     {
+        // TODO : score
         std::shared_ptr<DepositeZone> closest_zone = nullptr;
-        double min_distance = std::numeric_limits<double>::max();
+        double score = std::numeric_limits<double>::max();
         auto posPoint = Point(pos->x, pos->y, pos->theta);
+        auto enemyPos = Point(last_enemy_pos_.x, last_enemy_pos_.y, last_enemy_pos_.theta);
+
         for (const auto& [id, zone] : deposite_zones_)
         {
             if (zone->GetTeam() == teamId && zone->RemainingPotPos() > 0 && blacklistedId.end() == std::find(blacklistedId.begin(), blacklistedId.end(), id))
             {
                 double distance = Point::distance(posPoint, zone->GetPosition());
-                if (distance < min_distance)
+                double enemy_distance = Point::distance(enemyPos, zone->GetPosition());
+                double s = distance * 2 + enemy_distance;
+                if (s < score)
                 {
-                    min_distance = distance;
+                    score = s;
                     closest_zone = zone;
                 }
             }
@@ -318,6 +323,7 @@ namespace Modelec {
     void NavigationHelper::OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
         pathfinding_->OnEnemyPosition(msg);
+        last_enemy_pos_ = *msg;
 
         if (EnemyOnPath(*msg))
         {

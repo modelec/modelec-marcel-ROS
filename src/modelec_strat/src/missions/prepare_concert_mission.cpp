@@ -83,6 +83,7 @@ namespace Modelec
                     return;
                 }
 
+                // TODO : make the mission finished if the pos is not valid
                 closestDepoZonePoint_ = closestDepoZone_->GetNextPotPos();
                 auto p = closestDepoZonePoint_.GetTakeBasePosition();
                 auto res = nav_->CanGoTo(p, false, Pathfinding::FREE | Pathfinding::WALL);
@@ -135,7 +136,7 @@ namespace Modelec
                     }
                     else
                     {
-                        status_ = MissionStatus::FAILED;
+                        status_ = MissionStatus::FINISH_ALL;
                         return;
                     }
 
@@ -144,7 +145,7 @@ namespace Modelec
 
                 if (!canGo)
                 {
-                    status_ = MissionStatus::FAILED;
+                    status_ = MissionStatus::FINISH_ALL;
                     return;
                 }
 

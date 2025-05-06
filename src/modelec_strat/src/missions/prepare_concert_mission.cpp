@@ -76,7 +76,6 @@ namespace Modelec
             break;
         case TAKE_COLUMN:
             {
-                // TODO
                 closestDepoZone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), nav_->GetTeamId());
                 if (!closestDepoZone_)
                 {
@@ -104,23 +103,52 @@ namespace Modelec
             break;
         case GO_BACK:
             {
-                closestDepoZone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), nav_->GetTeamId());
-                if (!closestDepoZone_)
+
+                bool canGo = false;
+                std::vector<int> blacklistId = {};
+                int timeout = 0;
+
+                while (!canGo && timeout < 3)
+                {
+                    if (auto zone = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), nav_->GetTeamId(), blacklistId))
+                    {
+                        closestDepoZone_ = zone;
+                        closestDepoZonePoint_ = closestDepoZone_->GetNextPotPos();
+                        auto p = closestDepoZonePoint_.GetTakeBasePosition();
+
+                        if (nav_->CanGoTo(p, false, Pathfinding::FREE | Pathfinding::WALL) != Pathfinding::FREE)
+                        {
+                            if (nav_->GoToRotateFirst(p, true, Pathfinding::FREE | Pathfinding::WALL) != Pathfinding::FREE)
+                            {
+                                blacklistId.push_back(closestDepoZone_->GetId());
+                            }
+                            else
+                            {
+                                canGo = true;
+                            }
+                        }
+                        else
+                        {
+                            nav_->GoToRotateFirst(p, false, Pathfinding::FREE | Pathfinding::WALL);
+                            canGo = true;
+                        }
+                    }
+                    else
+                    {
+                        status_ = MissionStatus::FAILED;
+                        return;
+                    }
+
+                    timeout++;
+                }
+
+                if (!canGo)
                 {
                     status_ = MissionStatus::FAILED;
                     return;
                 }
 
                 closestDepoZonePoint_ = closestDepoZone_->ValidNextPotPos();
-                auto p = closestDepoZonePoint_.GetTakeBasePosition();
-                if (nav_->CanGoTo(p, false, Pathfinding::FREE | Pathfinding::WALL) != Pathfinding::FREE)
-                {
-                    nav_->GoToRotateFirst(p, true, Pathfinding::FREE | Pathfinding::WALL);
-                }
-                else
-                {
-                    nav_->GoToRotateFirst(p, false, Pathfinding::FREE | Pathfinding::WALL);
-                }
             }
 
             step_ = GO_TO_PLATFORM;

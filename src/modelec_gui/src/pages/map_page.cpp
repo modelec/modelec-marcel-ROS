@@ -271,14 +271,11 @@ namespace ModelecGUI
     {
         QWidget::mouseMoveEvent(event);
 
-        if (event->button() == Qt::RightButton)
-        {
-            enemy_pos_.x = Modelec::mapValue(event->pos().x(), 0, width(), 0, 3000);
-            enemy_pos_.y = 2000 - Modelec::mapValue(event->pos().y(), 0, height(), 0, 2000);
-            enemy_pos_.theta = 0;
+        enemy_pos_.x = Modelec::mapValue(event->pos().x(), 0, width(), 0, 3000);
+        enemy_pos_.y = 2000 - Modelec::mapValue(event->pos().y(), 0, height(), 0, 2000);
+        enemy_pos_.theta = 0;
 
-            enemy_pos_pub_->publish(enemy_pos_);
-        }
+        enemy_pos_pub_->publish(enemy_pos_);
     }
 
     void MapPage::OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg)

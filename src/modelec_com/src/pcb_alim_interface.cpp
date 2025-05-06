@@ -1,16 +1,25 @@
 #include <modelec_com/pcb_alim_interface.hpp>
 #include <modelec_utils/utils.hpp>
 #include <modelec_interfaces/srv/add_serial_listener.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <modelec_utils/config.hpp>
 
 namespace Modelec
 {
     PCBAlimInterface::PCBAlimInterface() : Node("pcb_alim_interface")
     {
         // Service to create a new serial listener
+        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
+        if (!Config::load(config_path))
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
+        }
+
         auto request = std::make_shared<modelec_interfaces::srv::AddSerialListener::Request>();
-        request->name = "pcb_alim";
-        request->bauds = 115200;
-        request->serial_port = "/dev/pts/12"; // TODO : check the real serial port
+        request->name = Config::get<std::string>("config.usb.pcb.pcb_alim.name", "pcb_odo");
+        request->bauds = Config::get<int>("config.usb.pcb.pcb_alim.baudrate", 115200);
+        request->serial_port = Config::get<std::string>("config.usb.pcb.pcb_alim.port", "/dev/ttyUSB0");
+
         auto client = this->create_client<modelec_interfaces::srv::AddSerialListener>("add_serial_listener");
         while (!client->wait_for_service(std::chrono::seconds(1)))
         {

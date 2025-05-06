@@ -39,4 +39,18 @@
         <blue x="100" y="1600" theta="-1.5708" />
         <yellow x="2650" y="1600" theta="-1.5708" />
     </spawn>
+    <usb>
+        <pcb>
+            <pcb_odo>
+                <name>pcb_odo</name>
+                <port>/dev/pts/11</port>
+                <baud_rate>115200</baud_rate>
+            </pcb_odo>
+            <pcb_alim>
+                <name>pcb_alim</name>
+                <port>/dev/pts/12</port>
+                <baud_rate>115200</baud_rate>
+            </pcb_alim>
+        </pcb>
+    </usb>
 </config>

@@ -41,6 +41,13 @@ namespace Modelec {
                 OnEnemyPosition(msg);
             });
 
+        enemy_pos_long_time_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
+            "/enemy/long-time", 10,
+            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+            {
+                OnEnemyPositionLongTime(msg);
+            });
+
         std::string deposite_zone_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/deposite_zone.xml";
         if (!LoadDepositeZoneFromXML(deposite_zone_path))
         {
@@ -397,18 +404,17 @@ namespace Modelec {
     PosMsg::SharedPtr NavigationHelper::GetHomePosition()
     {
         PosMsg::SharedPtr home = std::make_shared<PosMsg>();
-        // TODO : handle Team Id
         if (team_id_ == YELLOW)
         {
-            home->x = Config::get<int>("config.spawn.yellow@x", 0);
-            home->y = Config::get<int>("config.spawn.yellow@y", 0);
-            home->theta = Config::get<double>("config.spawn.yellow@theta", 0);
+            home->x = Config::get<int>("config.home.yellow@x", 0);
+            home->y = Config::get<int>("config.home.yellow@y", 0);
+            home->theta = Config::get<double>("config.home.yellow@theta", 0);
         }
         else
         {
-            home->x = Config::get<int>("config.spawn.blue@x", 0);
-            home->y = Config::get<int>("config.spawn.blue@y", 0);
-            home->theta = Config::get<double>("config.spawn.blue@theta", 0);
+            home->x = Config::get<int>("config.home.blue@x", 0);
+            home->y = Config::get<int>("config.home.blue@y", 0);
+            home->theta = Config::get<double>("config.home.blue@theta", 0);
         }
         return home;
     }
@@ -422,6 +428,22 @@ namespace Modelec {
         {
             RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
             Replan();
+        }
+    }
+
+    void NavigationHelper::OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+    {
+        pathfinding_->OnEnemyPositionLongTime(msg);
+
+        Point enemy_pos(msg->x, msg->y, msg->theta);
+        for (auto& [id, zone] : deposite_zones_)
+        {
+            auto zonePos = zone->GetPosition();
+            if (Point::distance(enemy_pos, zonePos) < pathfinding_->robot_width_mm_ + (zone->GetWidth()/2) + pathfinding_->enemy_margin_mm_)
+            {
+                std::shared_ptr<Obstacle> obs = std::make_shared<Obstacle>(id, zonePos.x, zonePos.y, zonePos.theta, zone->GetWidth(), zone->GetHeight(), "enemy-zone");
+                pathfinding_->AddObstacle(obs);
+            }
         }
     }
 

@@ -15,6 +15,8 @@ namespace Modelec
             posElem->QueryIntAttribute("x", &position_.x);
             posElem->QueryIntAttribute("y", &position_.y);
             posElem->QueryDoubleAttribute("theta", &position_.theta);
+            posElem->QueryIntAttribute("w", &w_);
+            posElem->QueryIntAttribute("h", &h_);
         }
 
         auto posPotList = obstacleElem->FirstChildElement("PotPos");

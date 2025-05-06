@@ -70,6 +70,8 @@ namespace Modelec {
 
         void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
+        void OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
+
         bool DoesLineIntersectCircle(const Point& start, const Point& end,
                              const Point& center, float radius);
 
@@ -111,6 +113,7 @@ namespace Modelec {
         rclcpp::Subscription<PosMsg>::SharedPtr pos_sub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_long_time_sub_;
 
         modelec_interfaces::msg::OdometryPos last_enemy_pos_;
 

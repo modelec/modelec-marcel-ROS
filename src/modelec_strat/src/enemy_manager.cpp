@@ -44,7 +44,7 @@ namespace Modelec
             });
 
         enemy_long_time_pub_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
-    "enemy/long-time", 10);
+    "/enemy/long-time", 10);
 
         timer_ = this->create_wall_timer(
             std::chrono::seconds(1),

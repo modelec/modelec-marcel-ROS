@@ -90,6 +90,8 @@ namespace Modelec {
 
         void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
+        void OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
+
     protected:
         void HandleMapRequest(
             const std::shared_ptr<modelec_interfaces::srv::Map::Request> request,

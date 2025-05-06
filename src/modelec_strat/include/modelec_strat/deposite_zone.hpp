@@ -34,6 +34,9 @@ namespace Modelec
         int GetId() const { return id_; }
         int GetMaxPot() const { return max_pot_; }
 
+        int GetWidth() const { return w_; }
+        int GetHeight() const { return h_; }
+
         int RemainingPotPos() const
         {
             return pot_queue_.size();
@@ -41,6 +44,7 @@ namespace Modelec
 
     protected:
         int id_, team_, max_pot_;
+        int w_, h_;
         Point position_;
 
         std::queue<Point> pot_queue_;

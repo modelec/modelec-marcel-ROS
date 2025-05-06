@@ -28,7 +28,7 @@ namespace Modelec {
         int width() const { return w_; }
         int height() const { return h_; }
         const std::string& type() const { return type_; }
-        Point position() const { return Point(x_, y_, theta_); }
+        Point GetPosition() const { return Point(x_, y_, theta_); }
 
         void setId(int id) { id_ = id; }
         void setX(int x) { x_ = x; }

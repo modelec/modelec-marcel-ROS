@@ -599,6 +599,21 @@ namespace Modelec
         has_enemy_pos_ = true;
     }
 
+    void Pathfinding::OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+    {
+        Point enemyPos(msg->x, msg->y, msg->theta);
+        for (auto& [index, obs] : obstacle_map_)
+        {
+            if (auto column = std::dynamic_pointer_cast<ColumnObstacle>(obs))
+            {
+                if (Point::distance(enemyPos, column->GetPosition()) < enemy_width_mm_ + (column->width() / 2) + enemy_margin_mm_)
+                {
+                    RemoveObstacle(column->id());
+                }
+            }
+        }
+    }
+
     bool Pathfinding::TestCollision(int x, int y, int collisionMask)
     {
         if (y < 0 || y >= static_cast<int>(grid_.size()) ||

@@ -8,7 +8,7 @@
         <detection>
             <min_move_threshold_mm>50</min_move_threshold_mm>
             <refresh_rate>0.5</refresh_rate>
-            <max_stationary_time_s>10</max_stationary_time_s>
+            <max_stationary_time_s>5</max_stationary_time_s>
         </detection>
         <factor_close_enemy>-0.3</factor_close_enemy>
     </enemy>
@@ -31,8 +31,12 @@
         </size>
     </map>
 
-    <spawn>
+    <home>
         <blue x="2650" y="1600" theta="-1.5708" />
         <yellow x="350" y="1600" theta="-1.5708" />
+    </home>
+    <spawn>
+        <blue x="100" y="1600" theta="-1.5708" />
+        <yellow x="2650" y="1600" theta="-1.5708" />
     </spawn>
 </config>

@@ -4,7 +4,7 @@ import time
 import serial
 
 # Set the parameters for the serial connection
-serial_port = '/dev/pts/9'  # Modify this to your serial port (e.g., 'COM3' on Windows)
+serial_port = '/dev/pts/11'  # Modify this to your serial port (e.g., 'COM3' on Windows)
 baud_rate = 115200  # Modify this to your baud rate
 
 # Open the serial connection

@@ -42,7 +42,7 @@ namespace Modelec {
             });
 
         enemy_pos_long_time_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
-            "/enemy/long-time", 10,
+            "/enemy/long_time", 10,
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
             {
                 OnEnemyPositionLongTime(msg);

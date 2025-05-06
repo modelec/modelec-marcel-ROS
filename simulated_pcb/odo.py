@@ -2,9 +2,10 @@
 import time
 import math
 import threading
+import argparse
 
 class SimulatedPCB:
-    def __init__(self, port='/dev/pts/9', baud=115200):
+    def __init__(self, port='/dev/pts/6', baud=115200):
         self.ser = serial.Serial(port, baud, timeout=1)
         self.running = True
         self.start = False
@@ -145,8 +146,14 @@ class SimulatedPCB:
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Simulated PCB")
+    parser.add_argument('--port', type=str, default='/dev/pts/6', help='Serial port to use')
+    args = parser.parse_args()
+
+    sim = None
     try:
-        sim = SimulatedPCB()
+        sim = SimulatedPCB(port=args.port)
     except KeyboardInterrupt:
-        sim.stop()
+        if sim:
+            sim.stop()
         print("Simulation stopped")

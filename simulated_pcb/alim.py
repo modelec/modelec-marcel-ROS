@@ -2,12 +2,17 @@
 import time
 
 import serial
+import argparse
 
-# Set the parameters for the serial connection
-serial_port = '/dev/pts/11'  # Modify this to your serial port (e.g., 'COM3' on Windows)
-baud_rate = 115200  # Modify this to your baud rate
 
-# Open the serial connection
+
+parser = argparse.ArgumentParser(description="Simulated PCB")
+parser.add_argument('--port', type=str, default='/dev/pts/6', help='Serial port to use')
+args = parser.parse_args()
+
+serial_port = args.port
+baud_rate = 115200
+
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
 
 try:

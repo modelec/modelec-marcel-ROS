@@ -176,6 +176,7 @@ namespace ModelecGUI
         timer_label_->setText("00");
 
         qpoints.clear();
+        obstacle_.clear();
 
         AskMap();
     }

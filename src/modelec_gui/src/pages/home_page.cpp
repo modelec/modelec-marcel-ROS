@@ -29,7 +29,7 @@ namespace ModelecGUI
         v_layout_ = new QVBoxLayout();
         v_layout_->setContentsMargins(0, 0, 0, 0);
         v_layout_->setSpacing(0);
-        v_layout_->addLayout(h_layout_, 1); // Stretch to fill vertical
+        v_layout_->addLayout(h_layout_, 1);
 
         setLayout(v_layout_);
 

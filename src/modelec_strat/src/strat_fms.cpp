@@ -20,6 +20,32 @@ namespace Modelec
 
         start_time_pub_ = create_publisher<std_msgs::msg::Int64>("/strat/start_time", 10);
 
+        team_id_sub_ = create_subscription<std_msgs::msg::Int8>(
+            "/strat/team", 10, [this](const std_msgs::msg::Int8::SharedPtr msg)
+            {
+                team_id_ = static_cast<int>(msg->data);
+                nav_->SetTeamId(team_id_);
+                nav_->SetSpawn();
+            });
+
+        client_start_ = create_client<modelec_interfaces::srv::OdometryStart>("/odometry/start");
+        while (!client_start_->wait_for_service(std::chrono::seconds(1))) {
+            if (!rclcpp::ok()) {
+                RCLCPP_ERROR(get_logger(), "Interrupted while waiting for the service. Exiting.");
+                return;
+            }
+            RCLCPP_INFO(get_logger(), "Service not available, waiting again...");
+        }
+
+        auto request = std::make_shared<modelec_interfaces::srv::OdometryStart::Request>();
+        request->start = true;
+        client_start_->async_send_request(request, [this](rclcpp::Client<modelec_interfaces::srv::OdometryStart>::SharedFuture response) {
+            if (!response.get()->success)
+            {
+                RCLCPP_ERROR(get_logger(), "Failed to send start command.");
+            }
+        });
+
         std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
         if (!Config::load(config_path))
         {
@@ -125,7 +151,7 @@ namespace Modelec
         case State::DO_PROMOTION:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<PromotionMission>(nav_);
+                current_mission_ = std::make_unique<BannerMission>(nav_);
                 current_mission_->start(shared_from_this());
             }
             current_mission_->update();

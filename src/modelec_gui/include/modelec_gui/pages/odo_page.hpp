@@ -17,12 +17,12 @@
 
 namespace ModelecGUI {
 
-    class TestPage : public QWidget
+    class OdoPage : public QWidget
     {
         Q_OBJECT
     public:
-        TestPage(rclcpp::Node::SharedPtr node, QWidget *parent = nullptr);
-        ~TestPage() override;
+        OdoPage(rclcpp::Node::SharedPtr node, QWidget *parent = nullptr);
+        ~OdoPage() override;
 
         rclcpp::Node::SharedPtr get_node() const { return node_; }
 

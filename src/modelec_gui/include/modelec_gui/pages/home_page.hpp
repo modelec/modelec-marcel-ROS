@@ -1,16 +1,45 @@
 #pragma once
 
 #include <QWidget>
-#include <QLabel>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QSvgRenderer>
 
-namespace ModelecGUI {
-class HomePage : public QWidget
+#include <rclcpp/rclcpp.hpp>
+
+#include <std_msgs/msg/int8.hpp>
+
+namespace ModelecGUI
 {
-    Q_OBJECT
-public:
-    HomePage(QWidget *parent = nullptr);
+    class HomePage : public QWidget
+    {
+        Q_OBJECT
 
-protected:
-    QLayout* m_layout;
-};
+    public:
+        HomePage(rclcpp::Node::SharedPtr node, QWidget* parent = nullptr);
+
+    public slots:
+        void onYellowButtonClicked();
+
+        void onBlueButtonClicked();
+
+    signals:
+        void TeamChoose();
+
+    protected:
+        void paintEvent(QPaintEvent*) override;
+
+        rclcpp::Node::SharedPtr node_;
+
+        rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr team_publisher_;
+
+        QVBoxLayout* v_layout_;
+        QHBoxLayout* h_layout_;
+
+        QPushButton* blue_button_;
+        QPushButton* yellow_button_;
+
+        QSvgRenderer* renderer_;
+
+    };
 }

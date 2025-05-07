@@ -33,15 +33,18 @@ add_executable(modelec_gui
 
         src/main.cpp
         src/modelec_gui.cpp
-        src/pages/test_page.cpp
+        src/pages/odo_page.cpp
         src/pages/home_page.cpp
+        src/pages/test_map_page.cpp
         src/pages/map_page.cpp
 
         include/modelec_gui/modelec_gui.hpp
-        include/modelec_gui/pages/test_page.hpp
+        include/modelec_gui/pages/odo_page.hpp
         include/modelec_gui/pages/home_page.hpp
+        include/modelec_gui/pages/test_map_page.hpp
         include/modelec_gui/pages/map_page.hpp
 )
+
 ament_target_dependencies(modelec_gui
         rclcpp
         std_msgs

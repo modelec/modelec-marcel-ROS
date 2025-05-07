@@ -142,7 +142,7 @@ public:
     void GetToF(const int &tof) const;
 
     void SetRobotPos(const modelec_interfaces::msg::OdometryPos::SharedPtr msg) const;
-    void SetRobotPos(long x, long y, long theta) const;
+    void SetRobotPos(long x, long y, double theta) const;
 
     void AddWaypoint(modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg) const;
     void AddWaypoint(int index, bool IsStopPoint, long x, long y, double theta) const;

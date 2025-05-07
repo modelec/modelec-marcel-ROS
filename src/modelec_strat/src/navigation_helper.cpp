@@ -15,6 +15,14 @@ namespace Modelec {
 
         factor_close_enemy_ = Config::get<float>("config.enemy.factor_close_enemy", -0.5f);
 
+        spawn_yellow_.x = Config::get<int>("config.spawn.yellow@x", 0);
+        spawn_yellow_.y = Config::get<int>("config.spawn.yellow@y", 0);
+        spawn_yellow_.theta = Config::get<double>("config.spawn.yellow@theta", 0);
+
+        spawn_blue_.x = Config::get<int>("config.spawn.blue@x", 0);
+        spawn_blue_.y = Config::get<int>("config.spawn.blue@y", 0);
+        spawn_blue_.theta = Config::get<double>("config.spawn.blue@theta", 0.0f);
+
         waypoint_reach_sub_ = node_->create_subscription<WaypointReachMsg>(
             "odometry/waypoint_reach", 10,
             [this](const WaypointReachMsg::SharedPtr msg) {
@@ -28,6 +36,8 @@ namespace Modelec {
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
                 OnPos(msg);
             });
+
+        pos_pub_ = node_->create_publisher<PosMsg>("odometry/set_position", 10);
 
         go_to_sub_ = node_->create_subscription<PosMsg>(
             "nav/go_to", 10, [this](const PosMsg::SharedPtr msg) {
@@ -342,6 +352,25 @@ namespace Modelec {
         return pathfinding_->FindPath(current_pos_, goal, isClose, collisionMask);
     }
 
+    void NavigationHelper::SetPos(const PosMsg& pos)
+    {
+        pos_pub_->publish(pos);
+    }
+
+    void NavigationHelper::SetPos(const Point& pos)
+    {
+        PosMsg msg;
+        msg.x = pos.x;
+        msg.y = pos.y;
+        msg.theta = pos.theta;
+        SetPos(msg);
+    }
+
+    void NavigationHelper::SetPos(int x, int y, double theta)
+    {
+        SetPos({x, y, theta});
+    }
+
     PosMsg::SharedPtr NavigationHelper::GetCurrentPos() const
     {
         return current_pos_;
@@ -481,11 +510,54 @@ namespace Modelec {
             {
                 if (GoTo(last_go_to_.goal, true, last_go_to_.collisionMask) != Pathfinding::FREE)
                 {
-                    // TODO : change to reset all the waypoints
                     GoTo(current_pos_, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE | Pathfinding::ENEMY);
                     // TODO : Handle case where no path is found
                 }
             }
+        }
+    }
+
+    void NavigationHelper::SetTeamId(int id)
+    {
+        team_id_ = id;
+    }
+
+    void NavigationHelper::SetSpawn()
+    {
+        switch (team_id_)
+        {
+        case YELLOW:
+            SetPos(spawn_yellow_);
+            break;
+        case BLUE:
+            SetPos(spawn_blue_);
+            break;
+        default:
+            SetPos(spawn_yellow_);
+            break;
+        }
+    }
+
+    Point NavigationHelper::GetSpawnYellow() const
+    {
+        return spawn_yellow_;
+    }
+
+    Point NavigationHelper::GetSpawnBlue() const
+    {
+        return spawn_blue_;
+    }
+
+    Point NavigationHelper::GetSpawn() const
+    {
+        switch (team_id_)
+        {
+            case YELLOW:
+                return spawn_yellow_;
+            case BLUE:
+                return spawn_blue_;
+            default:
+                return spawn_yellow_;
         }
     }
 

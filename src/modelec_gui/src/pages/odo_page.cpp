@@ -1,11 +1,11 @@
-#include <modelec_gui/pages/test_page.hpp>
+#include <modelec_gui/pages/odo_page.hpp>
 #include <utility>
 #include <boost/asio/connect.hpp>
 
 namespace ModelecGUI
 {
 
-    TestPage::TestPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent), node_(node)
+    OdoPage::OdoPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent), node_(node)
     {
         startButton_ = new QPushButton("Start");
         connect(startButton_, &QPushButton::clicked, this, [this]() {
@@ -156,7 +156,7 @@ namespace ModelecGUI
         // Set up subscription
         sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "/odometry/position", 10,
-            std::bind(&TestPage::PositionCallback, this, std::placeholders::_1));
+            std::bind(&OdoPage::PositionCallback, this, std::placeholders::_1));
 
         pub_add_waypoint_ = node_->create_publisher<modelec_interfaces::msg::OdometryAddWaypoint>(
             "/odometry/add_waypoint", 10);
@@ -199,9 +199,9 @@ namespace ModelecGUI
         }
     }
 
-    TestPage::~TestPage() = default;
+    OdoPage::~OdoPage() = default;
 
-    void TestPage::PositionCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+    void OdoPage::PositionCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
         QMetaObject::invokeMethod(this, [this, msg]() {
             xBox_->setText(QString("x: %1").arg(msg->x));

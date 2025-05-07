@@ -2,6 +2,7 @@
 
 #include <modelec_strat/missions/mission_base.hpp>
 #include <modelec_strat/navigation_helper.hpp>
+#include <std_msgs/msg/int64.hpp>
 
 namespace Modelec
 {
@@ -9,10 +10,10 @@ namespace Modelec
      * Banderole mission
      *
      */
-    class PromotionMission : public Mission
+    class BannerMission : public Mission
     {
     public:
-        PromotionMission(const std::shared_ptr<NavigationHelper>& nav);
+        BannerMission(const std::shared_ptr<NavigationHelper>& nav);
 
         void start(rclcpp::Node::SharedPtr node) override;
         void update() override;
@@ -30,5 +31,7 @@ namespace Modelec
         MissionStatus status_;
         std::shared_ptr<NavigationHelper> nav_;
         rclcpp::Node::SharedPtr node_;
+        rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr score_pub_;
+        int mission_score_ = 0;
     };
 }

@@ -60,6 +60,10 @@ namespace Modelec {
         std::pair<int, WaypointListMsg> FindPath(const PosMsg::SharedPtr& goal, bool isClose = false,
                                                  int collisionMask = Pathfinding::FREE);
 
+        void SetPos(const PosMsg& pos);
+        void SetPos(const Point& pos);
+        void SetPos(int x, int y, double theta);
+
         PosMsg::SharedPtr GetCurrentPos() const;
 
         bool LoadDepositeZoneFromXML(const std::string &filename);
@@ -79,6 +83,14 @@ namespace Modelec {
 
         void Replan();
 
+        void SetTeamId(int id);
+
+        void SetSpawn();
+
+        Point GetSpawnYellow() const;
+        Point GetSpawnBlue() const;
+        Point GetSpawn() const;
+
     protected:
         void OnWaypointReach(const WaypointReachMsg::SharedPtr msg);
 
@@ -97,6 +109,8 @@ namespace Modelec {
         std::shared_ptr<Pathfinding> pathfinding_;
 
         int team_id_ = YELLOW;
+        Point spawn_yellow_;
+        Point spawn_blue_;
 
         float factor_close_enemy_ = 0;
 
@@ -111,6 +125,7 @@ namespace Modelec {
 
         rclcpp::Subscription<PosMsg>::SharedPtr go_to_sub_;
         rclcpp::Subscription<PosMsg>::SharedPtr pos_sub_;
+        rclcpp::Publisher<PosMsg>::SharedPtr pos_pub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_long_time_sub_;

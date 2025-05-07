@@ -578,7 +578,7 @@ namespace Modelec
         SetRobotPos(msg->x, msg->y, msg->theta);
     }
 
-    void PCBOdoInterface::SetRobotPos(const long x, const long y, const long theta) const
+    void PCBOdoInterface::SetRobotPos(const long x, const long y, const double theta) const
     {
         std::vector<std::string> data = {
             std::to_string(x),

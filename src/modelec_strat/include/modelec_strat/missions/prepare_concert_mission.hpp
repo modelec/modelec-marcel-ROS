@@ -3,6 +3,7 @@
 #include <modelec_strat/missions/mission_base.hpp>
 #include <modelec_strat/navigation_helper.hpp>
 #include <modelec_strat/obstacle/column.hpp>
+#include <std_msgs/msg/int64.hpp>
 
 namespace Modelec {
 
@@ -36,6 +37,8 @@ namespace Modelec {
         std::shared_ptr<ColumnObstacle> column_;
         std::shared_ptr<DepositeZone> closestDepoZone_;
         Point closestDepoZonePoint_;
+        rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr score_pub_;
+        int mission_score_ = 0;
     };
 
 }

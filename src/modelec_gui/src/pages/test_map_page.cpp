@@ -1,4 +1,4 @@
-#include <modelec_gui/pages/map_page.hpp>
+#include <modelec_gui/pages/test_map_page.hpp>
 #include <modelec_utils/utils.hpp>
 
 #include <QMouseEvent>
@@ -8,12 +8,14 @@
 
 namespace ModelecGUI
 {
-    MapPage::MapPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent), renderer(new QSvgRenderer(QString(":/img/playmat/2025_FINAL.svg"), this)), node_(node)
+    TestMapPage::TestMapPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent), renderer(new QSvgRenderer(QString(":/img/playmat/2025_FINAL.svg"), this)), node_(node)
     {
         ratioBetweenMapAndWidgetX_ = width() / 3000.0f;
         ratioBetweenMapAndWidgetY_ = height() / 2000.0f;
 
         v_layout = new QVBoxLayout(this);
+
+        tirette_button_ = new QPushButton("Tirette", this);
 
         timer_label_ = new QLabel("00", this);
         timer_label_->setAlignment(Qt::AlignCenter);
@@ -26,11 +28,9 @@ namespace ModelecGUI
 
         h_layout = new QHBoxLayout(this);
         h_layout->addStretch();
-        h_layout->addStretch();
         h_layout->addWidget(score_label_);
-        h_layout->addStretch();
+        h_layout->addWidget(tirette_button_);
         h_layout->addWidget(timer_label_);
-        h_layout->addStretch();
         h_layout->addStretch();
 
         v_layout->addLayout(h_layout);
@@ -71,12 +71,6 @@ namespace ModelecGUI
                 update();
         });
 
-        score_sub_ = node_->create_subscription<std_msgs::msg::Int64>("strat/score", 10,
-            [this](const std_msgs::msg::Int64::SharedPtr msg) {
-                score_+= msg->data;
-                score_label_->setText(QString("Score: %1").arg(score_));
-        });
-
         obstacle_added_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>("nav/obstacle/added", 40,
             [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
                 OnObstacleReceived(msg);
@@ -87,6 +81,10 @@ namespace ModelecGUI
                 obstacle_.erase(msg->id);
         });
 
+        go_to_pub_ = node_->create_publisher<modelec_interfaces::msg::OdometryPos>("nav/go_to", 10);
+
+        enemy_pos_pub_ = node_->create_publisher<modelec_interfaces::msg::OdometryPos>("enemy/position", 10);
+
         enemy_pos_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>("enemy/position", 10,
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
             {
@@ -95,6 +93,9 @@ namespace ModelecGUI
                 enemy_pos_ = *msg;
                 update();
             });
+
+
+        tirette_pub_ = node_->create_publisher<std_msgs::msg::Bool>("tirette", 10);
 
         strat_start_sub_ = node_->create_subscription<std_msgs::msg::Int64>("/strat/start_time", 10,
             [this](const std_msgs::msg::Int64::SharedPtr msg){
@@ -109,6 +110,12 @@ namespace ModelecGUI
                     RCLCPP_INFO(node_->get_logger(), "Game stop");
                     isGameStarted_ = false;
                 }
+        });
+
+        connect(tirette_button_, &QPushButton::clicked, this, [this]() {
+            std_msgs::msg::Bool msg;
+            msg.data = true;
+            tirette_pub_->publish(msg);
         });
 
         // client to nav/map
@@ -146,7 +153,24 @@ namespace ModelecGUI
         rclcpp::spin_until_future_complete(node_->get_node_base_interface(), result2);
     }
 
-    void MapPage::paintEvent(QPaintEvent* paint_event)
+    void TestMapPage::setPlaymatGrid()
+    {
+        renderer->load(QString(":/img/playmat/grid_v1.svg"));
+        update();
+    }
+
+    void TestMapPage::setPlaymatMap()
+    {
+        renderer->load(QString(":/img/playmat/2025_FINAL.svg"));
+        update();
+    }
+
+    void TestMapPage::toggleShowObstacle()
+    {
+        show_obstacle_ = !show_obstacle_;
+    }
+
+    void TestMapPage::paintEvent(QPaintEvent* paint_event)
     {
         QWidget::paintEvent(paint_event);
 
@@ -224,12 +248,36 @@ namespace ModelecGUI
         painter.drawRect(rect);
     }
 
-    void MapPage::OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg)
+    void TestMapPage::mousePressEvent(QMouseEvent* event)
+    {
+        QWidget::mousePressEvent(event);
+
+        if (event->button() == Qt::LeftButton)
+        {
+            modelec_interfaces::msg::OdometryPos msg;
+            msg.x = Modelec::mapValue(event->pos().x(), 0, width(), 0, 3000);
+            msg.y = 2000 - Modelec::mapValue(event->pos().y(), 0, height(), 0, 2000);
+            msg.theta = 0;
+
+            go_to_pub_->publish(msg);
+        }
+        else if (event->button() == Qt::RightButton)
+        {
+            modelec_interfaces::msg::OdometryPos msg;
+            msg.x = Modelec::mapValue(event->pos().x(), 0, width(), 0, 3000);
+            msg.y = 2000 - Modelec::mapValue(event->pos().y(), 0, height(), 0, 2000);
+            msg.theta = 0;
+
+            enemy_pos_pub_->publish(msg);
+        }
+    }
+
+    void TestMapPage::OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg)
     {
         obstacle_.emplace(msg->id, *msg);
     }
 
-    void MapPage::resizeEvent(QResizeEvent* event)
+    void TestMapPage::resizeEvent(QResizeEvent* event)
     {
         QWidget::resizeEvent(event);
 

@@ -24,17 +24,25 @@
 #include <std_msgs/msg/int64.hpp>
 
 namespace ModelecGUI {
-    class MapPage : public QWidget
+    class TestMapPage : public QWidget
     {
         Q_OBJECT
 
     public:
-        MapPage(rclcpp::Node::SharedPtr node, QWidget *parent = nullptr);
+        TestMapPage(rclcpp::Node::SharedPtr node, QWidget *parent = nullptr);
 
         rclcpp::Node::SharedPtr get_node() const { return node_; }
 
+        void setPlaymatGrid();
+
+        void setPlaymatMap();
+
+        void toggleShowObstacle();
+
     protected:
         void paintEvent(QPaintEvent*) override;
+
+        void mousePressEvent(QMouseEvent* event) override;
 
         void onOdometryReceived(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
@@ -47,11 +55,15 @@ namespace ModelecGUI {
         QVBoxLayout* v_layout;
         QHBoxLayout* h_layout;
 
+        QPushButton* tirette_button_;
+
         QLabel* timer_label_;
         QLabel* score_label_;
 
         modelec_interfaces::msg::OdometryPos robotPos;
         std::vector<QPoint> qpoints;
+        //std::vector<modelec_interfaces::msg::OdometryAddWaypoint> points;
+        modelec_interfaces::msg::OdometryPos go_to_point;
 
         bool lastWapointWasEnd = true;
 
@@ -65,17 +77,18 @@ namespace ModelecGUI {
         int robot_width_ = 0;
         int enemy_length_ = 0;
         int enemy_width_ = 0;
-        int score_ = 0;
 
         float ratioBetweenMapAndWidgetX_;
         float ratioBetweenMapAndWidgetY_;
 
         rclcpp::Node::SharedPtr node_;
 
+        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr tirette_pub_;
+
         rclcpp::Subscription<modelec_interfaces::msg::OdometryAddWaypoint>::SharedPtr add_waypoint_sub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr odometry_sub_;
-        rclcpp::Subscription<std_msgs::msg::Int64>::SharedPtr score_sub_;
+        rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr go_to_pub_;
         rclcpp::Client<modelec_interfaces::srv::MapSize>::SharedPtr map_client_;
         rclcpp::Subscription<modelec_interfaces::msg::Obstacle>::SharedPtr obstacle_added_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::Obstacle>::SharedPtr obstacle_removed_sub_;
@@ -83,6 +96,7 @@ namespace ModelecGUI {
 
         modelec_interfaces::msg::OdometryPos enemy_pos_;
         bool hasEnemy = false;
+        rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_pub_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
         rclcpp::Subscription<std_msgs::msg::Int64>::SharedPtr strat_start_sub_;
 

@@ -36,21 +36,35 @@
         <yellow x="350" y="1600" theta="-1.5708" />
     </home>
     <spawn>
-        <blue x="100" y="1600" theta="-1.5708" />
-        <yellow x="2650" y="1600" theta="-1.5708" />
+        <blue x="1775" y="300" theta="1.5708" />
+        <yellow x="1225" y="300" theta="1.5708" />
     </spawn>
     <usb>
         <pcb>
             <pcb_odo>
                 <name>pcb_odo</name>
-                <port>/dev/pts/11</port>
+                <port>/dev/pts/5</port>
                 <baud_rate>115200</baud_rate>
             </pcb_odo>
             <pcb_alim>
                 <name>pcb_alim</name>
-                <port>/dev/pts/12</port>
+                <port>/dev/pts/9</port>
                 <baud_rate>115200</baud_rate>
             </pcb_alim>
         </pcb>
     </usb>
+    <mission_score>
+        <banner>20</banner>
+        <go_home>10</go_home>
+        <concert>
+            <niv_1>4</niv_1>
+            <niv_2>8</niv_2>
+            <niv_3>16</niv_3>
+        </concert>
+        <pami>
+            <goupie>5</goupie>
+            <superstar>5</superstar>
+            <all_party>10</all_party>
+        </pami>
+    </mission_score>
 </config>

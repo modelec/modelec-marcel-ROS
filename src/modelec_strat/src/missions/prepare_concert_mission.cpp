@@ -1,5 +1,6 @@
 #include <modelec_strat/missions/prepare_concert_mission.hpp>
 #include <modelec_strat/obstacle/column.hpp>
+#include <modelec_utils/config.hpp>
 
 namespace Modelec
 {
@@ -11,6 +12,10 @@ namespace Modelec
     void PrepareConcertMission::start(rclcpp::Node::SharedPtr node)
     {
         node_ = node;
+
+        mission_score_ = Config::get<int>("config.mission_score.concert.niv_1", 0);
+
+        score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
 
         if (!nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), nav_->GetTeamId()))
         {
@@ -188,9 +193,15 @@ namespace Modelec
             break;
 
         case GO_BACK_2:
-            step_ = DONE;
-            status_ = MissionStatus::DONE;
-            break;
+            {
+                std_msgs::msg::Int64 msg;
+                msg.data = mission_score_;
+                score_pub_->publish(msg);
+
+                step_ = DONE;
+                status_ = MissionStatus::DONE;
+                break;
+            }
 
         default:
             break;

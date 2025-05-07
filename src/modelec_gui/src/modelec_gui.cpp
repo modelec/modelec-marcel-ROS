@@ -2,9 +2,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <QMenuBar>
 #include <utility>
-#include <modelec_gui/pages/home_page.hpp>
-#include <modelec_gui/pages/map_page.hpp>
-#include <modelec_gui/pages/test_page.hpp>
+
 
 namespace ModelecGUI {
 
@@ -12,14 +10,25 @@ namespace ModelecGUI {
         : QMainWindow(parent), node_(std::move(node)), stackedWidget(new QStackedWidget(this)) {
 
         // Add pages to stack
-        stackedWidget->addWidget(new HomePage(this));
-        stackedWidget->addWidget(new TestPage(get_node(), this));
-        stackedWidget->addWidget(new MapPage(get_node(), this));
+        home_page_ = new HomePage(get_node(), this);
+        odo_page_ = new OdoPage(get_node(), this);
+        test_map_page_ = new TestMapPage(get_node(), this);
+        map_page_ = new MapPage(get_node(), this);
+
+        stackedWidget->addWidget(home_page_);
+        stackedWidget->addWidget(odo_page_);
+        stackedWidget->addWidget(test_map_page_);
+        stackedWidget->addWidget(map_page_);
         setCentralWidget(stackedWidget);
 
         setupMenu();
 
         resize(1200, 800);
+
+        connect(home_page_, &HomePage::TeamChoose, this, [this]()
+        {
+            stackedWidget->setCurrentIndex(3);
+        });
     }
 
     void ROS2QtGUI::setupMenu() {
@@ -28,7 +37,7 @@ namespace ModelecGUI {
         QMenu *optionsMenu = menuBar->addMenu("View");
 
         home_action_ = new QAction("Home", this);
-        test_action_ = new QAction("Test", this);
+        odo_action_ = new QAction("Odometrie", this);
         map_action_ = new QAction("Map", this);
 
         playmat_map_menu_ = new QMenu("playmat");
@@ -40,7 +49,7 @@ namespace ModelecGUI {
         exit_action_ = new QAction("Exit", this);
 
         optionsMenu->addAction(home_action_);
-        optionsMenu->addAction(test_action_);
+        optionsMenu->addAction(odo_action_);
         optionsMenu->addSeparator();
         optionsMenu->addAction(map_action_);
         optionsMenu->addMenu(playmat_map_menu_);
@@ -54,7 +63,7 @@ namespace ModelecGUI {
             stackedWidget->setCurrentIndex(0);
         });
 
-        connect(test_action_, &QAction::triggered, this, [this]() {
+        connect(odo_action_, &QAction::triggered, this, [this]() {
             stackedWidget->setCurrentIndex(1);
         });
 
@@ -63,21 +72,21 @@ namespace ModelecGUI {
         });
 
         connect(playmat_map_, &QAction::triggered, this, [this]() {
-            auto map_page = dynamic_cast<MapPage *>(stackedWidget->currentWidget());
+            auto map_page = dynamic_cast<TestMapPage *>(stackedWidget->currentWidget());
             if (map_page) {
                 map_page->setPlaymatMap();
             }
         });
 
         connect(playmat_grid_, &QAction::triggered, this, [this]() {
-            auto map_page = dynamic_cast<MapPage *>(stackedWidget->currentWidget());
+            auto map_page = dynamic_cast<TestMapPage *>(stackedWidget->currentWidget());
             if (map_page) {
                 map_page->setPlaymatGrid();
             }
         });
 
         connect(toggle_show_obstacle_action_, &QAction::triggered, this, [this]() {
-            auto map_page = dynamic_cast<MapPage *>(stackedWidget->currentWidget());
+            auto map_page = dynamic_cast<TestMapPage *>(stackedWidget->currentWidget());
             if (map_page)
             {
                 map_page->toggleShowObstacle();

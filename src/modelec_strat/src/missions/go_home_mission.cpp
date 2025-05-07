@@ -1,5 +1,7 @@
 #include <modelec_strat/missions/go_home_mission.hpp>
 
+#include <modelec_utils/config.hpp>
+
 namespace Modelec
 {
     GoHomeMission::GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const rclcpp::Time& start_time) : step_(ROTATE_TO_HOME), status_(MissionStatus::READY), nav_(nav), start_time_(start_time)
@@ -9,6 +11,10 @@ namespace Modelec
     void GoHomeMission::start(rclcpp::Node::SharedPtr node)
     {
         node_ = node;
+
+        mission_score_ = Config::get<int>("config.mission_score.go_home", 0);
+
+        score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
 
         auto pos = nav_->GetHomePosition();
         home_point_ = Point(pos->x, pos->y, pos->theta);
@@ -57,10 +63,16 @@ namespace Modelec
                 break;
 
             case GO_CLOSE:
-                step_ = DONE;
-                status_ = MissionStatus::DONE;
+                {
+                    std_msgs::msg::Int64 msg;
+                    msg.data = mission_score_;
+                    score_pub_->publish(msg);
 
-                break;
+                    step_ = DONE;
+                    status_ = MissionStatus::DONE;
+
+                    break;
+                }
             default:
                 break;
         }

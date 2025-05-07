@@ -51,18 +51,35 @@ namespace ModelecGUI
                 if (auto res = response.get()) {
                     RCLCPP_INFO(node_->get_logger(), "PID values received: p=%f, i=%f, d=%f", res->p, res->i, res->d);
                     QMetaObject::invokeMethod(this, [this, res]() {
-                        pPIDBox_->setText(QString("%1").arg(res->p));
-                        iPIDBox_->setText(QString("%1").arg(res->i));
-                        dPIDBox_->setText(QString("%1").arg(res->d));
+                        pPIDBox_->setValue(res->p);
+                        iPIDBox_->setValue(res->i);
+                        dPIDBox_->setValue(res->d);
                     });
                 } else {
                     RCLCPP_ERROR(node_->get_logger(), "Failed to get response for PID request.");
                 }
             });
         });
-        pPIDBox_ = new QLineEdit("");
-        iPIDBox_ = new QLineEdit("");
-        dPIDBox_ = new QLineEdit("");
+        pPIDBox_ = new QDoubleSpinBox(this);
+        pPIDBox_->setMinimum(0);
+        pPIDBox_->setMaximum(30);
+        pPIDBox_->setSingleStep(.1);
+        pPIDBox_->setValue(0);
+        pPIDBox_->setDecimals(2);
+
+        iPIDBox_ = new QDoubleSpinBox(this);
+        iPIDBox_->setMinimum(0);
+        iPIDBox_->setMaximum(30);
+        iPIDBox_->setSingleStep(.1);
+        iPIDBox_->setValue(0);
+        iPIDBox_->setDecimals(2);
+
+        dPIDBox_ = new QDoubleSpinBox(this);
+        dPIDBox_->setMinimum(0);
+        dPIDBox_->setMaximum(30);
+        dPIDBox_->setSingleStep(.1);
+        dPIDBox_->setValue(0);
+        dPIDBox_->setDecimals(2);
 
         pidLayout_ = new QHBoxLayout;
         pidLayout_->addWidget(pPIDBox_);

@@ -43,15 +43,17 @@
         <pcb>
             <pcb_odo>
                 <name>pcb_odo</name>
-                <port>/dev/pts/5</port>
+                <port>/dev/pts/7</port>
                 <baud_rate>115200</baud_rate>
             </pcb_odo>
             <pcb_alim>
                 <name>pcb_alim</name>
-                <port>/dev/pts/9</port>
+                <port>/dev/pts/11</port>
                 <baud_rate>115200</baud_rate>
             </pcb_alim>
         </pcb>
+        <timeout_ms>300</timeout_ms>
+        <attempt>5</attempt>
     </usb>
     <mission_score>
         <banner>20</banner>

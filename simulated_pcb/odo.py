@@ -96,25 +96,31 @@ class SimulatedPCB:
 
     def handle_message(self, msg):
         if msg == "GET;POS":
+            print(f'[TX] SET;POS;{int(self.x)};{int(self.y)};{self.theta:.3f}')
             self.ser.write(f'SET;POS;{int(self.x)};{int(self.y)};{self.theta:.3f}\n'.encode())
 
         elif msg == "GET;SPEED":
+            print(f'[TX] SET;SPEED;{int(self.vx)};{int(self.vy)};{int(self.vtheta)}')
             self.ser.write(f'SET;SPEED;{int(self.vx)};{int(self.vy)};{int(self.vtheta)}\n'.encode())
 
         elif msg.startswith("GET;DIST;"):
             n = int(msg.split(';')[2])
             dist = self.tof.get(n, 0)
+            print(f'[TX] SET;DIST;{n};{dist}')
             self.ser.write(f'SET;DIST;{n};{dist}\n'.encode())
 
         elif msg == "GET;PID":
+            print(f'[TX] SET;PID;{self.pid[0]};{self.pid[1]};{self.pid[2]}')
             self.ser.write(f'SET;PID;{self.pid[0]};{self.pid[1]};{self.pid[2]}\n'.encode())
 
         elif msg.startswith("SET;PID"):
-            self.pid = list(map(int, msg.split(';')[2:5]))
+            self.pid = list(map(float, msg.split(';')[2:5]))
+            print(f'[TX] OK;PID;1')
             self.ser.write(f'OK;PID;1\n'.encode())
 
         elif msg.startswith("SET;START"):
             self.start = msg.split(';')[2] == '1'
+            print(f'[TX] OK;START;1')
             self.ser.write(f'OK;START;1\n'.encode())
 
         elif msg.startswith("SET;WAYPOINT"):
@@ -137,6 +143,7 @@ class SimulatedPCB:
             self.x = float(parts[2])
             self.y = float(parts[3])
             self.theta = float(parts[4])
+            print(f'[TX] OK;POS;1')
             self.ser.write(b'OK;POS;1\n')
 
     def stop(self):

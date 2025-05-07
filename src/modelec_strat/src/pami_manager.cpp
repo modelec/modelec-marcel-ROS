@@ -80,8 +80,14 @@ namespace Modelec
         reset_strat_sub_ = create_subscription<std_msgs::msg::Empty>(
             "/strat/reset", 10, [this](const std_msgs::msg::Empty::SharedPtr)
             {
-                timer_add_->cancel();
-                timer_remove_->cancel();
+                if (timer_add_)
+                {
+                    timer_add_->cancel();
+                }
+                if (timer_remove_)
+                {
+                    timer_remove_->cancel();
+                }
             });
     }
 

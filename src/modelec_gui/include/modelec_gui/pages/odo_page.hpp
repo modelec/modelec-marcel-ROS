@@ -4,6 +4,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QVBoxLayout>
+#include <QSpinBox>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -33,7 +34,7 @@ namespace ModelecGUI {
         QHBoxLayout *posLayout_;
 
         QPushButton *askPID_;
-        QLineEdit *pPIDBox_, *iPIDBox_, *dPIDBox_;
+        QDoubleSpinBox *pPIDBox_, *iPIDBox_, *dPIDBox_;
         QHBoxLayout *pidLayout_;
         QPushButton *setPID_;
 

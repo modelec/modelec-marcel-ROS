@@ -130,6 +130,9 @@ private:
     void ResolveSetPIDRequest(bool success);
     void ResolveAddWaypointRequest(bool success);
 
+    int timeout_ms = 1000;
+    int attempt = 5;
+
 public:
     void SendToPCB(const std::string &data) const;
     void SendToPCB(const std::string& order, const std::string& elem, const std::vector<std::string>& data = {}) const;

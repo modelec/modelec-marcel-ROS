@@ -38,9 +38,6 @@ namespace Modelec
             {
                 if (res->success)
                 {
-                    RCLCPP_INFO(this->get_logger(), "Publisher: %s", res->publisher.c_str());
-                    RCLCPP_INFO(this->get_logger(), "Subscriber: %s", res->subscriber.c_str());
-
                     pcb_callback_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
                     rclcpp::SubscriptionOptions options;

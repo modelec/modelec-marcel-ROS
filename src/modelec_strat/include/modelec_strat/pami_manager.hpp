@@ -22,7 +22,7 @@ namespace Modelec {
         bool ReadFromXML(const std::string& filename);
 
     protected:
-        Obstacle zone;
+        std::vector<Obstacle> zones_;
 
         int time_to_put_zone_ = 0;
         int time_to_remove_top_pot_ = 0;

@@ -56,11 +56,14 @@ namespace Modelec
                     second_goal - now,
                     [this]()
                     {
-                        add_obs_pub_->publish(zone.toMsg());
+                        for (const auto & obs : zones_)
+                        {
+                            add_obs_pub_->publish(obs.toMsg());
 
-                        std_msgs::msg::Int64 msg;
-                        msg.data = score_to_add_;
-                        score_pub_->publish(msg);
+                            std_msgs::msg::Int64 msg;
+                            msg.data = score_to_add_;
+                            score_pub_->publish(msg);
+                        }
 
                         timer_add_->cancel();
                     });
@@ -98,15 +101,12 @@ namespace Modelec
             return false;
         }
 
-        tinyxml2::XMLElement* elem = root->FirstChildElement("middle");
-
-        if (!elem)
+        for (tinyxml2::XMLElement* elem = root->FirstChildElement("zone");
+            elem;
+            elem = elem->NextSiblingElement("zone"))
         {
-            RCLCPP_ERROR(get_logger(), "No <middle> element in file");
-            return false;
+            zones_.push_back(Obstacle(elem));
         }
-
-        zone = Obstacle(elem);
 
         RCLCPP_INFO(get_logger(), "Loaded zone obstacles from XML");
         return true;

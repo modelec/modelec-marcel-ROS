@@ -171,6 +171,9 @@ namespace ModelecGUI
     {
         isGameStarted_ = false;
         lastWapointWasEnd = true;
+        score_ = 0;
+        score_label_->setText(QString("Score: %1").arg(score_));
+        timer_label_->setText("00");
 
         qpoints.clear();
 

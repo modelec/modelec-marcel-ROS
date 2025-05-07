@@ -1,3 +1,8 @@
 <pami_zone>
-    <middle id="1000" x="1500" y="1500" theta="-1.5708" width="1700" height="600" type="pami-middle" />
+
+    <zone id="1000" x="725" y="1625" theta="-1.5708" width="150" height="450" type="pami-middle" />
+    <zone id="1001" x="900" y="1550" theta="-1.5708" width="200" height="500" type="pami-middle" />
+    <zone id="1002" x="1500" y="1500" theta="-1.5708" width="1000" height="600" type="pami-middle" />
+    <zone id="1003" x="2100" y="1550" theta="-1.5708" width="200" height="500" type="pami-middle" />
+    <zone id="1004" x="2275" y="1625" theta="-1.5708" width="150" height="450" type="pami-middle" />
 </pami_zone>

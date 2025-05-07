@@ -274,6 +274,10 @@ namespace Modelec
                 bool success = true;
                 ResolveSetPIDRequest(success);
             }
+            else if (tokens[1] == "POS")
+            {
+                // position set
+            }
             else
             {
                 RCLCPP_INFO(this->get_logger(), "PCB response: %s", msg->data.c_str());

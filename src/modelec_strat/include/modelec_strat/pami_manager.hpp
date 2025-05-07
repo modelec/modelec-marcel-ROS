@@ -10,6 +10,7 @@
 #include <tinyxml2.h>
 
 #include <std_msgs/msg/int64.hpp>
+#include <std_msgs/msg/empty.hpp>
 
 namespace Modelec {
 
@@ -40,6 +41,7 @@ namespace Modelec {
         rclcpp::Publisher<modelec_interfaces::msg::Obstacle>::SharedPtr add_obs_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::Obstacle>::SharedPtr remove_obs_pub_;
         rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr score_pub_;
+        rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr reset_strat_sub_;
     };
 
 }

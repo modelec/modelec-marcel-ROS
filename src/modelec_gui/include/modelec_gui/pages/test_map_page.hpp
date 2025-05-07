@@ -39,6 +39,8 @@ namespace ModelecGUI {
 
         void toggleShowObstacle();
 
+        void AskMap();
+
     protected:
         void paintEvent(QPaintEvent*) override;
 

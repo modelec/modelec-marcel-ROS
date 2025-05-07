@@ -146,6 +146,37 @@ namespace ModelecGUI
         rclcpp::spin_until_future_complete(node_->get_node_base_interface(), result2);
     }
 
+    void MapPage::AskMap()
+    {
+        reset_timer_ = node_->create_wall_timer(
+        std::chrono::seconds(1),
+        [this]() {
+
+            ask_map_obstacle_client_ = node_->create_client<std_srvs::srv::Empty>("nav/ask_map_obstacle");
+            while (!ask_map_obstacle_client_->wait_for_service(std::chrono::seconds(1))) {
+                if (!rclcpp::ok()) {
+                    RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+                    return;
+                }
+                RCLCPP_INFO(node_->get_logger(), "Waiting for the service...");
+            }
+
+            ask_map_obstacle_client_->async_send_request(std::make_shared<std_srvs::srv::Empty::Request>());
+
+            reset_timer_->cancel();
+        });
+    }
+
+    void MapPage::Reset()
+    {
+        isGameStarted_ = false;
+        lastWapointWasEnd = true;
+
+        qpoints.clear();
+
+        AskMap();
+    }
+
     void MapPage::paintEvent(QPaintEvent* paint_event)
     {
         QWidget::paintEvent(paint_event);
@@ -226,7 +257,7 @@ namespace ModelecGUI
 
     void MapPage::OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg)
     {
-        obstacle_.emplace(msg->id, *msg);
+        obstacle_[msg->id] = *msg;
     }
 
     void MapPage::resizeEvent(QResizeEvent* event)

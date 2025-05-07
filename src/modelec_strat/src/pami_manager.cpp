@@ -73,6 +73,13 @@ namespace Modelec
             "obstacle/remove", 10);
 
         score_pub_ = create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
+
+        reset_strat_sub_ = create_subscription<std_msgs::msg::Empty>(
+            "/strat/reset", 10, [this](const std_msgs::msg::Empty::SharedPtr)
+            {
+                timer_add_->cancel();
+                timer_remove_->cancel();
+            });
     }
 
     bool PamiManger::ReadFromXML(const std::string& filename)

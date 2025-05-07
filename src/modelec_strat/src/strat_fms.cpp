@@ -5,12 +5,12 @@
 namespace Modelec
 {
 
-    StratFMS::StratFMS() : Node("start_fms"), state_(State::INIT)
+    StratFMS::StratFMS() : Node("start_fms")
     {
         tirette_sub_ = create_subscription<std_msgs::msg::Bool>(
             "/tirette", 10, [this](const std_msgs::msg::Bool::SharedPtr msg)
             {
-                if (!started_ && msg->data)
+                if (setup_ && !started_ && msg->data)
                 {
                     started_ = true;
                 }
@@ -23,9 +23,17 @@ namespace Modelec
         team_id_sub_ = create_subscription<std_msgs::msg::Int8>(
             "/strat/team", 10, [this](const std_msgs::msg::Int8::SharedPtr msg)
             {
+                setup_ = true;
                 team_id_ = static_cast<int>(msg->data);
                 nav_->SetTeamId(team_id_);
                 nav_->SetSpawn();
+            });
+
+        reset_strat_sub_ = create_subscription<std_msgs::msg::Empty>(
+            "/strat/reset", 10, [this](const std_msgs::msg::Empty::SharedPtr)
+            {
+                RCLCPP_INFO(get_logger(), "Resetting strat");
+                Reset();
             });
 
         client_start_ = create_client<modelec_interfaces::srv::OdometryStart>("/odometry/start");
@@ -61,10 +69,23 @@ namespace Modelec
 
         RCLCPP_INFO(this->get_logger(), "StratFMS fully initialized");
 
+        state_ = State::INIT;
+        started_ = false;
+        setup_ = false;
+        current_mission_.reset();
+        match_start_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
+
         timer_ = create_wall_timer(std::chrono::milliseconds(100), [this]
         {
             update();
         });
+    }
+
+    void StratFMS::Reset()
+    {
+        timer_->cancel();
+
+        Init();
     }
 
     void StratFMS::transition(State next, const std::string& reason)
@@ -88,7 +109,6 @@ namespace Modelec
             RCLCPP_INFO_ONCE(get_logger(), "State: INIT");
             transition(State::WAIT_START, "System ready");
             break;
-
         case State::WAIT_START:
             if (started_)
             {

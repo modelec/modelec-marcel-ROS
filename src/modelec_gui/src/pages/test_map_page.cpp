@@ -170,6 +170,11 @@ namespace ModelecGUI
         show_obstacle_ = !show_obstacle_;
     }
 
+    void TestMapPage::AskMap()
+    {
+        ask_map_obstacle_client_->async_send_request(std::make_shared<std_srvs::srv::Empty::Request>());
+    }
+
     void TestMapPage::paintEvent(QPaintEvent* paint_event)
     {
         QWidget::paintEvent(paint_event);

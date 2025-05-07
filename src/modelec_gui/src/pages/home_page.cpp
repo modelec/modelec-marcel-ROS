@@ -33,17 +33,24 @@ namespace ModelecGUI
 
         setLayout(v_layout_);
 
-        team_publisher_ = node_->create_publisher<std_msgs::msg::Int8>("/strat/team", 10);
+        team_pub_ = node_->create_publisher<std_msgs::msg::Int8>("/strat/team", 10);
+
+        reset_strat_pub_ = node_->create_publisher<std_msgs::msg::Empty>("/strat/reset", 10);
 
         connect(yellow_button_, &QPushButton::clicked, this, &HomePage::onYellowButtonClicked);
         connect(blue_button_, &QPushButton::clicked, this, &HomePage::onBlueButtonClicked);
+    }
+
+    void HomePage::Init()
+    {
+        reset_strat_pub_->publish(std_msgs::msg::Empty());
     }
 
     void HomePage::onYellowButtonClicked()
     {
         std_msgs::msg::Int8 msg;
         msg.data = 0;
-        team_publisher_->publish(msg);
+        team_pub_->publish(msg);
 
         emit TeamChoose();
     }
@@ -52,7 +59,7 @@ namespace ModelecGUI
     {
         std_msgs::msg::Int8 msg;
         msg.data = 1;
-        team_publisher_->publish(msg);
+        team_pub_->publish(msg);
 
         emit TeamChoose();
     }

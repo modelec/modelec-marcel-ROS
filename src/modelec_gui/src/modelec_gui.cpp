@@ -61,6 +61,8 @@ namespace ModelecGUI {
 
         connect(home_action_, &QAction::triggered, this, [this]() {
             stackedWidget->setCurrentIndex(0);
+            home_page_->Init();
+            map_page_->Reset();
         });
 
         connect(odo_action_, &QAction::triggered, this, [this]() {

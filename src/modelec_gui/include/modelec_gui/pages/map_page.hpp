@@ -33,6 +33,10 @@ namespace ModelecGUI {
 
         rclcpp::Node::SharedPtr get_node() const { return node_; }
 
+        void AskMap();
+
+        void Reset();
+
     protected:
         void paintEvent(QPaintEvent*) override;
 
@@ -41,6 +45,8 @@ namespace ModelecGUI {
         void OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg);
 
         void resizeEvent(QResizeEvent* event) override;
+
+        rclcpp::TimerBase::SharedPtr reset_timer_;
 
         QSvgRenderer* renderer;
 

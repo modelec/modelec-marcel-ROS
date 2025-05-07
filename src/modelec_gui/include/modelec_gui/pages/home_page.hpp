@@ -8,6 +8,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <std_msgs/msg/int8.hpp>
+#include <std_msgs/msg/empty.hpp>
 
 namespace ModelecGUI
 {
@@ -17,6 +18,8 @@ namespace ModelecGUI
 
     public:
         HomePage(rclcpp::Node::SharedPtr node, QWidget* parent = nullptr);
+
+        void Init();
 
     public slots:
         void onYellowButtonClicked();
@@ -31,7 +34,8 @@ namespace ModelecGUI
 
         rclcpp::Node::SharedPtr node_;
 
-        rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr team_publisher_;
+        rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr team_pub_;
+        rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr reset_strat_pub_;
 
         QVBoxLayout* v_layout_;
         QHBoxLayout* h_layout_;

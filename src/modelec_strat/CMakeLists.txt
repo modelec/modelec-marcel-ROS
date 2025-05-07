@@ -31,6 +31,15 @@ target_include_directories(enemy_manager PUBLIC
         $<INSTALL_INTERFACE:include>
 )
 
+
+add_executable(pami_manager src/pami_manager.cpp src/obstacle/obstacle.cpp)
+ament_target_dependencies(pami_manager rclcpp std_msgs std_srvs modelec_interfaces ament_index_cpp)
+target_link_libraries(pami_manager modelec_utils::utils modelec_utils::config)
+target_include_directories(pami_manager PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
 if (BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
     set(ament_cmake_copyright_FOUND TRUE)
@@ -41,6 +50,7 @@ endif ()
 install(TARGETS
         strat_fsm
         enemy_manager
+        pami_manager
         DESTINATION lib/${PROJECT_NAME}
 )
 

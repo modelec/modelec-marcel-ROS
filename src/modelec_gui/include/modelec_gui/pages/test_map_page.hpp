@@ -14,6 +14,7 @@
 
 #include <modelec_interfaces/msg/odometry_add_waypoint.hpp>
 #include <modelec_interfaces/msg/odometry_pos.hpp>
+#include <modelec_interfaces/msg/odometry_go_to.hpp>
 #include <modelec_interfaces/srv/map.hpp>
 #include <modelec_interfaces/srv/map_size.hpp>
 #include <modelec_interfaces/msg/obstacle.hpp>
@@ -54,14 +55,6 @@ namespace ModelecGUI {
 
         QSvgRenderer* renderer;
 
-        QVBoxLayout* v_layout;
-        QHBoxLayout* h_layout;
-
-        QPushButton* tirette_button_;
-
-        QLabel* timer_label_;
-        QLabel* score_label_;
-
         modelec_interfaces::msg::OdometryPos robotPos;
         std::vector<QPoint> qpoints;
         //std::vector<modelec_interfaces::msg::OdometryAddWaypoint> points;
@@ -85,12 +78,10 @@ namespace ModelecGUI {
 
         rclcpp::Node::SharedPtr node_;
 
-        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr tirette_pub_;
-
         rclcpp::Subscription<modelec_interfaces::msg::OdometryAddWaypoint>::SharedPtr add_waypoint_sub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr odometry_sub_;
-        rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr go_to_pub_;
+        rclcpp::Publisher<modelec_interfaces::msg::OdometryGoTo>::SharedPtr go_to_pub_;
         rclcpp::Client<modelec_interfaces::srv::MapSize>::SharedPtr map_client_;
         rclcpp::Subscription<modelec_interfaces::msg::Obstacle>::SharedPtr obstacle_added_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::Obstacle>::SharedPtr obstacle_removed_sub_;
@@ -100,11 +91,5 @@ namespace ModelecGUI {
         bool hasEnemy = false;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_pub_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
-        rclcpp::Subscription<std_msgs::msg::Int64>::SharedPtr strat_start_sub_;
-
-        bool isGameStarted_ = false;
-        long int start_time_ = 0;
-
-        rclcpp::Subscription<modelec_interfaces::msg::StratState>::SharedPtr strat_state_sub_;
     };
 }

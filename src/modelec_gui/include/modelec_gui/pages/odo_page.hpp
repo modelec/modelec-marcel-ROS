@@ -42,13 +42,9 @@ namespace ModelecGUI {
         QLineEdit *xSpeedBox_, *ySpeedBox_, *thetaSpeedBox_;
         QHBoxLayout *speedLayout_;
 
-        QPushButton *startTest_;
-
         rclcpp::Node::SharedPtr node_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr sub_;
-
-        rclcpp::Publisher<modelec_interfaces::msg::OdometryAddWaypoint>::SharedPtr pub_add_waypoint_;
 
         // client
         rclcpp::Client<modelec_interfaces::srv::OdometrySpeed>::SharedPtr client_;

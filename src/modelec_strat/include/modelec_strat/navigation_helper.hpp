@@ -4,6 +4,7 @@
 #include <modelec_interfaces/msg/odometry_add_waypoint.hpp>
 #include <modelec_interfaces/msg/odometry_waypoint_reach.hpp>
 #include <modelec_interfaces/msg/odometry_pos.hpp>
+#include <modelec_interfaces/msg/odometry_go_to.hpp>
 
 #include "deposite_zone.hpp"
 #include "pathfinding.hpp"
@@ -123,7 +124,7 @@ namespace Modelec {
         rclcpp::Subscription<WaypointReachMsg>::SharedPtr waypoint_reach_sub_;
         rclcpp::Publisher<WaypointMsg>::SharedPtr waypoint_pub_;
 
-        rclcpp::Subscription<PosMsg>::SharedPtr go_to_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryGoTo>::SharedPtr go_to_sub_;
         rclcpp::Subscription<PosMsg>::SharedPtr pos_sub_;
         rclcpp::Publisher<PosMsg>::SharedPtr pos_pub_;
 

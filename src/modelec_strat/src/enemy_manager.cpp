@@ -144,7 +144,7 @@ namespace Modelec
                 last_publish_time_ = this->now();
                 last_movement_time_ = this->now();  // Mise à jour du dernier vrai mouvement
                 enemy_pos_pub_->publish(enemy_pos);
-                RCLCPP_INFO(this->get_logger(), "Enemy moved: x=%ld, y=%ld", enemy_pos.x, enemy_pos.y);
+                RCLCPP_INFO(this->get_logger(), "Enemy moved: x=%d, y=%d", enemy_pos.x, enemy_pos.y);
             }
             else
             {
@@ -152,7 +152,7 @@ namespace Modelec
                 if ((now - last_movement_time_).seconds() > max_stationary_time_s_)
                 {
                     enemy_long_time_pub_->publish(last_enemy_pos_);
-                    RCLCPP_WARN(this->get_logger(), "Enemy has been stationary for too long at x=%ld y=%ld", last_enemy_pos_.x, last_enemy_pos_.y);
+                    RCLCPP_WARN(this->get_logger(), "Enemy has been stationary for too long at x=%d y=%d", last_enemy_pos_.x, last_enemy_pos_.y);
 
                     last_movement_time_ = now;
                 }

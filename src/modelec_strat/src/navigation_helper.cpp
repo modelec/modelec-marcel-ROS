@@ -39,9 +39,9 @@ namespace Modelec {
 
         pos_pub_ = node_->create_publisher<PosMsg>("odometry/set_position", 10);
 
-        go_to_sub_ = node_->create_subscription<PosMsg>(
-            "nav/go_to", 10, [this](const PosMsg::SharedPtr msg) {
-                GoTo(msg, false, Pathfinding::FREE | Pathfinding::WALL);
+        go_to_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryGoTo>(
+            "nav/go_to", 10, [this](const modelec_interfaces::msg::OdometryGoTo::SharedPtr msg) {
+                GoTo(msg->x, msg->y, msg->theta, msg->close, msg->mask);
             });
 
         enemy_pos_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
@@ -478,14 +478,28 @@ namespace Modelec {
 
     bool NavigationHelper::EnemyOnPath(const modelec_interfaces::msg::OdometryPos msg)
     {
-        for (size_t i = -1; i + 1 < waypoints_.size(); ++i)
+        auto curr = Waypoint(*current_pos_, -1, false);
+        std::vector<Waypoint> waypointsList;
+        waypointsList.push_back(curr);
+
+        for (auto& waypoint : waypoints_)
         {
-            auto wp = i == -1 ? Waypoint(*current_pos_, -1, false) : waypoints_[i];
-            auto next_wp = waypoints_[i + 1];
+            if (waypoint.reached)
+            {
+                continue;
+            }
+            waypointsList.push_back(waypoint);
+        }
+
+        for (size_t i = 0; i + 1 < waypointsList.size(); ++i)
+        {
+            auto wp = waypointsList[i];
+            auto next_wp = waypointsList[i + 1];
             if (DoesLineIntersectCircle(
                     Point(wp.x, wp.y, wp.theta),
                     Point(next_wp.x, next_wp.y, next_wp.theta),
-                    Point(msg.x, msg.y, msg.theta), (pathfinding_->enemy_length_mm_ + pathfinding_->robot_length_mm_ + pathfinding_->enemy_margin_mm_) / 2.0f))
+                    Point(msg.x, msg.y, msg.theta),
+                    (pathfinding_->enemy_length_mm_ + pathfinding_->robot_length_mm_ + pathfinding_->enemy_margin_mm_) / 2.0f))
             {
                 return true;
             }

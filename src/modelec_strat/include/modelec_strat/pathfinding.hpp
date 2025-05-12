@@ -19,8 +19,8 @@
 #include "obstacle/column.hpp"
 
 
-namespace Modelec {
-
+namespace Modelec
+{
     using WaypointMsg = modelec_interfaces::msg::OdometryAddWaypoint;
     using WaypointReachMsg = modelec_interfaces::msg::OdometryWaypointReach;
     using PosMsg = modelec_interfaces::msg::OdometryPos;
@@ -38,7 +38,8 @@ namespace Modelec {
         WaypointMsg toMsg() const;
     };
 
-    class Pathfinding {
+    class Pathfinding
+    {
     public:
         enum
         {
@@ -83,10 +84,11 @@ namespace Modelec {
         void AddObstacle(const std::shared_ptr<Obstacle>& obstacle);
 
         template <typename T,
-          typename = std::enable_if_t<std::is_base_of<Obstacle, T>::value>>
+                  typename = std::enable_if_t<std::is_base_of<Obstacle, T>::value>>
         std::shared_ptr<T> GetClosestObstacle(const PosMsg::SharedPtr& pos) const;
 
-        std::shared_ptr<ColumnObstacle> GetClosestColumn(const PosMsg::SharedPtr& pos, const std::vector<int>& blacklistedId = {});
+        std::shared_ptr<ColumnObstacle> GetClosestColumn(const PosMsg::SharedPtr& pos,
+                                                         const std::vector<int>& blacklistedId = {});
 
         void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
@@ -145,10 +147,13 @@ namespace Modelec {
         auto robotPos = Point(pos->x, pos->y, pos->theta);
         float distance = std::numeric_limits<float>::max();
 
-        for (const auto& obstacle : obstacle_map_) {
-            if (auto obs = std::dynamic_pointer_cast<T>(obstacle.second)) {
+        for (const auto& obstacle : obstacle_map_)
+        {
+            if (auto obs = std::dynamic_pointer_cast<T>(obstacle.second))
+            {
                 auto dist = Point::distance(robotPos, obs->position());
-                if (dist < distance) {
+                if (dist < distance)
+                {
                     distance = dist;
                     closest_obstacle = obs;
                 }

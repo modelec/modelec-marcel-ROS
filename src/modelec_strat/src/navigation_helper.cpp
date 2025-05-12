@@ -4,7 +4,8 @@
 
 #include "../../modelec_utils/include/modelec_utils/config.hpp"
 
-namespace Modelec {
+namespace Modelec
+{
     NavigationHelper::NavigationHelper()
     {
     }
@@ -25,7 +26,8 @@ namespace Modelec {
 
         waypoint_reach_sub_ = node_->create_subscription<WaypointReachMsg>(
             "odometry/waypoint_reach", 10,
-            [this](const WaypointReachMsg::SharedPtr msg) {
+            [this](const WaypointReachMsg::SharedPtr msg)
+            {
                 OnWaypointReach(msg);
             });
 
@@ -33,14 +35,16 @@ namespace Modelec {
 
         pos_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 20,
-            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
+            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+            {
                 OnPos(msg);
             });
 
         pos_pub_ = node_->create_publisher<PosMsg>("odometry/set_position", 10);
 
         go_to_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryGoTo>(
-            "nav/go_to", 10, [this](const modelec_interfaces::msg::OdometryGoTo::SharedPtr msg) {
+            "nav/go_to", 10, [this](const modelec_interfaces::msg::OdometryGoTo::SharedPtr msg)
+            {
                 GoTo(msg->x, msg->y, msg->theta, msg->close, msg->mask);
             });
 
@@ -58,7 +62,8 @@ namespace Modelec {
                 OnEnemyPositionLongTime(msg);
             });
 
-        std::string deposite_zone_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/deposite_zone.xml";
+        std::string deposite_zone_path = ament_index_cpp::get_package_share_directory("modelec_strat") +
+            "/data/deposite_zone.xml";
         if (!LoadDepositeZoneFromXML(deposite_zone_path))
         {
             RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacles from XML");
@@ -82,7 +87,7 @@ namespace Modelec {
 
     void NavigationHelper::SendWaypoint() const
     {
-        for (auto & w : waypoints_)
+        for (auto& w : waypoints_)
         {
             waypoint_pub_->publish(w.toMsg());
         }
@@ -90,7 +95,7 @@ namespace Modelec {
 
     void NavigationHelper::SendWaypoint(const std::vector<WaypointMsg>& waypoints) const
     {
-        for (auto & w : waypoints)
+        for (auto& w : waypoints)
         {
             waypoint_pub_->publish(w);
         }
@@ -178,7 +183,7 @@ namespace Modelec {
         }
         waypoints_.back().is_end = false;
 
-        for (auto & w : waypoint_list)
+        for (auto& w : waypoint_list)
         {
             waypoints_.emplace_back(w);
         }
@@ -251,7 +256,7 @@ namespace Modelec {
 
         waypoints_.clear();
 
-        for (auto & w : wl)
+        for (auto& w : wl)
         {
             waypoints_.emplace_back(w);
         }
@@ -293,7 +298,7 @@ namespace Modelec {
 
             send_back_waypoints_.clear();
 
-            for (auto & w : wl)
+            for (auto& w : wl)
             {
                 send_back_waypoints_.emplace_back(w);
             }
@@ -302,7 +307,7 @@ namespace Modelec {
         {
             waypoints_.clear();
 
-            for (auto & w : wl)
+            for (auto& w : wl)
             {
                 waypoints_.emplace_back(w);
             }
@@ -404,7 +409,8 @@ namespace Modelec {
         return true;
     }
 
-    std::shared_ptr<DepositeZone> NavigationHelper::GetClosestDepositeZone(const PosMsg::SharedPtr& pos, int teamId, const std::vector<int>& blacklistedId)
+    std::shared_ptr<DepositeZone> NavigationHelper::GetClosestDepositeZone(
+        const PosMsg::SharedPtr& pos, int teamId, const std::vector<int>& blacklistedId)
     {
         // TODO : score
         std::shared_ptr<DepositeZone> closest_zone = nullptr;
@@ -414,7 +420,8 @@ namespace Modelec {
 
         for (const auto& [id, zone] : deposite_zones_)
         {
-            if (zone->GetTeam() == teamId && zone->RemainingPotPos() > 0 && blacklistedId.end() == std::find(blacklistedId.begin(), blacklistedId.end(), id))
+            if (zone->GetTeam() == teamId && zone->RemainingPotPos() > 0 && blacklistedId.end() == std::find(
+                blacklistedId.begin(), blacklistedId.end(), id))
             {
                 double distance = Point::distance(posPoint, zone->GetPosition());
                 double enemy_distance = Point::distance(enemyPos, zone->GetPosition());
@@ -468,9 +475,11 @@ namespace Modelec {
         for (auto& [id, zone] : deposite_zones_)
         {
             auto zonePos = zone->GetPosition();
-            if (Point::distance(enemy_pos, zonePos) < pathfinding_->robot_width_mm_ + (zone->GetWidth()/2) + pathfinding_->enemy_margin_mm_)
+            if (Point::distance(enemy_pos, zonePos) < pathfinding_->robot_width_mm_ + (zone->GetWidth() / 2) +
+                pathfinding_->enemy_margin_mm_)
             {
-                std::shared_ptr<Obstacle> obs = std::make_shared<Obstacle>(id, zonePos.x, zonePos.y, zonePos.theta, zone->GetWidth(), zone->GetHeight(), "enemy-zone");
+                std::shared_ptr<Obstacle> obs = std::make_shared<Obstacle>(
+                    id, zonePos.x, zonePos.y, zonePos.theta, zone->GetWidth(), zone->GetHeight(), "enemy-zone");
                 pathfinding_->AddObstacle(obs);
             }
         }
@@ -496,10 +505,11 @@ namespace Modelec {
             auto wp = waypointsList[i];
             auto next_wp = waypointsList[i + 1];
             if (DoesLineIntersectCircle(
-                    Point(wp.x, wp.y, wp.theta),
-                    Point(next_wp.x, next_wp.y, next_wp.theta),
-                    Point(msg.x, msg.y, msg.theta),
-                    (pathfinding_->enemy_length_mm_ + pathfinding_->robot_length_mm_ + pathfinding_->enemy_margin_mm_) / 2.0f))
+                Point(wp.x, wp.y, wp.theta),
+                Point(next_wp.x, next_wp.y, next_wp.theta),
+                Point(msg.x, msg.y, msg.theta),
+                (pathfinding_->enemy_length_mm_ + pathfinding_->robot_length_mm_ + pathfinding_->enemy_margin_mm_) /
+                2.0f))
             {
                 return true;
             }
@@ -508,9 +518,11 @@ namespace Modelec {
         return false;
     }
 
-    bool NavigationHelper::DoesLineIntersectCircle(const Point& start, const Point& end, const Point& center, float radius)
+    bool NavigationHelper::DoesLineIntersectCircle(const Point& start, const Point& end, const Point& center,
+                                                   float radius)
     {
-        float num = std::abs((end.y - start.y) * center.x - (end.x - start.x) * center.y + end.x * start.y - end.y * start.x);
+        float num = std::abs(
+            (end.y - start.y) * center.x - (end.x - start.x) * center.y + end.x * start.y - end.y * start.x);
         float den = std::sqrt((end.y - start.y) * (end.y - start.y) + (end.x - start.x) * (end.x - start.x));
         float dist = num / den;
         return dist < radius;
@@ -524,7 +536,8 @@ namespace Modelec {
             {
                 if (GoTo(last_go_to_.goal, true, last_go_to_.collisionMask) != Pathfinding::FREE)
                 {
-                    GoTo(current_pos_, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE | Pathfinding::ENEMY);
+                    GoTo(current_pos_, true,
+                         Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE | Pathfinding::ENEMY);
                     // TODO : Handle case where no path is found
                 }
             }
@@ -566,18 +579,18 @@ namespace Modelec {
     {
         switch (team_id_)
         {
-            case YELLOW:
-                return spawn_yellow_;
-            case BLUE:
-                return spawn_blue_;
-            default:
-                return spawn_yellow_;
+        case YELLOW:
+            return spawn_yellow_;
+        case BLUE:
+            return spawn_blue_;
+        default:
+            return spawn_yellow_;
         }
     }
 
     void NavigationHelper::OnWaypointReach(const WaypointReachMsg::SharedPtr msg)
     {
-        for (auto & waypoint : waypoints_)
+        for (auto& waypoint : waypoints_)
         {
             if (waypoint.id == msg->id)
             {
@@ -588,7 +601,7 @@ namespace Modelec {
                     await_rotate_ = false;
 
                     waypoints_.clear();
-                    for (auto & w : send_back_waypoints_)
+                    for (auto& w : send_back_waypoints_)
                     {
                         waypoints_.emplace_back(w);
                     }
@@ -603,5 +616,4 @@ namespace Modelec {
         current_pos_ = msg;
         pathfinding_->SetCurrentPos(msg);
     }
-
 }

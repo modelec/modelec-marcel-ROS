@@ -9,9 +9,10 @@
 #include "deposite_zone.hpp"
 #include "pathfinding.hpp"
 
-namespace Modelec {
-
-    class NavigationHelper {
+namespace Modelec
+{
+    class NavigationHelper
+    {
     public:
         enum
         {
@@ -30,15 +31,15 @@ namespace Modelec {
         int GetTeamId() const;
 
         void SendWaypoint() const;
-        void SendWaypoint(const std::vector<WaypointMsg> &waypoints) const;
+        void SendWaypoint(const std::vector<WaypointMsg>& waypoints) const;
 
-        void AddWaypoint(const PosMsg &pos, int index);
-        void AddWaypoint(const WaypointMsg &waypoint);
+        void AddWaypoint(const PosMsg& pos, int index);
+        void AddWaypoint(const WaypointMsg& waypoint);
 
-        void AddWaypoints(const std::initializer_list<PosMsg> &pos_list, int index);
-        void AddWaypoints(const std::initializer_list<WaypointMsg> &waypoint_list);
+        void AddWaypoints(const std::initializer_list<PosMsg>& pos_list, int index);
+        void AddWaypoints(const std::initializer_list<WaypointMsg>& waypoint_list);
 
-        void SetWaypoints(const std::list<Waypoint> &waypoints);
+        void SetWaypoints(const std::list<Waypoint>& waypoints);
 
         bool HasArrived() const;
 
@@ -67,9 +68,10 @@ namespace Modelec {
 
         PosMsg::SharedPtr GetCurrentPos() const;
 
-        bool LoadDepositeZoneFromXML(const std::string &filename);
+        bool LoadDepositeZoneFromXML(const std::string& filename);
 
-        std::shared_ptr<DepositeZone> GetClosestDepositeZone(const PosMsg::SharedPtr &pos, int teamId, const std::vector<int>& blacklistedId = {});
+        std::shared_ptr<DepositeZone> GetClosestDepositeZone(const PosMsg::SharedPtr& pos, int teamId,
+                                                             const std::vector<int>& blacklistedId = {});
 
         PosMsg::SharedPtr GetHomePosition();
 
@@ -78,7 +80,7 @@ namespace Modelec {
         void OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
         bool DoesLineIntersectCircle(const Point& start, const Point& end,
-                             const Point& center, float radius);
+                                     const Point& center, float radius);
 
         bool EnemyOnPath(const modelec_interfaces::msg::OdometryPos msg);
 

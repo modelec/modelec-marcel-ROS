@@ -24,13 +24,14 @@
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/int64.hpp>
 
-namespace ModelecGUI {
+namespace ModelecGUI
+{
     class TestMapPage : public QWidget
     {
         Q_OBJECT
 
     public:
-        TestMapPage(rclcpp::Node::SharedPtr node, QWidget *parent = nullptr);
+        TestMapPage(rclcpp::Node::SharedPtr node, QWidget* parent = nullptr);
 
         rclcpp::Node::SharedPtr get_node() const { return node_; }
 

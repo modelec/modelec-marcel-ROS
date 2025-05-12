@@ -6,14 +6,16 @@
 namespace ModelecGUI
 {
     HomePage::HomePage(rclcpp::Node::SharedPtr node, QWidget* parent)
-       : QWidget(parent), node_(node),
-         renderer_(new QSvgRenderer(QString(":/img/playmat/2025_FINAL.svg"), this))
+        : QWidget(parent), node_(node),
+          renderer_(new QSvgRenderer(QString(":/img/playmat/2025_FINAL.svg"), this))
     {
         yellow_button_ = new QPushButton("Yellow", this);
         blue_button_ = new QPushButton("Blue", this);
 
-        yellow_button_->setStyleSheet("background-color: rgba(255, 255, 0, 128); border: none; color: black; font-size: 24px;");
-        blue_button_->setStyleSheet("background-color: rgba(0, 0, 255, 128); border: none; color: white; font-size: 24px;");
+        yellow_button_->setStyleSheet(
+            "background-color: rgba(255, 255, 0, 128); border: none; color: black; font-size: 24px;");
+        blue_button_->setStyleSheet(
+            "background-color: rgba(0, 0, 255, 128); border: none; color: white; font-size: 24px;");
 
         yellow_button_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         blue_button_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

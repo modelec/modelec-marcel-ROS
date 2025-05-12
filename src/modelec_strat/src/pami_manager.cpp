@@ -56,7 +56,7 @@ namespace Modelec
                     second_goal - now,
                     [this]()
                     {
-                        for (const auto & obs : zones_)
+                        for (const auto& obs : zones_)
                         {
                             add_obs_pub_->publish(obs.toMsg());
 
@@ -108,8 +108,8 @@ namespace Modelec
         }
 
         for (tinyxml2::XMLElement* elem = root->FirstChildElement("zone");
-            elem;
-            elem = elem->NextSiblingElement("zone"))
+             elem;
+             elem = elem->NextSiblingElement("zone"))
         {
             zones_.push_back(Obstacle(elem));
         }
@@ -119,7 +119,8 @@ namespace Modelec
     }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
     rclcpp::init(argc, argv);
     rclcpp::spin(std::make_shared<Modelec::PamiManger>());
     rclcpp::shutdown();

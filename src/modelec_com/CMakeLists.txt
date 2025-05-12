@@ -18,7 +18,7 @@ find_package(modelec_interfaces REQUIRED)
 find_package(modelec_utils REQUIRED)
 find_library(WIRINGPI_LIB wiringPi)
 
-# USB Arduino Listener Node
+# Serial listener Node
 add_executable(serial_listener src/multiple_serial_listener.cpp)
 ament_target_dependencies(serial_listener rclcpp std_msgs modelec_interfaces ament_index_cpp)
 target_link_libraries(serial_listener Boost::system modelec_utils::utils modelec_utils::config)
@@ -27,7 +27,7 @@ target_include_directories(serial_listener PUBLIC
         $<INSTALL_INTERFACE:include>
 )
 
-# USB Arduino Logic Processor Node
+# PCB Odometry Node
 add_executable(pcb_odo_interface src/pcb_odo_interface.cpp)
 ament_target_dependencies(pcb_odo_interface rclcpp std_msgs modelec_interfaces ament_index_cpp)
 target_link_libraries(pcb_odo_interface modelec_utils::utils modelec_utils::config)
@@ -36,11 +36,20 @@ target_include_directories(pcb_odo_interface PUBLIC
         $<INSTALL_INTERFACE:include>
 )
 
-# USB Arduino Logic Processor Node
+# PCB Alim Node
 add_executable(pcb_alim_interface src/pcb_alim_interface.cpp)
 ament_target_dependencies(pcb_alim_interface rclcpp std_msgs modelec_interfaces ament_index_cpp)
 target_link_libraries(pcb_alim_interface modelec_utils::utils modelec_utils::config)
 target_include_directories(pcb_alim_interface PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+# PCB Action Node
+add_executable(pcb_action_interface src/pcb_action_interface.cpp)
+ament_target_dependencies(pcb_action_interface rclcpp std_msgs modelec_interfaces ament_index_cpp)
+target_link_libraries(pcb_action_interface modelec_utils::utils modelec_utils::config)
+target_include_directories(pcb_action_interface PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )

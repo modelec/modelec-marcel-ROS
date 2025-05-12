@@ -16,6 +16,11 @@ launch:
       name: 'pcb_alim_interface'
 
   - node:
+      pkg: 'modelec_com'
+      exec: 'pcb_action_interface'
+      name: 'pcb_action_interface'
+
+  - node:
       pkg: 'modelec_core'
       exec: 'speed_result'
       name: 'speed_result'

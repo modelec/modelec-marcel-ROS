@@ -8,7 +8,10 @@
 
 namespace ModelecGUI
 {
-    MapPage::MapPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent), renderer(new QSvgRenderer(QString(":/img/playmat/2025_FINAL.svg"), this)), node_(node)
+    MapPage::MapPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent),
+                                                                      renderer(new QSvgRenderer(
+                                                                          QString(":/img/playmat/2025_FINAL.svg"),
+                                                                          this)), node_(node)
     {
         ratioBetweenMapAndWidgetX_ = width() / 3000.0f;
         ratioBetweenMapAndWidgetY_ = height() / 2000.0f;
@@ -46,14 +49,17 @@ namespace ModelecGUI
         enemy_length_ = Modelec::Config::get<int>("config.enemy.size.length_mm", 300);
         enemy_width_ = Modelec::Config::get<int>("config.enemy.size.width_mm", 300);
 
-        add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryAddWaypoint>("odometry/add_waypoint", 100,
-            [this](const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg) {
+        add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryAddWaypoint>(
+            "odometry/add_waypoint", 100,
+            [this](const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg)
+            {
                 if (lastWapointWasEnd)
                 {
                     qpoints.clear();
                     lastWapointWasEnd = false;
 
-                    qpoints.push_back(QPoint(robotPos.x * ratioBetweenMapAndWidgetX_, height() - robotPos.y * ratioBetweenMapAndWidgetY_));
+                    qpoints.push_back(QPoint(robotPos.x * ratioBetweenMapAndWidgetX_,
+                                             height() - robotPos.y * ratioBetweenMapAndWidgetY_));
                 }
 
                 if (msg->is_end)
@@ -61,31 +67,38 @@ namespace ModelecGUI
                     lastWapointWasEnd = true;
                 }
 
-                qpoints.push_back(QPoint(msg->x * ratioBetweenMapAndWidgetX_, height() - msg->y * ratioBetweenMapAndWidgetY_));
+                qpoints.push_back(QPoint(msg->x * ratioBetweenMapAndWidgetX_,
+                                         height() - msg->y * ratioBetweenMapAndWidgetY_));
                 update();
-        });
+            });
 
         odometry_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>("odometry/position", 10,
-            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
+            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+            {
                 robotPos = *msg;
                 update();
-        });
+            });
 
         score_sub_ = node_->create_subscription<std_msgs::msg::Int64>("strat/score", 10,
-            [this](const std_msgs::msg::Int64::SharedPtr msg) {
-                score_+= msg->data;
-                score_label_->setText(QString("Score: %1").arg(score_));
-        });
+                                                                      [this](const std_msgs::msg::Int64::SharedPtr msg)
+                                                                      {
+                                                                          score_ += msg->data;
+                                                                          score_label_->setText(
+                                                                              QString("Score: %1").arg(score_));
+                                                                      });
 
         obstacle_added_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>("nav/obstacle/added", 40,
-            [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
+            [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg)
+            {
                 OnObstacleReceived(msg);
-        });
+            });
 
-        obstacle_removed_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>("nav/obstacle/removed", 40,
-            [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
+        obstacle_removed_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>(
+            "nav/obstacle/removed", 40,
+            [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg)
+            {
                 obstacle_.erase(msg->id);
-        });
+            });
 
         enemy_pos_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>("enemy/position", 10,
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
@@ -97,24 +110,29 @@ namespace ModelecGUI
             });
 
         strat_start_sub_ = node_->create_subscription<std_msgs::msg::Int64>("/strat/start_time", 10,
-            [this](const std_msgs::msg::Int64::SharedPtr msg){
-                isGameStarted_ = true;
-                start_time_ = msg->data;
-        });
+                                                                            [this](
+                                                                            const std_msgs::msg::Int64::SharedPtr msg)
+                                                                            {
+                                                                                isGameStarted_ = true;
+                                                                                start_time_ = msg->data;
+                                                                            });
 
         strat_state_sub_ = node_->create_subscription<modelec_interfaces::msg::StratState>("/strat/state", 10,
-            [this](const modelec_interfaces::msg::StratState::SharedPtr msg){
+            [this](const modelec_interfaces::msg::StratState::SharedPtr msg)
+            {
                 if (msg->state == modelec_interfaces::msg::StratState::STOP)
                 {
                     RCLCPP_INFO(node_->get_logger(), "Game stop");
                     isGameStarted_ = false;
                 }
-        });
+            });
 
         // client to nav/map
         map_client_ = node_->create_client<modelec_interfaces::srv::MapSize>("nav/map_size");
-        while (!map_client_->wait_for_service(std::chrono::seconds(1))) {
-            if (!rclcpp::ok()) {
+        while (!map_client_->wait_for_service(std::chrono::seconds(1)))
+        {
+            if (!rclcpp::ok())
+            {
                 RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
@@ -134,8 +152,10 @@ namespace ModelecGUI
         }
 
         ask_map_obstacle_client_ = node_->create_client<std_srvs::srv::Empty>("nav/ask_map_obstacle");
-        while (!ask_map_obstacle_client_->wait_for_service(std::chrono::seconds(1))) {
-            if (!rclcpp::ok()) {
+        while (!ask_map_obstacle_client_->wait_for_service(std::chrono::seconds(1)))
+        {
+            if (!rclcpp::ok())
+            {
                 RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
@@ -149,22 +169,24 @@ namespace ModelecGUI
     void MapPage::AskMap()
     {
         reset_timer_ = node_->create_wall_timer(
-        std::chrono::seconds(1),
-        [this]() {
-
-            ask_map_obstacle_client_ = node_->create_client<std_srvs::srv::Empty>("nav/ask_map_obstacle");
-            while (!ask_map_obstacle_client_->wait_for_service(std::chrono::seconds(1))) {
-                if (!rclcpp::ok()) {
-                    RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
-                    return;
+            std::chrono::seconds(1),
+            [this]()
+            {
+                ask_map_obstacle_client_ = node_->create_client<std_srvs::srv::Empty>("nav/ask_map_obstacle");
+                while (!ask_map_obstacle_client_->wait_for_service(std::chrono::seconds(1)))
+                {
+                    if (!rclcpp::ok())
+                    {
+                        RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+                        return;
+                    }
+                    RCLCPP_INFO(node_->get_logger(), "Waiting for the service...");
                 }
-                RCLCPP_INFO(node_->get_logger(), "Waiting for the service...");
-            }
 
-            ask_map_obstacle_client_->async_send_request(std::make_shared<std_srvs::srv::Empty::Request>());
+                ask_map_obstacle_client_->async_send_request(std::make_shared<std_srvs::srv::Empty::Request>());
 
-            reset_timer_->cancel();
-        });
+                reset_timer_->cancel();
+            });
     }
 
     void MapPage::Reset()
@@ -202,7 +224,8 @@ namespace ModelecGUI
 
         // --- Draw lines ---
         painter.setPen(QPen(Qt::red, 2)); // Red lines, 2px wide
-        for (size_t i = 0; i + 1 < qpoints.size(); ++i) {
+        for (size_t i = 0; i + 1 < qpoints.size(); ++i)
+        {
             painter.drawLine(qpoints[i], qpoints[i + 1]);
         }
 
@@ -211,11 +234,12 @@ namespace ModelecGUI
         // --- Draw colored points ---
         const int radius = 5;
 
-        for (size_t i = 0; i < qpoints.size(); ++i) {
+        for (size_t i = 0; i < qpoints.size(); ++i)
+        {
             if (i == qpoints.size() - 1)
-                painter.setBrush(Qt::blue);  // Last = blue
+                painter.setBrush(Qt::blue); // Last = blue
             else
-                painter.setBrush(Qt::red);   // Middle = red
+                painter.setBrush(Qt::red); // Middle = red
 
             painter.drawEllipse(qpoints[i], radius, radius);
         }
@@ -224,7 +248,7 @@ namespace ModelecGUI
 
         if (show_obstacle_)
         {
-            for (auto & [index, obs] : obstacle_)
+            for (auto& [index, obs] : obstacle_)
             {
                 painter.save();
 
@@ -233,8 +257,9 @@ namespace ModelecGUI
                 painter.rotate(90 - obs.theta * (180.0 / M_PI));
                 painter.setBrush(Qt::black);
 
-                QRect toDraw(-(obs.width * ratioBetweenMapAndWidgetX_ / 2), -(obs.height * ratioBetweenMapAndWidgetY_ / 2),
-                       obs.width * ratioBetweenMapAndWidgetX_, obs.height * ratioBetweenMapAndWidgetY_);
+                QRect toDraw(-(obs.width * ratioBetweenMapAndWidgetX_ / 2),
+                             -(obs.height * ratioBetweenMapAndWidgetY_ / 2),
+                             obs.width * ratioBetweenMapAndWidgetX_, obs.height * ratioBetweenMapAndWidgetY_);
 
                 painter.drawRect(toDraw);
 
@@ -245,7 +270,9 @@ namespace ModelecGUI
             if (hasEnemy)
             {
                 painter.setBrush(Qt::red);
-                painter.drawRect((enemy_pos_.x - (enemy_width_ / 2)) * ratioBetweenMapAndWidgetX_, height() - (enemy_pos_.y + (enemy_length_ / 2)) * ratioBetweenMapAndWidgetY_, enemy_width_*ratioBetweenMapAndWidgetX_, enemy_length_*ratioBetweenMapAndWidgetY_);
+                painter.drawRect((enemy_pos_.x - (enemy_width_ / 2)) * ratioBetweenMapAndWidgetX_,
+                                 height() - (enemy_pos_.y + (enemy_length_ / 2)) * ratioBetweenMapAndWidgetY_,
+                                 enemy_width_ * ratioBetweenMapAndWidgetX_, enemy_length_ * ratioBetweenMapAndWidgetY_);
             }
         }
 

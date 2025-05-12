@@ -21,13 +21,15 @@ namespace Modelec
 
         current_pos_sub_ = this->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10,
-            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
+            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+            {
                 OnCurrentPos(msg);
             });
 
         laser_scan_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
             "scan", 10,
-            [this](const sensor_msgs::msg::LaserScan::SharedPtr msg) {
+            [this](const sensor_msgs::msg::LaserScan::SharedPtr msg)
+            {
                 OnLidarData(msg);
             });
 
@@ -35,13 +37,17 @@ namespace Modelec
             "enemy/position", 10);
 
         state_sub_ = create_subscription<modelec_interfaces::msg::StratState>("/strat/state", 10,
-            [this](const modelec_interfaces::msg::StratState::SharedPtr msg)
-            {
-                if (!game_stated_ && msg->state == modelec_interfaces::msg::StratState::SELECT_MISSION)
-                {
-                    game_stated_ = true;
-                }
-            });
+                                                                              [this](
+                                                                              const
+                                                                              modelec_interfaces::msg::StratState::SharedPtr
+                                                                              msg)
+                                                                              {
+                                                                                  if (!game_stated_ && msg->state ==
+                                                                                      modelec_interfaces::msg::StratState::SELECT_MISSION)
+                                                                                  {
+                                                                                      game_stated_ = true;
+                                                                                  }
+                                                                              });
 
         enemy_long_time_pub_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
             "/enemy/long_time", 10);
@@ -142,7 +148,7 @@ namespace Modelec
             {
                 last_enemy_pos_ = enemy_pos;
                 last_publish_time_ = this->now();
-                last_movement_time_ = this->now();  // Mise à jour du dernier vrai mouvement
+                last_movement_time_ = this->now(); // Mise à jour du dernier vrai mouvement
                 enemy_pos_pub_->publish(enemy_pos);
                 RCLCPP_INFO(this->get_logger(), "Enemy moved: x=%d, y=%d", enemy_pos.x, enemy_pos.y);
             }
@@ -152,7 +158,8 @@ namespace Modelec
                 if ((now - last_movement_time_).seconds() > max_stationary_time_s_)
                 {
                     enemy_long_time_pub_->publish(last_enemy_pos_);
-                    RCLCPP_WARN(this->get_logger(), "Enemy has been stationary for too long at x=%d y=%d", last_enemy_pos_.x, last_enemy_pos_.y);
+                    RCLCPP_WARN(this->get_logger(), "Enemy has been stationary for too long at x=%d y=%d",
+                                last_enemy_pos_.x, last_enemy_pos_.y);
 
                     last_movement_time_ = now;
                 }
@@ -179,7 +186,8 @@ namespace Modelec
     }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
     rclcpp::init(argc, argv);
     rclcpp::spin(std::make_shared<Modelec::EnemyManager>());
     rclcpp::shutdown();

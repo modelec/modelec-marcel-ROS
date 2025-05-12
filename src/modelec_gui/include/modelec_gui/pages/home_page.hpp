@@ -44,6 +44,5 @@ namespace ModelecGUI
         QPushButton* yellow_button_;
 
         QSvgRenderer* renderer_;
-
     };
 }

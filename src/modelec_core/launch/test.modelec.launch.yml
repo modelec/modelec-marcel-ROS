@@ -16,6 +16,11 @@ launch:
       name: 'pcb_alim_interface'
 
   - node:
+      pkg: 'modelec_com'
+      exec: 'pcb_action_interface'
+      name: 'pcb_action_interface'
+
+  - node:
       pkg: 'modelec_gui'
       exec: "modelec_gui"
       name: "modelec_gui"

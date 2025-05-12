@@ -1,6 +1,5 @@
 #include <modelec_com/pcb_alim_interface.hpp>
 #include <modelec_utils/utils.hpp>
-#include <modelec_interfaces/srv/add_serial_listener.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_utils/config.hpp>
 
@@ -426,7 +425,7 @@ namespace Modelec
     }
 
     void PCBAlimInterface::SendToPCB(const std::string& order, const std::string& elem,
-                                    const std::vector<std::string>& data) const
+                                     const std::vector<std::string>& data) const
     {
         std::string command = order + ";" + elem;
         for (const auto& d : data)

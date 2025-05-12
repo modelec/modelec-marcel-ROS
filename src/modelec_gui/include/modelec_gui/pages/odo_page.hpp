@@ -16,31 +16,32 @@
 #include <modelec_interfaces/srv/odometry_set_pid.hpp>
 
 
-namespace ModelecGUI {
-
+namespace ModelecGUI
+{
     class OdoPage : public QWidget
     {
         Q_OBJECT
+
     public:
-        OdoPage(rclcpp::Node::SharedPtr node, QWidget *parent = nullptr);
+        OdoPage(rclcpp::Node::SharedPtr node, QWidget* parent = nullptr);
         ~OdoPage() override;
 
         rclcpp::Node::SharedPtr get_node() const { return node_; }
 
     private:
-        QVBoxLayout *mainLayout_;
+        QVBoxLayout* mainLayout_;
         QPushButton* startButton_;
         QLineEdit *xBox_, *yBox_, *thetaBox_;
-        QHBoxLayout *posLayout_;
+        QHBoxLayout* posLayout_;
 
-        QPushButton *askPID_;
+        QPushButton* askPID_;
         QDoubleSpinBox *pPIDBox_, *iPIDBox_, *dPIDBox_;
-        QHBoxLayout *pidLayout_;
-        QPushButton *setPID_;
+        QHBoxLayout* pidLayout_;
+        QPushButton* setPID_;
 
-        QPushButton *askSpeed_;
+        QPushButton* askSpeed_;
         QLineEdit *xSpeedBox_, *ySpeedBox_, *thetaSpeedBox_;
-        QHBoxLayout *speedLayout_;
+        QHBoxLayout* speedLayout_;
 
         rclcpp::Node::SharedPtr node_;
 
@@ -54,5 +55,4 @@ namespace ModelecGUI {
 
         void PositionCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
     };
-
 } // namespace Modelec

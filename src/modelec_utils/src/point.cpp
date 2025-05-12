@@ -31,5 +31,4 @@ namespace Modelec
     {
         return GetTakePosition(210, theta);
     }
-
 }

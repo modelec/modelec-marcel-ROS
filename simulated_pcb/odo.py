@@ -4,6 +4,7 @@ import math
 import threading
 import argparse
 
+
 class SimulatedPCB:
     def __init__(self, port='/dev/pts/6', baud=115200):
         self.ser = serial.Serial(port, baud, timeout=1)

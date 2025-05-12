@@ -27,10 +27,14 @@ namespace Modelec
         read_buffer_.resize(max_message_len_);
         start_async_read();
 
-        io_thread_ = std::thread([this]() {
-            try {
+        io_thread_ = std::thread([this]()
+        {
+            try
+            {
                 io_.run();
-            } catch (const std::exception& e) {
+            }
+            catch (const std::exception& e)
+            {
                 RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "IO thread exception: %s", e.what());
             }
         });
@@ -46,7 +50,8 @@ namespace Modelec
 
     void SerialListener::close()
     {
-        if (status_) {
+        if (status_)
+        {
             if (port_.is_open()) port_.close();
             io_.stop();
             if (io_thread_.joinable()) io_thread_.join();
@@ -60,8 +65,10 @@ namespace Modelec
 
         port_.async_read_some(
             boost::asio::buffer(read_buffer_),
-            [this](const boost::system::error_code& ec, std::size_t bytes_transferred) {
-                if (!ec && bytes_transferred > 0) {
+            [this](const boost::system::error_code& ec, std::size_t bytes_transferred)
+            {
+                if (!ec && bytes_transferred > 0)
+                {
                     auto msg = std_msgs::msg::String();
                     msg.data = std::string(read_buffer_.begin(), read_buffer_.begin() + bytes_transferred);
                     if (publisher_)
@@ -69,8 +76,10 @@ namespace Modelec
                         publisher_->publish(msg);
                     }
 
-                    start_async_read();  // continue reading
-                } else {
+                    start_async_read(); // continue reading
+                }
+                else
+                {
                     RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "Async read error: %s", ec.message().c_str());
                 }
             });
@@ -82,7 +91,8 @@ namespace Modelec
         bool write_in_progress = !write_queue_.empty();
         write_queue_.push_back(msg->data);
 
-        if (!write_in_progress) {
+        if (!write_in_progress)
+        {
             start_async_write();
         }
     }
@@ -94,14 +104,19 @@ namespace Modelec
         boost::asio::async_write(
             port_,
             boost::asio::buffer(write_queue_.front()),
-            [this](const boost::system::error_code& ec, std::size_t /*length*/) {
+            [this](const boost::system::error_code& ec, std::size_t /*length*/)
+            {
                 std::lock_guard<std::mutex> lock(write_mutex_);
-                if (!ec) {
+                if (!ec)
+                {
                     write_queue_.pop_front();
-                    if (!write_queue_.empty()) {
-                        start_async_write();  // continue writing
+                    if (!write_queue_.empty())
+                    {
+                        start_async_write(); // continue writing
                     }
-                } else {
+                }
+                else
+                {
                     RCLCPP_ERROR(rclcpp::get_logger("SerialListener"), "Async write error: %s", ec.message().c_str());
                 }
             });
@@ -157,7 +172,8 @@ namespace Modelec
         response->publisher = listener->publisher_->get_topic_name();
         response->subscriber = listener->subscriber_->get_topic_name();
 
-        RCLCPP_INFO(rclcpp::get_logger("MultipleSerialListener"), "Serial listener %s fully created", request->name.c_str());
+        RCLCPP_INFO(rclcpp::get_logger("MultipleSerialListener"), "Serial listener %s fully created",
+                    request->name.c_str());
     }
 
     rcl_interfaces::msg::SetParametersResult MultipleSerialListener::onParameterChange(
@@ -168,7 +184,8 @@ namespace Modelec
 
         for (const auto& parameter : parameters)
         {
-            if (parameter.get_name() == "bauds" || parameter.get_name() == "serial_port" || parameter.get_name() == "max_message_len")
+            if (parameter.get_name() == "bauds" || parameter.get_name() == "serial_port" || parameter.get_name() ==
+                "max_message_len")
             {
                 updateConnection();
             }

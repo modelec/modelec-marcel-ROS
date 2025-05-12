@@ -4,7 +4,8 @@
 
 namespace Modelec
 {
-    BannerMission::BannerMission(const std::shared_ptr<NavigationHelper>& nav) : step_(GO_TO_FRONT), status_(MissionStatus::READY), nav_(nav)
+    BannerMission::BannerMission(const std::shared_ptr<NavigationHelper>& nav) : step_(GO_TO_FRONT),
+        status_(MissionStatus::READY), nav_(nav)
     {
     }
 
@@ -41,7 +42,7 @@ namespace Modelec
             {
                 auto spawn = nav_->GetSpawn();
 
-                nav_->GoTo(spawn.x, (nav_->GetPathfinding()->robot_length_mm_/2) + 150, M_PI_2, true);
+                nav_->GoTo(spawn.x, (nav_->GetPathfinding()->robot_length_mm_ / 2) + 150, M_PI_2, true);
 
                 step_ = GO_FORWARD;
                 break;

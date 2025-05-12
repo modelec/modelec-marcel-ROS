@@ -606,7 +606,8 @@ namespace Modelec
         {
             if (auto column = std::dynamic_pointer_cast<ColumnObstacle>(obs))
             {
-                if (Point::distance(enemyPos, column->GetPosition()) < enemy_width_mm_ + (column->width() / 2) + enemy_margin_mm_)
+                if (Point::distance(enemyPos, column->GetPosition()) < enemy_width_mm_ + (column->width() / 2) +
+                    enemy_margin_mm_)
                 {
                     RemoveObstacle(column->id());
                 }

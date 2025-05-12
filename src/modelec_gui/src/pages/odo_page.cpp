@@ -4,25 +4,27 @@
 
 namespace ModelecGUI
 {
-
     OdoPage::OdoPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent), node_(node)
     {
         startButton_ = new QPushButton("Start");
-        connect(startButton_, &QPushButton::clicked, this, [this]() {
+        connect(startButton_, &QPushButton::clicked, this, [this]()
+        {
             // Create a request for the speed service
             RCLCPP_INFO(node_->get_logger(), "Start button clicked.");
             auto request = std::make_shared<modelec_interfaces::srv::OdometryStart::Request>();
             request->start = true;
-            client_start_->async_send_request(request, [this](rclcpp::Client<modelec_interfaces::srv::OdometryStart>::SharedFuture response) {
-                if (response.get()->success)
+            client_start_->async_send_request(
+                request, [this](rclcpp::Client<modelec_interfaces::srv::OdometryStart>::SharedFuture response)
                 {
-                    RCLCPP_INFO(node_->get_logger(), "Start command sent successfully.");
-                }
-                else
-                {
-                    RCLCPP_ERROR(node_->get_logger(), "Failed to send start command.");
-                }
-            });
+                    if (response.get()->success)
+                    {
+                        RCLCPP_INFO(node_->get_logger(), "Start command sent successfully.");
+                    }
+                    else
+                    {
+                        RCLCPP_ERROR(node_->get_logger(), "Failed to send start command.");
+                    }
+                });
         });
 
         // Initialize the UI components
@@ -40,25 +42,33 @@ namespace ModelecGUI
 
 
         askPID_ = new QPushButton("Ask PID");
-        connect(askPID_, &QPushButton::clicked, this, [this]() {
+        connect(askPID_, &QPushButton::clicked, this, [this]()
+        {
             RCLCPP_INFO(node_->get_logger(), "Ask PID button clicked.");
             // Create a request for the PID service
             auto request = std::make_shared<modelec_interfaces::srv::OdometryGetPid::Request>();
 
             // Make the asynchronous service call
-            client_get_pid_->async_send_request(request, [this](rclcpp::Client<modelec_interfaces::srv::OdometryGetPid>::SharedFuture response) {
-                RCLCPP_INFO(node_->get_logger(), "Received PID response.");
-                if (auto res = response.get()) {
-                    RCLCPP_INFO(node_->get_logger(), "PID values received: p=%f, i=%f, d=%f", res->p, res->i, res->d);
-                    QMetaObject::invokeMethod(this, [this, res]() {
-                        pPIDBox_->setValue(res->p);
-                        iPIDBox_->setValue(res->i);
-                        dPIDBox_->setValue(res->d);
-                    });
-                } else {
-                    RCLCPP_ERROR(node_->get_logger(), "Failed to get response for PID request.");
-                }
-            });
+            client_get_pid_->async_send_request(
+                request, [this](rclcpp::Client<modelec_interfaces::srv::OdometryGetPid>::SharedFuture response)
+                {
+                    RCLCPP_INFO(node_->get_logger(), "Received PID response.");
+                    if (auto res = response.get())
+                    {
+                        RCLCPP_INFO(node_->get_logger(), "PID values received: p=%f, i=%f, d=%f", res->p, res->i,
+                                    res->d);
+                        QMetaObject::invokeMethod(this, [this, res]()
+                        {
+                            pPIDBox_->setValue(res->p);
+                            iPIDBox_->setValue(res->i);
+                            dPIDBox_->setValue(res->d);
+                        });
+                    }
+                    else
+                    {
+                        RCLCPP_ERROR(node_->get_logger(), "Failed to get response for PID request.");
+                    }
+                });
         });
         pPIDBox_ = new QDoubleSpinBox(this);
         pPIDBox_->setMinimum(0);
@@ -87,7 +97,8 @@ namespace ModelecGUI
         pidLayout_->addWidget(dPIDBox_);
 
         setPID_ = new QPushButton("Set PID");
-        connect(setPID_, &QPushButton::clicked, this, [this]() {
+        connect(setPID_, &QPushButton::clicked, this, [this]()
+        {
             // Create a request for the PID service
             auto request = std::make_shared<modelec_interfaces::srv::OdometrySetPid::Request>();
             request->p = pPIDBox_->text().toFloat();
@@ -95,35 +106,44 @@ namespace ModelecGUI
             request->d = dPIDBox_->text().toFloat();
 
             // Make the asynchronous service call
-            client_set_pid_->async_send_request(request, [this](rclcpp::Client<modelec_interfaces::srv::OdometrySetPid>::SharedFuture response) {
-                if (response.get()->success)
+            client_set_pid_->async_send_request(
+                request, [this](rclcpp::Client<modelec_interfaces::srv::OdometrySetPid>::SharedFuture response)
                 {
-                    RCLCPP_INFO(node_->get_logger(), "Set PID command sent successfully.");
-                }
-                else
-                {
-                    RCLCPP_ERROR(node_->get_logger(), "Failed to send set PID command.");
-                }
-            });
+                    if (response.get()->success)
+                    {
+                        RCLCPP_INFO(node_->get_logger(), "Set PID command sent successfully.");
+                    }
+                    else
+                    {
+                        RCLCPP_ERROR(node_->get_logger(), "Failed to send set PID command.");
+                    }
+                });
         });
 
         askSpeed_ = new QPushButton("Ask speed");
-        connect(askSpeed_, &QPushButton::clicked, this, [this]() {
+        connect(askSpeed_, &QPushButton::clicked, this, [this]()
+        {
             // Create a request for the speed service
             auto request = std::make_shared<modelec_interfaces::srv::OdometrySpeed::Request>();
 
             // Make the asynchronous service call
-            client_->async_send_request(request, [this](rclcpp::Client<modelec_interfaces::srv::OdometrySpeed>::SharedFuture response) {
-                if (auto res = response.get()) {
-                    QMetaObject::invokeMethod(this, [this, res]() {
-                        xSpeedBox_->setText(QString("x: %1").arg(res->x));
-                        ySpeedBox_->setText(QString("y: %1").arg(res->y));
-                        thetaSpeedBox_->setText(QString("theta: %1").arg(res->theta));
-                    });
-                } else {
-                    RCLCPP_ERROR(node_->get_logger(), "Failed to get response for speed request.");
-                }
-            });
+            client_->async_send_request(
+                request, [this](rclcpp::Client<modelec_interfaces::srv::OdometrySpeed>::SharedFuture response)
+                {
+                    if (auto res = response.get())
+                    {
+                        QMetaObject::invokeMethod(this, [this, res]()
+                        {
+                            xSpeedBox_->setText(QString("x: %1").arg(res->x));
+                            ySpeedBox_->setText(QString("y: %1").arg(res->y));
+                            thetaSpeedBox_->setText(QString("theta: %1").arg(res->theta));
+                        });
+                    }
+                    else
+                    {
+                        RCLCPP_ERROR(node_->get_logger(), "Failed to get response for speed request.");
+                    }
+                });
         });
 
         xSpeedBox_ = new QLineEdit("x speed: ?");
@@ -154,8 +174,10 @@ namespace ModelecGUI
             std::bind(&OdoPage::PositionCallback, this, std::placeholders::_1));
 
         client_ = node_->create_client<modelec_interfaces::srv::OdometrySpeed>("odometry/speed");
-        while (!client_->wait_for_service(std::chrono::seconds(1))) {
-            if (!rclcpp::ok()) {
+        while (!client_->wait_for_service(std::chrono::seconds(1)))
+        {
+            if (!rclcpp::ok())
+            {
                 RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
@@ -163,8 +185,10 @@ namespace ModelecGUI
         }
 
         client_start_ = node_->create_client<modelec_interfaces::srv::OdometryStart>("odometry/start");
-        while (!client_start_->wait_for_service(std::chrono::seconds(1))) {
-            if (!rclcpp::ok()) {
+        while (!client_start_->wait_for_service(std::chrono::seconds(1)))
+        {
+            if (!rclcpp::ok())
+            {
                 RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
@@ -173,8 +197,10 @@ namespace ModelecGUI
 
         client_get_pid_ = node_->create_client<modelec_interfaces::srv::OdometryGetPid>("odometry/get_pid");
 
-        while (!client_get_pid_->wait_for_service(std::chrono::seconds(1))) {
-            if (!rclcpp::ok()) {
+        while (!client_get_pid_->wait_for_service(std::chrono::seconds(1)))
+        {
+            if (!rclcpp::ok())
+            {
                 RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
@@ -182,8 +208,10 @@ namespace ModelecGUI
         }
 
         client_set_pid_ = node_->create_client<modelec_interfaces::srv::OdometrySetPid>("odometry/set_pid");
-        while (!client_set_pid_->wait_for_service(std::chrono::seconds(1))) {
-            if (!rclcpp::ok()) {
+        while (!client_set_pid_->wait_for_service(std::chrono::seconds(1)))
+        {
+            if (!rclcpp::ok())
+            {
                 RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
@@ -195,7 +223,8 @@ namespace ModelecGUI
 
     void OdoPage::PositionCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
-        QMetaObject::invokeMethod(this, [this, msg]() {
+        QMetaObject::invokeMethod(this, [this, msg]()
+        {
             xBox_->setText(QString("x: %1").arg(msg->x));
             yBox_->setText(QString("y: %1").arg(msg->y));
             thetaBox_->setText(QString("theta: %1").arg(msg->theta));

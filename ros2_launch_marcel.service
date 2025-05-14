@@ -1,6 +1,7 @@
 [Unit]
 Description=Lancement automatique du launch file ROS 2
 After=network.target
+After=graphical.target
 
 [Service]
 User=modelec
@@ -13,6 +14,7 @@ Environment=USER=modelec
 Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 StandardOutput=journal
 StandardError=journal
+Environment=DISPLAY=:0
 
 [Install]
 WantedBy=multi-user.target

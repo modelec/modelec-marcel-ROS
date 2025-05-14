@@ -85,7 +85,85 @@ namespace Modelec
          *
          */
 
+        asc_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
+            "action/asc/get", 10,
+            [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr)
+            {
+                GetData("ASC", {"POS"});
+            });
 
+        servo_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPos>(
+            "action/servo/get", 10,
+            [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
+            {
+                GetData("SERVO" + std::to_string(msg->id), {"POS"});
+            });
+
+        relay_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionRelayState>(
+            "action/relay/get", 10,
+            [this](const modelec_interfaces::msg::ActionRelayState::SharedPtr msg)
+            {
+                GetData("RELAY" + std::to_string(msg->id), {"STATE"});
+            });
+
+        asc_get_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionAscPos>(
+            "action/asc/get/res", 10);
+        servo_get_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPos>(
+            "action/servo/get/res", 10);
+        relay_get_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionRelayState>(
+            "action/relay/get/res", 10);
+
+        asc_set_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
+            "action/asc/set", 10,
+            [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr msg)
+            {
+                SendOrder("ASC", {msg->pos == LOW ? "LOW" : "HIGH", std::to_string(msg->value)});
+            });
+
+        servo_set_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPos>(
+            "action/servo/set", 10,
+            [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
+            {
+                SendOrder("SERVO" + std::to_string(msg->id), {
+                              "POS" + std::to_string(msg->pos), std::to_string(msg->angle)
+                          });
+            });
+
+        asc_set_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionAscPos>(
+            "action/asc/set/res", 10);
+
+        servo_set_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPos>(
+            "action/servo/set/res", 10);
+
+        asc_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
+            "action/asc/move", 10,
+            [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr msg)
+            {
+                SendMove("ASC", {msg->pos == LOW ? "LOW" : "HIGH"});
+            });
+
+        servo_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPos>(
+            "action/servo/move", 10,
+            [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
+            {
+                SendMove("SERVO" + std::to_string(msg->id), {"POS" + std::to_string(msg->pos)});
+            });
+
+        relay_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionRelayState>(
+            "action/relay/move", 10,
+            [this](const modelec_interfaces::msg::ActionRelayState::SharedPtr msg)
+            {
+                SendMove("RELAY" + std::to_string(msg->id), {std::to_string(msg->state)});
+            });
+
+        asc_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionAscPos>(
+            "action/asc/move/res", 10);
+
+        servo_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPos>(
+            "action/servo/move/res", 10);
+
+        relay_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionRelayState>(
+            "action/relay/move/res", 10);
     }
 
     PCBActionInterface::~PCBActionInterface()
@@ -112,25 +190,163 @@ namespace Modelec
         {
             if (tokens[1] == "ASC")
             {
+                if (tokens[3] == "DESC" || tokens[3] == "CLIMB")
+                {
+                    asc_state_ = MOVING;
+                }
+                else if (tokens[3] == "LOW")
+                {
+                    asc_state_ = LOW;
+                }
+                else if (tokens[3] == "HIGH")
+                {
+                    asc_state_ = HIGH;
+                }
 
+                modelec_interfaces::msg::ActionAscPos asc_msg;
+                asc_msg.pos = asc_state_;
+                asc_msg.success = true;
+                asc_get_res_pub_->publish(asc_msg);
             }
             else if (startsWith(tokens[1], "SERVO"))
             {
                 int servo_id = std::stoi(tokens[1].substr(5));
-                int key = std::stoi(tokens[2]);
                 int v = std::stoi(tokens[3]);
-                servo_pos_v_[servo_id][key] = v;
+                servo_value_[servo_id] = v;
+
+                modelec_interfaces::msg::ActionServoPos servo_msg;
+                servo_msg.id = servo_id;
+                servo_msg.pos = v;
+                servo_msg.success = true;
+                servo_get_res_pub_->publish(servo_msg);
             }
             else if (startsWith(tokens[1], "RELAY"))
             {
                 int relay_id = std::stoi(tokens[1].substr(5));
-                bool state = (tokens[2] == "1");
-                relay_v_[relay_id] = state;
+                bool state = (tokens[3] == "1");
+                relay_value_[relay_id] = state;
+
+                modelec_interfaces::msg::ActionRelayState relay_msg;
+                relay_msg.id = relay_id;
+                relay_msg.state = state;
+                relay_msg.success = true;
+                relay_get_res_pub_->publish(relay_msg);
             }
         }
         else if (tokens[0] == "OK")
         {
+            if (tokens.size() == 4)
+            {
+                if (tokens[1] == "ASC")
+                {
+                    ASCState state = tokens[2] == "LOW" ? LOW : HIGH;
+                    int v = std::stoi(tokens[3]);
+                    asc_value_mapper_[state] = v;
 
+                    modelec_interfaces::msg::ActionAscPos asc_msg;
+                    asc_msg.pos = state;
+                    asc_msg.value = v;
+                    asc_msg.success = true;
+                    asc_set_res_pub_->publish(asc_msg);
+                }
+                else if (startsWith(tokens[1], "SERVO"))
+                {
+                    int servo_id = std::stoi(tokens[1].substr(5));
+                    int key = std::stoi(tokens[2].substr(3));
+                    int v = std::stoi(tokens[3]);
+                    servo_pos_mapper_[servo_id][key] = v;
+
+                    modelec_interfaces::msg::ActionServoPos servo_msg;
+                    servo_msg.id = servo_id;
+                    servo_msg.pos = key;
+                    servo_msg.angle = v;
+                    servo_msg.success = true;
+                    servo_set_res_pub_->publish(servo_msg);
+                }
+            }
+            else if (tokens.size() == 3)
+            {
+                if (tokens[1] == "ASC")
+                {
+                    asc_state_ = tokens[2] == "LOW" ? LOW : HIGH;
+
+                    modelec_interfaces::msg::ActionAscPos asc_msg;
+                    asc_msg.pos = asc_state_;
+                    asc_msg.success = true;
+                    asc_move_res_pub_->publish(asc_msg);
+                }
+                else if (startsWith(tokens[1], "SERVO"))
+                {
+                    int servo_id = std::stoi(tokens[1].substr(5));
+                    int key = std::stoi(tokens[2].substr(3));
+                    servo_value_[servo_id] = key;
+
+                    modelec_interfaces::msg::ActionServoPos servo_msg;
+                    servo_msg.id = servo_id;
+                    servo_msg.pos = key;
+                    servo_msg.success = true;
+                    servo_move_res_pub_->publish(servo_msg);
+                }
+                else if (startsWith(tokens[1], "RELAY"))
+                {
+                    int relay_id = std::stoi(tokens[1].substr(5));
+                    bool state = (tokens[2] == "1");
+                    relay_value_[relay_id] = state;
+
+                    modelec_interfaces::msg::ActionRelayState relay_msg;
+                    relay_msg.id = relay_id;
+                    relay_msg.state = state;
+                    relay_msg.success = true;
+                    relay_move_res_pub_->publish(relay_msg);
+                }
+            }
+            else
+            {
+                RCLCPP_WARN(this->get_logger(), "Unknown message format");
+            }
+        }
+        else if (tokens[0] == "KO")
+        {
+            if (tokens.size() == 4)
+            {
+                if (tokens[1] == "ASC")
+                {
+                    modelec_interfaces::msg::ActionAscPos asc_msg;
+                    asc_msg.success = false;
+                    asc_set_res_pub_->publish(asc_msg);
+                }
+                else if (startsWith(tokens[1], "SERVO"))
+                {
+                    modelec_interfaces::msg::ActionServoPos servo_msg;
+                    servo_msg.success = false;
+                    servo_set_res_pub_->publish(servo_msg);
+                }
+            }
+            else if (tokens.size() == 3)
+            {
+                if (tokens[1] == "ASC")
+                {
+                    modelec_interfaces::msg::ActionAscPos asc_msg;
+                    asc_msg.success = false;
+                    asc_move_res_pub_->publish(asc_msg);
+                }
+                else if (startsWith(tokens[1], "SERVO"))
+                {
+                    modelec_interfaces::msg::ActionServoPos servo_msg;
+                    servo_msg.success = false;
+                    servo_move_res_pub_->publish(servo_msg);
+                }
+                else if (startsWith(tokens[1], "RELAY"))
+                {
+                    modelec_interfaces::msg::ActionRelayState relay_msg;
+                    relay_msg.success = false;
+                    relay_move_res_pub_->publish(relay_msg);
+                }
+            }
+            else
+            {
+                RCLCPP_WARN(this->get_logger(), "Unknown message format");
+            }
         }
     }
 
@@ -142,7 +358,7 @@ namespace Modelec
     }
 
     void PCBActionInterface::SendToPCB(const std::string& order, const std::string& elem,
-        const std::vector<std::string>& data) const
+                                       const std::vector<std::string>& data) const
     {
         std::string command = order + ";" + elem;
         for (const auto& d : data)
@@ -162,6 +378,11 @@ namespace Modelec
     void PCBActionInterface::SendOrder(const std::string& elem, const std::vector<std::string>& data) const
     {
         SendToPCB("SET", elem, data);
+    }
+
+    void PCBActionInterface::SendMove(const std::string& elem, const std::vector<std::string>& data) const
+    {
+        SendToPCB("MOVE", elem, data);
     }
 }
 

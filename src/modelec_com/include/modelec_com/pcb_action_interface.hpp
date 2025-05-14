@@ -3,12 +3,23 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <modelec_interfaces/srv/add_serial_listener.hpp>
+#include <modelec_interfaces/msg/action_asc_pos.hpp>
+#include <modelec_interfaces/msg/action_relay_state.hpp>
+#include <modelec_interfaces/msg/action_servo_pos.hpp>
 
 namespace Modelec
 {
     class PCBActionInterface : public rclcpp::Node
     {
     public:
+
+        enum ASCState
+        {
+            LOW = 0,
+            HIGH = 1,
+            MOVING = 2,
+        };
+
         PCBActionInterface();
         rclcpp::CallbackGroup::SharedPtr pcb_callback_group_;
         std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> pcb_executor_;
@@ -17,15 +28,43 @@ namespace Modelec
         ~PCBActionInterface() override;
 
     protected:
-        std::map<std::string, int> asc_v_;
-        std::map<int, std::map<int, int>> servo_pos_v_;
-        std::map<int, bool> relay_v_;
+        std::map<ASCState, int> asc_value_mapper_ = {
+            {LOW, 0},
+            {HIGH, 0},
+        };
+        std::map<int, std::map<int, int>> servo_pos_mapper_;
+
+        ASCState asc_state_ = LOW;
+        std::map<int, int> servo_value_;
+        std::map<int, bool> relay_value_;
 
     private:
         rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pcb_publisher_;
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr pcb_subscriber_;
 
         void PCBCallback(const std_msgs::msg::String::SharedPtr msg);
+
+        rclcpp::Subscription<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_get_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_get_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::ActionRelayState>::SharedPtr relay_get_sub_;
+
+        rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_get_res_pub_;
+        rclcpp::Publisher<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_get_res_pub_;
+        rclcpp::Publisher<modelec_interfaces::msg::ActionRelayState>::SharedPtr relay_get_res_pub_;
+
+        rclcpp::Subscription<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_set_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_set_sub_;
+
+        rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_set_res_pub_;
+        rclcpp::Publisher<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_set_res_pub_;
+
+        rclcpp::Subscription<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_move_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::ActionRelayState>::SharedPtr relay_move_sub_;
+
+        rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_res_pub_;
+        rclcpp::Publisher<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_move_res_pub_;
+        rclcpp::Publisher<modelec_interfaces::msg::ActionRelayState>::SharedPtr relay_move_res_pub_;
 
     public:
         void SendToPCB(const std::string& data) const;
@@ -34,5 +73,6 @@ namespace Modelec
 
         void GetData(const std::string& elem, const std::vector<std::string>& data = {}) const;
         void SendOrder(const std::string& elem, const std::vector<std::string>& data = {}) const;
+        void SendMove(const std::string& elem, const std::vector<std::string>& data = {}) const;
     };
 }

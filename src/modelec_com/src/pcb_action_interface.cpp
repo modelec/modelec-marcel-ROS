@@ -74,17 +74,6 @@ namespace Modelec
             RCLCPP_ERROR(this->get_logger(), "Service call failed");
         }
 
-
-        /**
-         *  TODO : def
-         *  action/x/y/...
-         *
-         *  x -> asc | servo | relay
-         *  y -> get | set | move
-         *
-         *
-         */
-
         asc_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
             "action/asc/get", 10,
             [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr)

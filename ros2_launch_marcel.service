@@ -1,0 +1,18 @@
+[Unit]
+Description=Lancement automatique du launch file ROS 2
+After=network.target
+
+[Service]
+User=modelec
+WorkingDirectory=/home/modelec/modelec-serge-ROS
+ExecStart=/home/modelec/modelec-serge-ROS/start_ros2.sh
+Restart=on-failure
+Environment=HOME=/home/modelec
+Environment=LOGNAME=modelec
+Environment=USER=modelec
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

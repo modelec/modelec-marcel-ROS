@@ -30,16 +30,16 @@ def generate_launch_description():
             executable='pcb_odo_interface',
             name='pcb_odo_interface'
         ),
-        Node(
-            package='modelec_com',
-            executable='pcb_alim_interface',
-            name='pcb_alim_interface'
-        ),
-        Node(
-            package='modelec_com',
-            executable='pcb_action_interface',
-            name='pcb_action_interface'
-        ),
+        #Node(
+        #    package='modelec_com',
+        #    executable='pcb_alim_interface',
+        #    name='pcb_alim_interface'
+        #),
+        #Node(
+        #    package='modelec_com',
+        #    executable='pcb_action_interface',
+        #    name='pcb_action_interface'
+        #),
         gui_node,
         shutdown_on_gui_exit,
         Node(

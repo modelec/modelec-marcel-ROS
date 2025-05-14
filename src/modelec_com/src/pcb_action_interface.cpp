@@ -73,6 +73,19 @@ namespace Modelec
         {
             RCLCPP_ERROR(this->get_logger(), "Service call failed");
         }
+
+
+        /**
+         *  TODO : def
+         *  action/x/y/...
+         *
+         *  x -> asc | servo | relay
+         *  y -> get | set | move
+         *
+         *
+         */
+
+
     }
 
     PCBActionInterface::~PCBActionInterface()
@@ -88,6 +101,29 @@ namespace Modelec
     {
         RCLCPP_DEBUG(this->get_logger(), "Received message: '%s'", msg->data.c_str());
         std::vector<std::string> tokens = split(msg->data, ';');
+
+        if (tokens.size() < 3)
+        {
+            RCLCPP_ERROR(this->get_logger(), "Invalid message format");
+            return;
+        }
+
+        if (tokens[0] == "SET")
+        {
+            if (tokens[1] == "ASC")
+            {
+
+            }
+            else if (startsWith(tokens[2], "SERVO"))
+            {
+                int servo_id = std::stoi(tokens[2].substr(5));
+
+            }
+        }
+        else if (tokens[0] == "OK")
+        {
+
+        }
     }
 
     void PCBActionInterface::SendToPCB(const std::string& data) const

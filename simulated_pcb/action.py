@@ -119,6 +119,8 @@ class SimulatedPCB:
                 print(f"[RX] {msg}")
                 self.process_command(msg)
 
+            time.sleep(0.1)
+
     def stop(self):
         self.running = False
         self.thread.join()

@@ -4,8 +4,6 @@ set -e
 export DISPLAY=:0
 export XAUTHORITY=/home/modelec/.Xauthority
 
-xhost +SI:localuser:modelec
-
 source /opt/ros/jazzy/setup.bash
 source /home/modelec/modelec-serge-ROS/install/setup.bash
 

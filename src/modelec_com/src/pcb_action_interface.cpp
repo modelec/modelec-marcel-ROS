@@ -114,10 +114,18 @@ namespace Modelec
             {
 
             }
-            else if (startsWith(tokens[2], "SERVO"))
+            else if (startsWith(tokens[1], "SERVO"))
             {
-                int servo_id = std::stoi(tokens[2].substr(5));
-
+                int servo_id = std::stoi(tokens[1].substr(5));
+                int key = std::stoi(tokens[2]);
+                int v = std::stoi(tokens[3]);
+                servo_pos_v_[servo_id][key] = v;
+            }
+            else if (startsWith(tokens[1], "RELAY"))
+            {
+                int relay_id = std::stoi(tokens[1].substr(5));
+                bool state = (tokens[2] == "1");
+                relay_v_[relay_id] = state;
             }
         }
         else if (tokens[0] == "OK")

@@ -53,7 +53,7 @@
             </pcb_alim>
             <pcb_action>
                 <name>pcb_action</name>
-                <port>/dev/pts/12</port>
+                <port>/dev/pts/16</port>
                 <baud_rate>115200</baud_rate>
             </pcb_action>
         </pcb>

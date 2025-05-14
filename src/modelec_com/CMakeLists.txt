@@ -77,6 +77,7 @@ install(TARGETS
         serial_listener
         pcb_alim_interface
         pcb_odo_interface
+        pcb_action_interface
         pca9685_controller
         DESTINATION lib/${PROJECT_NAME}
 )

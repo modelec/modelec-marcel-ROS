@@ -19,7 +19,7 @@ namespace Modelec
     protected:
         std::map<std::string, int> asc_v_;
         std::map<int, std::map<int, int>> servo_pos_v_;
-        std::map<std::string, bool> relay_v_;
+        std::map<int, bool> relay_v_;
 
     private:
         rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pcb_publisher_;

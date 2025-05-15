@@ -412,7 +412,6 @@ namespace Modelec
     std::shared_ptr<DepositeZone> NavigationHelper::GetClosestDepositeZone(
         const PosMsg::SharedPtr& pos, int teamId, const std::vector<int>& blacklistedId)
     {
-        // TODO : score
         std::shared_ptr<DepositeZone> closest_zone = nullptr;
         double score = std::numeric_limits<double>::max();
         auto posPoint = Point(pos->x, pos->y, pos->theta);
@@ -423,7 +422,8 @@ namespace Modelec
             if (zone->GetTeam() == teamId && zone->RemainingPotPos() > 0 && blacklistedId.end() == std::find(
                 blacklistedId.begin(), blacklistedId.end(), id))
             {
-                double distance = Point::distance(posPoint, zone->GetPosition());
+                auto zonePoint = zone->GetNextPotPos().GetTakeBasePosition();
+                double distance = Point::distance(posPoint, zonePoint);
                 double enemy_distance = Point::distance(enemyPos, zone->GetPosition());
                 double s = distance + enemy_distance * factor_close_enemy_;
                 if (s < score)

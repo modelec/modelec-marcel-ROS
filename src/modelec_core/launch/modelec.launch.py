@@ -1,7 +1,10 @@
 from launch import LaunchDescription
-from launch.actions import RegisterEventHandler, Shutdown
+from launch.actions import RegisterEventHandler, Shutdown, IncludeLaunchDescription
 from launch.event_handlers import OnProcessExit
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+from ament_index_python.packages import get_package_share_directory
+import os
 
 def generate_launch_description():
     # Qt GUI node
@@ -19,7 +22,20 @@ def generate_launch_description():
         )
     )
 
+    # Include the RPLIDAR launch file
+    rplidar_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('rplidar_ros'),
+                'launch',
+                'view_rplidar_a1_launch.py'
+            )
+        )
+    )
+
     return LaunchDescription([
+        rplidar_launch,
+
         Node(
             package='modelec_com',
             executable='serial_listener',
@@ -43,11 +59,6 @@ def generate_launch_description():
         gui_node,
         shutdown_on_gui_exit,
         Node(
-            package='modelec_core',
-            executable='speed_result',
-            name='speed_result'
-        ),
-        Node(
             package='modelec_strat',
             executable='strat_fsm',
             name='strat_fsm'
@@ -56,5 +67,10 @@ def generate_launch_description():
             package='modelec_strat',
             executable='pami_manager',
             name='pami_manager'
+        ),
+        Node(
+            package='modelec_strat',
+            executable='enemy_manager',
+            name='enemy_manager'
         )
     ])

@@ -30,23 +30,18 @@ def generate_launch_description():
             executable='pcb_odo_interface',
             name='pcb_odo_interface'
         ),
-        #Node(
-        #    package='modelec_com',
-        #    executable='pcb_alim_interface',
-        #    name='pcb_alim_interface'
-        #),
-        #Node(
-        #    package='modelec_com',
-        #    executable='pcb_action_interface',
-        #    name='pcb_action_interface'
-        #),
+        Node(
+            package='modelec_com',
+            executable='pcb_alim_interface',
+            name='pcb_alim_interface'
+        ),
+        Node(
+            package='modelec_com',
+            executable='pcb_action_interface',
+            name='pcb_action_interface'
+        ),
         gui_node,
         shutdown_on_gui_exit,
-        Node(
-            package='modelec_core',
-            executable='speed_result',
-            name='speed_result'
-        ),
         Node(
             package='modelec_strat',
             executable='strat_fsm',
@@ -56,5 +51,10 @@ def generate_launch_description():
             package='modelec_strat',
             executable='pami_manager',
             name='pami_manager'
+        ),
+        Node(
+            package='modelec_strat',
+            executable='enemy_manager',
+            name='enemy_manager'
         )
     ])

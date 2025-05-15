@@ -75,42 +75,42 @@ namespace Modelec
         }
 
         asc_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
-            "action/asc/get", 10,
+            "action/get/asc", 10,
             [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr)
             {
                 GetData("ASC", {"POS"});
             });
 
         servo_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPos>(
-            "action/servo/get", 10,
+            "action/get/servo", 10,
             [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
             {
                 GetData("SERVO" + std::to_string(msg->id), {"POS"});
             });
 
         relay_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionRelayState>(
-            "action/relay/get", 10,
+            "action/get/relay", 10,
             [this](const modelec_interfaces::msg::ActionRelayState::SharedPtr msg)
             {
                 GetData("RELAY" + std::to_string(msg->id), {"STATE"});
             });
 
         asc_get_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionAscPos>(
-            "action/asc/get/res", 10);
+            "action/get/asc/res", 10);
         servo_get_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPos>(
-            "action/servo/get/res", 10);
+            "action/get/servo/res", 10);
         relay_get_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionRelayState>(
-            "action/relay/get/res", 10);
+            "action/get/relay/res", 10);
 
         asc_set_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
-            "action/asc/set", 10,
+            "action/set/asc", 10,
             [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr msg)
             {
                 SendOrder("ASC", {std::to_string(msg->pos), std::to_string(msg->value)});
             });
 
         servo_set_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPos>(
-            "action/servo/set", 10,
+            "action/set/servo", 10,
             [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
             {
                 SendOrder("SERVO" + std::to_string(msg->id), {
@@ -119,40 +119,40 @@ namespace Modelec
             });
 
         asc_set_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionAscPos>(
-            "action/asc/set/res", 10);
+            "action/set/asc/res", 10);
 
         servo_set_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPos>(
-            "action/servo/set/res", 10);
+            "action/set/servo/res", 10);
 
         asc_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
-            "action/asc/move", 10,
+            "action/move/asc", 10,
             [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr msg)
             {
                 SendMove("ASC", {std::to_string(msg->pos)});
             });
 
         servo_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPos>(
-            "action/servo/move", 10,
+            "action/move/servo", 10,
             [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
             {
                 SendMove("SERVO" + std::to_string(msg->id), {"POS" + std::to_string(msg->pos)});
             });
 
         relay_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionRelayState>(
-            "action/relay/move", 10,
+            "action/move/relay", 10,
             [this](const modelec_interfaces::msg::ActionRelayState::SharedPtr msg)
             {
                 SendMove("RELAY" + std::to_string(msg->id), {std::to_string(msg->state)});
             });
 
         asc_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionAscPos>(
-            "action/asc/move/res", 10);
+            "action/mode/asc/res", 10);
 
         servo_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPos>(
-            "action/servo/move/res", 10);
+            "action/move/servo/res", 10);
 
         relay_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionRelayState>(
-            "action/relay/move/res", 10);
+            "action/move/relay/res", 10);
     }
 
     PCBActionInterface::~PCBActionInterface()

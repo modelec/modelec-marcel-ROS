@@ -78,8 +78,11 @@ namespace Modelec
 
     void ActionExecutor::Update()
     {
+        RCLCPP_INFO(node_->get_logger(), "ActionExecutor::Update()");
         if (step_.empty())
         {
+            RCLCPP_INFO(node_->get_logger(), "action finished");
+
             action_ = NONE;
             action_done_ = true;
             return;
@@ -87,6 +90,8 @@ namespace Modelec
 
         if (step_running_ == 0)
         {
+            RCLCPP_INFO(node_->get_logger(), "Running new action");
+
             step_.pop();
 
             switch (step_.front())

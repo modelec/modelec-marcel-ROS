@@ -7,15 +7,14 @@
 
 namespace Modelec
 {
-
     class ActionExecutor
     {
     public:
-
         enum Action
         {
             NONE,
             DEPLOY_BANNER,
+            RETRACT_BANNER,
             TAKE_POT,
             PLACE_POT,
         };
@@ -35,6 +34,8 @@ namespace Modelec
         void Update();
 
         void DeployBanner();
+
+        void RetractBanner();
 
         void TakePot();
 
@@ -75,5 +76,4 @@ namespace Modelec
     private:
         rclcpp::Node::SharedPtr node_;
     };
-
 }

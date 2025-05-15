@@ -4,12 +4,13 @@
 
 namespace Modelec
 {
-    BannerMission::BannerMission(const std::shared_ptr<NavigationHelper>& nav, const std::shared_ptr<ActionExecutor>& action_executor) : step_(GO_TO_FRONT),
+    BannerMission::BannerMission(const std::shared_ptr<NavigationHelper>& nav,
+                                 const std::shared_ptr<ActionExecutor>& action_executor) : step_(GO_TO_FRONT),
         status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
     {
     }
 
-    void BannerMission::start(rclcpp::Node::SharedPtr node)
+    void BannerMission::Start(rclcpp::Node::SharedPtr node)
     {
         node_ = node;
 
@@ -24,7 +25,7 @@ namespace Modelec
         status_ = MissionStatus::RUNNING;
     }
 
-    void BannerMission::update()
+    void BannerMission::Update()
     {
         if (status_ != MissionStatus::RUNNING) return;
 
@@ -65,11 +66,11 @@ namespace Modelec
         }
     }
 
-    void BannerMission::clear()
+    void BannerMission::Clear()
     {
     }
 
-    MissionStatus BannerMission::getStatus() const
+    MissionStatus BannerMission::GetStatus() const
     {
         return status_;
     }

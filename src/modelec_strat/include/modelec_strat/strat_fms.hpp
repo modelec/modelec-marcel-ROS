@@ -44,9 +44,9 @@ namespace Modelec
         void Reset();
 
     protected:
-        void transition(State next, const std::string& reason);
+        void Transition(State next, const std::string& reason);
 
-        void update();
+        void Update();
 
     private:
         State state_;

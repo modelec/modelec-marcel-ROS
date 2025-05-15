@@ -12,8 +12,8 @@ namespace Modelec
     {
         possible_angles_.push_back(theta_);
         for (auto elem = obstacleElem->FirstChildElement("possible-angle");
-            elem;
-            elem = elem->NextSiblingElement("possible-angle"))
+             elem;
+             elem = elem->NextSiblingElement("possible-angle"))
         {
             possible_angles_.push_back(elem->DoubleAttribute("theta"));
         }
@@ -61,7 +61,7 @@ namespace Modelec
     std::vector<Point> ColumnObstacle::GetAllPossiblePositions() const
     {
         std::vector<Point> positions;
-        for (const auto & angle : possible_angles_)
+        for (const auto& angle : possible_angles_)
         {
             positions.push_back(Point(x_, y_, angle));
         }

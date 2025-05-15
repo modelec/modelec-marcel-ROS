@@ -12,7 +12,7 @@ namespace Modelec
         ColumnObstacle(const ColumnObstacle&) = default;
 
         ColumnObstacle(int id, int x, int y, double theta, int w, int h, const std::string& type);
-        ColumnObstacle(tinyxml2::XMLElement * obstacleElem);
+        ColumnObstacle(tinyxml2::XMLElement* obstacleElem);
         ColumnObstacle(const modelec_interfaces::msg::Obstacle& msg);
 
         bool IsAtObjective() const;

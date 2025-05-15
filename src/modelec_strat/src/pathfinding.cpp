@@ -107,7 +107,7 @@ namespace Modelec
             "odometry/add_waypoint", 100);
     }
 
-    rclcpp::Node::SharedPtr Pathfinding::getNode() const
+    rclcpp::Node::SharedPtr Pathfinding::GetNode() const
     {
         return node_;
     }
@@ -224,11 +224,11 @@ namespace Modelec
         // TODO some bug exist with the inflate
         for (const auto& [id, obstacle] : obstacle_map_)
         {
-            float cx = obstacle->x();
-            float cy = obstacle->y();
-            float width = obstacle->width() + inflate_x * 2 * cell_size_mm_x;
-            float height = obstacle->height() + inflate_y * 2 * cell_size_mm_y;
-            float theta = M_PI_2 - obstacle->theta();
+            float cx = obstacle->GetX();
+            float cy = obstacle->GetY();
+            float width = obstacle->GetWidth() + inflate_x * 2 * cell_size_mm_x;
+            float height = obstacle->GetHeight() + inflate_y * 2 * cell_size_mm_y;
+            float theta = M_PI_2 - obstacle->GetTheta();
 
             float dx = width / 2.0f;
             float dy = height / 2.0f;
@@ -521,7 +521,7 @@ namespace Modelec
 
     void Pathfinding::AddObstacle(const std::shared_ptr<Obstacle>& obstacle)
     {
-        obstacle_map_[obstacle->id()] = obstacle;
+        obstacle_map_[obstacle->GetId()] = obstacle;
         modelec_interfaces::msg::Obstacle msg = obstacle->toMsg();
         obstacle_add_pub_->publish(msg);
     }
@@ -539,7 +539,7 @@ namespace Modelec
         {
             if (auto obs = std::dynamic_pointer_cast<ColumnObstacle>(obstacle))
             {
-                if (!obs->IsAtObjective() && std::find(blacklistedId.begin(), blacklistedId.end(), obs->id()) ==
+                if (!obs->IsAtObjective() && std::find(blacklistedId.begin(), blacklistedId.end(), obs->GetId()) ==
                     blacklistedId.end())
                 {
                     for (auto possiblePos : obs->GetAllPossiblePositions())
@@ -606,10 +606,10 @@ namespace Modelec
         {
             if (auto column = std::dynamic_pointer_cast<ColumnObstacle>(obs))
             {
-                if (Point::distance(enemyPos, column->GetPosition()) < enemy_width_mm_ + (column->width() / 2) +
+                if (Point::distance(enemyPos, column->GetPosition()) < enemy_width_mm_ + (column->GetWidth() / 2) +
                     enemy_margin_mm_)
                 {
-                    RemoveObstacle(column->id());
+                    RemoveObstacle(column->GetId());
                 }
             }
         }
@@ -648,7 +648,7 @@ namespace Modelec
              obstacleElem = obstacleElem->NextSiblingElement("Obstacle"))
         {
             std::shared_ptr<Obstacle> obs = std::make_shared<Obstacle>(obstacleElem);
-            obstacle_map_[obs->id()] = obs;
+            obstacle_map_[obs->GetId()] = obs;
         }
 
         for (tinyxml2::XMLElement* obstacleElem = root->FirstChildElement("Gradin");
@@ -656,7 +656,7 @@ namespace Modelec
              obstacleElem = obstacleElem->NextSiblingElement("Gradin"))
         {
             std::shared_ptr<ColumnObstacle> obs = std::make_shared<ColumnObstacle>(obstacleElem);
-            obstacle_map_[obs->id()] = obs;
+            obstacle_map_[obs->GetId()] = obs;
         }
 
         RCLCPP_INFO(node_->get_logger(), "Loaded %zu obstacles from XML", obstacle_map_.size());
@@ -683,7 +683,7 @@ namespace Modelec
         reached = false;
     }
 
-    WaypointMsg Waypoint::toMsg() const
+    WaypointMsg Waypoint::ToMsg() const
     {
         return static_cast<OdometryAddWaypoint_<std::allocator<void>>>(*this);
     }

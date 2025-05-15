@@ -22,7 +22,8 @@ namespace Modelec
         auto posPotList = obstacleElem->FirstChildElement("PotPos");
         if (posPotList)
         {
-            for (auto elemPos = posPotList->FirstChildElement("Pos"); elemPos; elemPos = elemPos->NextSiblingElement("Pos"))
+            for (auto elemPos = posPotList->FirstChildElement("Pos"); elemPos; elemPos = elemPos->
+                 NextSiblingElement("Pos"))
             {
                 Point pos;
                 elemPos->QueryIntAttribute("x", &pos.x);

@@ -89,7 +89,7 @@ namespace Modelec
     {
         for (auto& w : waypoints_)
         {
-            waypoint_pub_->publish(w.toMsg());
+            waypoint_pub_->publish(w.ToMsg());
         }
     }
 

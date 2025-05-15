@@ -21,7 +21,6 @@ namespace Modelec
         void TimerCallback();
 
     private:
-
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr current_pos_sub_;
         rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr laser_scan_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::StratState>::SharedPtr state_sub_;

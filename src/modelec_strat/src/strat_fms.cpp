@@ -76,7 +76,7 @@ namespace Modelec
 
         timer_ = create_wall_timer(std::chrono::milliseconds(100), [this]
         {
-            update();
+            Update();
         });
     }
 
@@ -87,7 +87,7 @@ namespace Modelec
         Init();
     }
 
-    void StratFMS::transition(State next, const std::string& reason)
+    void StratFMS::Transition(State next, const std::string& reason)
     {
         RCLCPP_INFO(get_logger(), "Transition %d -> %d: %s", static_cast<int>(state_), static_cast<int>(next),
                     reason.c_str());
@@ -98,7 +98,7 @@ namespace Modelec
         state_pub_->publish(msg);
     }
 
-    void StratFMS::update()
+    void StratFMS::Update()
     {
         auto now = this->now();
 
@@ -106,7 +106,7 @@ namespace Modelec
         {
         case State::INIT:
             RCLCPP_INFO_ONCE(get_logger(), "State: INIT");
-            transition(State::WAIT_START, "System ready");
+            Transition(State::WAIT_START, "System ready");
             break;
         case State::WAIT_START:
             if (started_)
@@ -119,7 +119,7 @@ namespace Modelec
                                .count();
                 start_time_pub_->publish(msg);
 
-                transition(State::SELECT_MISSION, "Match started");
+                Transition(State::SELECT_MISSION, "Match started");
             }
             break;
 
@@ -129,15 +129,15 @@ namespace Modelec
                 // select mission in a good way there.
                 if (elapsed.seconds() < 2)
                 {
-                    transition(State::DO_PROMOTION, "Start promotion");
+                    Transition(State::DO_PROMOTION, "Start promotion");
                 }
                 else if (elapsed.seconds() < 80)
                 {
-                    transition(State::DO_PREPARE_CONCERT, "Proceed to concert");
+                    Transition(State::DO_PREPARE_CONCERT, "Proceed to concert");
                 }
                 else
                 {
-                    transition(State::DO_GO_HOME, "Cleanup and finish match");
+                    Transition(State::DO_GO_HOME, "Cleanup and finish match");
                 }
                 break;
             }
@@ -146,24 +146,24 @@ namespace Modelec
             if (!current_mission_)
             {
                 current_mission_ = std::make_unique<PrepareConcertMission>(nav_, action_executor_);
-                current_mission_->start(shared_from_this());
+                current_mission_->Start(shared_from_this());
             }
-            current_mission_->update();
-            if (current_mission_->getStatus() == MissionStatus::DONE)
+            current_mission_->Update();
+            if (current_mission_->GetStatus() == MissionStatus::DONE)
             {
                 current_mission_.reset();
-                transition(State::SELECT_MISSION, "PrepareConcert finished");
+                Transition(State::SELECT_MISSION, "PrepareConcert finished");
             }
-            else if (current_mission_->getStatus() == MissionStatus::FAILED)
+            else if (current_mission_->GetStatus() == MissionStatus::FAILED)
             {
-                current_mission_->clear();
+                current_mission_->Clear();
                 current_mission_.reset();
-                transition(State::SELECT_MISSION, "PrepareConcert failed");
+                Transition(State::SELECT_MISSION, "PrepareConcert failed");
             }
-            else if (current_mission_->getStatus() == MissionStatus::FINISH_ALL)
+            else if (current_mission_->GetStatus() == MissionStatus::FINISH_ALL)
             {
                 current_mission_.reset();
-                transition(State::DO_GO_HOME, "Finish all finished");
+                Transition(State::DO_GO_HOME, "Finish all finished");
             }
             break;
 
@@ -171,18 +171,18 @@ namespace Modelec
             if (!current_mission_)
             {
                 current_mission_ = std::make_unique<BannerMission>(nav_, action_executor_);
-                current_mission_->start(shared_from_this());
+                current_mission_->Start(shared_from_this());
             }
-            current_mission_->update();
-            if (current_mission_->getStatus() == MissionStatus::DONE)
+            current_mission_->Update();
+            if (current_mission_->GetStatus() == MissionStatus::DONE)
             {
                 current_mission_.reset();
-                transition(State::SELECT_MISSION, "Promotion finished");
+                Transition(State::SELECT_MISSION, "Promotion finished");
             }
-            else if (current_mission_->getStatus() == MissionStatus::FAILED)
+            else if (current_mission_->GetStatus() == MissionStatus::FAILED)
             {
                 current_mission_.reset();
-                transition(State::SELECT_MISSION, "Promotion failed");
+                Transition(State::SELECT_MISSION, "Promotion failed");
             }
             break;
 
@@ -190,13 +190,13 @@ namespace Modelec
             if (!current_mission_)
             {
                 current_mission_ = std::make_unique<GoHomeMission>(nav_, match_start_time_);
-                current_mission_->start(shared_from_this());
+                current_mission_->Start(shared_from_this());
             }
-            current_mission_->update();
-            if (current_mission_->getStatus() == MissionStatus::DONE)
+            current_mission_->Update();
+            if (current_mission_->GetStatus() == MissionStatus::DONE)
             {
                 current_mission_.reset();
-                transition(State::STOP, "Cleanup done");
+                Transition(State::STOP, "Cleanup done");
             }
             break;
 

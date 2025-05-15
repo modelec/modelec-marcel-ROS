@@ -85,31 +85,58 @@ namespace Modelec
             return;
         }
 
-        step_.pop();
-        step_done_ = false;
+        if (step_done_)
+        {
+            step_.pop();
+            step_done_ = false;
+
+            switch (step_.front())
+            {
+            }
+        }
     }
 
     void ActionExecutor::DeployBanner()
     {
-        action_ = DEPLOY_BANNER;
-        action_done_ = false;
+        if (action_done_)
+        {
+            action_ = DEPLOY_BANNER;
+            action_done_ = false;
 
-        Update();
+            Update();
+        }
+    }
+
+    void ActionExecutor::RetractBanner()
+    {
+        if (action_done_)
+        {
+            action_ = RETRACT_BANNER;
+            action_done_ = false;
+
+            Update();
+        }
     }
 
     void ActionExecutor::TakePot()
     {
-        action_ = TAKE_POT;
-        action_done_ = false;
+        if (action_done_)
+        {
+            action_ = TAKE_POT;
+            action_done_ = false;
 
-        Update();
+            Update();
+        }
     }
 
     void ActionExecutor::PlacePot()
     {
-        action_ = PLACE_POT;
-        action_done_ = false;
+        if (action_done_)
+        {
+            action_ = PLACE_POT;
+            action_done_ = false;
 
-        Update();
+            Update();
+        }
     }
 }

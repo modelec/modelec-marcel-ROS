@@ -4,12 +4,14 @@
 
 namespace Modelec
 {
-    PrepareConcertMission::PrepareConcertMission(const std::shared_ptr<NavigationHelper>& nav, const std::shared_ptr<ActionExecutor>& action_executor) : step_(GO_TO_COLUMN),
+    PrepareConcertMission::PrepareConcertMission(const std::shared_ptr<NavigationHelper>& nav,
+                                                 const std::shared_ptr<ActionExecutor>& action_executor) :
+        step_(GO_TO_COLUMN),
         status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
     {
     }
 
-    void PrepareConcertMission::start(rclcpp::Node::SharedPtr node)
+    void PrepareConcertMission::Start(rclcpp::Node::SharedPtr node)
     {
         node_ = node;
 
@@ -38,7 +40,7 @@ namespace Modelec
                 auto res = nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL);
                 if (res != Pathfinding::FREE)
                 {
-                    blacklistId.push_back(column_->id());
+                    blacklistId.push_back(column_->GetId());
                 }
                 else
                 {
@@ -58,7 +60,7 @@ namespace Modelec
         status_ = MissionStatus::RUNNING;
     }
 
-    void PrepareConcertMission::update()
+    void PrepareConcertMission::Update()
     {
         if (status_ != MissionStatus::RUNNING) return;
 
@@ -78,7 +80,7 @@ namespace Modelec
             break;
         case GO_CLOSE_TO_COLUMN:
             action_executor_->TakePot();
-            nav_->GetPathfinding()->RemoveObstacle(column_->id());
+            nav_->GetPathfinding()->RemoveObstacle(column_->GetId());
 
             step_ = TAKE_COLUMN;
             break;
@@ -112,7 +114,6 @@ namespace Modelec
             break;
         case GO_BACK:
             {
-
                 bool canGo = false;
                 std::vector<int> blacklistId = {};
                 int timeout = 0;
@@ -127,7 +128,8 @@ namespace Modelec
 
                         if (nav_->CanGoTo(p, false, Pathfinding::FREE | Pathfinding::WALL) != Pathfinding::FREE)
                         {
-                            if (nav_->GoToRotateFirst(p, true, Pathfinding::FREE | Pathfinding::WALL) != Pathfinding::FREE)
+                            if (nav_->GoToRotateFirst(p, true, Pathfinding::FREE | Pathfinding::WALL) !=
+                                Pathfinding::FREE)
                             {
                                 blacklistId.push_back(closestDepoZone_->GetId());
                             }
@@ -175,9 +177,9 @@ namespace Modelec
             {
                 action_executor_->PlacePot();
 
-                column_->setX(closestDepoZonePoint_.x);
-                column_->setY(closestDepoZonePoint_.y);
-                column_->setTheta(closestDepoZonePoint_.theta);
+                column_->SetX(closestDepoZonePoint_.x);
+                column_->SetY(closestDepoZonePoint_.y);
+                column_->SetTheta(closestDepoZonePoint_.theta);
                 column_->SetAtObjective(true);
                 nav_->GetPathfinding()->AddObstacle(column_);
             }
@@ -213,12 +215,12 @@ namespace Modelec
         }
     }
 
-    void PrepareConcertMission::clear()
+    void PrepareConcertMission::Clear()
     {
         // TODO : if is doing construction, stop everything and release everything
     }
 
-    MissionStatus PrepareConcertMission::getStatus() const
+    MissionStatus PrepareConcertMission::GetStatus() const
     {
         return status_;
     }

@@ -15,15 +15,16 @@ namespace Modelec
     {
     public:
         BannerMission(const std::shared_ptr<NavigationHelper>& nav,
-                        const std::shared_ptr<ActionExecutor>& action_executor);
+                      const std::shared_ptr<ActionExecutor>& action_executor);
 
-        void start(rclcpp::Node::SharedPtr node) override;
-        void update() override;
-        void clear() override;
-        MissionStatus getStatus() const override;
-        std::string name() const override { return "Promotion"; }
+        void Start(rclcpp::Node::SharedPtr node) override;
+        void Update() override;
+        void Clear() override;
+        MissionStatus GetStatus() const override;
+        std::string GetName() const override { return "Promotion"; }
 
-        enum Step {
+        enum Step
+        {
             GO_TO_FRONT,
             DEPLOY_BANNER,
             GO_FORWARD,

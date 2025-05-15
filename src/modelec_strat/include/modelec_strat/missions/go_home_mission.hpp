@@ -11,14 +11,15 @@ namespace Modelec
     public:
         GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const rclcpp::Time& start_time);
 
-        void start(rclcpp::Node::SharedPtr node) override;
-        void update() override;
-        void clear() override;
-        MissionStatus getStatus() const override;
-        std::string name() const override { return "GoHome"; }
+        void Start(rclcpp::Node::SharedPtr node) override;
+        void Update() override;
+        void Clear() override;
+        MissionStatus GetStatus() const override;
+        std::string GetName() const override { return "GoHome"; }
 
     private:
-        enum Step {
+        enum Step
+        {
             ROTATE_TO_HOME,
             GO_HOME,
             GO_CLOSE,

@@ -6,21 +6,23 @@
 #include <modelec_strat/obstacle/column.hpp>
 #include <std_msgs/msg/int64.hpp>
 
-namespace Modelec {
-
-    class PrepareConcertMission : public Mission {
+namespace Modelec
+{
+    class PrepareConcertMission : public Mission
+    {
     public:
         PrepareConcertMission(const std::shared_ptr<NavigationHelper>& nav,
                               const std::shared_ptr<ActionExecutor>& action_executor);
 
-        void start(rclcpp::Node::SharedPtr node) override;
-        void update() override;
-        void clear() override;
-        MissionStatus getStatus() const override;
-        std::string name() const override { return "PrepareConcert"; }
+        void Start(rclcpp::Node::SharedPtr node) override;
+        void Update() override;
+        void Clear() override;
+        MissionStatus GetStatus() const override;
+        std::string GetName() const override { return "PrepareConcert"; }
 
     private:
-        enum Step {
+        enum Step
+        {
             GO_TO_COLUMN,
             GO_CLOSE_TO_COLUMN,
             TAKE_COLUMN,
@@ -43,5 +45,4 @@ namespace Modelec {
         rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr score_pub_;
         int mission_score_ = 0;
     };
-
 }

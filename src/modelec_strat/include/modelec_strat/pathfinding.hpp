@@ -35,7 +35,7 @@ namespace Modelec
 
         explicit Waypoint(const WaypointMsg& waypoint);
 
-        WaypointMsg toMsg() const;
+        WaypointMsg ToMsg() const;
     };
 
     class Pathfinding
@@ -65,7 +65,7 @@ namespace Modelec
 
         Pathfinding(const rclcpp::Node::SharedPtr& node);
 
-        rclcpp::Node::SharedPtr getNode() const;
+        rclcpp::Node::SharedPtr GetNode() const;
 
         std::pair<int, WaypointListMsg> FindPath(const PosMsg::SharedPtr& start,
                                                  const PosMsg::SharedPtr& goal, bool isClose = false,

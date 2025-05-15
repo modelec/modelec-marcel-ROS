@@ -4,11 +4,12 @@
 
 namespace Modelec
 {
-    GoHomeMission::GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const rclcpp::Time& start_time) : step_(ROTATE_TO_HOME), status_(MissionStatus::READY), nav_(nav), start_time_(start_time)
+    GoHomeMission::GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const rclcpp::Time& start_time) :
+        step_(ROTATE_TO_HOME), status_(MissionStatus::READY), nav_(nav), start_time_(start_time)
     {
     }
 
-    void GoHomeMission::start(rclcpp::Node::SharedPtr node)
+    void GoHomeMission::Start(rclcpp::Node::SharedPtr node)
     {
         node_ = node;
 
@@ -31,58 +32,58 @@ namespace Modelec
         status_ = MissionStatus::RUNNING;
     }
 
-    void GoHomeMission::update()
+    void GoHomeMission::Update()
     {
         if (!nav_->HasArrived()) return;
 
         switch (step_)
         {
-            case ROTATE_TO_HOME:
+        case ROTATE_TO_HOME:
+            {
+                if (nav_->GoTo(home_point_.GetTakeBasePosition()) != Pathfinding::FREE)
                 {
-                    if (nav_->GoTo(home_point_.GetTakeBasePosition()) != Pathfinding::FREE)
+                    if (nav_->GoTo(home_point_.GetTakeBasePosition(), true) != Pathfinding::FREE)
                     {
-                        if (nav_->GoTo(home_point_.GetTakeBasePosition(), true) != Pathfinding::FREE)
-                        {
-                            status_ = MissionStatus::FAILED;
-                            return;
-                        }
+                        status_ = MissionStatus::FAILED;
+                        return;
                     }
                 }
+            }
 
-                step_ = GO_HOME;
+            step_ = GO_HOME;
+            break;
+        case GO_HOME:
+            if ((node_->now() - start_time_).seconds() < 94)
+            {
                 break;
-            case GO_HOME:
-                if ((node_->now() - start_time_).seconds() < 94)
-                {
-                    break;
-                }
+            }
 
-                nav_->GoTo(home_point_.GetTakePosition(0), true);
+            nav_->GoTo(home_point_.GetTakePosition(0), true);
 
-                step_ = GO_CLOSE;
+            step_ = GO_CLOSE;
+            break;
+
+        case GO_CLOSE:
+            {
+                std_msgs::msg::Int64 msg;
+                msg.data = mission_score_;
+                score_pub_->publish(msg);
+
+                step_ = DONE;
+                status_ = MissionStatus::DONE;
+
                 break;
-
-            case GO_CLOSE:
-                {
-                    std_msgs::msg::Int64 msg;
-                    msg.data = mission_score_;
-                    score_pub_->publish(msg);
-
-                    step_ = DONE;
-                    status_ = MissionStatus::DONE;
-
-                    break;
-                }
-            default:
-                break;
+            }
+        default:
+            break;
         }
     }
 
-    void GoHomeMission::clear()
+    void GoHomeMission::Clear()
     {
     }
 
-    MissionStatus GoHomeMission::getStatus() const
+    MissionStatus GoHomeMission::GetStatus() const
     {
         return status_;
     }

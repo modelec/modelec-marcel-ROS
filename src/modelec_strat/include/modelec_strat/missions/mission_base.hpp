@@ -19,10 +19,10 @@ namespace Modelec
     {
     public:
         virtual ~Mission() = default;
-        virtual void start(rclcpp::Node::SharedPtr node) = 0;
-        virtual void update() = 0;
-        virtual void clear() = 0;
-        virtual MissionStatus getStatus() const = 0;
-        virtual std::string name() const = 0;
+        virtual void Start(rclcpp::Node::SharedPtr node) = 0;
+        virtual void Update() = 0;
+        virtual void Clear() = 0;
+        virtual MissionStatus GetStatus() const = 0;
+        virtual std::string GetName() const = 0;
     };
 }

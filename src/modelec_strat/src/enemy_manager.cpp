@@ -54,7 +54,10 @@ namespace Modelec
 
         timer_ = this->create_wall_timer(
             std::chrono::seconds(1),
-            std::bind(&EnemyManager::TimerCallback, this)
+            [this]()
+            {
+                TimerCallback();
+            }
         );
 
         last_publish_time_ = this->now();

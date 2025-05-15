@@ -19,7 +19,7 @@ namespace Modelec
         }
     };
 
-    double heuristic(int x1, int y1, int x2, int y2)
+    double Heuristic(int x1, int y1, int x2, int y2)
     {
         return std::hypot(x1 - x2, y1 - y2); // Euclidean distance
     }
@@ -340,7 +340,7 @@ namespace Modelec
 
         AStarNode start_node{start_x, start_y};
         start_node.g = 0;
-        start_node.f = heuristic(start_x, start_y, goal_x, goal_y);
+        start_node.f = Heuristic(start_x, start_y, goal_x, goal_y);
 
         open_list.push(start_node);
         all_nodes[hash(start_x, start_y)] = start_node;
@@ -366,7 +366,7 @@ namespace Modelec
                 if (!TestCollision(nx, ny, collisionMask))
                     continue;
 
-                double tentative_g = current.g + heuristic(current.x, current.y, nx, ny);
+                double tentative_g = current.g + Heuristic(current.x, current.y, nx, ny);
                 int64_t neighbor_hash = hash(nx, ny);
 
                 if (all_nodes.find(neighbor_hash) == all_nodes.end() || tentative_g < all_nodes[neighbor_hash].g)
@@ -375,7 +375,7 @@ namespace Modelec
                     neighbor.x = nx;
                     neighbor.y = ny;
                     neighbor.g = tentative_g;
-                    neighbor.f = tentative_g + heuristic(nx, ny, goal_x, goal_y);
+                    neighbor.f = tentative_g + Heuristic(nx, ny, goal_x, goal_y);
                     neighbor.parent_x = current.x;
                     neighbor.parent_y = current.y;
                     all_nodes[neighbor_hash] = neighbor;

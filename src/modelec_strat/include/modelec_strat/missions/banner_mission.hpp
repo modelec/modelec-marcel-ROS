@@ -37,5 +37,6 @@ namespace Modelec
         rclcpp::Node::SharedPtr node_;
         rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr score_pub_;
         int mission_score_ = 0;
+        Point spawn_;
     };
 }

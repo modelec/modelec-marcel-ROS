@@ -18,6 +18,8 @@ namespace Modelec
 
         score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
 
+        spawn_ = nav_->GetSpawn();
+
         action_executor_->DeployBanner();
 
         status_ = MissionStatus::RUNNING;
@@ -34,23 +36,21 @@ namespace Modelec
         switch (step_)
         {
         case DEPLOY_BANNER:
+            {
+                nav_->GoTo(spawn_.x, (nav_->GetPathfinding()->robot_length_mm_ / 2) + 5, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
-            auto spawn = nav_->GetSpawn();
+                step_ = DEPLOY_BANNER;
+            }
 
-            nav_->GoTo(spawn.x, (nav_->GetPathfinding()->robot_length_mm_ / 2) + 5, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
-
-            step_ = DEPLOY_BANNER;
             break;
 
         case GO_TO_FRONT:
             {
-                auto spawn = nav_->GetSpawn();
-
-                nav_->GoTo(spawn.x, (nav_->GetPathfinding()->robot_length_mm_ / 2) + 150, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+                nav_->GoTo(spawn_.x, (nav_->GetPathfinding()->robot_length_mm_ / 2) + 150, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
                 step_ = GO_FORWARD;
-                break;
             }
+            break;
         case GO_FORWARD:
             {
                 std_msgs::msg::Int64 msg;

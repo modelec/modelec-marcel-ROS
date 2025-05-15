@@ -13,17 +13,17 @@ namespace Modelec
         relay_get_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionRelayState>("/action/get/relay", 10);
 
         asc_get_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionAscPos>(
-            "/action/get/asc/res", 10, [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr msg)
+            "/action/get/asc/res", 10, [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr)
             {
             });
 
         servo_get_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionServoPos>(
-            "/action/get/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
+            "/action/get/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr)
             {
             });
 
         relay_get_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionRelayState>(
-            "/action/get/relay/res", 10, [this](const modelec_interfaces::msg::ActionRelayState::SharedPtr msg)
+            "/action/get/relay/res", 10, [this](const modelec_interfaces::msg::ActionRelayState::SharedPtr)
             {
             });
 
@@ -31,12 +31,12 @@ namespace Modelec
         servo_set_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionServoPos>("/action/set/servo", 10);
 
         asc_set_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionAscPos>(
-            "/action/set/asc/res", 10, [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr msg)
+            "/action/set/asc/res", 10, [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr)
             {
             });
 
         servo_set_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionServoPos>(
-            "/action/set/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
+            "/action/set/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr)
             {
             });
 
@@ -45,21 +45,21 @@ namespace Modelec
         relay_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionRelayState>("/action/move/relay", 10);
 
         asc_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionAscPos>(
-            "/action/move/asc/res", 10, [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr msg)
+            "/action/move/asc/res", 10, [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr)
             {
                 step_done_ = true;
                 Update();
             });
 
         servo_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionServoPos>(
-            "/action/move/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
+            "/action/move/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr)
             {
                 step_done_ = true;
                 Update();
             });
 
         relay_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionRelayState>(
-            "/action/move/relay/res", 10, [this](const modelec_interfaces::msg::ActionRelayState::SharedPtr msg)
+            "/action/move/relay/res", 10, [this](const modelec_interfaces::msg::ActionRelayState::SharedPtr)
             {
                 step_done_ = true;
                 Update();

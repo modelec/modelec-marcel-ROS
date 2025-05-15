@@ -28,13 +28,10 @@ namespace Modelec
         ~PCBActionInterface() override;
 
     protected:
-        std::map<ASCState, int> asc_value_mapper_ = {
-            {LOW, 0},
-            {HIGH, 0},
-        };
+        std::map<ASCState, int> asc_value_mapper_;
         std::map<int, std::map<int, int>> servo_pos_mapper_;
 
-        ASCState asc_state_ = LOW;
+        ASCState asc_state_;
         std::map<int, int> servo_value_;
         std::map<int, bool> relay_value_;
 

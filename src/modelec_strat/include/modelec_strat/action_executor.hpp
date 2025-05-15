@@ -41,6 +41,7 @@ namespace Modelec
         void PlacePot();
 
     protected:
+        /*
         rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_get_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_get_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::ActionRelayState>::SharedPtr relay_get_pub_;
@@ -54,6 +55,7 @@ namespace Modelec
 
         rclcpp::Subscription<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_set_res_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_set_res_sub_;
+        */
 
         rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_move_pub_;

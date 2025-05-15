@@ -8,7 +8,7 @@ namespace Modelec
 
     ActionExecutor::ActionExecutor(const rclcpp::Node::SharedPtr& node) : node_(node)
     {
-        asc_get_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionAscPos>("/action/get/asc", 10);
+        /*asc_get_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionAscPos>("/action/get/asc", 10);
         servo_get_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionServoPos>("/action/get/servo", 10);
         relay_get_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionRelayState>("/action/get/relay", 10);
 
@@ -38,7 +38,7 @@ namespace Modelec
         servo_set_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionServoPos>(
             "/action/set/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr)
             {
-            });
+            });*/
 
         asc_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionAscPos>("/action/move/asc", 10);
         servo_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionServoPos>("/action/move/servo", 10);

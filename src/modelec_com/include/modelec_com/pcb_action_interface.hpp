@@ -13,13 +13,6 @@ namespace Modelec
     {
     public:
 
-        enum ASCState
-        {
-            LOW = 0,
-            HIGH = 1,
-            MOVING = 2,
-        };
-
         PCBActionInterface();
         rclcpp::CallbackGroup::SharedPtr pcb_callback_group_;
         std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> pcb_executor_;
@@ -28,10 +21,10 @@ namespace Modelec
         ~PCBActionInterface() override;
 
     protected:
-        std::map<ASCState, int> asc_value_mapper_;
+        std::map<int, int> asc_value_mapper_;
         std::map<int, std::map<int, int>> servo_pos_mapper_;
 
-        ASCState asc_state_ = LOW;
+        int asc_state_ = 0;
         std::map<int, int> servo_value_;
         std::map<int, bool> relay_value_;
 

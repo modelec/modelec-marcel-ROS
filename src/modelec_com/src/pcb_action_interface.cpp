@@ -106,7 +106,7 @@ namespace Modelec
             "action/asc/set", 10,
             [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr msg)
             {
-                SendOrder("ASC", {msg->pos == LOW ? "LOW" : "HIGH", std::to_string(msg->value)});
+                SendOrder("ASC", {std::to_string(msg->pos), std::to_string(msg->value)});
             });
 
         servo_set_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPos>(
@@ -128,7 +128,7 @@ namespace Modelec
             "action/asc/move", 10,
             [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr msg)
             {
-                SendMove("ASC", {msg->pos == LOW ? "LOW" : "HIGH"});
+                SendMove("ASC", {std::to_string(msg->pos)});
             });
 
         servo_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPos>(
@@ -179,18 +179,7 @@ namespace Modelec
         {
             if (tokens[1] == "ASC")
             {
-                if (tokens[3] == "DESC" || tokens[3] == "CLIMB")
-                {
-                    asc_state_ = MOVING;
-                }
-                else if (tokens[3] == "LOW")
-                {
-                    asc_state_ = LOW;
-                }
-                else if (tokens[3] == "HIGH")
-                {
-                    asc_state_ = HIGH;
-                }
+                asc_state_ = std::stoi(tokens[3]);
 
                 modelec_interfaces::msg::ActionAscPos asc_msg;
                 asc_msg.pos = asc_state_;
@@ -228,12 +217,12 @@ namespace Modelec
             {
                 if (tokens[1] == "ASC")
                 {
-                    ASCState state = tokens[2] == "LOW" ? LOW : HIGH;
+                    int pos = std::stoi(tokens[2]);
                     int v = std::stoi(tokens[3]);
-                    asc_value_mapper_[state] = v;
+                    asc_value_mapper_[pos] = v;
 
                     modelec_interfaces::msg::ActionAscPos asc_msg;
-                    asc_msg.pos = state;
+                    asc_msg.pos = pos;
                     asc_msg.value = v;
                     asc_msg.success = true;
                     asc_set_res_pub_->publish(asc_msg);
@@ -257,7 +246,7 @@ namespace Modelec
             {
                 if (tokens[1] == "ASC")
                 {
-                    asc_state_ = tokens[2] == "LOW" ? LOW : HIGH;
+                    asc_state_ = std::stoi(tokens[2]);
 
                     modelec_interfaces::msg::ActionAscPos asc_msg;
                     asc_msg.pos = asc_state_;

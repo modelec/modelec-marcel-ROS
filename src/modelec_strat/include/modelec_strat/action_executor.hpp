@@ -14,13 +14,30 @@ namespace Modelec
         {
             NONE,
             DEPLOY_BANNER,
-            RETRACT_BANNER,
             TAKE_POT,
             PLACE_POT,
         };
 
         enum Step
         {
+            // Banner
+            DEPLOY_BANNER_STEP,
+
+            // Take Pot
+            ASC_GO_DOWN,
+            STICK_TO_STRUCT,
+            ASC_GO_UP,
+            RETRACT_BOTTOM_PLATE,
+            ASC_GO_DOWN_TO_TAKE_POT,
+            STICK_POT,
+            ASC_GO_UP_TO_TAKE_POT,
+            PLACE_FIRST_PLATE,
+            ASC_FINAL,
+
+
+            // Place Pot
+            FREE_ALL,
+            REMOVE_ACTION_STEP,
         };
 
         ActionExecutor();
@@ -34,8 +51,6 @@ namespace Modelec
         void Update();
 
         void DeployBanner();
-
-        void RetractBanner();
 
         void TakePot();
 
@@ -71,7 +86,7 @@ namespace Modelec
         std::queue<Step> step_;
 
         bool action_done_ = true;
-        bool step_done_ = true;
+        int step_running_ = 0;
 
     private:
         rclcpp::Node::SharedPtr node_;

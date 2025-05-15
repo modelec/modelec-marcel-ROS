@@ -47,21 +47,21 @@ namespace Modelec
         asc_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionAscPos>(
             "/action/move/asc/res", 10, [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr)
             {
-                step_done_ = true;
+                step_running_--;
                 Update();
             });
 
         servo_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionServoPos>(
             "/action/move/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr)
             {
-                step_done_ = true;
+                step_running_--;
                 Update();
             });
 
         relay_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionRelayState>(
             "/action/move/relay/res", 10, [this](const modelec_interfaces::msg::ActionRelayState::SharedPtr)
             {
-                step_done_ = true;
+                step_running_--;
                 Update();
             });
     }
@@ -85,13 +85,196 @@ namespace Modelec
             return;
         }
 
-        if (step_done_)
+        if (step_running_ == 0)
         {
             step_.pop();
-            step_done_ = false;
 
             switch (step_.front())
             {
+            case DEPLOY_BANNER_STEP:
+                {
+                    modelec_interfaces::msg::ActionServoPos msg;
+                    msg.id = 5; // TODO : to define
+                    msg.pos = 1;
+                    servo_move_pub_->publish(msg);
+
+                    step_running_ = 1;
+                }
+
+                break;
+
+            case ASC_GO_DOWN:
+                {
+                    modelec_interfaces::msg::ActionAscPos asc_msg;
+                    asc_msg.pos = 1;
+                    asc_move_pub_->publish(asc_msg);
+
+                    modelec_interfaces::msg::ActionServoPos servo_action_bottom_msg;
+                    servo_action_bottom_msg.id = 4; // TODO : to define
+                    servo_action_bottom_msg.pos = 1;
+                    servo_move_pub_->publish(servo_action_bottom_msg);
+
+                    step_running_ = 2;
+                }
+
+                break;
+            case STICK_TO_STRUCT:
+                {
+                    modelec_interfaces::msg::ActionRelayState relay_top_msg;
+                    relay_top_msg.state = true; // TODO : check that
+                    relay_top_msg.id = 0;       // TODO : to define
+                    relay_move_pub_->publish(relay_top_msg);
+
+                    modelec_interfaces::msg::ActionRelayState relay_bottom_msg;
+                    relay_bottom_msg.state = true; // TODO : check that
+                    relay_bottom_msg.id = 1;       // TODO : to define
+                    relay_move_pub_->publish(relay_bottom_msg);
+
+                    modelec_interfaces::msg::ActionServoPos first_pot_msg;
+                    first_pot_msg.id = 0; // TODO : to define
+                    first_pot_msg.pos = 1;
+                    servo_move_pub_->publish(first_pot_msg);
+
+                    modelec_interfaces::msg::ActionServoPos fourth_pot_msg;
+                    fourth_pot_msg.id = 3; // TODO : to define
+                    fourth_pot_msg.pos = 1;
+                    servo_move_pub_->publish(fourth_pot_msg);
+
+                    step_running_ = 4;
+                }
+
+                break;
+            case ASC_GO_UP:
+                {
+                    modelec_interfaces::msg::ActionAscPos asc_msg;
+                    asc_msg.pos = 3;
+                    asc_move_pub_->publish(asc_msg);
+
+                    step_running_ = 1;
+                }
+
+                break;
+            case RETRACT_BOTTOM_PLATE:
+                {
+                    modelec_interfaces::msg::ActionServoPos servo_action_bottom_msg;
+                    servo_action_bottom_msg.id = 4; // TODO : to define
+                    servo_action_bottom_msg.pos = 2;
+                    servo_move_pub_->publish(servo_action_bottom_msg);
+
+                    step_running_ = 1;
+                }
+
+                break;
+            case ASC_GO_DOWN_TO_TAKE_POT:
+                {
+                    modelec_interfaces::msg::ActionAscPos asc_msg;
+                    asc_msg.pos = 0;
+                    asc_move_pub_->publish(asc_msg);
+
+                    step_running_ = 1;
+                }
+
+                break;
+            case STICK_POT:
+                {
+                    modelec_interfaces::msg::ActionServoPos second_pot_msg;
+                    second_pot_msg.id = 1; // TODO : to define
+                    second_pot_msg.pos = 1;
+                    servo_move_pub_->publish(second_pot_msg);
+
+                    modelec_interfaces::msg::ActionServoPos third_pot_msg;
+                    third_pot_msg.id = 2; // TODO : to define
+                    third_pot_msg.pos = 1;
+                    servo_move_pub_->publish(third_pot_msg);
+
+                    step_running_ = 2;
+                }
+
+                break;
+            case ASC_GO_UP_TO_TAKE_POT:
+                {
+                    modelec_interfaces::msg::ActionAscPos asc_msg;
+                    asc_msg.pos = 3;
+                    asc_move_pub_->publish(asc_msg);
+
+                    step_running_ = 1;
+                }
+
+                break;
+            case PLACE_FIRST_PLATE:
+                {
+                    modelec_interfaces::msg::ActionServoPos action_bottom_msg;
+                    action_bottom_msg.id = 4; // TODO : to define
+                    action_bottom_msg.pos = 0;
+                    servo_move_pub_->publish(action_bottom_msg);
+
+                    step_running_ = 1;
+                }
+
+                break;
+            case ASC_FINAL:
+                {
+                    modelec_interfaces::msg::ActionAscPos asc_msg;
+                    asc_msg.pos = 2;
+                    asc_move_pub_->publish(asc_msg);
+
+                    step_running_ = 1;
+                }
+
+                break;
+            case FREE_ALL:
+                {
+                    modelec_interfaces::msg::ActionRelayState relay_top_msg;
+                    relay_top_msg.state = false; // TODO : check that
+                    relay_top_msg.id = 0;       // TODO : to define
+                    relay_move_pub_->publish(relay_top_msg);
+
+                    modelec_interfaces::msg::ActionRelayState relay_bottom_msg;
+                    relay_bottom_msg.state = false; // TODO : check that
+                    relay_bottom_msg.id = 1;       // TODO : to define
+                    relay_move_pub_->publish(relay_bottom_msg);
+
+                    modelec_interfaces::msg::ActionServoPos first_pot_msg;
+                    first_pot_msg.id = 0; // TODO : to define
+                    first_pot_msg.pos = 0;
+                    servo_move_pub_->publish(first_pot_msg);
+
+                    modelec_interfaces::msg::ActionServoPos second_pot_msg;
+                    second_pot_msg.id = 1; // TODO : to define
+                    second_pot_msg.pos = 0;
+                    servo_move_pub_->publish(second_pot_msg);
+
+                    modelec_interfaces::msg::ActionServoPos third_pot_msg;
+                    third_pot_msg.id = 2; // TODO : to define
+                    third_pot_msg.pos = 0;
+                    servo_move_pub_->publish(third_pot_msg);
+
+                    modelec_interfaces::msg::ActionServoPos fourth_pot_msg;
+                    fourth_pot_msg.id = 3; // TODO : to define
+                    fourth_pot_msg.pos = 0;
+                    servo_move_pub_->publish(fourth_pot_msg);
+
+                    step_running_ = 6;
+                }
+
+                break;
+            case REMOVE_ACTION_STEP:
+                {
+                    modelec_interfaces::msg::ActionAscPos asc_msg;
+                    asc_msg.pos = 3;
+                    asc_move_pub_->publish(asc_msg);
+
+                    modelec_interfaces::msg::ActionServoPos servo_action_bottom_msg;
+                    servo_action_bottom_msg.id = 4; // TODO : to define
+                    servo_action_bottom_msg.pos = 0;
+                    servo_move_pub_->publish(servo_action_bottom_msg);
+
+                    step_running_ = 2;
+                }
+
+                break;
+            default:
+                break;
             }
         }
     }
@@ -102,17 +285,7 @@ namespace Modelec
         {
             action_ = DEPLOY_BANNER;
             action_done_ = false;
-
-            Update();
-        }
-    }
-
-    void ActionExecutor::RetractBanner()
-    {
-        if (action_done_)
-        {
-            action_ = RETRACT_BANNER;
-            action_done_ = false;
+            step_.push(DEPLOY_BANNER_STEP);
 
             Update();
         }
@@ -125,6 +298,16 @@ namespace Modelec
             action_ = TAKE_POT;
             action_done_ = false;
 
+            step_.push(ASC_GO_DOWN);
+            step_.push(STICK_TO_STRUCT);
+            step_.push(ASC_GO_UP);
+            step_.push(RETRACT_BOTTOM_PLATE);
+            step_.push(ASC_GO_DOWN_TO_TAKE_POT);
+            step_.push(STICK_POT);
+            step_.push(ASC_GO_UP_TO_TAKE_POT);
+            step_.push(PLACE_FIRST_PLATE);
+            step_.push(ASC_FINAL);
+
             Update();
         }
     }
@@ -135,6 +318,8 @@ namespace Modelec
         {
             action_ = PLACE_POT;
             action_done_ = false;
+            step_.push(FREE_ALL);
+            step_.push(REMOVE_ACTION_STEP);
 
             Update();
         }

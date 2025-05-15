@@ -25,8 +25,8 @@ namespace Modelec
 
         enum Step
         {
-            GO_TO_FRONT,
             DEPLOY_BANNER,
+            GO_TO_FRONT,
             GO_FORWARD,
             DONE
         } step_;

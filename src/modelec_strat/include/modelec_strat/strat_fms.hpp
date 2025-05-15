@@ -3,7 +3,6 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include "action_executor.hpp"
-#include "mission_manager.hpp"
 #include "navigation_helper.hpp"
 #include "missions/mission_base.hpp"
 #include "missions/banner_mission.hpp"
@@ -59,8 +58,7 @@ namespace Modelec
         int team_id_ = 0;
 
         std::shared_ptr<NavigationHelper> nav_;
-        std::unique_ptr<MissionManager> mission_manager_;
-        std::unique_ptr<ActionExecutor> action_executor_;
+        std::shared_ptr<ActionExecutor> action_executor_;
 
         rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr tirette_sub_;
         rclcpp::Publisher<modelec_interfaces::msg::StratState>::SharedPtr state_pub_;

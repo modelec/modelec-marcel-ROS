@@ -4,8 +4,8 @@
 
 namespace Modelec
 {
-    BannerMission::BannerMission(const std::shared_ptr<NavigationHelper>& nav) : step_(GO_TO_FRONT),
-        status_(MissionStatus::READY), nav_(nav)
+    BannerMission::BannerMission(const std::shared_ptr<NavigationHelper>& nav, const std::shared_ptr<ActionExecutor>& action_executor) : step_(GO_TO_FRONT),
+        status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
     {
     }
 
@@ -30,10 +30,12 @@ namespace Modelec
 
         if (!nav_->HasArrived()) return;
 
+        if (!action_executor_->IsActionDone()) return;
+
         switch (step_)
         {
         case GO_TO_FRONT:
-            // TODO deploy the banner here
+            action_executor_->DeployBanner();
 
             step_ = DEPLOY_BANNER;
             break;

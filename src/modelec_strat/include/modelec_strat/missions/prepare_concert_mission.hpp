@@ -1,5 +1,6 @@
 #pragma once
 
+#include <modelec_strat/action_executor.hpp>
 #include <modelec_strat/missions/mission_base.hpp>
 #include <modelec_strat/navigation_helper.hpp>
 #include <modelec_strat/obstacle/column.hpp>
@@ -9,7 +10,8 @@ namespace Modelec {
 
     class PrepareConcertMission : public Mission {
     public:
-        PrepareConcertMission(const std::shared_ptr<NavigationHelper>& nav);
+        PrepareConcertMission(const std::shared_ptr<NavigationHelper>& nav,
+                              const std::shared_ptr<ActionExecutor>& action_executor);
 
         void start(rclcpp::Node::SharedPtr node) override;
         void update() override;
@@ -32,6 +34,7 @@ namespace Modelec {
 
         MissionStatus status_;
         std::shared_ptr<NavigationHelper> nav_;
+        std::shared_ptr<ActionExecutor> action_executor_;
         rclcpp::Node::SharedPtr node_;
 
         std::shared_ptr<ColumnObstacle> column_;

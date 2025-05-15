@@ -64,7 +64,6 @@ namespace Modelec
     void StratFMS::Init()
     {
         nav_ = std::make_shared<NavigationHelper>(shared_from_this());
-        mission_manager_ = std::make_unique<MissionManager>(shared_from_this());
         action_executor_ = std::make_unique<ActionExecutor>(shared_from_this());
 
         RCLCPP_INFO(this->get_logger(), "StratFMS fully initialized");
@@ -146,7 +145,7 @@ namespace Modelec
         case State::DO_PREPARE_CONCERT:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<PrepareConcertMission>(nav_);
+                current_mission_ = std::make_unique<PrepareConcertMission>(nav_, action_executor_);
                 current_mission_->start(shared_from_this());
             }
             current_mission_->update();
@@ -171,7 +170,7 @@ namespace Modelec
         case State::DO_PROMOTION:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<BannerMission>(nav_);
+                current_mission_ = std::make_unique<BannerMission>(nav_, action_executor_);
                 current_mission_->start(shared_from_this());
             }
             current_mission_->update();

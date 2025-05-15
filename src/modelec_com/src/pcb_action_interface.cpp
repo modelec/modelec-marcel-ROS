@@ -153,46 +153,6 @@ namespace Modelec
 
         relay_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionRelayState>(
             "action/relay/move/res", 10);
-
-        asc_value_mapper_ = {
-            {LOW, 0},
-            {HIGH, 0}
-        };
-        SendOrder("ASC", {"LOW", std::to_string(0)});
-        SendOrder("ASC", {"HIGH", std::to_string(200)});
-
-        servo_pos_mapper_ = {
-            {0, {{0, 0}, {1, 0}}},
-            {1, {{0, 0}, {1, 0}}},
-            {2, {{0, 0}, {1, 0}}}
-        };
-        SendOrder("SERVO0", {"POS0", std::to_string(0)});
-        SendOrder("SERVO0", {"POS1", std::to_string(PI)});
-        SendOrder("SERVO1", {"POS0", std::to_string(0)});
-        SendOrder("SERVO1", {"POS1", std::to_string(PI)});
-        SendOrder("SERVO2", {"POS0", std::to_string(0)});
-        SendOrder("SERVO2", {"POS1", std::to_string(PI)});
-
-        asc_state_ = LOW;
-        SendMove("ASC", {"LOW"});
-
-        servo_value_ = {
-            {0, 0},
-            {1, 0},
-            {2, 0}
-        };
-        SendMove("SERVO0", {"POS0"});
-        SendMove("SERVO1", {"POS0"});
-        SendMove("SERVO2", {"POS0"});
-
-        relay_value_ = {
-            {0, false},
-            {1, false},
-            {2, false},
-        };
-        SendMove("RELAY0", {"0"});
-        SendMove("RELAY1", {"0"});
-        SendMove("RELAY2", {"0"});
     }
 
     PCBActionInterface::~PCBActionInterface()

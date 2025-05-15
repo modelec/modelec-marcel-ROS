@@ -31,7 +31,7 @@ namespace Modelec
         std::map<ASCState, int> asc_value_mapper_;
         std::map<int, std::map<int, int>> servo_pos_mapper_;
 
-        ASCState asc_state_;
+        ASCState asc_state_ = LOW;
         std::map<int, int> servo_value_;
         std::map<int, bool> relay_value_;
 

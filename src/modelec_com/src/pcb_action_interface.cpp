@@ -128,7 +128,6 @@ namespace Modelec
             "action/move/asc", 10,
             [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr msg)
             {
-                RCLCPP_INFO(this->get_logger(), "ASC move: %d", msg->pos);
                 SendMove("ASC", {std::to_string(msg->pos)});
             });
 
@@ -147,7 +146,7 @@ namespace Modelec
             });
 
         asc_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionAscPos>(
-            "action/mode/asc/res", 10);
+            "action/move/asc/res", 10);
 
         servo_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPos>(
             "action/move/servo/res", 10);
@@ -331,7 +330,7 @@ namespace Modelec
 
     void PCBActionInterface::SendToPCB(const std::string& data) const
     {
-        RCLCPP_INFO(this->get_logger(), "Sending to PCB: '%s'", data.c_str());
+        RCLCPP_DEBUG(this->get_logger(), "Sending to PCB: '%s'", data.c_str());
         auto message = std_msgs::msg::String();
         message.data = data;
         pcb_publisher_->publish(message);
@@ -362,7 +361,7 @@ namespace Modelec
 
     void PCBActionInterface::SendMove(const std::string& elem, const std::vector<std::string>& data) const
     {
-        SendToPCB("MOVE", elem, data);
+        SendToPCB("MOV", elem, data);
     }
 }
 

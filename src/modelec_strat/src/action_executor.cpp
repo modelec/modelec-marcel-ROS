@@ -78,11 +78,8 @@ namespace Modelec
 
     void ActionExecutor::Update()
     {
-        RCLCPP_INFO(node_->get_logger(), "ActionExecutor::Update()");
         if (step_.empty())
         {
-            RCLCPP_INFO(node_->get_logger(), "action finished");
-
             action_ = NONE;
             action_done_ = true;
             return;
@@ -90,16 +87,10 @@ namespace Modelec
 
         if (step_running_ == 0)
         {
-            RCLCPP_INFO(node_->get_logger(), "Running new action");
-
-            step_.pop();
-
             switch (step_.front())
             {
             case DEPLOY_BANNER_STEP:
                 {
-                    RCLCPP_INFO(node_->get_logger(), "Deploy banner step");
-
                     modelec_interfaces::msg::ActionServoPos msg;
                     msg.id = 5; // TODO : to define
                     msg.pos = 1;
@@ -281,8 +272,10 @@ namespace Modelec
 
                 break;
             default:
-                break;
+                return;
             }
+
+            step_.pop();
         }
     }
 

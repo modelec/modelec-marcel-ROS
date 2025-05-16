@@ -39,7 +39,7 @@ namespace Modelec
             {
                 nav_->GoTo(spawn_.x, (nav_->GetPathfinding()->robot_length_mm_ / 2) + 5, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
-                step_ = DEPLOY_BANNER;
+                step_ = GO_TO_FRONT;
             }
 
             break;

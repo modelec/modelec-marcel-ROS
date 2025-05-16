@@ -201,6 +201,10 @@ namespace Modelec
 
     bool NavigationHelper::HasArrived() const
     {
+        if (waypoints_.empty())
+        {
+            return true;
+        }
         return waypoints_.back().reached;
     }
 

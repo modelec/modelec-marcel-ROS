@@ -12,10 +12,10 @@ class SimulatedPCB:
         self.last_update = time.time()
 
         # État simulé
-        self.servos = {}  # {id: pos_index}
-        self.servo_angles = {}  # {id: {pos_index: angle}}
-        self.relais = {1: 0, 2: 0, 3: 0}
-        self.ascenseur_pos = "low"  # 'low', 'climb', 'high', 'desc'
+        self.servos = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, }  # {id: pos_index}
+        self.servo_angles = {0: {0: 0, 1: 0, 3: 0}, 1: {0: 0, 1: 0, 3: 0}, 2: {0: 0, 1: 0, 3: 0}, 3: {0: 0, 1: 0, 3: 0}, 4: {0: 0, 1: 0, 3: 0}, 5: {0: 0, 1: 0, 3: 0}, }  # {id: {pos_index: angle}}
+        self.relais = {1: 0, 2: 0}
+        self.ascenseur_pos = 0
         self.fin_course = {}  # à implémenter si besoin
         self.tirette_arm = False
 
@@ -73,7 +73,7 @@ class SimulatedPCB:
             self.servo_angles[sid][pos_index] = angle
 
             self.send_response(f"OK;{category};{data};{val}")
-        elif category == "ASC" and data in ("HIGH", "LOW"):
+        elif category == "ASC":
             self.send_response(f"OK;ASC;{data};{val}")
         else:
             self.send_response(f"KO;{category};{data};{val}")
@@ -85,11 +85,8 @@ class SimulatedPCB:
         category, data = parts[1], parts[2]
 
         if category == "ASC":
-            if data in ("HIGH", "LOW"):
-                self.ascenseur_pos = data.lower()
-                self.send_response(f"OK;{category};{data}")
-            else:
-                self.send_response(f"KO;{category};{data}")
+            self.ascenseur_pos = data
+            self.send_response(f"OK;{category};{data}")
         elif category.startswith("SERVO") and data.startswith("POS"):
             sid = int(category[5:])
             pos_index = int(data[3:])

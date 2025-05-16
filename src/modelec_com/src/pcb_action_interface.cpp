@@ -128,6 +128,7 @@ namespace Modelec
             "action/move/asc", 10,
             [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr msg)
             {
+                RCLCPP_INFO(this->get_logger(), "ASC move: %d", msg->pos);
                 SendMove("ASC", {std::to_string(msg->pos)});
             });
 

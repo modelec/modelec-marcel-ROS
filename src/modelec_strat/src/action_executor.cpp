@@ -98,6 +98,8 @@ namespace Modelec
             {
             case DEPLOY_BANNER_STEP:
                 {
+                    RCLCPP_INFO(node_->get_logger(), "Deploy banner step");
+
                     modelec_interfaces::msg::ActionServoPos msg;
                     msg.id = 5; // TODO : to define
                     msg.pos = 1;

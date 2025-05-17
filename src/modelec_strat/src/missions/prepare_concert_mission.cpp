@@ -15,7 +15,7 @@ namespace Modelec
     {
         node_ = node;
 
-        mission_score_ = Config::get<int>("config.mission_score.concert.niv_1", 0);
+        mission_score_ = Config::get<int>("config.mission_score.concert.niv_2", 0);
 
         score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
 

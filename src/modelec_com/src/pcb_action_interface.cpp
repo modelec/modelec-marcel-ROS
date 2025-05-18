@@ -153,6 +153,63 @@ namespace Modelec
 
         relay_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionRelayState>(
             "action/move/relay/res", 10);
+
+
+        // TODO : servo : 90deg all default pos (0) and then 1, 2, 3 pos for each
+        asc_value_mapper_ = {
+            {0, 0},
+            {1, 100},
+            {2, 200},
+            {3, 300}
+        };
+        for (auto & [id, v] : asc_value_mapper_)
+        {
+            SendOrder("ASC", {std::to_string(id), std::to_string(v)});
+        }
+
+        asc_state_ = 3;
+
+        SendMove("ASC", {std::to_string(asc_state_)});
+
+        servo_pos_mapper_ = {
+            {0, {{0, M_PI_2}}},
+            {1, {{0, M_PI_2}}},
+            {2, {{0, M_PI_2}}},
+            {3, {{0, M_PI_2}}},
+            {4, {{0, M_PI_2}, {1, -M_PI_2}, {2, PI}}},
+        };
+
+        for (auto & [id, v] : servo_pos_mapper_)
+        {
+            for (auto & [key, angle] : v)
+            {
+                SendOrder("SERVO" + std::to_string(id), {"POS" + std::to_string(key), std::to_string(angle)});
+            }
+        }
+
+        servo_value_ = {
+            {0, 0},
+            {1, 0},
+            {2, 0},
+            {3, 0},
+            {4, 0}
+        };
+
+        for (auto & [id, v] : servo_value_)
+        {
+            SendMove("SERVO" + std::to_string(id), {"POS" + std::to_string(v)});
+        }
+
+        relay_value_ = {
+            {0, false},
+            {1, false},
+            {2, false},
+        };
+
+        for (auto & [id, v] : relay_value_)
+        {
+            SendMove("RELAY" + std::to_string(id), {std::to_string(v)});
+        }
     }
 
     PCBActionInterface::~PCBActionInterface()

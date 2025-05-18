@@ -32,10 +32,10 @@ namespace Modelec
             STICK_POT,
             ASC_GO_UP_TO_TAKE_POT,
             PLACE_FIRST_PLATE,
-            ASC_FINAL,
 
 
             // Place Pot
+            ASC_FINAL,
             FREE_ALL,
             REMOVE_ACTION_STEP,
         };

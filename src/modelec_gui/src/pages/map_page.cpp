@@ -269,7 +269,7 @@ namespace ModelecGUI
             // -- Draw enemy position --
             if (hasEnemy)
             {
-                painter.setBrush(Qt::red);
+                painter.setBrush(Qt::darkBlue);
                 painter.drawRect((enemy_pos_.x - (enemy_width_ / 2)) * ratioBetweenMapAndWidgetX_,
                                  height() - (enemy_pos_.y + (enemy_length_ / 2)) * ratioBetweenMapAndWidgetY_,
                                  enemy_width_ * ratioBetweenMapAndWidgetX_, enemy_length_ * ratioBetweenMapAndWidgetY_);
@@ -282,7 +282,8 @@ namespace ModelecGUI
 
         QRect rect(-(robot_width_ * ratioBetweenMapAndWidgetX_ / 2), -(robot_length_ * ratioBetweenMapAndWidgetY_ / 2),
                    robot_width_ * ratioBetweenMapAndWidgetX_, robot_length_ * ratioBetweenMapAndWidgetY_);
-        painter.setBrush(Qt::green);
+        painter.setBrush(Qt::red);
+        painter.setPen(Qt::black);
         painter.drawRect(rect);
     }
 

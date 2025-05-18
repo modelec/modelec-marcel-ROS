@@ -306,7 +306,6 @@ namespace Modelec
             step_.push(STICK_POT);
             step_.push(ASC_GO_UP_TO_TAKE_POT);
             step_.push(PLACE_FIRST_PLATE);
-            step_.push(ASC_FINAL);
 
             Update();
         }
@@ -318,6 +317,7 @@ namespace Modelec
         {
             action_ = PLACE_POT;
             action_done_ = false;
+            step_.push(ASC_FINAL);
             step_.push(FREE_ALL);
             step_.push(REMOVE_ACTION_STEP);
 

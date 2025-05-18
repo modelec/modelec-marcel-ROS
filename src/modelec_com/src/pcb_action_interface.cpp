@@ -155,7 +155,7 @@ namespace Modelec
             "action/move/relay/res", 10);
 
 
-        // TODO : servo : 90deg all default pos (0) and then 1, 2, 3 pos for each
+        // TODO : check for real value there
         asc_value_mapper_ = {
             {0, 0},
             {1, 100},

@@ -97,19 +97,11 @@ class SimulatedPCB:
                 self.send_response(f"OK;{category};{data}")
             else:
                 self.send_response(f"KO;{category};{data}")
-        elif category == "RELAY":
-            if data == "1":
-                for r in self.relais:
-                    self.relais[r] = 1
-                time.sleep(1)
-                self.send_response(f"OK;RELAY;1")
-            elif data == "0":
-                for r in self.relais:
-                    self.relais[r] = 0
-                time.sleep(1)
-                self.send_response(f"OK;RELAY;0")
-            else:
-                self.send_response(f"KO;RELAY;{data}")
+        elif category.startswith("RELAY"):
+            rid = int(category[5:])
+            self.relais[rid] = 1 if data == "1" else 0
+            time.sleep(.2)
+            self.send_response(f"OK;{category};{data}")
         else:
             self.send_response(f"KO;{category};{data}")
 

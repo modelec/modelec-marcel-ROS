@@ -14,7 +14,7 @@ class SimulatedPCB:
         # État simulé
         self.servos = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, }  # {id: pos_index}
         self.servo_angles = {0: {0: 0, 1: 0, 3: 0}, 1: {0: 0, 1: 0, 3: 0}, 2: {0: 0, 1: 0, 3: 0}, 3: {0: 0, 1: 0, 3: 0}, 4: {0: 0, 1: 0, 3: 0}, 5: {0: 0, 1: 0, 3: 0}, }  # {id: {pos_index: angle}}
-        self.relais = {1: 0, 2: 0}
+        self.relais = {0: 0, 1: 0, 2: 0}
         self.ascenseur_pos = 0
         self.fin_course = {}  # à implémenter si besoin
         self.tirette_arm = False

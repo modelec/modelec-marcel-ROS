@@ -23,17 +23,13 @@ sudo apt upgrade
 
 sudo apt install ros-jazzy-desktop -y
 
-sudo apt install git -y
-git clone https://github.com/WiringPi/WiringPi.git
+git submodule init
+git submodule update
 
-# build the package
 ./WiringPi/build debian
 mv "./WiringPi/debian-template/wiringpi-*" ./WiringPi
 
 # install it
 sudo apt install "./WiringPi/wiringpi-*.deb" -y
-
-git submodule init
-git submodule update
 
 sudo apt-get install qt6-base-dev qt6-svg-dev libxml2-dev socat -y

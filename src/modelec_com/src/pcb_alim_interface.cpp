@@ -419,9 +419,12 @@ namespace Modelec
 
     void PCBAlimInterface::SendToPCB(const std::string& data) const
     {
-        auto message = std_msgs::msg::String();
-        message.data = data;
-        pcb_publisher_->publish(message);
+        if (pcb_publisher_)
+        {
+            auto message = std_msgs::msg::String();
+            message.data = data;
+            pcb_publisher_->publish(message);
+        }
     }
 
     void PCBAlimInterface::SendToPCB(const std::string& order, const std::string& elem,

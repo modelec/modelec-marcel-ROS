@@ -8,6 +8,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -23,6 +24,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Strat/StratState.msg"
   "msg/Map/Map.msg"
   "msg/Map/Obstacle.msg"
+  "msg/Map/Spawn.msg"
   "msg/PCA9685Servo.msg"
   "msg/ServoMode.msg"
   "msg/Solenoid.msg"
@@ -50,7 +52,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/AddButton.srv"
   "srv/Button.srv"
   "srv/AddSerialListener.srv"
-  DEPENDENCIES std_msgs
+  DEPENDENCIES std_msgs geometry_msgs
 )
 
 if(BUILD_TESTING)

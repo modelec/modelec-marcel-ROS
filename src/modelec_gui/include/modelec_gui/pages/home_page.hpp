@@ -9,22 +9,21 @@
 
 #include <std_msgs/msg/int8.hpp>
 #include <std_msgs/msg/empty.hpp>
+#include <std_srvs/srv/empty.hpp>
+
+#include <modelec_interfaces/msg/spawn.hpp>
 
 namespace ModelecGUI
 {
     class HomePage : public QWidget
     {
+    private:
         Q_OBJECT
 
     public:
         HomePage(rclcpp::Node::SharedPtr node, QWidget* parent = nullptr);
 
         void Init();
-
-    public slots:
-        void onYellowButtonClicked();
-
-        void onBlueButtonClicked();
 
     signals:
         void TeamChoose();
@@ -34,15 +33,13 @@ namespace ModelecGUI
 
         rclcpp::Node::SharedPtr node_;
 
-        rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr team_pub_;
+        rclcpp::Publisher<modelec_interfaces::msg::Spawn>::SharedPtr spawn_pub_;
+        rclcpp::Subscription<modelec_interfaces::msg::Spawn>::SharedPtr spawn_sub_;
         rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr reset_strat_pub_;
-
-        QVBoxLayout* v_layout_;
-        QHBoxLayout* h_layout_;
-
-        QPushButton* blue_button_;
-        QPushButton* yellow_button_;
+        rclcpp::Client<std_srvs::srv::Empty>::SharedPtr ask_spawn_client_;
 
         QSvgRenderer* renderer_;
+
+        std::vector<QPushButton*> spawn_buttons_;
     };
 }

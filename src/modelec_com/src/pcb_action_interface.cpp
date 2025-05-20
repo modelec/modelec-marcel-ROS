@@ -387,10 +387,12 @@ namespace Modelec
 
     void PCBActionInterface::SendToPCB(const std::string& data) const
     {
-        RCLCPP_DEBUG(this->get_logger(), "Sending to PCB: '%s'", data.c_str());
-        auto message = std_msgs::msg::String();
-        message.data = data;
-        pcb_publisher_->publish(message);
+        if (pcb_publisher_)
+        {
+            auto message = std_msgs::msg::String();
+            message.data = data;
+            pcb_publisher_->publish(message);
+        }
     }
 
     void PCBActionInterface::SendToPCB(const std::string& order, const std::string& elem,

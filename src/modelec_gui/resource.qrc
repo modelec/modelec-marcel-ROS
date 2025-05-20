@@ -3,5 +3,10 @@
     <qresource prefix="/">
         <file>img/playmat/2025_FINAL.svg</file>
         <file>img/playmat/grid_v1.svg</file>
+        <file>img/logo/ISEN-Nantes.png</file>
+        <file>img/logo/ISEN-Nantes-fond-blanc.svg</file>
+        <file>img/logo/ISEN-Nantes-fond-blanc.png</file>
+        <file>img/logo/modelec.png</file>
+        <file>img/wood.jpg</file>
     </qresource>
 </RCC>

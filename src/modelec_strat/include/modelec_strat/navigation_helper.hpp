@@ -5,6 +5,8 @@
 #include <modelec_interfaces/msg/odometry_waypoint_reach.hpp>
 #include <modelec_interfaces/msg/odometry_pos.hpp>
 #include <modelec_interfaces/msg/odometry_go_to.hpp>
+#include <modelec_interfaces/msg/spawn.hpp>
+#include <std_srvs/srv/empty.hpp>
 
 #include "deposite_zone.hpp"
 #include "pathfinding.hpp"
@@ -88,7 +90,7 @@ namespace Modelec
 
         void SetTeamId(int id);
 
-        void SetSpawn();
+        void SetSpawn(const std::string& name);
 
         Point GetSpawnYellow() const;
         Point GetSpawnBlue() const;
@@ -98,6 +100,8 @@ namespace Modelec
         void OnWaypointReach(const WaypointReachMsg::SharedPtr msg);
 
         void OnPos(const PosMsg::SharedPtr msg);
+
+        void SetupSpawn();
 
         struct
         {
@@ -112,8 +116,9 @@ namespace Modelec
         std::shared_ptr<Pathfinding> pathfinding_;
 
         int team_id_ = YELLOW;
-        Point spawn_yellow_;
-        Point spawn_blue_;
+        std::map<std::string, Point> spawn_yellow_;
+        std::map<std::string, Point> spawn_blue_;
+        Point spawn_;
 
         float factor_close_enemy_ = 0;
 
@@ -137,5 +142,9 @@ namespace Modelec
 
         bool await_rotate_ = false;
         std::vector<Waypoint> send_back_waypoints_;
+
+        rclcpp::Publisher<modelec_interfaces::msg::Spawn>::SharedPtr spawn_pub_;
+        rclcpp::Service<std_srvs::srv::Empty>::SharedPtr ask_spawn_srv_;
+
     };
 }

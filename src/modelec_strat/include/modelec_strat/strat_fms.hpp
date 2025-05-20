@@ -14,6 +14,7 @@
 #include <std_msgs/msg/int8.hpp>
 
 #include <modelec_interfaces/msg/strat_state.hpp>
+#include <modelec_interfaces/msg/spawn.hpp>
 
 #include <modelec_interfaces/srv/odometry_start.hpp>
 #include <std_msgs/msg/empty.hpp>
@@ -64,6 +65,7 @@ namespace Modelec
         rclcpp::Publisher<modelec_interfaces::msg::StratState>::SharedPtr state_pub_;
         rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr start_time_pub_;
         rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr team_id_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::Spawn>::SharedPtr spawn_id_sub_;
         rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr reset_strat_sub_;
 
         rclcpp::Client<modelec_interfaces::srv::OdometryStart>::SharedPtr client_start_;

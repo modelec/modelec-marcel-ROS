@@ -16,13 +16,7 @@ namespace Modelec
 
         factor_close_enemy_ = Config::get<float>("config.enemy.factor_close_enemy", -0.5f);
 
-        spawn_yellow_.x = Config::get<int>("config.spawn.yellow@x", 0);
-        spawn_yellow_.y = Config::get<int>("config.spawn.yellow@y", 0);
-        spawn_yellow_.theta = Config::get<double>("config.spawn.yellow@theta", 0);
-
-        spawn_blue_.x = Config::get<int>("config.spawn.blue@x", 0);
-        spawn_blue_.y = Config::get<int>("config.spawn.blue@y", 0);
-        spawn_blue_.theta = Config::get<double>("config.spawn.blue@theta", 0.0f);
+        SetupSpawn();
 
         waypoint_reach_sub_ = node_->create_subscription<WaypointReachMsg>(
             "odometry/waypoint_reach", 10,
@@ -68,6 +62,37 @@ namespace Modelec
         {
             RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacles from XML");
         }
+
+        spawn_pub_ = node_->create_publisher<modelec_interfaces::msg::Spawn>("nav/spawn", 10);
+
+        ask_spawn_srv_ = node->create_service<std_srvs::srv::Empty>(
+            "/nav/ask_spawn", [this](const std_srvs::srv::Empty::Request::SharedPtr,
+                               const std_srvs::srv::Empty::Response::SharedPtr)
+            {
+                for (auto& ys : spawn_yellow_)
+                {
+                    auto s = modelec_interfaces::msg::Spawn();
+                    s.team_id = YELLOW;
+                    s.name = ys.first;
+                    s.pose.x = ys.second.x;
+                    s.pose.y = ys.second.y;
+                    s.pose.theta = ys.second.theta;
+
+                    spawn_pub_->publish(s);
+                }
+
+                for (auto& bs : spawn_blue_)
+                {
+                    auto s = modelec_interfaces::msg::Spawn();
+                    s.team_id = BLUE;
+                    s.name = bs.first;
+                    s.pose.x = bs.second.x;
+                    s.pose.y = bs.second.y;
+                    s.pose.theta = bs.second.theta;
+
+                    spawn_pub_->publish(s);
+                }
+            });
     }
 
     rclcpp::Node::SharedPtr NavigationHelper::GetNode() const
@@ -553,43 +578,25 @@ namespace Modelec
         team_id_ = id;
     }
 
-    void NavigationHelper::SetSpawn()
+    void NavigationHelper::SetSpawn(const std::string& name)
     {
         switch (team_id_)
         {
         case YELLOW:
-            SetPos(spawn_yellow_);
+            SetPos(spawn_yellow_[name]);
             break;
         case BLUE:
-            SetPos(spawn_blue_);
+            SetPos(spawn_blue_[name]);
             break;
         default:
-            SetPos(spawn_yellow_);
+            SetPos(spawn_yellow_[name]);
             break;
         }
-    }
-
-    Point NavigationHelper::GetSpawnYellow() const
-    {
-        return spawn_yellow_;
-    }
-
-    Point NavigationHelper::GetSpawnBlue() const
-    {
-        return spawn_blue_;
     }
 
     Point NavigationHelper::GetSpawn() const
     {
-        switch (team_id_)
-        {
-        case YELLOW:
-            return spawn_yellow_;
-        case BLUE:
-            return spawn_blue_;
-        default:
-            return spawn_yellow_;
-        }
+        return spawn_;
     }
 
     void NavigationHelper::OnWaypointReach(const WaypointReachMsg::SharedPtr msg)
@@ -619,5 +626,44 @@ namespace Modelec
     {
         current_pos_ = msg;
         pathfinding_->SetCurrentPos(msg);
+    }
+
+    void NavigationHelper::SetupSpawn()
+    {
+        spawn_yellow_["top"] = Point(
+            Config::get<int>("config.spawn.yellow.top@x"),
+            Config::get<int>("config.spawn.yellow.top@y"),
+            Config::get<double>("config.spawn.yellow.top@theta")
+        );
+
+        spawn_yellow_["side"] = Point(
+            Config::get<int>("config.spawn.yellow.side@x"),
+            Config::get<int>("config.spawn.yellow.side@y"),
+            Config::get<double>("config.spawn.yellow.side@theta")
+        );
+
+        spawn_yellow_["bottom"] = Point(
+            Config::get<int>("config.spawn.yellow.bottom@x"),
+            Config::get<int>("config.spawn.yellow.bottom@y"),
+            Config::get<double>("config.spawn.yellow.bottom@theta")
+        );
+
+        spawn_blue_["top"] = Point(
+            Config::get<int>("config.spawn.blue.top@x"),
+            Config::get<int>("config.spawn.blue.top@y"),
+            Config::get<double>("config.spawn.blue.top@theta")
+        );
+
+        spawn_blue_["side"] = Point(
+            Config::get<int>("config.spawn.blue.side@x"),
+            Config::get<int>("config.spawn.blue.side@y"),
+            Config::get<double>("config.spawn.blue.side@theta")
+        );
+
+        spawn_blue_["bottom"] = Point(
+            Config::get<int>("config.spawn.blue.bottom@x"),
+            Config::get<int>("config.spawn.blue.bottom@y"),
+            Config::get<double>("config.spawn.blue.bottom@theta")
+        );
     }
 }

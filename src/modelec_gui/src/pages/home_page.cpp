@@ -2,6 +2,9 @@
 #include <modelec_gui/pages/home_page.hpp>
 
 #include <QVBoxLayout>
+#include <modelec_interfaces/msg/detail/servo_mode__builder.hpp>
+
+#include "../../../modelec_utils/include/modelec_utils/config.hpp"
 
 namespace ModelecGUI
 {
@@ -9,61 +12,59 @@ namespace ModelecGUI
         : QWidget(parent), node_(node),
           renderer_(new QSvgRenderer(QString(":/img/playmat/2025_FINAL.svg"), this))
     {
-        yellow_button_ = new QPushButton("Yellow", this);
-        blue_button_ = new QPushButton("Blue", this);
+        spawn_pub_ = node_->create_publisher<modelec_interfaces::msg::Spawn>("/strat/spawn", 10);
 
-        yellow_button_->setStyleSheet(
-            "background-color: rgba(255, 255, 0, 128); border: none; color: black; font-size: 24px;");
-        blue_button_->setStyleSheet(
-            "background-color: rgba(0, 0, 255, 128); border: none; color: white; font-size: 24px;");
+        auto w = Modelec::Config::get<int>("config.spawn.width_mm");
+        auto h = Modelec::Config::get<int>("config.spawn.height_mm");
 
-        yellow_button_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        blue_button_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        spawn_sub_ = node_->create_subscription<modelec_interfaces::msg::Spawn>("/nav/spawn", 10,
+            [this, w, h](const modelec_interfaces::msg::Spawn::SharedPtr msg)
+            {
+                auto ratioX = 1200 / 3000.0f;
+                auto ratioY = 800 / 2000.0f;
 
-        h_layout_ = new QHBoxLayout();
-        h_layout_->setContentsMargins(0, 0, 0, 0);
-        h_layout_->setSpacing(0);
-        h_layout_->addWidget(yellow_button_);
-        h_layout_->addWidget(blue_button_);
-        h_layout_->setStretch(0, 1);
-        h_layout_->setStretch(1, 1);
+                auto* button = new QPushButton(this);
+                spawn_buttons_.push_back(button);
 
-        v_layout_ = new QVBoxLayout();
-        v_layout_->setContentsMargins(0, 0, 0, 0);
-        v_layout_->setSpacing(0);
-        v_layout_->addLayout(h_layout_, 1);
+                button->setText(msg->team_id == 0 ? "Yellow" : "Blue");
+                button->setStyleSheet(
+                    msg->team_id == 0
+                        ? "background-color: rgba(255, 255, 0, 128); border: none; color: black; font-size: 24px;"
+                        : "background-color: rgba(0, 0, 255, 128); border: none; color: white; font-size: 24px;"
+                );
 
-        setLayout(v_layout_);
+                button->move(
+                    static_cast<int>(msg->pose.x * ratioX - (w * ratioX) / 2),
+                    static_cast<int>(800 - msg->pose.y * ratioY - (h * ratioY) / 2)
+                );
 
-        team_pub_ = node_->create_publisher<std_msgs::msg::Int8>("/strat/team", 10);
+                button->setFixedSize(w * ratioX, h * ratioY);
+
+                button->show();
+
+                connect(button, &QPushButton::clicked, this, [this, msg]()
+                {
+                    modelec_interfaces::msg::Spawn team_msg;
+                    team_msg.team_id = msg->team_id;
+                    team_msg.name = msg->name;
+                    spawn_pub_->publish(team_msg);
+
+                    emit TeamChoose();
+                });
+            });
 
         reset_strat_pub_ = node_->create_publisher<std_msgs::msg::Empty>("/strat/reset", 10);
 
-        connect(yellow_button_, &QPushButton::clicked, this, &HomePage::onYellowButtonClicked);
-        connect(blue_button_, &QPushButton::clicked, this, &HomePage::onBlueButtonClicked);
+        ask_spawn_client_ = node_->create_client<std_srvs::srv::Empty>("/nav/ask_spawn");
+        ask_spawn_client_->wait_for_service();
+        auto ask_spawn_request_ = std::make_shared<std_srvs::srv::Empty::Request>();
+        auto res = ask_spawn_client_->async_send_request(ask_spawn_request_);
+        rclcpp::spin_until_future_complete(node_->get_node_base_interface(), res);
     }
 
     void HomePage::Init()
     {
         reset_strat_pub_->publish(std_msgs::msg::Empty());
-    }
-
-    void HomePage::onYellowButtonClicked()
-    {
-        std_msgs::msg::Int8 msg;
-        msg.data = 0;
-        team_pub_->publish(msg);
-
-        emit TeamChoose();
-    }
-
-    void HomePage::onBlueButtonClicked()
-    {
-        std_msgs::msg::Int8 msg;
-        msg.data = 1;
-        team_pub_->publish(msg);
-
-        emit TeamChoose();
     }
 
     void HomePage::paintEvent(QPaintEvent* paint_event)

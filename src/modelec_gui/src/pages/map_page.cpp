@@ -18,19 +18,21 @@ namespace ModelecGUI
 
         v_layout = new QVBoxLayout(this);
 
-        timer_label_ = new QLabel("00", this);
+        timer_label_ = new QLabel("00 s", this);
         timer_label_->setAlignment(Qt::AlignCenter);
-        timer_label_->setFont(QFont("Arial", 24));
-        timer_label_->setStyleSheet("QLabel { color: white; }");
+        timer_label_->setFont(QFont("Arial", 26));
+        timer_label_->setStyleSheet("QLabel { color: black; }");
         score_label_ = new QLabel("Score: 0", this);
         score_label_->setAlignment(Qt::AlignCenter);
-        score_label_->setFont(QFont("Arial", 24));
-        score_label_->setStyleSheet("QLabel { color: white; }");
+        score_label_->setFont(QFont("Arial", 26));
+        score_label_->setStyleSheet("QLabel { color: black; }");
 
         h_layout = new QHBoxLayout(this);
         h_layout->addStretch();
         h_layout->addStretch();
         h_layout->addWidget(score_label_);
+        h_layout->addStretch();
+        h_layout->addStretch();
         h_layout->addStretch();
         h_layout->addWidget(timer_label_);
         h_layout->addStretch();
@@ -213,7 +215,7 @@ namespace ModelecGUI
             auto start = std::chrono::nanoseconds(start_time_);
             auto elapsed = now - start;
             auto elapsed_s = std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
-            timer_label_->setText(QString::number(elapsed_s));
+            timer_label_->setText(QString::number(elapsed_s) + " s");
         }
 
         QPainter painter(this);
@@ -255,7 +257,45 @@ namespace ModelecGUI
                 QPoint obsPoint(obs.x * ratioBetweenMapAndWidgetX_, height() - obs.y * ratioBetweenMapAndWidgetY_);
                 painter.translate(obsPoint);
                 painter.rotate(90 - obs.theta * (180.0 / M_PI));
-                painter.setBrush(Qt::black);
+
+                if (obs.type == modelec_interfaces::msg::Obstacle::GRADIN)
+                {
+                    QPixmap texture(":/img/wood.jpg");
+                    painter.setBrush(QBrush(texture));
+                }
+                else if (obs.id == 2)
+                {
+                    QPixmap texture(":/img/logo/ISEN-Nantes.png");
+                    texture = texture.scaled(obs.width * ratioBetweenMapAndWidgetX_,
+                                           obs.height * ratioBetweenMapAndWidgetY_, Qt::KeepAspectRatio);
+
+                    QRect imageRect(-(texture.width() / 2), -(texture.height() / 2), texture.width(), texture.height());
+
+                    QRect toDraw(-(obs.width * ratioBetweenMapAndWidgetX_ / 2),
+                         -(obs.height * ratioBetweenMapAndWidgetY_ / 2),
+                         obs.width * ratioBetweenMapAndWidgetX_, obs.height * ratioBetweenMapAndWidgetY_);
+
+                    painter.setBrush(Qt::white);
+                    painter.setPen(Qt::NoPen);
+                    painter.drawRect(toDraw);
+
+                    painter.drawPixmap(imageRect.topLeft(), texture);
+
+                    painter.restore();
+
+                    continue;
+                }
+                else if (obs.type == modelec_interfaces::msg::Obstacle::ESTRADE)
+                {
+                    painter.setBrush(Qt::white);
+                    painter.setPen(Qt::NoPen);
+                }
+                else
+                {
+                    painter.setBrush(Qt::red);
+                    painter.setOpacity(0.5);
+                    painter.setPen(QPen(Qt::red, 5));
+                }
 
                 QRect toDraw(-(obs.width * ratioBetweenMapAndWidgetX_ / 2),
                              -(obs.height * ratioBetweenMapAndWidgetY_ / 2),
@@ -269,7 +309,7 @@ namespace ModelecGUI
             // -- Draw enemy position --
             if (hasEnemy)
             {
-                painter.setBrush(Qt::darkBlue);
+                painter.setBrush(Qt::red);
                 painter.drawRect((enemy_pos_.x - (enemy_width_ / 2)) * ratioBetweenMapAndWidgetX_,
                                  height() - (enemy_pos_.y + (enemy_length_ / 2)) * ratioBetweenMapAndWidgetY_,
                                  enemy_width_ * ratioBetweenMapAndWidgetX_, enemy_length_ * ratioBetweenMapAndWidgetY_);
@@ -280,11 +320,20 @@ namespace ModelecGUI
         painter.translate(robotPos.x * ratioBetweenMapAndWidgetX_, height() - robotPos.y * ratioBetweenMapAndWidgetY_);
         painter.rotate(90 - robotPos.theta * (180.0 / M_PI));
 
+        QPixmap texture(":/img/logo/modelec.png");
+        texture = texture.scaled(robot_width_ * ratioBetweenMapAndWidgetX_ * 0.9,
+                               robot_length_ * ratioBetweenMapAndWidgetY_ * 0.9, Qt::KeepAspectRatio);
+
+        QRect imageRect(-(texture.width() / 2), -(texture.height() / 2), texture.width(), texture.height());
+
         QRect rect(-(robot_width_ * ratioBetweenMapAndWidgetX_ / 2), -(robot_length_ * ratioBetweenMapAndWidgetY_ / 2),
-                   robot_width_ * ratioBetweenMapAndWidgetX_, robot_length_ * ratioBetweenMapAndWidgetY_);
-        painter.setBrush(Qt::red);
-        painter.setPen(Qt::black);
+                           robot_width_ * ratioBetweenMapAndWidgetX_, robot_length_ * ratioBetweenMapAndWidgetY_);
+
+        painter.setBrush(Qt::white);
+        painter.setPen(QPen(Qt::black, 5));
         painter.drawRect(rect);
+
+        painter.drawPixmap(imageRect.topLeft(), texture);
     }
 
     void MapPage::OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg)

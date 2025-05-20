@@ -10,6 +10,8 @@ namespace ModelecGUI {
         : QMainWindow(parent), node_(std::move(node)), stackedWidget(new QStackedWidget(this)) {
 
         // Add pages to stack
+        resize(1200, 800);
+
         home_page_ = new HomePage(get_node(), this);
         odo_page_ = new OdoPage(get_node(), this);
         test_map_page_ = new TestMapPage(get_node(), this);
@@ -22,8 +24,6 @@ namespace ModelecGUI {
         setCentralWidget(stackedWidget);
 
         setupMenu();
-
-        resize(1200, 800);
 
         connect(home_page_, &HomePage::TeamChoose, this, [this]()
         {

@@ -23,10 +23,17 @@ namespace Modelec
         team_id_sub_ = create_subscription<std_msgs::msg::Int8>(
             "/strat/team", 10, [this](const std_msgs::msg::Int8::SharedPtr msg)
             {
-                setup_ = true;
                 team_id_ = static_cast<int>(msg->data);
                 nav_->SetTeamId(team_id_);
-                nav_->SetSpawn();
+            });
+
+        spawn_id_sub_ = create_subscription<modelec_interfaces::msg::Spawn>(
+            "/strat/spawn", 10, [this](const modelec_interfaces::msg::Spawn::SharedPtr msg)
+            {
+                setup_ = true;
+                team_id_ = msg->team_id;
+                nav_->SetTeamId(team_id_);
+                nav_->SetSpawn(msg->name);
             });
 
         reset_strat_sub_ = create_subscription<std_msgs::msg::Empty>(

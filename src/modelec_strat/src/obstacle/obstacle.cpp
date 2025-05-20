@@ -39,6 +39,7 @@ namespace Modelec
         msg.width = w_;
         msg.height = h_;
         msg.theta = theta_;
+        msg.type = type_;
 
         return msg;
     }

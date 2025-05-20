@@ -34,8 +34,8 @@ namespace ModelecGUI
                 );
 
                 button->move(
-                    static_cast<int>(msg->pose.x * ratioX - (w * ratioX) / 2),
-                    static_cast<int>(800 - msg->pose.y * ratioY - (h * ratioY) / 2)
+                    static_cast<int>(msg->x * ratioX - (w * ratioX) / 2),
+                    static_cast<int>(800 - msg->y * ratioY - (h * ratioY) / 2)
                 );
 
                 button->setFixedSize(w * ratioX, h * ratioY);

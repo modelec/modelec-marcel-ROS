@@ -74,9 +74,9 @@ namespace Modelec
                     auto s = modelec_interfaces::msg::Spawn();
                     s.team_id = YELLOW;
                     s.name = ys.first;
-                    s.pose.x = ys.second.x;
-                    s.pose.y = ys.second.y;
-                    s.pose.theta = ys.second.theta;
+                    s.x = ys.second.x;
+                    s.y = ys.second.y;
+                    s.theta = ys.second.theta;
 
                     spawn_pub_->publish(s);
                 }
@@ -86,9 +86,9 @@ namespace Modelec
                     auto s = modelec_interfaces::msg::Spawn();
                     s.team_id = BLUE;
                     s.name = bs.first;
-                    s.pose.x = bs.second.x;
-                    s.pose.y = bs.second.y;
-                    s.pose.theta = bs.second.theta;
+                    s.x = bs.second.x;
+                    s.y = bs.second.y;
+                    s.theta = bs.second.theta;
 
                     spawn_pub_->publish(s);
                 }

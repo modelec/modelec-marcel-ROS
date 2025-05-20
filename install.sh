@@ -27,10 +27,10 @@ git submodule update
 cd WiringPi
 
 ./build debian
-mv ./debian-template/wiringpi-* .
+mv ./debian-template/wiringpi_*.deb .
 
 # install it
-sudo apt install ./wiringpi-*.deb -y
+sudo apt install ./wiringpi_*.deb -y
 
 sudo apt-get install qt6-base-dev qt6-svg-dev libxml2-dev socat -y
 

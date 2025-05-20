@@ -39,7 +39,7 @@ cd ..
 echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 echo "source ~/modelec-marcel-ROS/install/setup.bash" >> ~/.bashrc
 echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-      export FASTRTPS_DEFAULT_PROFILES_FILE=~/modelec-marcel-ROS/fastdds_setup.xml
-      export ROS_DOMAIN_ID=128" >> ~/.bashrc
+export FASTRTPS_DEFAULT_PROFILES_FILE=~/modelec-marcel-ROS/fastdds_setup.xml
+export ROS_DOMAIN_ID=128" >> ~/.bashrc
 
 source ~/.bashrc

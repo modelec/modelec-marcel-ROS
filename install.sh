@@ -24,7 +24,7 @@ sudo apt install ros-dev-tools ros-jazzy-desktop -y
 git submodule init
 git submodule update
 
-cd WiringPi
+cd WiringPi || exit 1
 
 ./build debian
 mv ./debian-template/wiringpi_*.deb .
@@ -43,3 +43,10 @@ export FASTRTPS_DEFAULT_PROFILES_FILE=~/modelec-marcel-ROS/fastdds_setup.xml
 export ROS_DOMAIN_ID=128" >> ~/.bashrc
 
 source ~/.bashrc
+
+cp usbs.rules /etc/udev/rules.d
+source src/rplidar_ros/scripts/create_udev_rules.sh
+
+cp ros2_launch_marcel.desktop ~/Desktop
+chmod +x ~/Desktop/ros2_launch_marcel.desktop
+gio set ~/Desktop/ros2_launch_marcel.desktop "metadata::trusted" true

@@ -60,6 +60,8 @@ namespace Modelec
         rclcpp::Publisher<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_move_res_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::ActionRelayState>::SharedPtr relay_move_res_pub_;
 
+
+        bool isOk = false;
     public:
         void SendToPCB(const std::string& data) const;
         void SendToPCB(const std::string& order, const std::string& elem,

@@ -58,6 +58,8 @@ namespace Modelec
                     });
 
                     pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(res->subscriber, 10);
+
+                    isOk = true;
                 }
                 else
                 {
@@ -214,7 +216,10 @@ namespace Modelec
 
     PCBActionInterface::~PCBActionInterface()
     {
-        pcb_executor_->cancel();
+        if (pcb_executor_)
+        {
+            pcb_executor_->cancel();
+        }
         if (pcb_executor_thread_.joinable())
         {
             pcb_executor_thread_.join();

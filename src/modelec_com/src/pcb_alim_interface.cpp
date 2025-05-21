@@ -58,6 +58,8 @@ namespace Modelec
                     });
 
                     pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(res->subscriber, 10);
+
+                    isOk = true;
                 }
                 else
                 {
@@ -131,7 +133,10 @@ namespace Modelec
 
     PCBAlimInterface::~PCBAlimInterface()
     {
-        pcb_executor_->cancel();
+        if (pcb_executor_)
+        {
+            pcb_executor_->cancel();
+        }
         if (pcb_executor_thread_.joinable())
         {
             pcb_executor_thread_.join();
@@ -220,6 +225,13 @@ namespace Modelec
     void PCBAlimInterface::HandleGetPCBOutData(const std::shared_ptr<modelec_interfaces::srv::AlimOut::Request> request,
                                                std::shared_ptr<modelec_interfaces::srv::AlimOut::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            response->success = false;
+            return;
+        }
+
         std::promise<PCBData> promise;
         auto future = promise.get_future();
 
@@ -239,6 +251,13 @@ namespace Modelec
     void PCBAlimInterface::HandleSetPCBOutData(const std::shared_ptr<modelec_interfaces::srv::AlimOut::Request> request,
                                                std::shared_ptr<modelec_interfaces::srv::AlimOut::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            response->success = false;
+            return;
+        }
+
         std::promise<PCBData> promise;
         auto future = promise.get_future();
 
@@ -258,6 +277,13 @@ namespace Modelec
     void PCBAlimInterface::HandleGetPCBInData(const std::shared_ptr<modelec_interfaces::srv::AlimIn::Request> request,
                                               std::shared_ptr<modelec_interfaces::srv::AlimIn::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            response->success = false;
+            return;
+        }
+
         std::promise<PCBData> promise;
         auto future = promise.get_future();
 
@@ -277,6 +303,13 @@ namespace Modelec
     void PCBAlimInterface::HandleGetPCBBauData(const std::shared_ptr<modelec_interfaces::srv::AlimBau::Request>,
                                                std::shared_ptr<modelec_interfaces::srv::AlimBau::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            response->success = false;
+            return;
+        }
+
         std::promise<PCBBau> promise;
         auto future = promise.get_future();
 
@@ -295,6 +328,13 @@ namespace Modelec
     void PCBAlimInterface::HandleSetPCBEmgData(const std::shared_ptr<modelec_interfaces::srv::AlimEmg::Request> request,
                                                std::shared_ptr<modelec_interfaces::srv::AlimEmg::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            response->success = false;
+            return;
+        }
+
         std::promise<bool> promise;
         auto future = promise.get_future();
 
@@ -312,6 +352,13 @@ namespace Modelec
         const std::shared_ptr<modelec_interfaces::srv::AlimTemp::Request>,
         std::shared_ptr<modelec_interfaces::srv::AlimTemp::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            response->success = false;
+            return;
+        }
+
         std::promise<PCBData> promise;
         auto future = promise.get_future();
 

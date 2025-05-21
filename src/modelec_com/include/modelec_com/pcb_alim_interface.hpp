@@ -96,6 +96,8 @@ namespace Modelec
         void ResolveSetPCBEmgRequest(bool value);
         void ResolveGetPCBTempRequest(const PCBData& value);
 
+        bool isOk = false;
+
     public:
         void SendToPCB(const std::string& data) const;
         void SendToPCB(const std::string& order, const std::string& elem,

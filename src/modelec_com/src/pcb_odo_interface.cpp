@@ -60,6 +60,8 @@ namespace Modelec
                     });
 
                     pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(res->subscriber, 10);
+
+                    isOk = true;
                 }
                 else
                 {
@@ -172,7 +174,10 @@ namespace Modelec
 
     PCBOdoInterface::~PCBOdoInterface()
     {
-        pcb_executor_->cancel();
+        if (pcb_executor_)
+        {
+            pcb_executor_->cancel();
+        }
         if (pcb_executor_thread_.joinable())
         {
             pcb_executor_thread_.join();
@@ -327,6 +332,12 @@ namespace Modelec
         const std::shared_ptr<modelec_interfaces::srv::OdometryToF::Request> request,
         std::shared_ptr<modelec_interfaces::srv::OdometryToF::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            return;
+        }
+
         std::promise<long> promise;
         auto future = promise.get_future();
 
@@ -344,6 +355,12 @@ namespace Modelec
         const std::shared_ptr<modelec_interfaces::srv::OdometrySpeed::Request>,
         std::shared_ptr<modelec_interfaces::srv::OdometrySpeed::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            return;
+        }
+
         std::promise<OdometryData> promise;
         auto future = promise.get_future();
 
@@ -364,6 +381,12 @@ namespace Modelec
         const std::shared_ptr<modelec_interfaces::srv::OdometryPosition::Request>,
         std::shared_ptr<modelec_interfaces::srv::OdometryPosition::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            return;
+        }
+
         std::promise<OdometryData> promise;
         auto future = promise.get_future();
 
@@ -383,6 +406,13 @@ namespace Modelec
     void PCBOdoInterface::HandleGetStart(const std::shared_ptr<modelec_interfaces::srv::OdometryStart::Request> request,
                                          std::shared_ptr<modelec_interfaces::srv::OdometryStart::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            response->success = false;
+            return;
+        }
+
         std::promise<bool> promise;
         auto future = promise.get_future();
 
@@ -398,6 +428,12 @@ namespace Modelec
     void PCBOdoInterface::HandleGetPID(const std::shared_ptr<modelec_interfaces::srv::OdometryGetPid::Request>,
                                        std::shared_ptr<modelec_interfaces::srv::OdometryGetPid::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            return;
+        }
+
         std::promise<PIDData> promise;
         auto future = promise.get_future();
 
@@ -418,6 +454,13 @@ namespace Modelec
     void PCBOdoInterface::HandleSetPID(const std::shared_ptr<modelec_interfaces::srv::OdometrySetPid::Request> request,
                                        std::shared_ptr<modelec_interfaces::srv::OdometrySetPid::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            response->success = false;
+            return;
+        }
+
         std::promise<bool> promise;
         auto future = promise.get_future();
 
@@ -436,6 +479,13 @@ namespace Modelec
         const std::shared_ptr<modelec_interfaces::srv::OdometryAddWaypoint::Request> request,
         std::shared_ptr<modelec_interfaces::srv::OdometryAddWaypoint::Response> response)
     {
+        if (!isOk)
+        {
+            RCLCPP_ERROR(get_logger(), "PCB not initialized");
+            response->success = false;
+            return;
+        }
+
         std::promise<bool> promise;
         auto future = promise.get_future();
 

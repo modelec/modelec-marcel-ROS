@@ -12,7 +12,7 @@ namespace Modelec
     {
     public:
         PrepareConcertMission(const std::shared_ptr<NavigationHelper>& nav,
-                              const std::shared_ptr<ActionExecutor>& action_executor);
+                              const std::shared_ptr<ActionExecutor>& action_executor, bool two_floor = true);
 
         void Start(rclcpp::Node::SharedPtr node) override;
         void Update() override;
@@ -38,6 +38,7 @@ namespace Modelec
         std::shared_ptr<NavigationHelper> nav_;
         std::shared_ptr<ActionExecutor> action_executor_;
         rclcpp::Node::SharedPtr node_;
+        bool two_floor_;
 
         std::shared_ptr<ColumnObstacle> column_;
         std::shared_ptr<DepositeZone> closestDepoZone_;

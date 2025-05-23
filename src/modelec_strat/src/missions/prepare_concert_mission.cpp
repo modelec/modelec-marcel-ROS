@@ -5,8 +5,8 @@
 namespace Modelec
 {
     PrepareConcertMission::PrepareConcertMission(const std::shared_ptr<NavigationHelper>& nav,
-                                                 const std::shared_ptr<ActionExecutor>& action_executor) :
-        step_(GO_TO_COLUMN),
+                                                 const std::shared_ptr<ActionExecutor>& action_executor, bool two_floor) :
+        step_(GO_TO_COLUMN), two_floor_(two_floor),
         status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
     {
     }
@@ -79,7 +79,7 @@ namespace Modelec
             step_ = GO_CLOSE_TO_COLUMN;
             break;
         case GO_CLOSE_TO_COLUMN:
-            action_executor_->TakePot();
+            action_executor_->TakePot(two_floor_);
             nav_->GetPathfinding()->RemoveObstacle(column_->GetId());
 
             step_ = TAKE_COLUMN;
@@ -175,7 +175,7 @@ namespace Modelec
 
         case GO_CLOSE_TO_PLATFORM:
             {
-                action_executor_->PlacePot();
+                action_executor_->PlacePot(two_floor_);
 
                 column_->SetX(closestDepoZonePoint_.x);
                 column_->SetY(closestDepoZonePoint_.y);

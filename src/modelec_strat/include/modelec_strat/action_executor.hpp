@@ -33,6 +33,9 @@ namespace Modelec
             ASC_GO_UP_TO_TAKE_POT,
             PLACE_FIRST_PLATE,
 
+            // Take One floor
+            STICK_ALL,
+
 
             // Place Pot
             ASC_FINAL,
@@ -52,9 +55,9 @@ namespace Modelec
 
         void DeployBanner();
 
-        void TakePot();
+        void TakePot(bool two_floor = true);
 
-        void PlacePot();
+        void PlacePot(bool two_floor = true);
 
         void ReInit();
 

@@ -61,6 +61,7 @@ namespace Modelec
         bool setup_ = false;
         std::unique_ptr<Mission> current_mission_;
         int team_id_ = 0;
+        bool is_banner_done_ = false;
 
         std::shared_ptr<NavigationHelper> nav_;
         std::shared_ptr<ActionExecutor> action_executor_;

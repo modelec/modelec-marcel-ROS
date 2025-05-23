@@ -175,6 +175,26 @@ namespace Modelec
                 break;
             case STICK_POT:
                 {
+                    modelec_interfaces::msg::ActionRelayState relay_top_msg;
+                    relay_top_msg.state = true; // TODO : check that
+                    relay_top_msg.id = 2;
+                    relay_move_pub_->publish(relay_top_msg);
+
+                    modelec_interfaces::msg::ActionRelayState relay_bottom_msg;
+                    relay_bottom_msg.state = true; // TODO : check that
+                    relay_bottom_msg.id = 1;
+                    relay_move_pub_->publish(relay_bottom_msg);
+
+                    modelec_interfaces::msg::ActionServoPos first_pot_msg;
+                    first_pot_msg.id = 0; // TODO : to define
+                    first_pot_msg.pos = 1;
+                    servo_move_pub_->publish(first_pot_msg);
+
+                    modelec_interfaces::msg::ActionServoPos fourth_pot_msg;
+                    fourth_pot_msg.id = 3; // TODO : to define
+                    fourth_pot_msg.pos = 1;
+                    servo_move_pub_->publish(fourth_pot_msg);
+
                     modelec_interfaces::msg::ActionServoPos second_pot_msg;
                     second_pot_msg.id = 1; // TODO : to define
                     second_pot_msg.pos = 1;
@@ -185,7 +205,7 @@ namespace Modelec
                     third_pot_msg.pos = 1;
                     servo_move_pub_->publish(third_pot_msg);
 
-                    step_running_ = 2;
+                    step_running_ = 6;
                 }
 
                 break;
@@ -207,6 +227,22 @@ namespace Modelec
                     servo_move_pub_->publish(action_bottom_msg);
 
                     step_running_ = 1;
+                }
+
+                break;
+            case STICK_ALL:
+                {
+                    modelec_interfaces::msg::ActionServoPos second_pot_msg;
+                    second_pot_msg.id = 1; // TODO : to define
+                    second_pot_msg.pos = 1;
+                    servo_move_pub_->publish(second_pot_msg);
+
+                    modelec_interfaces::msg::ActionServoPos third_pot_msg;
+                    third_pot_msg.id = 2; // TODO : to define
+                    third_pot_msg.pos = 1;
+                    servo_move_pub_->publish(third_pot_msg);
+
+                    step_running_ = 2;
                 }
 
                 break;
@@ -291,35 +327,52 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::TakePot()
+    void ActionExecutor::TakePot(bool two_floor)
     {
         if (action_done_)
         {
             action_ = TAKE_POT;
             action_done_ = false;
 
-            step_.push(ASC_GO_DOWN);
-            step_.push(STICK_TO_STRUCT);
-            step_.push(ASC_GO_UP);
-            step_.push(RETRACT_BOTTOM_PLATE);
-            step_.push(ASC_GO_DOWN_TO_TAKE_POT);
-            step_.push(STICK_POT);
-            step_.push(ASC_GO_UP_TO_TAKE_POT);
-            step_.push(PLACE_FIRST_PLATE);
+            if (two_floor)
+            {
+                step_.push(ASC_GO_DOWN);
+                step_.push(STICK_TO_STRUCT);
+                step_.push(ASC_GO_UP);
+                step_.push(RETRACT_BOTTOM_PLATE);
+                step_.push(ASC_GO_DOWN_TO_TAKE_POT);
+                step_.push(STICK_POT);
+                step_.push(ASC_GO_UP_TO_TAKE_POT);
+                step_.push(PLACE_FIRST_PLATE);
+            }
+            else
+            {
+                step_.push(ASC_GO_DOWN);
+                step_.push(STICK_ALL);
+            }
 
             Update();
         }
     }
 
-    void ActionExecutor::PlacePot()
+    void ActionExecutor::PlacePot(bool two_floor)
     {
         if (action_done_)
         {
             action_ = PLACE_POT;
             action_done_ = false;
-            step_.push(ASC_FINAL);
-            step_.push(FREE_ALL);
-            step_.push(REMOVE_ACTION_STEP);
+
+            if (two_floor)
+            {
+                step_.push(ASC_FINAL);
+                step_.push(FREE_ALL);
+                step_.push(REMOVE_ACTION_STEP);
+            }
+            else
+            {
+                step_.push(FREE_ALL);
+                step_.push(REMOVE_ACTION_STEP);
+            }
 
             Update();
         }

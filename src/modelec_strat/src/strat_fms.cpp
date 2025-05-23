@@ -156,8 +156,9 @@ namespace Modelec
         case State::SELECT_MISSION:
             {
                 auto elapsed = now - match_start_time_;
-                // select mission in a good way there.
-                if (elapsed.seconds() < 2)
+
+                // TODO : next thing to upgrade to have a good strat
+                if (!is_banner_done_)
                 {
                     Transition(State::DO_PROMOTION, "Start promotion");
                 }
@@ -175,7 +176,7 @@ namespace Modelec
         case State::DO_PREPARE_CONCERT:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<PrepareConcertMission>(nav_, action_executor_);
+                current_mission_ = std::make_unique<PrepareConcertMission>(nav_, action_executor_, (now - match_start_time_).seconds() < 70);
                 current_mission_->Start(shared_from_this());
             }
             current_mission_->Update();
@@ -207,11 +208,13 @@ namespace Modelec
             if (current_mission_->GetStatus() == MissionStatus::DONE)
             {
                 current_mission_.reset();
+                is_banner_done_ = true;
                 Transition(State::SELECT_MISSION, "Promotion finished");
             }
             else if (current_mission_->GetStatus() == MissionStatus::FAILED)
             {
                 current_mission_.reset();
+                is_banner_done_ = true;
                 Transition(State::SELECT_MISSION, "Promotion failed");
             }
             break;

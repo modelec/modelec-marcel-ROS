@@ -29,19 +29,16 @@ namespace Modelec
     {
         if (status_ != MissionStatus::RUNNING)
         {
-            RCLCPP_INFO(node_->get_logger(), "Mission not running");
             return;
         }
 
         if (!action_executor_->IsActionDone())
         {
-            RCLCPP_INFO(node_->get_logger(), "Waiting for action to finish");
             return;
         }
 
         if (!nav_->HasArrived())
         {
-            RCLCPP_INFO(node_->get_logger(), "Waiting for navigation to finish");
             return;
         }
 

@@ -87,12 +87,12 @@ class SimulatedPCB:
         if category == "ASC":
             self.ascenseur_pos = data
             self.send_response(f"OK;{category};{data}")
-            time.sleep(2)
+            time.sleep(.5)
         elif category.startswith("SERVO") and data.startswith("POS"):
             sid = int(category[5:])
             pos_index = int(data[3:])
             if sid in self.servo_angles and pos_index in self.servo_angles[sid]:
-                time.sleep(0.5)
+                time.sleep(0.1)
                 self.servos[sid] = pos_index
                 self.send_response(f"OK;{category};{data}")
             else:
@@ -100,7 +100,7 @@ class SimulatedPCB:
         elif category.startswith("RELAY"):
             rid = int(category[5:])
             self.relais[rid] = 1 if data == "1" else 0
-            time.sleep(.2)
+            time.sleep(.1)
             self.send_response(f"OK;{category};{data}")
         else:
             self.send_response(f"KO;{category};{data}")

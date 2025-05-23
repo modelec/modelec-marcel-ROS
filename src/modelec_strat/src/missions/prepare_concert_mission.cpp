@@ -5,7 +5,8 @@
 namespace Modelec
 {
     PrepareConcertMission::PrepareConcertMission(const std::shared_ptr<NavigationHelper>& nav,
-                                                 const std::shared_ptr<ActionExecutor>& action_executor, bool two_floor) :
+                                                 const std::shared_ptr<ActionExecutor>& action_executor,
+                                                 bool two_floor) :
         step_(GO_TO_COLUMN),
         status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor), two_floor_(two_floor)
     {
@@ -18,7 +19,8 @@ namespace Modelec
         if (two_floor_)
         {
             mission_score_ = Config::get<int>("config.mission_score.concert.niv_2", 0);
-        } else
+        }
+        else
         {
             mission_score_ = Config::get<int>("config.mission_score.concert.niv_1", 0);
         }
@@ -68,11 +70,20 @@ namespace Modelec
 
     void PrepareConcertMission::Update()
     {
-        if (status_ != MissionStatus::RUNNING) return;
+        if (status_ != MissionStatus::RUNNING)
+        {
+            return;
+        }
 
-        if (!nav_->HasArrived()) return;
+        if (!nav_->HasArrived())
+        {
+            return;
+        }
 
-        if (!action_executor_->IsActionDone()) return;
+        if (!action_executor_->IsActionDone())
+        {
+            return;
+        }
 
         switch (step_)
         {

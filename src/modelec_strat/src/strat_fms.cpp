@@ -160,7 +160,7 @@ namespace Modelec
                     Transition(State::DO_PROMOTION, "Start promotion");
                 }
                 // TODO : check the time needed by the mission
-                else if (elapsed.seconds() < 80)
+                else if (elapsed.seconds() < 75)
                 {
                     Transition(State::DO_PREPARE_CONCERT, "Proceed to concert");
                 }

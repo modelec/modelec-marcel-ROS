@@ -95,6 +95,11 @@ namespace Modelec
             });
     }
 
+    void NavigationHelper::ReInit()
+    {
+        SetPos(spawn_);
+    }
+
     rclcpp::Node::SharedPtr NavigationHelper::GetNode() const
     {
         return node_;
@@ -584,12 +589,15 @@ namespace Modelec
         {
         case YELLOW:
             SetPos(spawn_yellow_[name]);
+            spawn_ = spawn_yellow_[name];
             break;
         case BLUE:
             SetPos(spawn_blue_[name]);
+            spawn_ = spawn_blue_[name];
             break;
         default:
             SetPos(spawn_yellow_[name]);
+            spawn_ = spawn_yellow_[name];
             break;
         }
     }

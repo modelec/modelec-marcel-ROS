@@ -120,12 +120,12 @@ namespace Modelec
                 {
                     modelec_interfaces::msg::ActionRelayState relay_top_msg;
                     relay_top_msg.state = true; // TODO : check that
-                    relay_top_msg.id = 0;       // TODO : to define
+                    relay_top_msg.id = 2;
                     relay_move_pub_->publish(relay_top_msg);
 
                     modelec_interfaces::msg::ActionRelayState relay_bottom_msg;
                     relay_bottom_msg.state = true; // TODO : check that
-                    relay_bottom_msg.id = 1;       // TODO : to define
+                    relay_bottom_msg.id = 1;
                     relay_move_pub_->publish(relay_bottom_msg);
 
                     modelec_interfaces::msg::ActionServoPos first_pot_msg;
@@ -224,12 +224,12 @@ namespace Modelec
                 {
                     modelec_interfaces::msg::ActionRelayState relay_top_msg;
                     relay_top_msg.state = false; // TODO : check that
-                    relay_top_msg.id = 0;       // TODO : to define
+                    relay_top_msg.id = 2;
                     relay_move_pub_->publish(relay_top_msg);
 
                     modelec_interfaces::msg::ActionRelayState relay_bottom_msg;
                     relay_bottom_msg.state = false; // TODO : check that
-                    relay_bottom_msg.id = 1;       // TODO : to define
+                    relay_bottom_msg.id = 1;
                     relay_move_pub_->publish(relay_bottom_msg);
 
                     modelec_interfaces::msg::ActionServoPos first_pot_msg;
@@ -323,5 +323,16 @@ namespace Modelec
 
             Update();
         }
+    }
+
+    void ActionExecutor::ReInit()
+    {
+        action_done_ = true;
+        step_running_ = 0;
+        while (!step_.empty())
+        {
+            step_.pop();
+        }
+        action_ = NONE;
     }
 }

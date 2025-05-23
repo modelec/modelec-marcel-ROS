@@ -42,7 +42,11 @@ namespace Modelec
 
         void Init();
 
+        void ReInit();
+
         void Reset();
+
+        void ResetStrat();
 
     protected:
         void Transition(State next, const std::string& reason);
@@ -61,12 +65,13 @@ namespace Modelec
         std::shared_ptr<NavigationHelper> nav_;
         std::shared_ptr<ActionExecutor> action_executor_;
 
-        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr tirette_sub_;
+        rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr tir_sub_;
         rclcpp::Publisher<modelec_interfaces::msg::StratState>::SharedPtr state_pub_;
         rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr start_time_pub_;
         rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr team_id_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::Spawn>::SharedPtr spawn_id_sub_;
         rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr reset_strat_sub_;
+        rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr tir_arm_sub_;
 
         rclcpp::Client<modelec_interfaces::srv::OdometryStart>::SharedPtr client_start_;
     };

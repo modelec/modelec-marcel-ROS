@@ -156,6 +156,36 @@ namespace Modelec
         relay_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionRelayState>(
             "action/move/relay/res", 10);
 
+        tir_start_pub_ = this->create_publisher<std_msgs::msg::Empty>(
+            "action/tir/start", 10);
+
+        tir_start_sub_ = this->create_subscription<std_msgs::msg::Empty>(
+            "action/tir/start/res", 10,
+            [this](const std_msgs::msg::Empty::SharedPtr)
+            {
+                RespondEvent("TIR", {"START"});
+            });
+
+        tir_arm_pub_ = this->create_publisher<std_msgs::msg::Empty>(
+            "action/tir/arm", 10);
+
+        tir_arm_sub_ = this->create_subscription<std_msgs::msg::Empty>(
+            "action/tir/arm/res", 10,
+            [this](const std_msgs::msg::Empty::SharedPtr)
+            {
+                RespondEvent("TIR", {"ARM"});
+            });
+
+        tir_disarm_pub_ = this->create_publisher<std_msgs::msg::Empty>(
+            "action/tir/disarm", 10);
+
+        tir_disarm_sub_ = this->create_subscription<std_msgs::msg::Empty>(
+            "action/tir/disarm/res", 10,
+            [this](const std_msgs::msg::Empty::SharedPtr)
+            {
+                RespondEvent("TIR", {"DIS"});
+            });
+
 
         // TODO : check for real value there
         asc_value_mapper_ = {
@@ -203,7 +233,6 @@ namespace Modelec
         }
 
         relay_value_ = {
-            {0, false},
             {1, false},
             {2, false},
         };
@@ -383,6 +412,27 @@ namespace Modelec
                     relay_move_res_pub_->publish(relay_msg);
                 }
             }
+            else if (tokens[0] == "EVENT")
+            {
+                if (tokens[1] == "TIR")
+                {
+                    if (tokens[2] == "START")
+                    {
+                        tir_start_pub_->publish(std_msgs::msg::Empty());
+                        RespondEvent(tokens[1], {tokens[2]});
+                    }
+                    else if (tokens[2] == "ARM")
+                    {
+                        tir_arm_pub_->publish(std_msgs::msg::Empty());
+                        RespondEvent(tokens[1], {tokens[2]});
+                    }
+                    else if (tokens[2] == "DIS")
+                    {
+                        tir_disarm_pub_->publish(std_msgs::msg::Empty());
+                        RespondEvent(tokens[1], {tokens[2]});
+                    }
+                }
+            }
             else
             {
                 RCLCPP_WARN(this->get_logger(), "Unknown message format");
@@ -426,6 +476,11 @@ namespace Modelec
     void PCBActionInterface::SendMove(const std::string& elem, const std::vector<std::string>& data) const
     {
         SendToPCB("MOV", elem, data);
+    }
+
+    void PCBActionInterface::RespondEvent(const std::string& elem, const std::vector<std::string>& data) const
+    {
+        SendToPCB("ACK", elem, data);
     }
 }
 

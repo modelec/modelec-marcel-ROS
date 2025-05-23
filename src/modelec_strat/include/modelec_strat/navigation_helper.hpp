@@ -26,6 +26,8 @@ namespace Modelec
 
         NavigationHelper(const rclcpp::Node::SharedPtr& node);
 
+        void ReInit();
+
         rclcpp::Node::SharedPtr GetNode() const;
 
         std::shared_ptr<Pathfinding> GetPathfinding() const;

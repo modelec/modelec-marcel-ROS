@@ -56,6 +56,8 @@ namespace Modelec
 
         void PlacePot();
 
+        void ReInit();
+
     protected:
         /*
         rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_get_pub_;

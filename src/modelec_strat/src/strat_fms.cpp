@@ -7,10 +7,12 @@ namespace Modelec
 
     StratFMS::StratFMS() : Node("start_fms")
     {
-        tirette_sub_ = create_subscription<std_msgs::msg::Bool>(
-            "/tirette", 10, [this](const std_msgs::msg::Bool::SharedPtr msg)
+        tir_sub_ = create_subscription<std_msgs::msg::Empty>(
+            "/action/tir/start", 10, [this](const std_msgs::msg::Empty::SharedPtr)
             {
-                if (setup_ && !started_ && msg->data)
+                RCLCPP_INFO(get_logger(), "TIR started");
+
+                if (setup_ && !started_)
                 {
                     started_ = true;
                 }
@@ -30,7 +32,6 @@ namespace Modelec
         spawn_id_sub_ = create_subscription<modelec_interfaces::msg::Spawn>(
             "/strat/spawn", 10, [this](const modelec_interfaces::msg::Spawn::SharedPtr msg)
             {
-                setup_ = true;
                 team_id_ = msg->team_id;
                 nav_->SetTeamId(team_id_);
                 nav_->SetSpawn(msg->name);
@@ -41,6 +42,13 @@ namespace Modelec
             {
                 RCLCPP_INFO(get_logger(), "Resetting strat");
                 Reset();
+            });
+
+        tir_arm_sub_ = create_subscription<std_msgs::msg::Empty>(
+            "/action/tir/arm", 10, [this](const std_msgs::msg::Empty::SharedPtr)
+            {
+                RCLCPP_INFO(get_logger(), "TIR armed");
+                setup_ = true;
             });
 
         client_start_ = create_client<modelec_interfaces::srv::OdometryStart>("/odometry/start");
@@ -74,10 +82,30 @@ namespace Modelec
         action_executor_ = std::make_unique<ActionExecutor>(shared_from_this());
 
         RCLCPP_INFO(this->get_logger(), "StratFMS fully initialized");
+    }
+
+    void StratFMS::ReInit()
+    {
+        nav_->ReInit();
+        action_executor_->ReInit();
+        setup_ = false;
+    }
+
+    void StratFMS::Reset()
+    {
+        ReInit();
+        ResetStrat();
+    }
+
+    void StratFMS::ResetStrat()
+    {
+        if (timer_)
+        {
+            timer_->cancel();
+        }
 
         state_ = State::INIT;
         started_ = false;
-        setup_ = false;
         current_mission_.reset();
         match_start_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
@@ -85,13 +113,6 @@ namespace Modelec
         {
             Update();
         });
-    }
-
-    void StratFMS::Reset()
-    {
-        timer_->cancel();
-
-        Init();
     }
 
     void StratFMS::Transition(State next, const std::string& reason)
@@ -112,8 +133,10 @@ namespace Modelec
         switch (state_)
         {
         case State::INIT:
-            RCLCPP_INFO_ONCE(get_logger(), "State: INIT");
-            Transition(State::WAIT_START, "System ready");
+            if (setup_)
+            {
+                Transition(State::WAIT_START, "System ready");
+            }
             break;
         case State::WAIT_START:
             if (started_)

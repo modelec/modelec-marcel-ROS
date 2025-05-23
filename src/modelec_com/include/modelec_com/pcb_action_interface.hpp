@@ -2,6 +2,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
+#include <std_msgs/msg/empty.hpp>
 #include <modelec_interfaces/srv/add_serial_listener.hpp>
 #include <modelec_interfaces/msg/action_asc_pos.hpp>
 #include <modelec_interfaces/msg/action_relay_state.hpp>
@@ -60,6 +61,14 @@ namespace Modelec
         rclcpp::Publisher<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_move_res_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::ActionRelayState>::SharedPtr relay_move_res_pub_;
 
+        rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr tir_start_pub_;
+        rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr tir_arm_pub_;
+        rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr tir_disarm_pub_;
+
+        rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr tir_start_sub_;
+        rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr tir_arm_sub_;
+        rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr tir_disarm_sub_;
+
 
         bool isOk = false;
     public:
@@ -70,5 +79,6 @@ namespace Modelec
         void GetData(const std::string& elem, const std::vector<std::string>& data = {}) const;
         void SendOrder(const std::string& elem, const std::vector<std::string>& data = {}) const;
         void SendMove(const std::string& elem, const std::vector<std::string>& data = {}) const;
+        void RespondEvent(const std::string& elem, const std::vector<std::string>& data = {}) const;
     };
 }

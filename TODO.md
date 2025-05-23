@@ -1,2 +1,4 @@
-- rework position system with that https://docs.ros2.org/latest/api/geometry_msgs/index-msg.html
 - API (check for the middleware already implemented or fill the API package)
+
+
+- Check every value and after that update the max TIME mission

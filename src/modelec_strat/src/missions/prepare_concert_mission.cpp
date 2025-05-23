@@ -6,8 +6,8 @@ namespace Modelec
 {
     PrepareConcertMission::PrepareConcertMission(const std::shared_ptr<NavigationHelper>& nav,
                                                  const std::shared_ptr<ActionExecutor>& action_executor, bool two_floor) :
-        step_(GO_TO_COLUMN), two_floor_(two_floor),
-        status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
+        step_(GO_TO_COLUMN),
+        status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor), two_floor_(two_floor)
     {
     }
 

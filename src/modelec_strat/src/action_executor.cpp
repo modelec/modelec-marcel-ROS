@@ -78,6 +78,7 @@ namespace Modelec
 
     void ActionExecutor::Update()
     {
+        RCLCPP_INFO(node_->get_logger(), "ActionExecutor::Update()");
         if (step_.empty())
         {
             action_ = NONE;
@@ -85,12 +86,17 @@ namespace Modelec
             return;
         }
 
-        if (step_running_ == 0)
+        RCLCPP_INFO(node_->get_logger(), "ActionExecutor::Update() - action_ = %d", action_);
+        RCLCPP_INFO(node_->get_logger(), "is the right one = %d", step_.front() == DEPLOY_BANNER_STEP);
+        RCLCPP_INFO(node_->get_logger(), "step running = %d", step_running_);
+
+        if (step_running_ <= 0)
         {
             switch (step_.front())
             {
             case DEPLOY_BANNER_STEP:
                 {
+                    RCLCPP_INFO(node_->get_logger(), "ActionExecutor::Update() - DEPLOY_BANNER_STEP");
                     modelec_interfaces::msg::ActionServoPos msg;
                     msg.id = 5; // TODO : to define
                     msg.pos = 1;
@@ -100,9 +106,10 @@ namespace Modelec
                 }
 
                 break;
-
             case ASC_GO_DOWN:
                 {
+                    RCLCPP_INFO(node_->get_logger(), "is the right one = %d", step_.front() == ASC_GO_DOWN);
+
                     modelec_interfaces::msg::ActionAscPos asc_msg;
                     asc_msg.pos = 1;
                     asc_move_pub_->publish(asc_msg);
@@ -321,6 +328,8 @@ namespace Modelec
         {
             action_ = DEPLOY_BANNER;
             action_done_ = false;
+            step_running_ = 0;
+
             step_.push(DEPLOY_BANNER_STEP);
 
             Update();
@@ -333,6 +342,7 @@ namespace Modelec
         {
             action_ = TAKE_POT;
             action_done_ = false;
+            step_running_ = 0;
 
             if (two_floor)
             {
@@ -361,6 +371,7 @@ namespace Modelec
         {
             action_ = PLACE_POT;
             action_done_ = false;
+            step_running_ = 0;
 
             if (two_floor)
             {

@@ -10,8 +10,6 @@ namespace Modelec
         tir_sub_ = create_subscription<std_msgs::msg::Empty>(
             "/action/tir/start", 10, [this](const std_msgs::msg::Empty::SharedPtr)
             {
-                RCLCPP_INFO(get_logger(), "TIR started");
-
                 if (setup_ && !started_)
                 {
                     started_ = true;
@@ -40,14 +38,12 @@ namespace Modelec
         reset_strat_sub_ = create_subscription<std_msgs::msg::Empty>(
             "/strat/reset", 10, [this](const std_msgs::msg::Empty::SharedPtr)
             {
-                RCLCPP_INFO(get_logger(), "Resetting strat");
                 Reset();
             });
 
         tir_arm_sub_ = create_subscription<std_msgs::msg::Empty>(
             "/action/tir/arm", 10, [this](const std_msgs::msg::Empty::SharedPtr)
             {
-                RCLCPP_INFO(get_logger(), "TIR armed");
                 setup_ = true;
             });
 
@@ -80,6 +76,7 @@ namespace Modelec
     {
         nav_ = std::make_shared<NavigationHelper>(shared_from_this());
         action_executor_ = std::make_unique<ActionExecutor>(shared_from_this());
+        ResetStrat();
 
         RCLCPP_INFO(this->get_logger(), "StratFMS fully initialized");
     }

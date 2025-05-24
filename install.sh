@@ -32,9 +32,9 @@ mv ./debian-template/wiringpi_*.deb .
 # install it
 sudo apt install ./wiringpi_*.deb -y
 
-sudo apt-get install qt6-base-dev qt6-svg-dev libxml2-dev socat -y
-
 cd ..
+
+sudo apt-get install qt6-base-dev qt6-svg-dev libxml2-dev socat -y
 
 echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 echo "source ~/modelec-marcel-ROS/install/setup.bash" >> ~/.bashrc

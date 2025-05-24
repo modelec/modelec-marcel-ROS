@@ -23,7 +23,7 @@
                     <!-- End repeat -->
                     <locator>
                         <udpv4>
-                            <address>acki-windows-2.tail1f0d2.ts.net</address> <!-- ackimixs -->
+                            <address>acki-windows.tail1f0d2.ts.net</address> <!-- ackimixs -->
                         </udpv4>
                     </locator>
                     <locator>

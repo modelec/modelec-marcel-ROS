@@ -59,6 +59,7 @@ namespace Modelec
         rclcpp::Time match_start_time_;
         bool started_ = false;
         bool setup_ = false;
+        bool team_selected_ = false;
         std::unique_ptr<Mission> current_mission_;
         int team_id_ = 0;
         bool is_banner_done_ = false;

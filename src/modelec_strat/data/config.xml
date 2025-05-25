@@ -53,17 +53,17 @@
         <pcb>
             <pcb_odo>
                 <name>pcb_odo</name>
-                <port>/dev/pts/4</port>
+                <port>/tmp/USB_ODO</port>
                 <baud_rate>115200</baud_rate>
             </pcb_odo>
             <pcb_alim>
                 <name>pcb_alim</name>
-                <port>/dev/pts/12</port>
+                <port>/tmp/USB_ALIM</port>
                 <baud_rate>115200</baud_rate>
             </pcb_alim>
             <pcb_action>
                 <name>pcb_action</name>
-                <port>/dev/pts/9</port>
+                <port>/tmp/USB_ACTION</port>
                 <baud_rate>115200</baud_rate>
             </pcb_action>
         </pcb>

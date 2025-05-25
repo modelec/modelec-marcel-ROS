@@ -8,6 +8,9 @@
 #include <modelec_gui/pages/test_map_page.hpp>
 #include <modelec_gui/pages/odo_page.hpp>
 #include <modelec_gui/pages/map_page.hpp>
+#include <modelec_gui/pages/action_page.hpp>
+#include <modelec_gui/pages/alim_page.hpp>
+
 
 namespace ModelecGUI
 {
@@ -31,10 +34,14 @@ namespace ModelecGUI
         TestMapPage* test_map_page_;
         OdoPage* odo_page_;
         MapPage* map_page_;
+        ActionPage* action_page_;
+        AlimPage* alim_page_;
 
         QAction* home_action_;
         QAction* odo_action_;
         QAction* map_action_;
+        QAction* action_action_;
+        QAction* alim_action_;
         QAction* exit_action_;
 
         QMenu* playmat_map_menu_;

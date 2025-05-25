@@ -30,6 +30,7 @@ namespace Modelec
         spawn_id_sub_ = create_subscription<modelec_interfaces::msg::Spawn>(
             "/strat/spawn", 10, [this](const modelec_interfaces::msg::Spawn::SharedPtr msg)
             {
+                team_selected_ = true;
                 team_id_ = msg->team_id;
                 nav_->SetTeamId(team_id_);
                 nav_->SetSpawn(msg->name);
@@ -103,6 +104,7 @@ namespace Modelec
 
         state_ = State::INIT;
         started_ = false;
+        team_selected_ = false;
         current_mission_.reset();
         match_start_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
@@ -130,7 +132,7 @@ namespace Modelec
         switch (state_)
         {
         case State::INIT:
-            if (setup_)
+            if (setup_ && team_selected_)
             {
                 Transition(State::WAIT_START, "System ready");
             }

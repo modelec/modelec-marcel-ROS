@@ -55,4 +55,4 @@ namespace ModelecGUI
 
         void PositionCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
     };
-} // namespace Modelec
+} // namespace Modelec GUI

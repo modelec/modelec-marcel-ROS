@@ -37,12 +37,18 @@ add_executable(modelec_gui
         src/pages/home_page.cpp
         src/pages/test_map_page.cpp
         src/pages/map_page.cpp
+        src/pages/action_page.cpp
+        src/pages/alim_page.cpp
+        src/widget/action_widget.cpp
 
         include/modelec_gui/modelec_gui.hpp
         include/modelec_gui/pages/odo_page.hpp
         include/modelec_gui/pages/home_page.hpp
         include/modelec_gui/pages/test_map_page.hpp
         include/modelec_gui/pages/map_page.hpp
+        include/modelec_gui/pages/action_page.hpp
+        include/modelec_gui/pages/alim_page.hpp
+        include/modelec_gui/widget/action_widget.hpp
 )
 
 ament_target_dependencies(modelec_gui

@@ -27,7 +27,7 @@ namespace ModelecGUI
         score_label_->setFont(QFont("Arial", 26));
         score_label_->setStyleSheet("QLabel { color: black; }");
 
-        h_layout = new QHBoxLayout(this);
+        h_layout = new QHBoxLayout();
         h_layout->addStretch();
         h_layout->addStretch();
         h_layout->addWidget(score_label_);

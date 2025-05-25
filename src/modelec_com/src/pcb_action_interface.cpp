@@ -258,7 +258,7 @@ namespace Modelec
     void PCBActionInterface::PCBCallback(const std_msgs::msg::String::SharedPtr msg)
     {
         RCLCPP_DEBUG(this->get_logger(), "Received message: '%s'", msg->data.c_str());
-        std::vector<std::string> tokens = split(msg->data, ';');
+        std::vector<std::string> tokens = split(trim(msg->data), ';');
 
         if (tokens.size() < 3)
         {
@@ -274,6 +274,7 @@ namespace Modelec
 
                 modelec_interfaces::msg::ActionAscPos asc_msg;
                 asc_msg.pos = asc_state_;
+                asc_msg.value = asc_value_mapper_[asc_state_];
                 asc_msg.success = true;
                 asc_get_res_pub_->publish(asc_msg);
             }
@@ -286,6 +287,7 @@ namespace Modelec
                 modelec_interfaces::msg::ActionServoPos servo_msg;
                 servo_msg.id = servo_id;
                 servo_msg.pos = v;
+                servo_msg.angle = servo_pos_mapper_[servo_id][v];
                 servo_msg.success = true;
                 servo_get_res_pub_->publish(servo_msg);
             }

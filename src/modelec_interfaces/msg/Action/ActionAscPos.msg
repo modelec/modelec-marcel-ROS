@@ -1,3 +1,3 @@
 int32 pos
-int32 value
+float64 value
 bool success

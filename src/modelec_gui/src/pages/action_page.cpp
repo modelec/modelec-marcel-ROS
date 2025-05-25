@@ -119,7 +119,7 @@ namespace ModelecGUI
                     ActionServoPos servo_move;
                     servo_move.id = i;
                     servo_move.pos = 128;
-                    servo_move.angle = value;
+                    servo_move.angle = value * M_PI / 180.0;
                     servo_set_pub_->publish(servo_move);
                     servo_actions_[i]->setDisabled(true);
 
@@ -199,7 +199,7 @@ namespace ModelecGUI
             {
                 if (static_cast<int>(servo_actions_.size()) > msg->id && servo_actions_[msg->id] != nullptr)
                 {
-                    servo_actions_[msg->id]->SetSpinBoxValue(msg->angle);
+                    servo_actions_[msg->id]->SetSpinBoxValue(msg->angle * 180.0 / M_PI);
                 }
             });
 

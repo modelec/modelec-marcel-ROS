@@ -57,6 +57,7 @@ namespace ModelecGUI
 
         QPushButton* relay_top_button_;
         QPushButton* relay_bottom_button_;
+        QPushButton* relay_third_button_;
         std::vector<QPushButton*> relay_buttons_;
         std::vector<bool> relay_values_;
 

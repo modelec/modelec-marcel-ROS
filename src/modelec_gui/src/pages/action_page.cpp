@@ -135,12 +135,17 @@ namespace ModelecGUI
         relay_bottom_button_ = new QPushButton(this);
         relay_bottom_button_->setText("Toggle Relay Bottom");
 
+        relay_third_button_ = new QPushButton(this);
+        relay_third_button_->setText("Toggle Third Relay");
+
         relay_layout_->addWidget(relay_top_button_);
         relay_layout_->addWidget(relay_bottom_button_);
+        relay_layout_->addWidget(relay_third_button_);
 
         relay_buttons_.push_back(relay_top_button_);
         relay_buttons_.push_back(relay_bottom_button_);
-        relay_values_ = {false, false};
+        relay_buttons_.push_back(relay_third_button_);
+        relay_values_ = {false, false, false};
 
         for (size_t i = 0; i < relay_buttons_.size(); ++i)
         {

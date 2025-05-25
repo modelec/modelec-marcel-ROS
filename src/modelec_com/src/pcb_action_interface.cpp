@@ -233,6 +233,7 @@ namespace Modelec
         }
 
         relay_value_ = {
+            {0, false},
             {1, false},
             {2, false},
         };

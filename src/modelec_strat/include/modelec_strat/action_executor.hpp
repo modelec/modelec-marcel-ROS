@@ -4,6 +4,7 @@
 #include <modelec_interfaces/msg/action_asc_pos.hpp>
 #include <modelec_interfaces/msg/action_relay_state.hpp>
 #include <modelec_interfaces/msg/action_servo_pos.hpp>
+#include <modelec_interfaces/msg/action_exec.hpp>
 
 namespace Modelec
 {
@@ -16,6 +17,7 @@ namespace Modelec
             DEPLOY_BANNER,
             TAKE_POT,
             PLACE_POT,
+            DEPLOY_MAX_SIZE,
         };
 
         enum Step
@@ -85,6 +87,8 @@ namespace Modelec
         rclcpp::Subscription<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_res_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_move_res_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::ActionRelayState>::SharedPtr relay_move_res_sub_;
+
+        rclcpp::Subscription<modelec_interfaces::msg::ActionExec>::SharedPtr action_exec_sub_;
 
         Action action_ = NONE;
 

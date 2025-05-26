@@ -64,6 +64,19 @@ namespace Modelec
                 step_running_--;
                 Update();
             });
+
+        action_exec_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionExec>(
+            "/action/exec", 10, [this](const modelec_interfaces::msg::ActionExec::SharedPtr msg)
+            {
+                action_ = static_cast<Action>(msg->action);
+                for (const auto& step : msg->mission)
+                {
+                    step_.push(static_cast<Step>(step));
+                }
+                action_done_ = false;
+                step_running_ = 0;
+                Update();
+            });
     }
 
     rclcpp::Node::SharedPtr ActionExecutor::GetNode() const

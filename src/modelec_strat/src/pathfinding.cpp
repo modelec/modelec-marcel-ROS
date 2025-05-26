@@ -81,7 +81,6 @@ namespace Modelec
             [this](const std::shared_ptr<std_srvs::srv::Empty::Request> request,
                    const std::shared_ptr<std_srvs::srv::Empty::Response> response)
             {
-                RCLCPP_INFO(node_->get_logger(), "Ask obstacle request received");
                 HandleAskObstacleRequest(request, response);
             });
 
@@ -90,7 +89,6 @@ namespace Modelec
             [this](const std::shared_ptr<modelec_interfaces::srv::Map::Request> request,
                    const std::shared_ptr<modelec_interfaces::srv::Map::Response> response)
             {
-                RCLCPP_INFO(node_->get_logger(), "Map request received");
                 HandleMapRequest(request, response);
             });
 
@@ -99,7 +97,6 @@ namespace Modelec
             [this](const std::shared_ptr<modelec_interfaces::srv::MapSize::Request> request,
                    const std::shared_ptr<modelec_interfaces::srv::MapSize::Response> response)
             {
-                RCLCPP_INFO(node_->get_logger(), "Map size request received");
                 HandleMapSizeRequest(request, response);
             });
 

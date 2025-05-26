@@ -13,6 +13,7 @@
 #include <modelec_interfaces/msg/action_asc_pos.hpp>
 #include <modelec_interfaces/msg/action_servo_pos.hpp>
 #include <modelec_interfaces/msg/action_relay_state.hpp>
+#include <modelec_interfaces/msg/action_exec.hpp>
 
 namespace ModelecGUI
 {
@@ -25,6 +26,7 @@ namespace ModelecGUI
         using ActionAscPos = modelec_interfaces::msg::ActionAscPos;
         using ActionServoPos = modelec_interfaces::msg::ActionServoPos;
         using ActionRelayState = modelec_interfaces::msg::ActionRelayState;
+        using ActionExec = modelec_interfaces::msg::ActionExec;
 
         ActionPage(rclcpp::Node::SharedPtr node, QWidget* parent = nullptr);
         ~ActionPage() override;
@@ -32,6 +34,7 @@ namespace ModelecGUI
         rclcpp::Node::SharedPtr get_node() const { return node_; }
 
     private:
+        QPushButton* max_size_button_;
 
         QVBoxLayout* layout_;
         QHBoxLayout* asc_layout_;
@@ -61,7 +64,11 @@ namespace ModelecGUI
         std::vector<QPushButton*> relay_buttons_;
         std::vector<bool> relay_values_;
 
+        QPushButton* deploy_banner_button_;
+
         rclcpp::Node::SharedPtr node_;
+
+        rclcpp::Publisher<ActionExec>::SharedPtr action_exec_pub_;
 
         rclcpp::Subscription<ActionAscPos>::SharedPtr asc_get_sub_;
         rclcpp::Publisher<ActionAscPos>::SharedPtr asc_set_pub_;

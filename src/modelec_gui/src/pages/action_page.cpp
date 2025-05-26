@@ -10,6 +10,17 @@ namespace ModelecGUI
         setLayout(layout_);
         setWindowTitle("Action Page");
 
+        max_size_button_ = new QPushButton("Deploy Max Size");
+
+        connect(max_size_button_, &QPushButton::clicked, this,
+            [this]()
+            {
+                ActionExec action_exec;
+                action_exec.action = ActionExec::DEPLOY_MAX_SIZE;
+                action_exec.mission = {ActionExec::ASC_GO_UP, ActionExec::RETRACT_BOTTOM_PLATE};
+                action_exec_pub_->publish(action_exec);
+            });
+
         asc_layout_ = new QHBoxLayout;
 
         asc_action_ = new ActionWidget(this);
@@ -160,9 +171,24 @@ namespace ModelecGUI
                 });
         }
 
+        deploy_banner_button_ = new QPushButton("Deploy Banner");
+        connect(deploy_banner_button_, &QPushButton::clicked, this,
+            [this]()
+            {
+                ActionExec action_exec;
+                action_exec.action = ActionExec::DEPLOY_BANNER;
+                action_exec.mission = {ActionExec::DEPLOY_BANNER_STEP};
+                action_exec_pub_->publish(action_exec);
+            });
+
+        layout_->addWidget(max_size_button_);
         layout_->addLayout(asc_layout_);
         layout_->addLayout(servo_layout_);
         layout_->addLayout(relay_layout_);
+        layout_->addWidget(deploy_banner_button_);
+
+        action_exec_pub_ = node_->create_publisher<ActionExec>(
+            "action/exec", 10);
 
         asc_get_sub_ = node_->create_subscription<ActionAscPos>(
             "action/get/asc", 10, [this](const ActionAscPos::SharedPtr msg)

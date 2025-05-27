@@ -124,6 +124,8 @@ namespace Modelec
                 continue;
             }
 
+            RCLCPP_INFO(this->get_logger(), "Lidar point at x=%.2f, y=%.2f, range=%.2f", x_global, y_global, range);
+
             if (range < min_distance)
             {
                 min_distance = range;

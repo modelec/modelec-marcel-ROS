@@ -103,6 +103,12 @@ namespace Modelec
                 continue;
             }
 
+            if (range < robot_radius_)
+            {
+                angle += msg->angle_increment;
+                continue;
+            }
+
             // Convert to local robot frame
             double x_local = range * std::cos(angle) * 1000.0; // meters -> mm
             double y_local = range * std::sin(angle) * 1000.0; // meters -> mm
@@ -116,12 +122,6 @@ namespace Modelec
             {
                 angle += msg->angle_increment;
                 continue;
-            }
-
-            if (std::hypot(x_global - robot_x, y_global - robot_y) < robot_radius_)
-            {
-                angle += msg->angle_increment;
-                continue; // Ignore points too close to the robot
             }
 
             if (range < min_distance)

@@ -19,6 +19,13 @@ namespace Modelec
 
         max_stationary_time_s_ = Config::get<float>("config.enemy.detection.max_stationary_time_s", 10.0);
 
+        map_width_ = Config::get<float>("config.map.size.map_width_mm", 3000.0);
+        map_height_ = Config::get<float>("config.map.size.map_height_mm", 2000.0);
+
+        robot_width_ = Config::get<float>("config.robot.size.width_mm", 500.0);
+        robot_length_ = Config::get<float>("config.robot.size.length_mm", 500.0);
+        robot_radius_ = std::max(robot_width_, robot_length_) / 2.0;
+
         current_pos_sub_ = this->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10,
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
@@ -105,10 +112,16 @@ namespace Modelec
             double y_global = robot_y + (x_local * std::sin(robot_theta) + y_local * std::cos(robot_theta));
 
             // Ignore points outside of the table
-            if (x_global < 0 || x_global > 3000 || y_global < 0 || y_global > 2000)
+            if (x_global < 0 || x_global > map_width_ || y_global < 0 || y_global > map_height_)
             {
                 angle += msg->angle_increment;
                 continue;
+            }
+
+            if (std::hypot(x_global - robot_x, y_global - robot_y) < robot_radius_)
+            {
+                angle += msg->angle_increment;
+                continue; // Ignore points too close to the robot
             }
 
             if (range < min_distance)

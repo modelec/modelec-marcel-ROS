@@ -41,5 +41,10 @@ namespace Modelec
 
         bool game_stated_ = false;
         float max_stationary_time_s_ = 10.0f;
+        float map_width_ = 0;
+        float map_height_ = 0;
+        float robot_width_ = 0;
+        float robot_length_ = 0;
+        double robot_radius_ = 0;
     };
 }

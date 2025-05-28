@@ -27,6 +27,8 @@ namespace Modelec
         {
             GO_TO_FRONT,
             DEPLOY_BANNER,
+            WAIT_5_SECONDS,
+            UNDEPLOY_BANNER,
             GO_FORWARD,
             DONE
         } step_;
@@ -38,5 +40,7 @@ namespace Modelec
         rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr score_pub_;
         int mission_score_ = 0;
         Point spawn_;
+
+        rclcpp::Time deploy_time_;
     };
 }

@@ -5,8 +5,6 @@
 #include <sstream>
 
 namespace Modelec {
-    #define PI 3.14159265358979323846
-    
     std::vector<std::string> split(const std::string &s, char delim);
 
     std::string join(const std::vector<std::string> &v, const std::string &delim);

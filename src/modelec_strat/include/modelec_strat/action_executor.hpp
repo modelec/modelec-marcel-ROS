@@ -15,6 +15,7 @@ namespace Modelec
         {
             NONE,
             DEPLOY_BANNER,
+            UNDEPLOY_BANNER,
             TAKE_POT,
             PLACE_POT,
             DEPLOY_MAX_SIZE,
@@ -24,6 +25,7 @@ namespace Modelec
         {
             // Banner
             DEPLOY_BANNER_STEP,
+            UNDEPLOY_BANNER_STEP,
 
             // Take Pot
             ASC_GO_DOWN,
@@ -56,6 +58,7 @@ namespace Modelec
         void Update();
 
         void DeployBanner();
+        void UndeployBanner();
 
         void TakePot(bool two_floor = true);
 

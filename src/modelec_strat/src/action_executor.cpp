@@ -113,6 +113,19 @@ namespace Modelec
                 }
 
                 break;
+
+            case UNDEPLOY_BANNER_STEP:
+                {
+                    modelec_interfaces::msg::ActionServoPos msg;
+                    msg.id = 5;
+                    msg.pos = 0;
+                    servo_move_pub_->publish(msg);
+
+                    step_running_ = 1;
+                }
+
+                break;
+
             case ASC_GO_DOWN:
                 {
                     modelec_interfaces::msg::ActionAscPos asc_msg;
@@ -306,6 +319,20 @@ namespace Modelec
             step_running_ = 0;
 
             step_.push(DEPLOY_BANNER_STEP);
+
+            Update();
+        }
+    }
+
+    void ActionExecutor::UndeployBanner()
+    {
+        if (action_done_)
+        {
+            action_ = UNDEPLOY_BANNER;
+            action_done_ = false;
+            step_running_ = 0;
+
+            step_.push(UNDEPLOY_BANNER_STEP);
 
             Update();
         }

@@ -47,6 +47,7 @@ namespace Modelec
         case GO_TO_FRONT:
             {
                 action_executor_->DeployBanner();
+                deploy_time_ = node_->now();
 
                 step_ = DEPLOY_BANNER;
             }
@@ -54,6 +55,28 @@ namespace Modelec
             break;
 
         case DEPLOY_BANNER:
+            {
+                if ((node_->now() - deploy_time_).seconds() >= 5)
+                {
+                    step_ = WAIT_5_SECONDS;
+                }
+                else
+                {
+                    RCLCPP_INFO(node_->get_logger(), "Waiting for banner deployment to finish... %d seconds left", 5 - static_cast<int>((node_->now() - deploy_time_).seconds()));
+                }
+            }
+
+            break;
+        case WAIT_5_SECONDS:
+            {
+                action_executor_->UndeployBanner();
+
+                step_ = UNDEPLOY_BANNER;
+            }
+
+            break;
+
+        case UNDEPLOY_BANNER:
             {
                 nav_->GoTo(spawn_.x, (nav_->GetPathfinding()->robot_length_mm_ / 2) + 600, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 

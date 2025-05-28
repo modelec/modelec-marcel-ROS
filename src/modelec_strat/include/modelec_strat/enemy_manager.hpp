@@ -5,6 +5,7 @@
 #include <modelec_interfaces/msg/odometry_pos.hpp>
 #include <modelec_interfaces/msg/strat_state.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
+#include <std_srvs/srv/empty.hpp>
 
 namespace Modelec
 {
@@ -27,6 +28,9 @@ namespace Modelec
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr close_enemy_pos_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_long_time_pub_;
+
+        rclcpp::Service<std_srvs::srv::Empty>::SharedPtr ping_service_;
+
         rclcpp::TimerBase::SharedPtr timer_;
 
         rclcpp::Time last_movement_time_;

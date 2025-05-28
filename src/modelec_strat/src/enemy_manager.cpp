@@ -93,7 +93,7 @@ namespace Modelec
         double best_x = 0.0;
         double best_y = 0.0;
 
-        RCLCPP_INFO(this->get_logger(), "Processing Lidar min %f %f", msg->range_min, msg->range_max);
+        RCLCPP_INFO(this->get_logger(), "Processing Lidar min %f | %f | %f", msg->range_min, msg->range_max, msg->ranges[1]);
 
         for (size_t i = 0; i < msg->ranges.size(); ++i)
         {

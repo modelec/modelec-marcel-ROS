@@ -25,6 +25,7 @@ namespace Modelec
         rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr laser_scan_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::StratState>::SharedPtr state_sub_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_pub_;
+        rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr close_enemy_pos_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_long_time_pub_;
         rclcpp::TimerBase::SharedPtr timer_;
 
@@ -46,5 +47,6 @@ namespace Modelec
         float robot_width_ = 0;
         float robot_length_ = 0;
         double robot_radius_ = 0;
+        float min_emergency_distance_ = 0.0f;
     };
 }

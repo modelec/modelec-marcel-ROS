@@ -49,6 +49,13 @@ namespace Modelec
                 OnEnemyPosition(msg);
             });
 
+        close_enemy_pos_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
+            "enemy/position/emergency", 10,
+            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+            {
+                OnEnemyPositionClose(msg);
+            });
+
         enemy_pos_long_time_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "/enemy/long_time", 10,
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
@@ -474,18 +481,9 @@ namespace Modelec
     PosMsg::SharedPtr NavigationHelper::GetHomePosition()
     {
         PosMsg::SharedPtr home = std::make_shared<PosMsg>();
-        if (team_id_ == YELLOW)
-        {
-            home->x = Config::get<int>("config.home.yellow@x", 0);
-            home->y = Config::get<int>("config.home.yellow@y", 0);
-            home->theta = Config::get<double>("config.home.yellow@theta", 0);
-        }
-        else
-        {
-            home->x = Config::get<int>("config.home.blue@x", 0);
-            home->y = Config::get<int>("config.home.blue@y", 0);
-            home->theta = Config::get<double>("config.home.blue@theta", 0);
-        }
+        home->x = spawn_.x;
+        home->y = spawn_.y;
+        home->theta = spawn_.theta;
         return home;
     }
 
@@ -499,6 +497,28 @@ namespace Modelec
             RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
             Replan();
         }
+    }
+
+    void NavigationHelper::OnEnemyPositionClose(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
+    {
+        last_was_close_enemy_ = true;
+
+        pathfinding_->OnEnemyPosition(msg);
+        last_enemy_pos_ = *msg;
+
+        // TODO : try to replan next frame
+
+        waypoints_.clear();
+
+        WaypointMsg emptyWaypoint;
+        emptyWaypoint.x = current_pos_->x;
+        emptyWaypoint.y = current_pos_->y;
+        emptyWaypoint.theta = current_pos_->theta;
+        emptyWaypoint.id = 0;
+        emptyWaypoint.is_end = true;
+
+        waypoints_.emplace_back(emptyWaypoint);
+        SendWaypoint();
     }
 
     void NavigationHelper::OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)

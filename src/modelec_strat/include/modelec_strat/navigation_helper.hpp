@@ -80,6 +80,7 @@ namespace Modelec
         PosMsg::SharedPtr GetHomePosition();
 
         void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
+        void OnEnemyPositionClose(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
         void OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
@@ -124,6 +125,8 @@ namespace Modelec
 
         float factor_close_enemy_ = 0;
 
+        bool last_was_close_enemy_ = false;
+
         std::vector<Waypoint> waypoints_;
 
         PosMsg::SharedPtr current_pos_;
@@ -138,6 +141,7 @@ namespace Modelec
         rclcpp::Publisher<PosMsg>::SharedPtr pos_pub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr close_enemy_pos_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_long_time_sub_;
 
         modelec_interfaces::msg::OdometryPos last_enemy_pos_;

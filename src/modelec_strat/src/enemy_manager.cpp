@@ -26,6 +26,8 @@ namespace Modelec
         robot_length_ = Config::get<float>("config.robot.size.length_mm", 500.0);
         robot_radius_ = std::max(robot_width_, robot_length_) / 2.0;
 
+        min_emergency_distance_ = Config::get<float>("config.enemy.detection.min_emergency_distance_mm", 100.0);
+
         RCLCPP_INFO(get_logger(), "Configuration loaded:");
         RCLCPP_INFO(get_logger(), "  min_move_threshold_mm: %f", min_move_threshold_mm_);
         RCLCPP_INFO(get_logger(), "  refresh_rate_s: %f", refresh_rate_s_);
@@ -35,6 +37,7 @@ namespace Modelec
         RCLCPP_INFO(get_logger(), "  robot_width_mm: %f", robot_width_);
         RCLCPP_INFO(get_logger(), "  robot_length_mm: %f", robot_length_);
         RCLCPP_INFO(get_logger(), "  robot_radius_mm: %f", robot_radius_);
+        RCLCPP_INFO(get_logger(), "  min_emergency_distance_mm: %f", min_emergency_distance_);
 
         current_pos_sub_ = this->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10,
@@ -52,6 +55,9 @@ namespace Modelec
 
         enemy_pos_pub_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
             "enemy/position", 10);
+
+        close_enemy_pos_pub_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
+            "enemy/position/emergency", 10);
 
         state_sub_ = create_subscription<modelec_interfaces::msg::StratState>("/strat/state", 10,
                                                                               [this](

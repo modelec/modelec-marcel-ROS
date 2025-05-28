@@ -26,6 +26,16 @@ namespace Modelec
         robot_length_ = Config::get<float>("config.robot.size.length_mm", 500.0);
         robot_radius_ = std::max(robot_width_, robot_length_) / 2.0;
 
+        RCLCPP_INFO(get_logger(), "Configuration loaded:");
+        RCLCPP_INFO(get_logger(), "  min_move_threshold_mm: %f", min_move_threshold_mm_);
+        RCLCPP_INFO(get_logger(), "  refresh_rate_s: %f", refresh_rate_s_);
+        RCLCPP_INFO(get_logger(), "  max_stationary_time_s: %f", max_stationary_time_s_);
+        RCLCPP_INFO(get_logger(), "  map_width_mm: %f", map_width_);
+        RCLCPP_INFO(get_logger(), "  map_height_mm: %f", map_height_);
+        RCLCPP_INFO(get_logger(), "  robot_width_mm: %f", robot_width_);
+        RCLCPP_INFO(get_logger(), "  robot_length_mm: %f", robot_length_);
+        RCLCPP_INFO(get_logger(), "  robot_radius_mm: %f", robot_radius_);
+
         current_pos_sub_ = this->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10,
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)

@@ -1,3 +1,2 @@
-SUBSYSTEM=="tty", ATTRS{idVendor}=="", ATTRS{idProduct}=="", NAME="USB_ALIM", SYMLINK="ttyUSB_ALIM"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="", ATTRS{idProduct}=="", NAME="USB_ODO", SYMLINK="ttyUSB_ODO"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="", ATTRS{idProduct}=="", NAME="USB_ACTION", SYMLINK="ttyUSB_ACTION"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1d6b", ATTRS{idProduct}=="0002", NAME="USB_ACTION", SYMLINK="ttyUSB_ACTION"

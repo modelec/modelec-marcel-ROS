@@ -175,8 +175,11 @@ namespace Modelec
             "odometry/start", 10,
             [this](const std_msgs::msg::Bool::SharedPtr msg)
             {
-                start_odo_ = msg->data;
-                SendOrder("START", {std::to_string(msg->data)});
+                if (msg->data != start_odo_)
+                {
+                    start_odo_ = msg->data;
+                    SendOrder("START", {std::to_string(msg->data)});
+                }
             });
     }
 

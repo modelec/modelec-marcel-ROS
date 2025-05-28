@@ -101,12 +101,16 @@ namespace Modelec
 
             if (std::isnan(range) || range < msg->range_min || range > msg->range_max)
             {
+                RCLCPP_INFO(this->get_logger(), "Ignoring Lidar point with invalid range: %.2f", range);
+
                 angle += msg->angle_increment;
                 continue;
             }
 
             if (range < robot_radius_)
             {
+                RCLCPP_INFO(this->get_logger(), "Ignoring Lidar point too close to robot: range=%.2f", range);
+
                 angle += msg->angle_increment;
                 continue;
             }
@@ -122,6 +126,8 @@ namespace Modelec
             // Ignore points outside of the table
             if (x_global < 0 || x_global > map_width_ || y_global < 0 || y_global > map_height_)
             {
+                RCLCPP_INFO(this->get_logger(), "Lidar point out of bounds: x=%.2f, y=%.2f", x_global, y_global);
+
                 angle += msg->angle_increment;
                 continue;
             }

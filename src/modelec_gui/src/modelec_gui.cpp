@@ -9,26 +9,6 @@ namespace ModelecGUI {
     ROS2QtGUI::ROS2QtGUI(rclcpp::Node::SharedPtr node, QWidget *parent)
         : QMainWindow(parent), node_(std::move(node)), stackedWidget(new QStackedWidget(this)) {
 
-        auto request = std::make_shared<std_srvs::srv::Empty::Request>();
-        auto client = node_->create_client<std_srvs::srv::Empty>("enemy_manager/ping");
-        int timeout = 3;
-        while (!client->wait_for_service(std::chrono::seconds(1)) && timeout-- > 0)
-        {
-            if (!rclcpp::ok())
-            {
-                RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
-                return;
-            }
-            RCLCPP_INFO(node_->get_logger(), "service not available, waiting again...");
-        }
-
-        if (timeout <= 0)
-        {
-            // Quit app
-            this->close();
-            return;
-        }
-
         // Add pages to stack
         resize(1200, 800);
 

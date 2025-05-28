@@ -75,13 +75,6 @@ namespace Modelec
         );
 
         last_publish_time_ = this->now();
-
-        ping_service_ = this->create_service<std_srvs::srv::Empty>(
-            "enemy_manager/ping",
-            [this](const std::shared_ptr<std_srvs::srv::Empty::Request>,
-                   std::shared_ptr<std_srvs::srv::Empty::Response>)
-            {
-            });
     }
 
     void EnemyManager::OnCurrentPos(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)

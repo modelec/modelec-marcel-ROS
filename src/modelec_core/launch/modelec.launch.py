@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, Shutdown, RegisterEventHandler, TimerAction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, Shutdown, RegisterEventHandler
 from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -7,6 +7,7 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
+
 
 def generate_launch_description():
     # Declare launch arguments
@@ -32,32 +33,6 @@ def generate_launch_description():
         ),
         condition=IfCondition(with_rplidar)
     )
-
-    # Function to launch RPLIDAR node with crash detection and restart
-    def launch_rplidar_with_restart(context, *args, **kwargs):
-        if context.launch_configurations.get('with_rplidar') == 'true':
-            rplidar_node = Node(
-                package='rplidar_ros',
-                executable='rplidar_node',
-                name='rplidar_node',
-                output='screen',
-            )
-
-            # Register event handler to restart rplidar node only if it crashes (exit code non-nul)
-            restart_handler = RegisterEventHandler(
-                OnProcessExit(
-                    target_action=rplidar_node,
-                    on_exit=[
-                        TimerAction(
-                            period=5.0,  # Delay before restarting (in seconds)
-                            actions=[rplidar_node]  # Restart the rplidar_node
-                        )
-                    ]
-                )
-            )
-
-            return [rplidar_node, restart_handler]
-        return []
 
     # Function to launch GUI and shutdown handler
     def launch_gui(context, *args, **kwargs):
@@ -102,9 +77,7 @@ def generate_launch_description():
         with_com_arg,
         with_strat_arg,
 
-        # Conditionally launch the RPLIDAR node with the restart handler
-        OpaqueFunction(function=launch_rplidar_with_restart),
-
+        rplidar_launch,
         OpaqueFunction(function=launch_gui),
         OpaqueFunction(function=launch_com),
         OpaqueFunction(function=launch_strat),

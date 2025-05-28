@@ -24,11 +24,11 @@ namespace Modelec
 
     Point Point::GetTakeBasePosition() const
     {
-        return GetTakePosition(320, theta);
+        return GetTakePosition(290, theta);
     }
 
     Point Point::GetTakeClosePosition() const
     {
-        return GetTakePosition(210, theta);
+        return GetTakePosition(130, theta);
     }
 }

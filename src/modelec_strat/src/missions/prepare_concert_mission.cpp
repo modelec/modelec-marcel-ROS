@@ -48,6 +48,7 @@ namespace Modelec
                 auto res = nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL);
                 if (res != Pathfinding::FREE)
                 {
+                    RCLCPP_WARN(node_->get_logger(), "Cannot go to column %d, trying another one", column_->GetId());
                     blacklistId.push_back(column_->GetId());
                 }
                 else
@@ -110,14 +111,13 @@ namespace Modelec
                     return;
                 }
 
-                // TODO : make the mission finished if the pos is not valid
                 closestDepoZonePoint_ = closestDepoZone_->GetNextPotPos();
                 auto p = closestDepoZonePoint_.GetTakeBasePosition();
                 auto res = nav_->CanGoTo(p, false, Pathfinding::FREE | Pathfinding::WALL);
                 if (res != Pathfinding::FREE)
                 {
                     auto pos = column_->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
-                    nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::WALL);
+                    nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
                     step_ = GO_BACK;
                 }
                 else
@@ -209,7 +209,7 @@ namespace Modelec
                 auto p = closestDepoZonePoint_.GetTakeBasePosition();
                 if (nav_->CanGoTo(p.x, p.y, p.theta) != Pathfinding::FREE)
                 {
-                    nav_->GoTo(p.x, p.y, p.theta, true, Pathfinding::FREE | Pathfinding::WALL);
+                    nav_->GoTo(p.x, p.y, p.theta, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
                 }
             }
 

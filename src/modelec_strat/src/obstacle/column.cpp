@@ -46,7 +46,7 @@ namespace Modelec
         double optimizedAngle = 0;
         for (const auto& angle : possible_angles_)
         {
-            auto newPos = GetPosition().GetTakePosition(400, angle);
+            auto newPos = GetPosition().GetTakePosition(310, angle);
             double dist = Point::distance(currentPos, newPos);
             if (dist < distance)
             {

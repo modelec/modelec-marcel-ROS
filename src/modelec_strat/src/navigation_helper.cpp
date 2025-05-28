@@ -481,11 +481,19 @@ namespace Modelec
     PosMsg::SharedPtr NavigationHelper::GetHomePosition()
     {
         PosMsg::SharedPtr home = std::make_shared<PosMsg>();
-        home->x = spawn_.x;
-        home->y = spawn_.y;
-        home->theta = spawn_.theta;
-        return home;
-    }
+        if (team_id_ == YELLOW)
+        {
+            home->x = Config::get<int>("config.home.yellow@x", 0);
+            home->y = Config::get<int>("config.home.yellow@y", 0);
+            home->theta = Config::get<double>("config.home.yellow@theta", 0);
+        }
+        else
+        {
+            home->x = Config::get<int>("config.home.blue@x", 0);
+            home->y = Config::get<int>("config.home.blue@y", 0);
+            home->theta = Config::get<double>("config.home.blue@theta", 0);
+        }
+        return home;    }
 
     void NavigationHelper::OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {

@@ -695,16 +695,31 @@ namespace Modelec
             }
         }*/
 
-        if (!waypoint_queue_.empty())
+        if (await_rotate_)
         {
-            waypoint_pub_->publish(waypoint_queue_.front().ToMsg());
-            waypoint_queue_.pop();
+            await_rotate_ = false;
 
-            waypoints_[waypoints_.size() - waypoint_queue_.size() - 1].reached = true;
+            waypoints_.clear();
+            for (auto& w : send_back_waypoints_)
+            {
+                waypoints_.emplace_back(w);
+            }
+            // SendWaypoint();
+            SendGoTo();
         }
         else
         {
-            waypoints_.back().reached = true;
+            if (!waypoint_queue_.empty())
+            {
+                waypoint_pub_->publish(waypoint_queue_.front().ToMsg());
+                waypoint_queue_.pop();
+
+                waypoints_[waypoints_.size() - waypoint_queue_.size() - 1].reached = true;
+            }
+            else
+            {
+                waypoints_.back().reached = true;
+            }
         }
     }
 

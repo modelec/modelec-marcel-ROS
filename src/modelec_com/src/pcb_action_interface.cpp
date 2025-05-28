@@ -116,7 +116,7 @@ namespace Modelec
             [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
             {
                 SendOrder("SERVO" + std::to_string(msg->id), {
-                              "POS" + std::to_string(msg->pos), std::to_string(msg->angle)
+                              "POS" + std::to_string(msg->pos), std::to_string(static_cast<int>(msg->angle * 100))
                           });
             });
 

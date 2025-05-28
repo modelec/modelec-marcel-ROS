@@ -154,7 +154,7 @@ namespace Modelec
                     Transition(State::STOP, "Start prepare concert");
                 }*/
                 // TODO : check the time needed by the mission
-                else if (elapsed.seconds() < 75)
+                else if (elapsed.seconds() < 70)
                 {
                     Transition(State::DO_PREPARE_CONCERT, "Proceed to concert");
                 }
@@ -168,7 +168,7 @@ namespace Modelec
         case State::DO_PREPARE_CONCERT:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<PrepareConcertMission>(nav_, action_executor_, (now - match_start_time_).seconds() < 70);
+                current_mission_ = std::make_unique<PrepareConcertMission>(nav_, action_executor_, (now - match_start_time_).seconds() < 65);
                 current_mission_->Start(shared_from_this());
             }
             current_mission_->Update();

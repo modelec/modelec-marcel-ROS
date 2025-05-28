@@ -124,7 +124,25 @@ namespace Modelec
         return team_id_;
     }
 
-    void NavigationHelper::SendWaypoint() const
+    void NavigationHelper::SendGoTo()
+    {
+        while (!waypoint_queue_.empty())
+        {
+            waypoint_queue_.pop();
+        }
+
+        for (auto w : waypoints_)
+        {
+            w.id = 0;
+            w.is_end = true;
+            waypoint_queue_.push(w);
+        }
+
+        waypoint_pub_->publish(waypoint_queue_.front().ToMsg());
+        waypoint_queue_.pop();
+    }
+
+/*    void NavigationHelper::SendWaypoint() const
     {
         for (auto& w : waypoints_)
         {
@@ -139,6 +157,7 @@ namespace Modelec
             waypoint_pub_->publish(w);
         }
     }
+*/
 
     void NavigationHelper::AddWaypoint(const PosMsg& pos, int index)
     {
@@ -244,7 +263,7 @@ namespace Modelec
         {
             return true;
         }
-        return waypoints_.back().reached;
+        return waypoint_queue_.empty() && waypoints_.back().reached;
     }
 
     bool NavigationHelper::RotateTo(const PosMsg::SharedPtr& pos)
@@ -283,7 +302,8 @@ namespace Modelec
         startAngle.is_end = true;
 
         waypoints_.emplace_back(startAngle);
-        SendWaypoint();
+        // SendWaypoint();
+        SendGoTo();
     }
 
     int NavigationHelper::GoTo(const PosMsg::SharedPtr& goal, bool isClose, int collisionMask)
@@ -304,7 +324,8 @@ namespace Modelec
             waypoints_.emplace_back(w);
         }
 
-        SendWaypoint();
+        // SendWaypoint();
+        SendGoTo();
 
         return res;
     }
@@ -355,7 +376,8 @@ namespace Modelec
                 waypoints_.emplace_back(w);
             }
 
-            SendWaypoint();
+            // SendWaypoint();
+            SendGoTo();
         }
 
         return res;
@@ -651,9 +673,9 @@ namespace Modelec
         return spawn_;
     }
 
-    void NavigationHelper::OnWaypointReach(const WaypointReachMsg::SharedPtr msg)
+    void NavigationHelper::OnWaypointReach(const WaypointReachMsg::SharedPtr)
     {
-        for (auto& waypoint : waypoints_)
+        /*for (auto& waypoint : waypoints_)
         {
             if (waypoint.id == msg->id)
             {
@@ -671,6 +693,18 @@ namespace Modelec
                     SendWaypoint();
                 }
             }
+        }*/
+
+        if (!waypoint_queue_.empty())
+        {
+            waypoint_pub_->publish(waypoint_queue_.front().ToMsg());
+            waypoint_queue_.pop();
+
+            waypoints_[waypoints_.size() - waypoint_queue_.size() - 1].reached = true;
+        }
+        else
+        {
+            waypoints_.back().reached = true;
         }
     }
 

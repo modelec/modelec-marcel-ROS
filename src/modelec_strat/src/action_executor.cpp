@@ -197,7 +197,7 @@ namespace Modelec
                     top_pot_msg.pos = 1;
                     servo_move_pub_->publish(top_pot_msg);
 
-                    step_running_ = 6;
+                    step_running_ = 2;
                 }
 
                 break;
@@ -229,7 +229,7 @@ namespace Modelec
                     top_pot_msg.pos = 1;
                     servo_move_pub_->publish(top_pot_msg);
 
-                    step_running_ = 2;
+                    step_running_ = 1;
                 }
 
                 break;
@@ -270,7 +270,7 @@ namespace Modelec
                     top_pot_msg.pos = 0;
                     servo_move_pub_->publish(top_pot_msg);
 
-                    step_running_ = 6;
+                    step_running_ = 5;
                 }
 
                 break;

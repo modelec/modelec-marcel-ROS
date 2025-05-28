@@ -463,7 +463,7 @@ namespace Modelec
         }
 
         // 7. Fill Waypoints (reconvertir grille -> millimètres)
-        int id = 0;
+        /*int id = 0;
         for (size_t i = 0; i < smooth_path.size(); ++i)
         {
             const auto& [x, y] = smooth_path[i];
@@ -485,6 +485,52 @@ namespace Modelec
             wp.x = x * cell_size_mm_x;
             wp.y = (grid_height_ - 1 - y) * cell_size_mm_y;
             wp.theta = i == smooth_path.size() - 1 ? goal->theta : 0.0f; // last waypoint takes goal theta
+            wp.id = id++;
+            wp.is_end = false;
+            waypoints.push_back(wp);
+        }
+        if (!waypoints.empty())
+        {
+            waypoints.back().is_end = true;
+        }*/
+
+        // 7. Fill Waypoints (reconvertir grille -> millimètres)
+        int id = 0;
+        for (size_t i = 0; i < smooth_path.size(); ++i)
+        {
+            const auto& [x, y] = smooth_path[i];
+
+            // Skip first point if it's too close to robot position
+            if (i == 0)
+            {
+                float world_x = x * cell_size_mm_x;
+                float world_y = (grid_height_ - 1 - y) * cell_size_mm_y;
+
+                float dx = std::abs(world_x - start->x);
+                float dy = std::abs(world_y - start->y);
+
+                if (dx < 50 && dy < 50) // <== seuil de 50mm
+                    continue;
+            }
+
+            WaypointMsg wp;
+            wp.x = x * cell_size_mm_x;
+            wp.y = (grid_height_ - 1 - y) * cell_size_mm_y;
+
+            // Calculer l'angle entre le point actuel et le prochain point
+            if (i < smooth_path.size() - 1) // Si ce n'est pas le dernier point
+            {
+                const auto& [next_x, next_y] = smooth_path[i + 1];
+                // Calcul de l'angle entre (x, y) et (next_x, next_y)
+                float delta_x = next_x * cell_size_mm_x - wp.x;
+                float delta_y = (grid_height_ - 1 - next_y) * cell_size_mm_y - wp.y;
+                wp.theta = std::atan2(delta_y, delta_x); // Calcul de l'angle en radians
+            }
+            else
+            {
+                wp.theta = goal->theta;
+            }
+
             wp.id = id++;
             wp.is_end = false;
             waypoints.push_back(wp);

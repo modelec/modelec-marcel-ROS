@@ -36,8 +36,9 @@ namespace Modelec
 
         int GetTeamId() const;
 
-        void SendWaypoint() const;
-        void SendWaypoint(const std::vector<WaypointMsg>& waypoints) const;
+        // void SendWaypoint() const;
+        // void SendWaypoint(const std::vector<WaypointMsg>& waypoints) const;
+        void SendGoTo();
 
         void AddWaypoint(const PosMsg& pos, int index);
         void AddWaypoint(const WaypointMsg& waypoint);
@@ -128,6 +129,7 @@ namespace Modelec
         bool last_was_close_enemy_ = false;
 
         std::vector<Waypoint> waypoints_;
+        std::queue<Waypoint> waypoint_queue_;
 
         PosMsg::SharedPtr current_pos_;
 

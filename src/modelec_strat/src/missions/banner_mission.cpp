@@ -5,7 +5,7 @@
 namespace Modelec
 {
     BannerMission::BannerMission(const std::shared_ptr<NavigationHelper>& nav,
-                                 const std::shared_ptr<ActionExecutor>& action_executor) : step_(DEPLOY_BANNER),
+                                 const std::shared_ptr<ActionExecutor>& action_executor) : step_(GO_TO_FRONT),
         status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
     {
     }
@@ -20,7 +20,7 @@ namespace Modelec
 
         spawn_ = nav_->GetSpawn();
 
-        action_executor_->DeployBanner();
+        nav_->GoTo(spawn_.x, (nav_->GetPathfinding()->robot_length_mm_ / 2) + 5, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
         status_ = MissionStatus::RUNNING;
     }
@@ -44,22 +44,24 @@ namespace Modelec
 
         switch (step_)
         {
-        case DEPLOY_BANNER:
+        case GO_TO_FRONT:
             {
-                nav_->GoTo(spawn_.x, (nav_->GetPathfinding()->robot_length_mm_ / 2) + 5, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+                action_executor_->DeployBanner();
 
-                step_ = GO_TO_FRONT;
+                step_ = DEPLOY_BANNER;
             }
 
             break;
 
-        case GO_TO_FRONT:
+        case DEPLOY_BANNER:
             {
                 nav_->GoTo(spawn_.x, (nav_->GetPathfinding()->robot_length_mm_ / 2) + 600, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
                 step_ = GO_FORWARD;
             }
+
             break;
+
         case GO_FORWARD:
             {
                 std_msgs::msg::Int64 msg;

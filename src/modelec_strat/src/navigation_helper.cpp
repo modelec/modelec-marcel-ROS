@@ -74,7 +74,7 @@ namespace Modelec
 
         ask_spawn_srv_ = node->create_service<std_srvs::srv::Empty>(
             "/nav/ask_spawn", [this](const std_srvs::srv::Empty::Request::SharedPtr,
-                               const std_srvs::srv::Empty::Response::SharedPtr)
+                                      const std_srvs::srv::Empty::Response::SharedPtr)
             {
                 for (auto& ys : spawn_yellow_)
                 {
@@ -494,18 +494,25 @@ namespace Modelec
 
         if (last_was_close_enemy_)
         {
-            RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
-            if (Replan(false)) {
+            RCLCPP_INFO(node_->get_logger(), "Enemy was close try to replanning...");
+            if (Replan(false))
+            {
                 last_was_close_enemy_ = false;
             }
+
+            return;
         }
-        else
+
+        if (HasArrived())
         {
-            if (EnemyOnPath(*msg))
-            {
-                RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
-                Replan();
-            }
+            RCLCPP_INFO(node_->get_logger(), "No path to replanning, ignoring enemy position");
+            return;
+        }
+
+        if (EnemyOnPath(*msg))
+        {
+            RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
+            Replan();
         }
     }
 
@@ -601,7 +608,8 @@ namespace Modelec
                     if (!force) return false;
 
                     if (GoTo(current_pos_, true,
-                         Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE | Pathfinding::ENEMY) != Pathfinding::FREE)
+                             Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE | Pathfinding::ENEMY) !=
+                        Pathfinding::FREE)
                     {
                         return false;
                     }

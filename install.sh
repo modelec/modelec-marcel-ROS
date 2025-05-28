@@ -44,7 +44,7 @@ export ROS_DOMAIN_ID=128" >> ~/.bashrc
 
 source ~/.bashrc
 
-cp usbs.rules /etc/udev/rules.d
+sudo cp usbs.rules /etc/udev/rules.d
 source src/rplidar_ros/scripts/create_udev_rules.sh
 
 cp ros2_launch_marcel.desktop ~/Desktop

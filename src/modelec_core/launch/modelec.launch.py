@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, Shutdown, RegisterEventHandler, TimerAction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, Shutdown, RegisterEventHandler
 from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -7,6 +7,7 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
+
 
 def generate_launch_description():
     # Declare launch arguments
@@ -21,23 +22,17 @@ def generate_launch_description():
     with_com = LaunchConfiguration('with_com')
     with_strat = LaunchConfiguration('with_strat')
 
-    # Function to launch RPLIDAR node with a delay
-    def launch_rplidar_with_delay(context, *args, **kwargs):
-        if context.launch_configurations.get('with_rplidar') == 'true':
-            # TimerAction to delay the start of RPLIDAR
-            start_rplidar = TimerAction(
-                period=5.0,  # Delay of 10 seconds before launching RPLIDAR
-                actions=[
-                    Node(
-                        package='rplidar_ros',
-                        executable='rplidar_node',
-                        name='rplidar_node',
-                        output='screen'
-                    )
-                ]
+    # Conditionally include RPLIDAR launch
+    rplidar_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('rplidar_ros'),
+                'launch',
+                'rplidar_a1_launch.py'
             )
-            return [start_rplidar]
-        return []
+        ),
+        condition=IfCondition(with_rplidar)
+    )
 
     # Function to launch GUI and shutdown handler
     def launch_gui(context, *args, **kwargs):
@@ -82,9 +77,7 @@ def generate_launch_description():
         with_com_arg,
         with_strat_arg,
 
-        # Launch the RPLIDAR node with a delay
-        OpaqueFunction(function=launch_rplidar_with_delay),
-
+        rplidar_launch,
         OpaqueFunction(function=launch_gui),
         OpaqueFunction(function=launch_com),
         OpaqueFunction(function=launch_strat),

@@ -89,7 +89,7 @@ namespace Modelec
 
         bool EnemyOnPath(const modelec_interfaces::msg::OdometryPos msg);
 
-        void Replan();
+        bool Replan(bool force = true);
 
         void SetTeamId(int id);
 

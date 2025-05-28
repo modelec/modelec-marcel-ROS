@@ -492,10 +492,20 @@ namespace Modelec
         pathfinding_->OnEnemyPosition(msg);
         last_enemy_pos_ = *msg;
 
-        if (EnemyOnPath(*msg))
+        if (last_was_close_enemy_)
         {
             RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
-            Replan();
+            if (Replan(false)) {
+                last_was_close_enemy_ = false;
+            }
+        }
+        else
+        {
+            if (EnemyOnPath(*msg))
+            {
+                RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
+                Replan();
+            }
         }
     }
 
@@ -505,8 +515,6 @@ namespace Modelec
 
         pathfinding_->OnEnemyPosition(msg);
         last_enemy_pos_ = *msg;
-
-        // TODO : try to replan next frame
 
         waypoints_.clear();
 
@@ -582,7 +590,7 @@ namespace Modelec
         return dist < radius;
     }
 
-    void NavigationHelper::Replan()
+    bool NavigationHelper::Replan(bool force)
     {
         if (last_go_to_.goal)
         {
@@ -590,12 +598,18 @@ namespace Modelec
             {
                 if (GoTo(last_go_to_.goal, true, last_go_to_.collisionMask) != Pathfinding::FREE)
                 {
-                    GoTo(current_pos_, true,
-                         Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE | Pathfinding::ENEMY);
-                    // TODO : Handle case where no path is found
+                    if (!force) return false;
+
+                    if (GoTo(current_pos_, true,
+                         Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE | Pathfinding::ENEMY) != Pathfinding::FREE)
+                    {
+                        return false;
+                    }
                 }
             }
         }
+
+        return true;
     }
 
     void NavigationHelper::SetTeamId(int id)

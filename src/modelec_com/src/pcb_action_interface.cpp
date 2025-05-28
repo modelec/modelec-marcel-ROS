@@ -208,7 +208,8 @@ namespace Modelec
             {1, {{0, M_PI_2}}},
             {2, {{0, M_PI_2}}},
             {3, {{0, M_PI_2}}},
-            {4, {{0, M_PI_2}, {1, -M_PI_2}, {2, PI}}},
+            {4, {{0, M_PI_2}}},
+            {5, {{0, M_PI_2}}},
         };
 
         for (auto & [id, v] : servo_pos_mapper_)
@@ -224,7 +225,8 @@ namespace Modelec
             {1, 0},
             {2, 0},
             {3, 0},
-            {4, 0}
+            {4, 0},
+            {5, 0}
         };
 
         for (auto & [id, v] : servo_value_)

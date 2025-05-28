@@ -146,7 +146,7 @@ namespace Modelec
                     servo_move_pub_->publish(first_pot_msg);
 
                     modelec_interfaces::msg::ActionServoPos fourth_pot_msg;
-                    fourth_pot_msg.id = 3; // TODO : to define
+                    fourth_pot_msg.id = 1; // TODO : to define
                     fourth_pot_msg.pos = 1;
                     servo_move_pub_->publish(fourth_pot_msg);
 
@@ -167,7 +167,7 @@ namespace Modelec
             case RETRACT_BOTTOM_PLATE:
                 {
                     modelec_interfaces::msg::ActionServoPos servo_action_bottom_msg;
-                    servo_action_bottom_msg.id = 4; // TODO : to define
+                    servo_action_bottom_msg.id = 2; // TODO : to define
                     servo_action_bottom_msg.pos = 2;
                     servo_move_pub_->publish(servo_action_bottom_msg);
 
@@ -192,30 +192,10 @@ namespace Modelec
                     relay_top_msg.id = 2;
                     relay_move_pub_->publish(relay_top_msg);
 
-                    modelec_interfaces::msg::ActionRelayState relay_bottom_msg;
-                    relay_bottom_msg.state = true; // TODO : check that
-                    relay_bottom_msg.id = 1;
-                    relay_move_pub_->publish(relay_bottom_msg);
-
-                    modelec_interfaces::msg::ActionServoPos first_pot_msg;
-                    first_pot_msg.id = 0; // TODO : to define
-                    first_pot_msg.pos = 1;
-                    servo_move_pub_->publish(first_pot_msg);
-
-                    modelec_interfaces::msg::ActionServoPos fourth_pot_msg;
-                    fourth_pot_msg.id = 3; // TODO : to define
-                    fourth_pot_msg.pos = 1;
-                    servo_move_pub_->publish(fourth_pot_msg);
-
-                    modelec_interfaces::msg::ActionServoPos second_pot_msg;
-                    second_pot_msg.id = 1; // TODO : to define
-                    second_pot_msg.pos = 1;
-                    servo_move_pub_->publish(second_pot_msg);
-
-                    modelec_interfaces::msg::ActionServoPos third_pot_msg;
-                    third_pot_msg.id = 2; // TODO : to define
-                    third_pot_msg.pos = 1;
-                    servo_move_pub_->publish(third_pot_msg);
+                    modelec_interfaces::msg::ActionServoPos top_pot_msg;
+                    top_pot_msg.id = 4; // TODO : to define
+                    top_pot_msg.pos = 1;
+                    servo_move_pub_->publish(top_pot_msg);
 
                     step_running_ = 6;
                 }
@@ -234,7 +214,7 @@ namespace Modelec
             case PLACE_FIRST_PLATE:
                 {
                     modelec_interfaces::msg::ActionServoPos action_bottom_msg;
-                    action_bottom_msg.id = 4; // TODO : to define
+                    action_bottom_msg.id = 2; // TODO : to define
                     action_bottom_msg.pos = 0;
                     servo_move_pub_->publish(action_bottom_msg);
 
@@ -244,15 +224,10 @@ namespace Modelec
                 break;
             case STICK_ALL:
                 {
-                    modelec_interfaces::msg::ActionServoPos second_pot_msg;
-                    second_pot_msg.id = 1; // TODO : to define
-                    second_pot_msg.pos = 1;
-                    servo_move_pub_->publish(second_pot_msg);
-
-                    modelec_interfaces::msg::ActionServoPos third_pot_msg;
-                    third_pot_msg.id = 2; // TODO : to define
-                    third_pot_msg.pos = 1;
-                    servo_move_pub_->publish(third_pot_msg);
+                    modelec_interfaces::msg::ActionServoPos top_pot_msg;
+                    top_pot_msg.id = 4; // TODO : to define
+                    top_pot_msg.pos = 1;
+                    servo_move_pub_->publish(top_pot_msg);
 
                     step_running_ = 2;
                 }
@@ -290,15 +265,10 @@ namespace Modelec
                     second_pot_msg.pos = 0;
                     servo_move_pub_->publish(second_pot_msg);
 
-                    modelec_interfaces::msg::ActionServoPos third_pot_msg;
-                    third_pot_msg.id = 2; // TODO : to define
-                    third_pot_msg.pos = 0;
-                    servo_move_pub_->publish(third_pot_msg);
-
-                    modelec_interfaces::msg::ActionServoPos fourth_pot_msg;
-                    fourth_pot_msg.id = 3; // TODO : to define
-                    fourth_pot_msg.pos = 0;
-                    servo_move_pub_->publish(fourth_pot_msg);
+                    modelec_interfaces::msg::ActionServoPos top_pot_msg;
+                    top_pot_msg.id = 4; // TODO : to define
+                    top_pot_msg.pos = 0;
+                    servo_move_pub_->publish(top_pot_msg);
 
                     step_running_ = 6;
                 }
@@ -311,7 +281,7 @@ namespace Modelec
                     asc_move_pub_->publish(asc_msg);
 
                     modelec_interfaces::msg::ActionServoPos servo_action_bottom_msg;
-                    servo_action_bottom_msg.id = 4; // TODO : to define
+                    servo_action_bottom_msg.id = 3; // TODO : to define
                     servo_action_bottom_msg.pos = 0;
                     servo_move_pub_->publish(servo_action_bottom_msg);
 

@@ -118,7 +118,7 @@ namespace Modelec
 
             if (std::isnan(range) || range < msg->range_min || range > msg->range_max)
             {
-                RCLCPP_INFO(this->get_logger(), "Ignoring Lidar point with invalid range: %.2f", range);
+                // RCLCPP_INFO(this->get_logger(), "Ignoring Lidar point with invalid range: %.2f", range);
 
                 angle += msg->angle_increment;
                 continue;

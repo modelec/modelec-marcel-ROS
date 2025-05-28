@@ -124,9 +124,37 @@ namespace Modelec
                 continue;
             }
 
-            if (range < robot_radius_)
+            double range_mm = range * 1000.0;  // conversion en mm
+
+            if (range_mm < robot_radius_)
             {
-                RCLCPP_INFO(this->get_logger(), "Ignoring Lidar point too close to robot: range=%.2f", range);
+                RCLCPP_INFO(this->get_logger(), "Ignoring Lidar point too close to robot body: range=%.2f mm", range_mm);
+                angle += msg->angle_increment;
+                continue;
+            }
+
+            // EMERGENCY detection: obstacle very close but not the robot itself
+            if (range_mm < min_emergency_distance_)
+            {
+                // Convert to local robot frame
+                double x_local = range * std::cos(angle) * 1000.0; // meters -> mm
+                double y_local = range * std::sin(angle) * 1000.0; // meters -> mm
+
+                // Rotate + translate into global frame
+                double x_global = robot_x + (x_local * std::cos(robot_theta) - y_local * std::sin(robot_theta));
+                double y_global = robot_y + (x_local * std::sin(robot_theta) + y_local * std::cos(robot_theta));
+
+                // Check if in bounds
+                if (x_global >= 0 && x_global <= map_width_ && y_global >= 0 && y_global <= map_height_)
+                {
+                    modelec_interfaces::msg::OdometryPos emergency_msg;
+                    emergency_msg.x = x_global;
+                    emergency_msg.y = y_global;
+                    emergency_msg.theta = 0.0;
+
+                    close_enemy_pos_pub_->publish(emergency_msg);
+                    RCLCPP_WARN(this->get_logger(), "EMERGENCY CLOSE OBJECT DETECTED at x=%.2f y=%.2f (%.1f mm)", x_global, y_global, range_mm);
+                }
 
                 angle += msg->angle_increment;
                 continue;

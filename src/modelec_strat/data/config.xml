@@ -10,6 +10,7 @@
             <refresh_rate>0.5</refresh_rate>
             <max_stationary_time_s>5</max_stationary_time_s>
             <min_emergency_distance_mm>500</min_emergency_distance_mm>
+            <margin_detection_table_mm>50</margin_detection_table_mm>
         </detection>
         <factor_close_enemy>-0.3</factor_close_enemy>
     </enemy>
@@ -55,16 +56,19 @@
             <pcb_odo>
                 <name>pcb_odo</name>
                 <port>/dev/USB_ODO</port>
+                <!--<port>/tmp/USB_ODO</port>-->
                 <baud_rate>115200</baud_rate>
             </pcb_odo>
             <pcb_alim>
                 <name>pcb_alim</name>
                 <port>/dev/USB_ALIM</port>
+                <!--<port>/tmp/USB_ALIM</port>-->
                 <baud_rate>115200</baud_rate>
             </pcb_alim>
             <pcb_action>
                 <name>pcb_action</name>
                 <port>/dev/USB_ACTION</port>
+                <!--<port>/tmp/USB_ACTION</port>-->
                 <baud_rate>115200</baud_rate>
             </pcb_action>
         </pcb>

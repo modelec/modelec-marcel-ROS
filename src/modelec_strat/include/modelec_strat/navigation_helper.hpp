@@ -8,6 +8,8 @@
 #include <modelec_interfaces/msg/spawn.hpp>
 #include <std_srvs/srv/empty.hpp>
 
+#include <std_msgs/msg/bool.hpp>
+
 #include "deposite_zone.hpp"
 #include "pathfinding.hpp"
 
@@ -95,8 +97,6 @@ namespace Modelec
 
         void SetSpawn(const std::string& name);
 
-        Point GetSpawnYellow() const;
-        Point GetSpawnBlue() const;
         Point GetSpawn() const;
 
     protected:
@@ -143,6 +143,8 @@ namespace Modelec
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr close_enemy_pos_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_long_time_sub_;
+
+        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr start_odo_pub_;
 
         modelec_interfaces::msg::OdometryPos last_enemy_pos_;
 

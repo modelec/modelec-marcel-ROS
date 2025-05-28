@@ -22,6 +22,8 @@ namespace Modelec
         map_width_ = Config::get<float>("config.map.size.map_width_mm", 3000.0);
         map_height_ = Config::get<float>("config.map.size.map_height_mm", 2000.0);
 
+        margin_detection_table_ = Config::get<float>("config.enemy.detection.margin_detection_table_mm", 50.0);
+
         robot_width_ = Config::get<float>("config.robot.size.width_mm", 500.0);
         robot_length_ = Config::get<float>("config.robot.size.length_mm", 500.0);
         robot_radius_ = std::max(robot_width_, robot_length_) / 2.0;
@@ -134,7 +136,7 @@ namespace Modelec
                 double y_global = robot_y + (x_local * std::sin(robot_theta) + y_local * std::cos(robot_theta));
 
                 // Check if in bounds
-                if (x_global >= 0 && x_global <= map_width_ && y_global >= 0 && y_global <= map_height_)
+                if (x_global >= 0 && x_global <= (map_width_ - margin_detection_table_) && y_global >= 0 && y_global <= (map_height_ - margin_detection_table_))
                 {
                     modelec_interfaces::msg::OdometryPos emergency_msg;
                     emergency_msg.x = x_global;
@@ -145,8 +147,7 @@ namespace Modelec
                     RCLCPP_WARN(this->get_logger(), "EMERGENCY CLOSE OBJECT DETECTED at x=%.2f y=%.2f (%.1f mm)", x_global, y_global, range_mm);
                 }
 
-                angle += msg->angle_increment;
-                continue;
+                break;;
             }
 
             // Convert to local robot frame
@@ -158,7 +159,7 @@ namespace Modelec
             double y_global = robot_y + (x_local * std::sin(robot_theta) + y_local * std::cos(robot_theta));
 
             // Ignore points outside of the table
-            if (x_global < 0 || x_global > map_width_ || y_global < 0 || y_global > map_height_)
+            if (x_global < 0 || x_global > (map_width_ - margin_detection_table_) || y_global < 0 || y_global > (map_height_ - margin_detection_table_))
             {
                 // RCLCPP_INFO(this->get_logger(), "Lidar point out of bounds: x=%.2f, y=%.2f", x_global, y_global);
 

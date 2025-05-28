@@ -75,6 +75,6 @@ namespace Modelec
         rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr reset_strat_sub_;
         rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr tir_arm_sub_;
 
-        rclcpp::Client<modelec_interfaces::srv::OdometryStart>::SharedPtr client_start_;
+        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr start_odo_pub_;
     };
 }

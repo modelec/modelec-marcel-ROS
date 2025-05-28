@@ -29,6 +29,6 @@ namespace Modelec
 
     Point Point::GetTakeClosePosition() const
     {
-        return GetTakePosition(130, theta);
+        return GetTakePosition(150, theta);
     }
 }

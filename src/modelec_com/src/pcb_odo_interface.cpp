@@ -170,6 +170,14 @@ namespace Modelec
             {
                 HandleAddWaypoint(request, response);
             });
+
+        start_odo_sub_ = this->create_subscription<std_msgs::msg::Bool>(
+            "odometry/start", 10,
+            [this](const std_msgs::msg::Bool::SharedPtr msg)
+            {
+                start_odo_ = msg->data;
+                SendOrder("START", {std::to_string(msg->data)});
+            });
     }
 
     PCBOdoInterface::~PCBOdoInterface()
@@ -313,17 +321,17 @@ namespace Modelec
         }
     }
 
-    void PCBOdoInterface::AddWaypointCallback(const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg) const
+    void PCBOdoInterface::AddWaypointCallback(const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg)
     {
         AddWaypoint(msg);
     }
 
-    void PCBOdoInterface::SetPosCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg) const
+    void PCBOdoInterface::SetPosCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
         SetRobotPos(msg);
     }
 
-    void PCBOdoInterface::SetPIDCallback(const modelec_interfaces::msg::OdometryPid::SharedPtr msg) const
+    void PCBOdoInterface::SetPIDCallback(const modelec_interfaces::msg::OdometryPid::SharedPtr msg)
     {
         SetPID(msg);
     }
@@ -603,7 +611,7 @@ namespace Modelec
         }
     }
 
-    void PCBOdoInterface::SendToPCB(const std::string& data) const
+    void PCBOdoInterface::SendToPCB(const std::string& data)
     {
         if (pcb_publisher_)
         {
@@ -614,7 +622,7 @@ namespace Modelec
     }
 
     void PCBOdoInterface::SendToPCB(const std::string& order, const std::string& elem,
-                                    const std::vector<std::string>& data) const
+                                    const std::vector<std::string>& data)
     {
         std::string command = order + ";" + elem;
         for (const auto& d : data)
@@ -626,37 +634,37 @@ namespace Modelec
         SendToPCB(command);
     }
 
-    void PCBOdoInterface::GetData(const std::string& elem, const std::vector<std::string>& data) const
+    void PCBOdoInterface::GetData(const std::string& elem, const std::vector<std::string>& data)
     {
         SendToPCB("GET", elem, data);
     }
 
-    void PCBOdoInterface::SendOrder(const std::string& elem, const std::vector<std::string>& data) const
+    void PCBOdoInterface::SendOrder(const std::string& elem, const std::vector<std::string>& data)
     {
         SendToPCB("SET", elem, data);
     }
 
-    void PCBOdoInterface::GetPos() const
+    void PCBOdoInterface::GetPos()
     {
         GetData("POS");
     }
 
-    void PCBOdoInterface::GetSpeed() const
+    void PCBOdoInterface::GetSpeed()
     {
         GetData("SPEED");
     }
 
-    void PCBOdoInterface::GetToF(const int& tof) const
+    void PCBOdoInterface::GetToF(const int& tof)
     {
         GetData("DIST", {std::to_string(tof)});
     }
 
-    void PCBOdoInterface::SetRobotPos(const modelec_interfaces::msg::OdometryPos::SharedPtr msg) const
+    void PCBOdoInterface::SetRobotPos(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
         SetRobotPos(msg->x, msg->y, msg->theta);
     }
 
-    void PCBOdoInterface::SetRobotPos(const long x, const long y, const double theta) const
+    void PCBOdoInterface::SetRobotPos(const long x, const long y, const double theta)
     {
         std::vector<std::string> data = {
             std::to_string(x),
@@ -668,14 +676,20 @@ namespace Modelec
     }
 
     void PCBOdoInterface::AddWaypoint(
-        const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg) const
+        const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg)
     {
         AddWaypoint(msg->id, msg->is_end, msg->x, msg->y, msg->theta);
     }
 
     void PCBOdoInterface::AddWaypoint(const int index, const bool IsStopPoint, const long x, const long y,
-                                      const double theta) const
+                                      const double theta)
     {
+        if (!start_odo_)
+        {
+            SendOrder("START", {std::to_string(true)});
+            start_odo_ = true;
+        }
+
         std::vector<std::string> data = {
             std::to_string(index),
             std::to_string(IsStopPoint),
@@ -687,27 +701,27 @@ namespace Modelec
         SendOrder("WAYPOINT", data);
     }
 
-    void PCBOdoInterface::SetStart(const modelec_interfaces::msg::OdometryStart::SharedPtr msg) const
+    void PCBOdoInterface::SetStart(const modelec_interfaces::msg::OdometryStart::SharedPtr msg)
     {
         SetStart(msg->start);
     }
 
-    void PCBOdoInterface::SetStart(bool start) const
+    void PCBOdoInterface::SetStart(bool start)
     {
         SendOrder("START", {std::to_string(start)});
     }
 
-    void PCBOdoInterface::GetPID() const
+    void PCBOdoInterface::GetPID()
     {
         GetData("PID");
     }
 
-    void PCBOdoInterface::SetPID(const modelec_interfaces::msg::OdometryPid::SharedPtr msg) const
+    void PCBOdoInterface::SetPID(const modelec_interfaces::msg::OdometryPid::SharedPtr msg)
     {
         SetPID(msg->p, msg->i, msg->d);
     }
 
-    void PCBOdoInterface::SetPID(float p, float i, float d) const
+    void PCBOdoInterface::SetPID(float p, float i, float d)
     {
         std::vector<std::string> data = {
             std::to_string(p),

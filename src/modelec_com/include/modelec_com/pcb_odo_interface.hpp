@@ -25,6 +25,8 @@
 #include <modelec_interfaces/srv/odometry_set_pid.hpp>
 #include <modelec_interfaces/srv/odometry_add_waypoint.hpp>
 
+#include <std_msgs/msg/bool.hpp>
+
 namespace Modelec
 {
     class PCBOdoInterface : public rclcpp::Node
@@ -67,9 +69,9 @@ namespace Modelec
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr odo_set_pos_subscriber_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPid>::SharedPtr odo_set_pid_subscriber_;
 
-        void AddWaypointCallback(const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg) const;
-        void SetPosCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg) const;
-        void SetPIDCallback(const modelec_interfaces::msg::OdometryPid::SharedPtr msg) const;
+        void AddWaypointCallback(const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg);
+        void SetPosCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
+        void SetPIDCallback(const modelec_interfaces::msg::OdometryPid::SharedPtr msg);
 
         rclcpp::Service<modelec_interfaces::srv::OdometryToF>::SharedPtr get_tof_service_;
         rclcpp::Service<modelec_interfaces::srv::OdometrySpeed>::SharedPtr get_speed_service_;
@@ -78,6 +80,9 @@ namespace Modelec
         rclcpp::Service<modelec_interfaces::srv::OdometryGetPid>::SharedPtr get_pid_service_;
         rclcpp::Service<modelec_interfaces::srv::OdometrySetPid>::SharedPtr set_pid_service_;
         rclcpp::Service<modelec_interfaces::srv::OdometryAddWaypoint>::SharedPtr add_waypoint_service_;
+
+        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr start_odo_sub_;
+        bool start_odo_ = false;
 
         // Promises and mutexes to synchronize service responses asynchronously
         std::queue<std::promise<long>> tof_promises_;
@@ -138,28 +143,28 @@ namespace Modelec
         bool isOk = false;
 
     public:
-        void SendToPCB(const std::string& data) const;
+        void SendToPCB(const std::string& data);
         void SendToPCB(const std::string& order, const std::string& elem,
-                       const std::vector<std::string>& data = {}) const;
+                       const std::vector<std::string>& data = {});
 
-        void GetData(const std::string& elem, const std::vector<std::string>& data = {}) const;
-        void SendOrder(const std::string& elem, const std::vector<std::string>& data = {}) const;
+        void GetData(const std::string& elem, const std::vector<std::string>& data = {});
+        void SendOrder(const std::string& elem, const std::vector<std::string>& data = {});
 
-        void GetPos() const;
-        void GetSpeed() const;
-        void GetToF(const int& tof) const;
+        void GetPos();
+        void GetSpeed();
+        void GetToF(const int& tof);
 
-        void SetRobotPos(const modelec_interfaces::msg::OdometryPos::SharedPtr msg) const;
-        void SetRobotPos(long x, long y, double theta) const;
+        void SetRobotPos(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
+        void SetRobotPos(long x, long y, double theta);
 
-        void AddWaypoint(modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg) const;
-        void AddWaypoint(int index, bool IsStopPoint, long x, long y, double theta) const;
+        void AddWaypoint(modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg);
+        void AddWaypoint(int index, bool IsStopPoint, long x, long y, double theta);
 
-        void SetStart(const modelec_interfaces::msg::OdometryStart::SharedPtr msg) const;
-        void SetStart(bool start) const;
+        void SetStart(const modelec_interfaces::msg::OdometryStart::SharedPtr msg);
+        void SetStart(bool start);
 
-        void GetPID() const;
-        void SetPID(const modelec_interfaces::msg::OdometryPid::SharedPtr msg) const;
-        void SetPID(float p, float i, float d) const;
+        void GetPID();
+        void SetPID(const modelec_interfaces::msg::OdometryPid::SharedPtr msg);
+        void SetPID(float p, float i, float d);
     };
 } // namespace Modelec

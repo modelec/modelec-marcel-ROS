@@ -63,6 +63,8 @@ namespace Modelec
                 OnEnemyPositionLongTime(msg);
             });
 
+        start_odo_pub_ = node_->create_publisher<std_msgs::msg::Bool>("/odometry/start", 10);
+
         std::string deposite_zone_path = ament_index_cpp::get_package_share_directory("modelec_strat") +
             "/data/deposite_zone.xml";
         if (!LoadDepositeZoneFromXML(deposite_zone_path))
@@ -531,17 +533,9 @@ namespace Modelec
         pathfinding_->OnEnemyPosition(msg);
         last_enemy_pos_ = *msg;
 
-        waypoints_.clear();
-
-        WaypointMsg emptyWaypoint;
-        emptyWaypoint.x = current_pos_->x;
-        emptyWaypoint.y = current_pos_->y;
-        emptyWaypoint.theta = current_pos_->theta;
-        emptyWaypoint.id = 0;
-        emptyWaypoint.is_end = true;
-
-        waypoints_.emplace_back(emptyWaypoint);
-        SendWaypoint();
+        std_msgs::msg::Bool start_odo_msg;
+        start_odo_msg.data = false;
+        start_odo_pub_->publish(start_odo_msg);
     }
 
     void NavigationHelper::OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)

@@ -7,11 +7,11 @@
         </PotPos>
     </DepositeZone>
 
-    <DepositeZone id="101" team="0" max_pot="3">
+    <DepositeZone id="101" team="0" max_pot="2">
         <Pos x="1225" y="225" theta="1.5708" w="450" h="450" />
         <PotPos>
-            <Pos x="1225" y="75" theta="1.5708" />
-            <Pos x="1225" y="225" theta="1.5708" />
+            <!--<Pos x="1225" y="125" theta="1.5708" />-->
+            <Pos x="1225" y="200" theta="1.5708" />
             <Pos x="1225" y="400" theta="1.5708" />
         </PotPos>
     </DepositeZone>
@@ -40,11 +40,11 @@
         </PotPos>
     </DepositeZone>
 
-    <DepositeZone id="111" team="1" max_pot="3">
+    <DepositeZone id="111" team="1" max_pot="2">
         <Pos x="1775" y="225" theta="1.5708" w="450" h="450" />
         <PotPos>
-            <Pos x="1775" y="75" theta="1.5708" />
-            <Pos x="1775" y="225" theta="1.5708" />
+            <!--<Pos x="1775" y="75" theta="1.5708" />-->
+            <Pos x="1775" y="200" theta="1.5708" />
             <Pos x="1775" y="400" theta="1.5708" />
         </PotPos>
     </DepositeZone>

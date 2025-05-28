@@ -90,7 +90,7 @@ namespace Modelec
         case GO_TO_COLUMN:
             {
                 auto pos = column_->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
-                nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::WALL);
+                nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
             }
 
             step_ = GO_CLOSE_TO_COLUMN;
@@ -184,7 +184,7 @@ namespace Modelec
         case GO_TO_PLATFORM:
             {
                 auto p = closestDepoZonePoint_.GetTakeClosePosition();
-                nav_->GoTo(p.x, p.y, p.theta, true);
+                nav_->GoTo(p.x, p.y, p.theta, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
             }
 
             step_ = GO_CLOSE_TO_PLATFORM;

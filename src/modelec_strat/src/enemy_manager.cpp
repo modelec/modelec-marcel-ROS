@@ -165,8 +165,8 @@ namespace Modelec
             double y_local = range * std::sin(angle) * 1000.0; // meters -> mm
 
             // Rotate + translate into global frame
-            double x_global = robot_x + (x_local * std::cos(robot_theta) - y_local * std::sin(robot_theta));
-            double y_global = robot_y + (x_local * std::sin(robot_theta) + y_local * std::cos(robot_theta));
+            double x_global = robot_x + (x_local * std::cos(robot_theta) + y_local * std::sin(robot_theta));
+            double y_global = robot_y - (x_local * std::sin(robot_theta) - y_local * std::cos(robot_theta));
 
             // Ignore points outside of the table
             if (x_global < 0 || x_global > map_width_ || y_global < 0 || y_global > map_height_)

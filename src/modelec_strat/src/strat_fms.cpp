@@ -149,19 +149,19 @@ namespace Modelec
                 {
                     Transition(State::DO_PROMOTION, "Start promotion");
                 }
-                /*else
+                else
                 {
                     Transition(State::STOP, "Start prepare concert");
-                }*/
+                }
                 // TODO : check the time needed by the mission
-                else if (elapsed.seconds() < 70)
+                /*else if (elapsed.seconds() < 70)
                 {
                     Transition(State::DO_PREPARE_CONCERT, "Proceed to concert");
                 }
                 else
                 {
                     Transition(State::DO_GO_HOME, "Cleanup and finish match");
-                }
+                }*/
                 break;
             }
 

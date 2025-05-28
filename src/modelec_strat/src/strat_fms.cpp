@@ -10,7 +10,7 @@ namespace Modelec
         tir_sub_ = create_subscription<std_msgs::msg::Empty>(
             "/action/tir/start", 10, [this](const std_msgs::msg::Empty::SharedPtr)
             {
-                if (setup_ && !started_)
+                if (!started_)
                 {
                     started_ = true;
                 }
@@ -116,7 +116,7 @@ namespace Modelec
         switch (state_)
         {
         case State::INIT:
-            if (setup_ && team_selected_)
+            if (team_selected_)
             {
                 std_msgs::msg::Bool start_odo_msg;
                 start_odo_msg.data = true;

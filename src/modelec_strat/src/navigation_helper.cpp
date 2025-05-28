@@ -580,6 +580,10 @@ namespace Modelec
 
     bool NavigationHelper::EnemyOnPath(const modelec_interfaces::msg::OdometryPos msg)
     {
+        if (!current_pos_) {
+            return false;
+        }
+
         auto curr = Waypoint(*current_pos_, -1, false);
         std::vector<Waypoint> waypointsList;
         waypointsList.push_back(curr);

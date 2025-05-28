@@ -1,2 +1,2 @@
-KERNEL=="tty*", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", NAME="USB_ODO", MODE:="0777", SYMLINK+="USB_ODO"
-KERNEL=="tty*", ATTRS{idVendor}=="1d6b", ATTRS{idProduct}=="0002", NAME="USB_ACTION", MODE:="0777", SYMLINK+="USB_ACTION"
+KERNEL=="tty*", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE:="0777", SYMLINK+="USB_ODO"
+KERNEL=="tty*", ATTRS{idVendor}=="1d6b", ATTRS{idProduct}=="0002", MODE:="0777", SYMLINK+="USB_ACTION"

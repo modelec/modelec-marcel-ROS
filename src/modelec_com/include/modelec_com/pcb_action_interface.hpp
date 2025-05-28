@@ -23,11 +23,7 @@ namespace Modelec
 
     protected:
         std::map<int, int> asc_value_mapper_;
-        std::map<int, std::map<int, int>> servo_pos_mapper_ = {
-            {0, {{0, 0}, {1, 0}, {2, 0}, {3, 0}}},
-            {1, {{0, 0}, {1, 0}, {2, 0}, {3, 0}}},
-            {2, {{0, 0}, {1, 0}, {2, 0}, {3, 0}}}
-        };
+        std::map<int, std::map<int, double>> servo_pos_mapper_;
 
         int asc_state_ = 0;
         std::map<int, int> servo_value_;

@@ -205,10 +205,10 @@ namespace Modelec
 
         servo_pos_mapper_ = {
             {0, {{0, M_PI_2}}},
-            {1, {{0, M_PI_2}}},
+            {1, {{0, 0}, {1, 0.4}}},
             {2, {{0, M_PI_2}}},
             {3, {{0, M_PI_2}}},
-            {4, {{0, M_PI_2}}},
+            {4, {{0, 1.25}, {1, 0.45}}},
             {5, {{0, M_PI_2}}},
         };
 
@@ -216,7 +216,7 @@ namespace Modelec
         {
             for (auto & [key, angle] : v)
             {
-                SendOrder("SERVO" + std::to_string(id), {"POS" + std::to_string(key), std::to_string(angle)});
+                SendOrder("SERVO" + std::to_string(id), {"POS" + std::to_string(key), std::to_string(static_cast<int>(angle * 100))});
             }
         }
 

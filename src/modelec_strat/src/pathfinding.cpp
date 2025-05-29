@@ -336,7 +336,7 @@ namespace Modelec
             };
         };
 
-        AStarNode start_node{start_x, start_y};
+        AStarNode start_node{static_cast<int>(start_x), static_cast<int>(start_y)};
         start_node.g = 0;
         start_node.f = Heuristic(start_x, start_y, goal_x, goal_y);
 

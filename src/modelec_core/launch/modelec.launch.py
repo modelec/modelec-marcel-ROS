@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, Shutdown, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, Shutdown, RegisterEventHandler, TimerAction
 from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -16,23 +16,51 @@ def generate_launch_description():
     with_com_arg = DeclareLaunchArgument('with_com', default_value='true', description='Launch COM nodes?')
     with_strat_arg = DeclareLaunchArgument('with_strat', default_value='true', description='Launch strategy nodes?')
 
+    channel_type =  LaunchConfiguration('channel_type', default='serial')
+    serial_port = LaunchConfiguration('serial_port', default='/dev/ttyUSB0')
+    serial_baudrate = LaunchConfiguration('serial_baudrate', default='115200')
+    frame_id = LaunchConfiguration('frame_id', default='laser')
+    inverted = LaunchConfiguration('inverted', default='false')
+    angle_compensate = LaunchConfiguration('angle_compensate', default='true')
+    scan_mode = LaunchConfiguration('scan_mode', default='Sensitivity')
+
     # Get launch configs
     with_gui = LaunchConfiguration('with_gui')
     with_rplidar = LaunchConfiguration('with_rplidar')
     with_com = LaunchConfiguration('with_com')
     with_strat = LaunchConfiguration('with_strat')
 
-    # Conditionally include RPLIDAR launch
-    rplidar_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('rplidar_ros'),
-                'launch',
-                'rplidar_a1_launch.py'
+    def launch_rplidar_restart_if_needed(context, *args, **kwargs):
+        if context.launch_configurations.get('with_rplidar') == 'true':
+            rplidar_node = Node(
+                package='rplidar_ros',
+                executable='rplidarNode',
+                name='rplidar_node',
+                parameters=[{
+                    'channel_type': channel_type,
+                    'serial_port': serial_port,
+                    'serial_baudrate': serial_baudrate,
+                    'frame_id': frame_id,
+                    'inverted': inverted,
+                    'angle_compensate': angle_compensate,
+                    'scan_mode': scan_mode
+                }],
+                output='screen'
             )
-        ),
-        condition=IfCondition(with_rplidar)
-    )
+            restart_handler = RegisterEventHandler(
+                OnProcessExit(
+                    target_action=rplidar_node,
+                    on_exit=[
+                        TimerAction(
+                            period=5.0,  # Delay before restarting (in seconds)
+                            actions=[rplidar_node]  # Restart the rplidar_node
+                        )
+                    ]
+                )
+            )
+            return [rplidar_node, restart_handler]
+        return []
+
 
     # Function to launch GUI and shutdown handler
     def launch_gui(context, *args, **kwargs):
@@ -72,12 +100,47 @@ def generate_launch_description():
         return []
 
     return LaunchDescription([
+
+        DeclareLaunchArgument(
+            'channel_type',
+            default_value=channel_type,
+            description='Specifying channel type of lidar'),
+
+        DeclareLaunchArgument(
+            'serial_port',
+            default_value=serial_port,
+            description='Specifying usb port to connected lidar'),
+
+        DeclareLaunchArgument(
+            'serial_baudrate',
+            default_value=serial_baudrate,
+            description='Specifying usb port baudrate to connected lidar'),
+
+        DeclareLaunchArgument(
+            'frame_id',
+            default_value=frame_id,
+            description='Specifying frame_id of lidar'),
+
+        DeclareLaunchArgument(
+            'inverted',
+            default_value=inverted,
+            description='Specifying whether or not to invert scan data'),
+
+        DeclareLaunchArgument(
+            'angle_compensate',
+            default_value=angle_compensate,
+            description='Specifying whether or not to enable angle_compensate of scan data'),
+        DeclareLaunchArgument(
+            'scan_mode',
+            default_value=scan_mode,
+            description='Specifying scan mode of lidar'),
+
         with_gui_arg,
         with_rplidar_arg,
         with_com_arg,
         with_strat_arg,
 
-        rplidar_launch,
+        OpaqueFunction(function=launch_rplidar_restart_if_needed),
         OpaqueFunction(function=launch_gui),
         OpaqueFunction(function=launch_com),
         OpaqueFunction(function=launch_strat),

@@ -30,9 +30,9 @@ namespace Modelec
         spawn_id_sub_ = create_subscription<modelec_interfaces::msg::Spawn>(
             "/strat/spawn", 10, [this](const modelec_interfaces::msg::Spawn::SharedPtr msg)
             {
-                std_msgs::msg::Bool tir_msg;
-                tir_msg.data = true;
-                tir_arm_set_pub_->publish(tir_msg);
+                // std_msgs::msg::Bool tir_msg;
+                // tir_msg.data = true;
+                // tir_arm_set_pub_->publish(tir_msg);
 
                 team_selected_ = true;
                 team_id_ = msg->team_id;

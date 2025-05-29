@@ -43,7 +43,7 @@ namespace Modelec
             {
                 column_ = col;
 
-                auto pos = column_->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
+                auto pos = column_->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakePosition(400);
 
                 auto res = nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL);
                 if (res != Pathfinding::FREE)

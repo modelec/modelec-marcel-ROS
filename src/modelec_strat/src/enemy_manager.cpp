@@ -156,10 +156,6 @@ namespace Modelec
 
                 is_enemy_close_ = false;
             }
-            else
-            {
-                is_enemy_close_ = false;
-            }
 
             // Convert to local robot frame
             double x_local = range * std::cos(angle) * 1000.0; // meters -> mm
@@ -192,6 +188,8 @@ namespace Modelec
 
         if (min_distance < std::numeric_limits<double>::max())
         {
+            is_enemy_close_ = false;
+
             modelec_interfaces::msg::OdometryPos enemy_pos;
             enemy_pos.x = best_x;
             enemy_pos.y = best_y;

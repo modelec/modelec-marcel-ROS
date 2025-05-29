@@ -539,7 +539,7 @@ namespace Modelec
 
         if (HasArrived())
         {
-            RCLCPP_INFO(node_->get_logger(), "No path to replanning, ignoring enemy position");
+            RCLCPP_DEBUG(node_->get_logger(), "No path to replanning, ignoring enemy position");
             return;
         }
 
@@ -552,6 +552,8 @@ namespace Modelec
 
     void NavigationHelper::OnEnemyPositionClose(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
+        RCLCPP_INFO(node_->get_logger(), "Enemy is close, replanning...");
+
         last_was_close_enemy_ = true;
 
         pathfinding_->OnEnemyPosition(msg);

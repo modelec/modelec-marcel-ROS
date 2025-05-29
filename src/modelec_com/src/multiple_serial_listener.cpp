@@ -72,8 +72,6 @@ namespace Modelec
                 {
                     std::string d = std::string(read_buffer_.begin(), read_buffer_.begin() + bytes_transferred);
 
-                    RCLCPP_INFO(rclcpp::get_logger("SerialListener"), "Received data: %s", d.c_str());
-
                     auto allMess = Modelec::split(d, '\n');
                     for (const auto& mess : allMess)
                     {

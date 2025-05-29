@@ -7,9 +7,9 @@
         </size>
         <detection>
             <min_move_threshold_mm>50</min_move_threshold_mm>
-            <refresh_rate>0.5</refresh_rate>
+            <refresh_rate>3</refresh_rate>
             <max_stationary_time_s>5</max_stationary_time_s>
-            <min_emergency_distance_mm>50</min_emergency_distance_mm>
+            <min_emergency_distance_mm>500</min_emergency_distance_mm>
             <margin_detection_table_mm>50</margin_detection_table_mm>
         </detection>
         <factor_close_enemy>-0.3</factor_close_enemy>

@@ -60,10 +60,6 @@ namespace Modelec
                 {
                     step_ = WAIT_5_SECONDS;
                 }
-                else
-                {
-                    RCLCPP_INFO(node_->get_logger(), "Waiting for banner deployment to finish... %d seconds left", 5 - static_cast<int>((node_->now() - deploy_time_).seconds()));
-                }
             }
 
             break;

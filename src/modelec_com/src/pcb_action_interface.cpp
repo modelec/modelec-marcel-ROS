@@ -254,6 +254,8 @@ namespace Modelec
         {
             SendMove("RELAY" + std::to_string(id), {std::to_string(v)});
         }
+
+        SendOrder("TIR", {"ARM", "1"});
     }
 
     PCBActionInterface::~PCBActionInterface()

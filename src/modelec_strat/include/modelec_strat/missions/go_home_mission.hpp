@@ -20,9 +20,8 @@ namespace Modelec
     private:
         enum Step
         {
-            ROTATE_TO_HOME,
+            GO_FRONT,
             GO_HOME,
-            GO_CLOSE,
             DONE
         } step_;
 

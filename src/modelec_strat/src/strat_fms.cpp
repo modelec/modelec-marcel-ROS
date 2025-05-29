@@ -159,13 +159,11 @@ namespace Modelec
                 auto elapsed = now - match_start_time_;
 
                 // TODO : next thing to upgrade to have a good strat
-                if (!is_banner_done_)
+                /*if (!is_banner_done_)
                 {
                     Transition(State::DO_PROMOTION, "Start promotion");
-                }else if (elapsed.seconds() >= 96)
-                {
-                    Transition(State::STOP, "Finish");
-                }
+                }*/
+                Transition(State::DO_GO_HOME, "Go Home");
                 // TODO : check the time needed by the mission
                 /*else if (elapsed.seconds() < 70)
                 {

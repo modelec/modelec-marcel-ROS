@@ -219,7 +219,7 @@ namespace Modelec
 
     void PCBOdoInterface::PCBCallback(const std_msgs::msg::String::SharedPtr msg)
     {
-        RCLCPP_INFO(this->get_logger(), "Received from PCB: %s", msg->data.c_str());
+        //RCLCPP_INFO(this->get_logger(), "Received from PCB: %s", msg->data.c_str());
         std::vector<std::string> tokens = split(trim(msg->data), ';');
         if (tokens.size() < 2)
         {
@@ -640,8 +640,6 @@ namespace Modelec
     {
         if (pcb_publisher_)
         {
-            RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", data.c_str());
-
             auto message = std_msgs::msg::String();
             message.data = data;
             pcb_publisher_->publish(message);
@@ -711,6 +709,8 @@ namespace Modelec
     void PCBOdoInterface::AddWaypoint(const int index, const bool IsStopPoint, const long x, const long y,
                                       const double theta)
     {
+        RCLCPP_INFO(this->get_logger(), "Adding waypoint: %d, Stop: %s, Pos: (%ld, %ld), Theta: %.2f",
+                    index, IsStopPoint ? "true" : "false", x, y, theta);
         if (!start_odo_)
         {
             SendOrder("START", {std::to_string(true)});

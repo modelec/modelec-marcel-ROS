@@ -429,6 +429,8 @@ namespace Modelec
 
     void NavigationHelper::SetPos(const Point& pos)
     {
+        RCLCPP_INFO(node_->get_logger(), "Set position to x: %d, y: %d, theta: %f", pos.x, pos.y, pos.theta);
+
         PosMsg msg;
         msg.x = pos.x;
         msg.y = pos.y;

@@ -84,6 +84,8 @@ namespace Modelec
 
     void EnemyManager::OnLidarData(const sensor_msgs::msg::LaserScan::SharedPtr msg)
     {
+        is_enemy_close_ = false;
+
         if (std::isnan(current_pos_.x) || std::isnan(current_pos_.y))
         {
             RCLCPP_WARN(this->get_logger(), "Current robot position unknown, cannot compute enemy position");
@@ -186,7 +188,7 @@ namespace Modelec
 
         if (min_distance < std::numeric_limits<double>::max())
         {
-            is_enemy_close_ = false;
+            if (is_enemy_close_) return;
 
             modelec_interfaces::msg::OdometryPos enemy_pos;
             enemy_pos.x = best_x;

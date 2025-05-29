@@ -540,6 +540,11 @@ namespace Modelec
             waypoints.back().is_end = true;
         }
 
+        for (auto & wp : waypoints)
+        {
+            wp.x += 1;
+        }
+
         return {FREE, waypoints};
     }
 

@@ -77,6 +77,7 @@ namespace Modelec
                     {
                         if (!mess.empty())
                         {
+                            RCLCPP_INFO(rclcpp::get_logger("SerialListener"), "Received message: %s", mess.c_str());
                             auto msg = std_msgs::msg::String();
                             msg.data = mess;
                             if (publisher_)

@@ -39,7 +39,7 @@ namespace Modelec
             return;
         }
 
-        if (!nav_->HasArrived() && (node_->now() - go_timeout_).seconds() < 2)
+        if (!nav_->HasArrived())
         {
             if ((node_->now() - go_timeout_).seconds() < 4)
             {

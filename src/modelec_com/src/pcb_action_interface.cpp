@@ -186,6 +186,13 @@ namespace Modelec
                 RespondEvent("TIR", {"DIS"});
             });
 
+        tir_arm_set_sub_ = this->create_subscription<std_msgs::msg::Bool>(
+            "action/tir/arm/set", 10,
+            [this](const std_msgs::msg::Bool::SharedPtr msg)
+            {
+                SendOrder("TIR", {"ARM", msg->data ? "1" : "0"});
+            });
+
 
         // TODO : check for real value there
         asc_value_mapper_ = {
@@ -194,14 +201,14 @@ namespace Modelec
             {2, 200},
             {3, 300}
         };
-        for (auto & [id, v] : asc_value_mapper_)
+        /*for (auto & [id, v] : asc_value_mapper_)
         {
             SendOrder("ASC", {std::to_string(id), std::to_string(v)});
-        }
+        }*/
 
         asc_state_ = 3;
 
-        SendMove("ASC", {std::to_string(asc_state_)});
+        // SendMove("ASC", {std::to_string(asc_state_)});
 
         servo_pos_mapper_ = {
             {0, {{0, M_PI_2}}},
@@ -244,8 +251,6 @@ namespace Modelec
         {
             SendMove("RELAY" + std::to_string(id), {std::to_string(v)});
         }
-
-        SendOrder("TIR", {"ARM", "1"});
     }
 
     PCBActionInterface::~PCBActionInterface()

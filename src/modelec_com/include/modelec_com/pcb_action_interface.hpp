@@ -3,6 +3,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <std_msgs/msg/empty.hpp>
+#include <std_msgs/msg/bool.hpp>
 #include <modelec_interfaces/srv/add_serial_listener.hpp>
 #include <modelec_interfaces/msg/action_asc_pos.hpp>
 #include <modelec_interfaces/msg/action_relay_state.hpp>
@@ -64,6 +65,7 @@ namespace Modelec
         rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr tir_start_sub_;
         rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr tir_arm_sub_;
         rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr tir_disarm_sub_;
+        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr tir_arm_set_sub_;
 
 
         bool isOk = false;

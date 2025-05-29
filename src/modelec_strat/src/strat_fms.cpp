@@ -30,6 +30,14 @@ namespace Modelec
         spawn_id_sub_ = create_subscription<modelec_interfaces::msg::Spawn>(
             "/strat/spawn", 10, [this](const modelec_interfaces::msg::Spawn::SharedPtr msg)
             {
+                std_msgs::msg::Bool start_odo_msg;
+                start_odo_msg.data = true;
+                start_odo_pub_->publish(start_odo_msg);
+
+                std_msgs::msg::Bool tir_msg;
+                tir_msg.data = true;
+                tir_arm_set_pub_->publish(tir_msg);
+
                 team_selected_ = true;
                 team_id_ = msg->team_id;
                 nav_->SetTeamId(team_id_);
@@ -47,6 +55,9 @@ namespace Modelec
             {
                 setup_ = true;
             });
+
+        tir_arm_set_pub_ = create_publisher<std_msgs::msg::Bool>(
+            "/action/tir/arm/set", 10);
 
         start_odo_pub_ = create_publisher<std_msgs::msg::Bool>("/odometry/start", 10);
 
@@ -118,10 +129,6 @@ namespace Modelec
         case State::INIT:
             if (team_selected_)
             {
-                std_msgs::msg::Bool start_odo_msg;
-                start_odo_msg.data = true;
-                start_odo_pub_->publish(start_odo_msg);
-
                 Transition(State::WAIT_START, "System ready");
             }
             break;

@@ -17,6 +17,9 @@ namespace Modelec
 
         score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
 
+        auto curr = nav_->GetCurrentPos();
+        RCLCPP_INFO(node_->get_logger(), "GoHomeMission: Starting at position (%f, %f)", curr->x, curr->y);
+
         nav_->GoTo(375, 1600, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
         go_home_time_ = node_->now();

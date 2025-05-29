@@ -577,14 +577,18 @@ namespace Modelec
 
     void NavigationHelper::OnEnemyPositionClose(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
-        last_was_close_enemy_ = true;
 
-        pathfinding_->OnEnemyPosition(msg);
-        last_enemy_pos_ = *msg;
+        if (!last_was_close_enemy_)
+        {
+            last_was_close_enemy_ = true;
 
-        std_msgs::msg::Bool start_odo_msg;
-        start_odo_msg.data = false;
-        start_odo_pub_->publish(start_odo_msg);
+            pathfinding_->OnEnemyPosition(msg);
+            last_enemy_pos_ = *msg;
+
+            std_msgs::msg::Bool start_odo_msg;
+            start_odo_msg.data = false;
+            start_odo_pub_->publish(start_odo_msg);
+        }
     }
 
     void NavigationHelper::OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)

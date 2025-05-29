@@ -163,7 +163,7 @@ namespace Modelec
                         is_enemy_close_ = true;
                     }
 
-                    break;
+                    return;
                 }
             }
 

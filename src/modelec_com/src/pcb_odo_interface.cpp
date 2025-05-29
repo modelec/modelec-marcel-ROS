@@ -177,7 +177,7 @@ namespace Modelec
             {
                 if (msg->data != start_odo_)
                 {
-                    RCLCPP_INFO(this->get_logger(), "Start Odo: %s", msg->data ? "true" : "false");
+                    RCLCPP_INFO(this->get_logger(), "Start Odo: %s", std::to_string(msg->data).c_str());
                     start_odo_ = msg->data;
                     SendOrder("START", {std::to_string(msg->data)});
                 }

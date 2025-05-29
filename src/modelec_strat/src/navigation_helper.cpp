@@ -580,6 +580,8 @@ namespace Modelec
 
         if (!last_was_close_enemy_)
         {
+            RCLCPP_INFO(node_->get_logger(), "Enemy is close, replanning...");
+
             last_was_close_enemy_ = true;
 
             pathfinding_->OnEnemyPosition(msg);

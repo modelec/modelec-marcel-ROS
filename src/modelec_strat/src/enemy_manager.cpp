@@ -146,15 +146,13 @@ namespace Modelec
                         emergency_msg.theta = 0.0;
 
                         close_enemy_pos_pub_->publish(emergency_msg);
-                        RCLCPP_WARN(this->get_logger(), "EMERGENCY CLOSE OBJECT DETECTED at x=%.2f y=%.2f (%.1f mm)", x_global, y_global, range_mm);
+                        // RCLCPP_WARN(this->get_logger(), "EMERGENCY CLOSE OBJECT DETECTED at x=%.2f y=%.2f (%.1f mm)", x_global, y_global, range_mm);
 
                         is_enemy_close_ = true;
                     }
 
                     break;
                 }
-
-                is_enemy_close_ = false;
             }
 
             // Convert to local robot frame

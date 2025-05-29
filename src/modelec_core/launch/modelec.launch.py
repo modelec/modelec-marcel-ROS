@@ -30,9 +30,10 @@ def generate_launch_description():
     with_com = LaunchConfiguration('with_com')
     with_strat = LaunchConfiguration('with_strat')
 
-    def launch_rplidar_restart_if_needed(context, *args, **kwargs):
-        if context.launch_configurations.get('with_rplidar') == 'true':
-            rplidar_node = Node(
+def launch_rplidar_restart_if_needed(context, *args, **kwargs):
+    if context.launch_configurations.get('with_rplidar') == 'true':
+        def create_rplidar_node():
+            return Node(
                 package='rplidar_ros',
                 executable='rplidar_node',
                 name='rplidar_node',
@@ -47,19 +48,22 @@ def generate_launch_description():
                 output='screen'
             )
 
-            restart_handler = RegisterEventHandler(
-                OnProcessExit(
-                    target_action=rplidar_node,
-                    on_exit=[
-                        TimerAction(
-                            period=5.0,  # Delay before restarting (in seconds)
-                            actions=[rplidar_node]  # Restart the rplidar_node
-                        )
-                    ]
-                )
+        rplidar_node = create_rplidar_node()
+
+        restart_handler = RegisterEventHandler(
+            OnProcessExit(
+                target_action=rplidar_node,
+                on_exit=[
+                    TimerAction(
+                        period=5.0,
+                        actions=[create_rplidar_node()]  # ✅ créer un NOUVEAU Node
+                    )
+                ]
             )
-            return [rplidar_node, restart_handler]
-        return []
+        )
+
+        return [rplidar_node, restart_handler]
+    return []
 
 
     # Function to launch GUI and shutdown handler

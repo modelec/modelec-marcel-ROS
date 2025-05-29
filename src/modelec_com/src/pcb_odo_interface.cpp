@@ -221,7 +221,7 @@ namespace Modelec
 
     void PCBOdoInterface::PCBCallback(const std_msgs::msg::String::SharedPtr msg)
     {
-        RCLCPP_INFO(this->get_logger(), "Received from PCB: %s", msg->data.c_str());
+        // RCLCPP_INFO(this->get_logger(), "Received from PCB: %s", msg->data.c_str());
         std::vector<std::string> tokens = split(trim(msg->data), ';');
         if (tokens.size() < 2)
         {
@@ -280,6 +280,8 @@ namespace Modelec
                 message.id = id;
 
                 odo_waypoint_reach_publisher_->publish(message);
+
+                RCLCPP_INFO(this->get_logger(), "Waypoint reached: %d", id);
             }
             else if (tokens[1] == "PID")
             {
@@ -642,8 +644,7 @@ namespace Modelec
     {
         if (pcb_publisher_)
         {
-            RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", data.c_str());
-
+            // RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", data.c_str());
             auto message = std_msgs::msg::String();
             message.data = data;
             pcb_publisher_->publish(message);

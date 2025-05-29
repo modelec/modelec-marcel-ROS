@@ -272,7 +272,7 @@ namespace Modelec
 
     void PCBActionInterface::PCBCallback(const std_msgs::msg::String::SharedPtr msg)
     {
-        RCLCPP_DEBUG(this->get_logger(), "Received message: '%s'", msg->data.c_str());
+        RCLCPP_INFO(this->get_logger(), "Received message: '%s'", msg->data.c_str());
         std::vector<std::string> tokens = split(trim(msg->data), ';');
 
         if (tokens.size() < 2)

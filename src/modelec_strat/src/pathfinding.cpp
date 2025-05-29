@@ -291,12 +291,12 @@ namespace Modelec
         }
 
         // 3. Convert start and goal (avec inversion Y)
-        const double start_x = start->x / cell_size_mm_x;
-        const double start_y = (grid_height_ - 1) - (start->y / cell_size_mm_y);
-        const double goal_x = goal->x / cell_size_mm_x;
-        const double goal_y = (grid_height_ - 1) - (goal->y / cell_size_mm_y);
+        const int start_x = start->x / cell_size_mm_x;
+        const int start_y = (grid_height_ - 1) - (start->y / cell_size_mm_y);
+        const int goal_x = goal->x / cell_size_mm_x;
+        const int goal_y = (grid_height_ - 1) - (goal->y / cell_size_mm_y);
 
-        RCLCPP_INFO(node_->get_logger(), "Start: (%f, %f), Goal: (%f, %f)", start_x, start_y, goal_x, goal_y);
+        RCLCPP_INFO(node_->get_logger(), "Start: (%d, %d), Goal: (%d, %d)", start_x, start_y, goal_x, goal_y);
 
         if (start_x < 0 || start_y < 0 || goal_x < 0 || goal_y < 0 ||
             start_x >= grid_width_ || start_y >= grid_height_ ||

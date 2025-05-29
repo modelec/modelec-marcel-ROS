@@ -272,7 +272,7 @@ namespace Modelec
         RCLCPP_INFO(this->get_logger(), "Received message: '%s'", msg->data.c_str());
         std::vector<std::string> tokens = split(trim(msg->data), ';');
 
-        if (tokens.size() < 3)
+        if (tokens.size() <= 2)
         {
             RCLCPP_ERROR(this->get_logger(), "Invalid message format");
             return;

@@ -20,8 +20,8 @@ namespace ModelecGUI
         spawn_sub_ = node_->create_subscription<modelec_interfaces::msg::Spawn>("/nav/spawn", 10,
             [this, w, h](const modelec_interfaces::msg::Spawn::SharedPtr msg)
             {
-                auto ratioX = 600 / 3000.0f;
-                auto ratioY = 400 / 2000.0f;
+                auto ratioX = 1200 / 3000.0f;
+                auto ratioY = 800 / 2000.0f;
 
                 auto* button = new QPushButton(this);
                 spawn_buttons_.push_back(button);
@@ -46,7 +46,7 @@ namespace ModelecGUI
                 {
                     modelec_interfaces::msg::Spawn team_msg;
                     team_msg.team_id = msg->team_id;
-                    team_msg.name = msg->name;
+                    team_msg.name = modelec_interfaces::msg::Spawn::BOTTOM;
                     spawn_pub_->publish(team_msg);
 
                     emit TeamChoose();

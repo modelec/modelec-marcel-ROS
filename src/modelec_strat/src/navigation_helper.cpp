@@ -553,10 +553,13 @@ namespace Modelec
 
         if (last_was_close_enemy_)
         {
-            RCLCPP_INFO(node_->get_logger(), "Enemy was close try to replanning...");
-            if (Replan(false))
+            if (Point::distance(Point(msg->x, msg->y, msg->theta), Point(current_pos_->x, current_pos_->y, current_pos_->theta)) > 400)
             {
-                last_was_close_enemy_ = false;
+                RCLCPP_INFO(node_->get_logger(), "Enemy was close try to replanning...");
+                if (Replan(false))
+                {
+                    last_was_close_enemy_ = false;
+                }
             }
 
             return;
@@ -597,7 +600,6 @@ namespace Modelec
 
             waypoints_.emplace_back(w);
 
-            // SendWaypoint();
             SendGoTo();
         }
     }

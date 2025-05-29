@@ -25,8 +25,8 @@
 
     <map>
         <size>
-            <grid_width>300</grid_width>
-            <grid_height>200</grid_height>
+            <grid_width>1200</grid_width>
+            <grid_height>800</grid_height>
 
             <map_width_mm>3000</map_width_mm>
             <map_height_mm>2000</map_height_mm>

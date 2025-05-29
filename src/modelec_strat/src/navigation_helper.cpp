@@ -594,13 +594,13 @@ namespace Modelec
             start_odo_msg.data = false;
             start_odo_pub_->publish(start_odo_msg);
 
-            waypoints_.clear();
+            /*waypoints_.clear();
 
             Waypoint w(*msg, -1, false);
 
             waypoints_.emplace_back(w);
 
-            SendGoTo();
+            SendGoTo();*/
         }
     }
 

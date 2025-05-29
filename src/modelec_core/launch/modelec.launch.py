@@ -99,7 +99,7 @@ def generate_launch_description():
             return [
                 Node(package='modelec_strat', executable='strat_fsm', name='strat_fsm'),
                 Node(package='modelec_strat', executable='pami_manager', name='pami_manager'),
-                # Node(package='modelec_strat', executable='enemy_manager', name='enemy_manager'),
+                Node(package='modelec_strat', executable='enemy_manager', name='enemy_manager'),
             ]
         return []
 

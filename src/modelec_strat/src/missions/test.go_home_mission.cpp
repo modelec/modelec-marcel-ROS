@@ -19,7 +19,7 @@ namespace Modelec
 
         auto t = nav_->GetSpawn();
 
-        nav_->GoTo(t.x, 1200, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+        nav_->GoTo(t.x, t.y - 800, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
         go_home_time_ = node_->now();
 
@@ -44,7 +44,7 @@ namespace Modelec
             {
                 auto t = nav_->GetSpawn();
 
-                nav_->GoTo(t.x, 1700, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+                nav_->GoTo(t.x, t.y, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
                 step_ = GO_HOME;
             }

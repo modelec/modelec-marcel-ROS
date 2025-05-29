@@ -190,7 +190,6 @@ namespace Modelec
             "action/tir/arm/set", 10,
             [this](const std_msgs::msg::Bool::SharedPtr msg)
             {
-                RCLCPP_INFO(this->get_logger(), "TIR arm set to: %s", msg->data ? "true" : "false");
                 SendOrder("TIR", {"ARM", msg->data ? "1" : "0"});
             });
 
@@ -280,7 +279,7 @@ namespace Modelec
 
     void PCBActionInterface::PCBCallback(const std_msgs::msg::String::SharedPtr msg)
     {
-        RCLCPP_INFO(this->get_logger(), "Received message: '%s'", msg->data.c_str());
+        RCLCPP_DEBUG(this->get_logger(), "Received message: '%s'", msg->data.c_str());
         std::vector<std::string> tokens = split(trim(msg->data), ';');
 
         if (tokens.size() < 2)

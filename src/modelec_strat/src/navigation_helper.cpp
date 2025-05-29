@@ -436,6 +436,12 @@ namespace Modelec
         msg.y = pos.y;
         msg.theta = pos.theta;
         SetPos(msg);
+
+        PosMsg::SharedPtr goal = std::make_shared<PosMsg>();
+        goal->x = pos.x;
+        goal->y = pos.y;
+        goal->theta = pos.theta;
+        OnPos(goal);
     }
 
     void NavigationHelper::SetPos(int x, int y, double theta)

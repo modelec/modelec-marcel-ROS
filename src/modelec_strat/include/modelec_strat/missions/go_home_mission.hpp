@@ -21,12 +21,14 @@ namespace Modelec
         enum Step
         {
             GO_FRONT,
+            AWAIT_10S,
             GO_HOME,
             DONE
         } step_;
 
         MissionStatus status_;
         std::shared_ptr<NavigationHelper> nav_;
+        rclcpp::Time go_home_time_;
         rclcpp::Node::SharedPtr node_;
         rclcpp::Time start_time_;
         Point home_point_;

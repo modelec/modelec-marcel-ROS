@@ -21,6 +21,8 @@ namespace Modelec
 
         nav_->GoTo(t->x, 1200, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
+        go_home_time_ = node_->now();
+
         status_ = MissionStatus::RUNNING;
     }
 
@@ -35,12 +37,23 @@ namespace Modelec
         {
         case GO_FRONT:
             {
+                if ((node_->now() - go_home_time_).seconds() >= 10)
+                {
+                    step_ = AWAIT_10S;
+                }
+            }
+
+            break;
+
+        case AWAIT_10S:
+            {
                 auto t = nav_->GetCurrentPos();
 
                 nav_->GoTo(t->x, 1700, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+
+                step_ = GO_HOME;
             }
 
-            step_ = GO_HOME;
             break;
         case GO_HOME:
             {

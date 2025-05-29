@@ -132,13 +132,13 @@ namespace Modelec
             {
                 RCLCPP_INFO_ONCE(get_logger(), "State: WAIT_START - Match starting");
 
-                std_msgs::msg::Bool start_odo_msg;
-                start_odo_msg.data = true;
-                start_odo_pub_->publish(start_odo_msg);
+                nav_->SetSpawn(modelec_interfaces::msg::Spawn::BOTTOM);
 
                 rclcpp::sleep_for(std::chrono::milliseconds(300));
 
-                nav_->SetSpawn(modelec_interfaces::msg::Spawn::BOTTOM);
+                std_msgs::msg::Bool start_odo_msg;
+                start_odo_msg.data = true;
+                start_odo_pub_->publish(start_odo_msg);
 
                 match_start_time_ = now;
 

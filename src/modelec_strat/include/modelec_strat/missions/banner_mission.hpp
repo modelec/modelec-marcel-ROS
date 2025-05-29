@@ -42,5 +42,6 @@ namespace Modelec
         Point spawn_;
 
         rclcpp::Time deploy_time_;
+        rclcpp::Time go_timeout_;
     };
 }

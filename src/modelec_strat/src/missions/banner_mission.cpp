@@ -22,6 +22,8 @@ namespace Modelec
 
         nav_->GoTo(spawn_.x, 160, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
+        go_timeout_ = node_->now();
+
         status_ = MissionStatus::RUNNING;
     }
 
@@ -37,9 +39,12 @@ namespace Modelec
             return;
         }
 
-        if (!nav_->HasArrived())
+        if (!nav_->HasArrived() && (node_->now() - go_timeout_).seconds() < 2)
         {
-            return;
+            if ((node_->now() - go_timeout_).seconds() < 4)
+            {
+                return;
+            }
         }
 
         switch (step_)
@@ -74,6 +79,7 @@ namespace Modelec
 
         case UNDEPLOY_BANNER:
             {
+                go_timeout_ = node_->now();
                 nav_->GoTo(spawn_.x, (nav_->GetPathfinding()->robot_length_mm_ / 2) + 550, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
                 step_ = GO_FORWARD;

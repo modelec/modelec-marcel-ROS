@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <chrono>
 #include <thread>
+#include <modelec_utils/utils.hpp>
 
 namespace Modelec
 {
@@ -69,11 +70,19 @@ namespace Modelec
             {
                 if (!ec && bytes_transferred > 0)
                 {
-                    auto msg = std_msgs::msg::String();
-                    msg.data = std::string(read_buffer_.begin(), read_buffer_.begin() + bytes_transferred);
-                    if (publisher_)
+                    std::string d = std::string(read_buffer_.begin(), read_buffer_.begin() + bytes_transferred);
+                    auto allMess = Modelec::split(d, '\n');
+                    for (const auto& mess : allMess)
                     {
-                        publisher_->publish(msg);
+                        if (!mess.empty())
+                        {
+                            auto msg = std_msgs::msg::String();
+                            msg.data = mess;
+                            if (publisher_)
+                            {
+                                publisher_->publish(msg);
+                            }
+                        }
                     }
 
                     start_async_read(); // continue reading

@@ -226,6 +226,8 @@ namespace Modelec
 
             for (auto & [key, angle] : v)
             {
+                rclcpp::sleep_for(std::chrono::milliseconds(100));
+
                 SendOrder("SERVO" + std::to_string(id), {"POS" + std::to_string(key), std::to_string(static_cast<int>(angle * 100))});
             }
         }
@@ -241,6 +243,8 @@ namespace Modelec
 
         for (auto & [id, v] : servo_value_)
         {
+            rclcpp::sleep_for(std::chrono::milliseconds(100));
+
             SendMove("SERVO" + std::to_string(id), {"POS" + std::to_string(v)});
         }
 
@@ -252,8 +256,12 @@ namespace Modelec
 
         for (auto & [id, v] : relay_value_)
         {
+            rclcpp::sleep_for(std::chrono::milliseconds(100));
+
             SendMove("RELAY" + std::to_string(id), {std::to_string(v)});
         }
+
+        rclcpp::sleep_for(std::chrono::milliseconds(100));
 
         SendOrder("TIR", {"ARM", "1"});
     }

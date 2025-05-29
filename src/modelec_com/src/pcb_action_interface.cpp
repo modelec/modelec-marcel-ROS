@@ -221,6 +221,8 @@ namespace Modelec
 
         for (auto & [id, v] : servo_pos_mapper_)
         {
+            if (id == 5) continue;
+
             for (auto & [key, angle] : v)
             {
                 SendOrder("SERVO" + std::to_string(id), {"POS" + std::to_string(key), std::to_string(static_cast<int>(angle * 100))});

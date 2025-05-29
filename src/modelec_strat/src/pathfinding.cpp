@@ -529,6 +529,7 @@ namespace Modelec
             else
             {
                 wp.theta = goal->theta;
+                wp.x += goal->x;
             }
 
             wp.id = id++;
@@ -538,11 +539,6 @@ namespace Modelec
         if (!waypoints.empty())
         {
             waypoints.back().is_end = true;
-        }
-
-        for (auto & wp : waypoints)
-        {
-            wp.x += 1;
         }
 
         return {FREE, waypoints};

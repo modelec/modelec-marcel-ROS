@@ -131,7 +131,7 @@ namespace Modelec
 
     void NavigationHelper::Update()
     {
-        if ((node_->now() - last_odo_get_pos_time_).seconds() > 0.5)
+        if ((node_->now() - last_odo_get_pos_time_).seconds() > 1)
         {
             RCLCPP_INFO(node_->get_logger(), "Requesting current position from odometry");
             std_msgs::msg::Empty empty_msg;

@@ -138,7 +138,10 @@ namespace Modelec
             waypoint_queue_.push(w);
         }
 
-        waypoint_pub_->publish(waypoint_queue_.front().ToMsg());
+        auto w = waypoint_queue_.front().ToMsg();
+        RCLCPP_DEBUG(node_->get_logger(), "Sending waypoint: x: %f, y: %f, theta: %f, id: %d",
+                     w.x, w.y, w.theta, w.id);
+        waypoint_pub_->publish(w);
         waypoint_queue_.pop();
     }
 

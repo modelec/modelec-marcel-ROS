@@ -130,6 +130,7 @@ namespace Modelec
         case State::WAIT_START:
             if (started_)
             {
+                RCLCPP_INFO_ONCE(get_logger(), "State: WAIT_START - Match starting");
 
                 std_msgs::msg::Bool start_odo_msg;
                 start_odo_msg.data = true;

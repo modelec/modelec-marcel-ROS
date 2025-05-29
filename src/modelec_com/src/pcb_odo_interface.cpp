@@ -189,6 +189,8 @@ namespace Modelec
             {
                 if (isOk && start_odo_)
                 {
+                    RCLCPP_INFO(this->get_logger(), "Requesting position from PCB");
+
                     GetPos();
                 }
             });

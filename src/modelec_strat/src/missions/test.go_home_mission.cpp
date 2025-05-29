@@ -43,7 +43,7 @@ namespace Modelec
 
         case AWAIT_10S:
             {
-                nav_->GoTo(370, 1600, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+                nav_->GoTo(375, 1600, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
                 step_ = GO_HOME;
             }

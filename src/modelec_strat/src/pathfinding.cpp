@@ -530,7 +530,6 @@ namespace Modelec
             else
             {
                 wp.theta = goal->theta;
-                wp.x += goal->x;
             }
 
             wp.id = id++;

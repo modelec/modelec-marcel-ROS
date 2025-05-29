@@ -163,7 +163,10 @@ namespace Modelec
                 {
                     Transition(State::DO_PROMOTION, "Start promotion");
                 }*/
-                Transition(State::DO_GO_HOME, "Go Home");
+                if (elapsed.seconds() >= 2)
+                {
+                    Transition(State::DO_GO_HOME, "Go Home");
+                }
                 // TODO : check the time needed by the mission
                 /*else if (elapsed.seconds() < 70)
                 {

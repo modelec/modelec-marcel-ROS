@@ -81,7 +81,7 @@ class SimulatedPCB:
             self.theta = self.normalize_angle(self.theta)
 
             if now - self.last_send > 0.1:
-                self.ser.write(f'SET;POS;{int(self.x)};{int(self.y)};{self.theta:.5f}\n'.encode())
+                # self.ser.write(f'SET;POS;{int(self.x)};{int(self.y)};{self.theta:.5f}\n'.encode())
                 self.last_send = now
 
     def run(self):

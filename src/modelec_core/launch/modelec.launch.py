@@ -88,7 +88,7 @@ def generate_launch_description():
         if context.launch_configurations.get('with_com') == 'true':
             return [
                 Node(package='modelec_com', executable='serial_listener', name='serial_listener'),
-                # Node(package='modelec_com', executable='pcb_odo_interface', name='pcb_odo_interface'),
+                Node(package='modelec_com', executable='pcb_odo_interface', name='pcb_odo_interface'),
                 Node(package='modelec_com', executable='pcb_action_interface', name='pcb_action_interface'),
             ]
         return []

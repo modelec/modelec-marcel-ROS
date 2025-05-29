@@ -28,7 +28,7 @@ namespace Modelec
         robot_length_ = Config::get<float>("config.robot.size.length_mm", 500.0);
         robot_radius_ = std::max(robot_width_, robot_length_) / 3.0;
 
-        min_emergency_distance_ = Config::get<float>("config.enemy.detection.min_emergency_distance_mm", 100.0);
+        min_emergency_distance_ = Config::get<float>("config.enemy.detection.min_emergency_distance_mm", 500.0f);
 
         current_pos_sub_ = this->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10,

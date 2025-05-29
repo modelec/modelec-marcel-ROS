@@ -38,6 +38,8 @@ namespace Modelec
         bool enemy_initialized_ = false;
         rclcpp::Time last_publish_time_;
 
+        bool is_enemy_close_ = false;
+
         float min_move_threshold_mm_ = 0.0f;
         float refresh_rate_s_ = 0.0f;
 

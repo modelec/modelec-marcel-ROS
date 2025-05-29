@@ -138,16 +138,27 @@ namespace Modelec
                 // Check if in bounds
                 if (x_global >= 0 && x_global <= (map_width_ - margin_detection_table_) && y_global >= 0 && y_global <= (map_height_ - margin_detection_table_))
                 {
-                    modelec_interfaces::msg::OdometryPos emergency_msg;
-                    emergency_msg.x = x_global;
-                    emergency_msg.y = y_global;
-                    emergency_msg.theta = 0.0;
+                    if (!is_enemy_close_)
+                    {
+                        modelec_interfaces::msg::OdometryPos emergency_msg;
+                        emergency_msg.x = x_global;
+                        emergency_msg.y = y_global;
+                        emergency_msg.theta = 0.0;
 
-                    close_enemy_pos_pub_->publish(emergency_msg);
-                    RCLCPP_WARN(this->get_logger(), "EMERGENCY CLOSE OBJECT DETECTED at x=%.2f y=%.2f (%.1f mm)", x_global, y_global, range_mm);
+                        close_enemy_pos_pub_->publish(emergency_msg);
+                        RCLCPP_WARN(this->get_logger(), "EMERGENCY CLOSE OBJECT DETECTED at x=%.2f y=%.2f (%.1f mm)", x_global, y_global, range_mm);
+
+                        is_enemy_close_ = true;
+                    }
+
+                    break;
                 }
 
-                break;;
+                is_enemy_close_ = false;
+            }
+            else
+            {
+                is_enemy_close_ = false;
             }
 
             // Convert to local robot frame

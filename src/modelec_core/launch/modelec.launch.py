@@ -36,13 +36,17 @@ def generate_launch_description():
                 package='rplidar_ros',
                 executable='rplidar_node',
                 name='rplidar_node',
-                parameters=[{'channel_type':channel_type,
-                             'serial_port': serial_port,
-                             'serial_baudrate': serial_baudrate,
-                             'frame_id': frame_id,
-                             'inverted': inverted,
-                             'angle_compensate': angle_compensate}],
-                output='screen'),
+                parameters=[{
+                    'channel_type': channel_type,
+                    'serial_port': serial_port,
+                    'serial_baudrate': serial_baudrate,
+                    'frame_id': frame_id,
+                    'inverted': inverted,
+                    'angle_compensate': angle_compensate
+                }],
+                output='screen'
+            )
+
             restart_handler = RegisterEventHandler(
                 OnProcessExit(
                     target_action=rplidar_node,

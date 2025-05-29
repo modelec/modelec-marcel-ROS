@@ -106,6 +106,8 @@ namespace Modelec
             "odometry/add_waypoint", 30,
             [this](const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg)
             {
+                RCLCPP_INFO(this->get_logger(), "Received add waypoint request: %d %s %d %d %f",
+                            msg->id, msg->is_end ? "end" : "not end", msg->x, msg->y, msg->theta);
                 AddWaypointCallback(msg);
             });
 

@@ -84,6 +84,8 @@ namespace Modelec
         rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr start_odo_sub_;
         bool start_odo_ = false;
 
+        rclcpp::TimerBase::SharedPtr odo_get_pos_timer_;
+
         // Promises and mutexes to synchronize service responses asynchronously
         std::queue<std::promise<long>> tof_promises_;
         std::mutex tof_mutex_;

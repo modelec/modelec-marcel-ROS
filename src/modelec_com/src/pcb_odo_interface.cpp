@@ -181,6 +181,16 @@ namespace Modelec
                     SendOrder("START", {std::to_string(msg->data)});
                 }
             });
+
+        odo_get_pos_timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(100),
+            [this]()
+            {
+                if (isOk && start_odo_)
+                {
+                    GetPos();
+                }
+            });
     }
 
     PCBOdoInterface::~PCBOdoInterface()

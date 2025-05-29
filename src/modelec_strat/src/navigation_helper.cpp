@@ -561,6 +561,10 @@ namespace Modelec
                     last_was_close_enemy_ = false;
                 }
             }
+            else
+            {
+                RCLCPP_INFO(node_->get_logger(), "Enemy is still close, waiting for more information...");
+            }
 
             return;
         }

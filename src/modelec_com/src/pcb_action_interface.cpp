@@ -190,6 +190,7 @@ namespace Modelec
             "action/tir/arm/set", 10,
             [this](const std_msgs::msg::Bool::SharedPtr msg)
             {
+                RCLCPP_INFO(this->get_logger(), "TIR arm set to: %s", msg->data ? "true" : "false");
                 SendOrder("TIR", {"ARM", msg->data ? "1" : "0"});
             });
 

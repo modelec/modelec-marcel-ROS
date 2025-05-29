@@ -17,9 +17,9 @@ namespace Modelec
 
         score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
 
-        auto t = nav_->GetCurrentPos();
+        auto t = nav_->GetSpawn();
 
-        nav_->GoTo(t->x, 1200, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+        nav_->GoTo(t.x, 1200, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
         go_home_time_ = node_->now();
 
@@ -42,9 +42,9 @@ namespace Modelec
 
         case AWAIT_10S:
             {
-                auto t = nav_->GetCurrentPos();
+                auto t = nav_->GetSpawn();
 
-                nav_->GoTo(t->x, 1700, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+                nav_->GoTo(t.x, 1700, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
                 step_ = GO_HOME;
             }

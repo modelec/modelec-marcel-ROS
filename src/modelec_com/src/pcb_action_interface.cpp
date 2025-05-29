@@ -427,30 +427,30 @@ namespace Modelec
                     relay_move_res_pub_->publish(relay_msg);
                 }
             }
-            else if (tokens[0] == "EVENT")
-            {
-                if (tokens[1] == "TIR")
-                {
-                    if (tokens[2] == "START")
-                    {
-                        tir_start_pub_->publish(std_msgs::msg::Empty());
-                        RespondEvent(tokens[1], {tokens[2]});
-                    }
-                    else if (tokens[2] == "ARM")
-                    {
-                        tir_arm_pub_->publish(std_msgs::msg::Empty());
-                        RespondEvent(tokens[1], {tokens[2]});
-                    }
-                    else if (tokens[2] == "DIS")
-                    {
-                        tir_disarm_pub_->publish(std_msgs::msg::Empty());
-                        RespondEvent(tokens[1], {tokens[2]});
-                    }
-                }
-            }
             else
             {
                 RCLCPP_WARN(this->get_logger(), "Unknown message format: '%s'", msg->data.c_str());
+            }
+        }
+        else if (tokens[0] == "EVENT")
+        {
+            if (tokens[1] == "TIR")
+            {
+                if (tokens[2] == "START")
+                {
+                    tir_start_pub_->publish(std_msgs::msg::Empty());
+                    RespondEvent(tokens[1], {tokens[2]});
+                }
+                else if (tokens[2] == "ARM")
+                {
+                    tir_arm_pub_->publish(std_msgs::msg::Empty());
+                    RespondEvent(tokens[1], {tokens[2]});
+                }
+                else if (tokens[2] == "DIS")
+                {
+                    tir_disarm_pub_->publish(std_msgs::msg::Empty());
+                    RespondEvent(tokens[1], {tokens[2]});
+                }
             }
         }
     }

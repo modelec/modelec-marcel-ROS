@@ -709,8 +709,6 @@ namespace Modelec
     void PCBOdoInterface::AddWaypoint(const int index, const bool IsStopPoint, const long x, const long y,
                                       const double theta)
     {
-        RCLCPP_INFO(this->get_logger(), "Adding waypoint: %d, Stop: %s, Pos: (%ld, %ld), Theta: %.2f",
-                    index, IsStopPoint ? "true" : "false", x, y, theta);
         if (!start_odo_)
         {
             SendOrder("START", {std::to_string(true)});

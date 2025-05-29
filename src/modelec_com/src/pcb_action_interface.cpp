@@ -249,9 +249,9 @@ namespace Modelec
         }
 
         relay_value_ = {
-            {0, false},
             {1, false},
             {2, false},
+            {3, false},
         };
 
         for (auto & [id, v] : relay_value_)

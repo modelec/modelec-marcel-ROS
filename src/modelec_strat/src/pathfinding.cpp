@@ -296,12 +296,13 @@ namespace Modelec
         const double goal_x = goal->x / cell_size_mm_x;
         const double goal_y = (grid_height_ - 1) - (goal->y / cell_size_mm_y);
 
+        RCLCPP_INFO(node_->get_logger(), "Start: (%f, %f), Goal: (%f, %f)", start_x, start_y, goal_x, goal_y);
+
         if (start_x < 0 || start_y < 0 || goal_x < 0 || goal_y < 0 ||
             start_x >= grid_width_ || start_y >= grid_height_ ||
             goal_x >= grid_width_ || goal_y >= grid_height_)
         {
             RCLCPP_WARN(node_->get_logger(), "Start or Goal out of bounds");
-            RCLCPP_WARN(node_->get_logger(), "Start: (%f, %f), Goal: (%f, %f)", start_x, start_y, goal_x, goal_y);
             return {-2, waypoints};
         }
 

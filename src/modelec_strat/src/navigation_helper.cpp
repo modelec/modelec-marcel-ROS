@@ -102,6 +102,9 @@ namespace Modelec
                     spawn_pub_->publish(s);
                 }
             });
+
+        odo_get_pos_pub_ = node_->create_publisher<std_msgs::msg::Empty>(
+            "odometry/get/pos", 30);
     }
 
     void NavigationHelper::ReInit()
@@ -122,6 +125,12 @@ namespace Modelec
     int NavigationHelper::GetTeamId() const
     {
         return team_id_;
+    }
+
+    void NavigationHelper::Update()
+    {
+        std_msgs::msg::Empty empty_msg;
+        odo_get_pos_pub_->publish(empty_msg);
     }
 
     void NavigationHelper::SendGoTo()

@@ -81,6 +81,17 @@ namespace Modelec
         odo_pos_publisher_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10);
 
+        odo_get_pos_sub_ = this->create_subscription<std_msgs::msg::Empty>(
+            "odometry/get/pos", 30, [this](const std_msgs::msg::Empty::SharedPtr)
+            {
+                if (isOk)
+                {
+                    RCLCPP_INFO(this->get_logger(), "Requesting position from PCB");
+
+                    GetPos();
+                }
+            });
+
         odo_speed_publisher_ = this->create_publisher<modelec_interfaces::msg::OdometrySpeed>(
             "odometry/speed", 10);
 
@@ -183,7 +194,7 @@ namespace Modelec
                 }
             });
 
-        odo_get_pos_timer_ = this->create_wall_timer(
+        /*odo_get_pos_timer_ = this->create_wall_timer(
             std::chrono::milliseconds(500),
             [this]()
             {
@@ -193,7 +204,7 @@ namespace Modelec
 
                     GetPos();
                 }
-            });
+            });*/
     }
 
     PCBOdoInterface::~PCBOdoInterface()

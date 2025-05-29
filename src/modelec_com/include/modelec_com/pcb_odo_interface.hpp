@@ -26,6 +26,7 @@
 #include <modelec_interfaces/srv/odometry_add_waypoint.hpp>
 
 #include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/empty.hpp>
 
 namespace Modelec
 {
@@ -60,6 +61,7 @@ namespace Modelec
         void PCBCallback(const std_msgs::msg::String::SharedPtr msg);
 
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr odo_pos_publisher_;
+        rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr odo_get_pos_sub_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometrySpeed>::SharedPtr odo_speed_publisher_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryToF>::SharedPtr odo_tof_publisher_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryWaypointReach>::SharedPtr odo_waypoint_reach_publisher_;
@@ -84,7 +86,7 @@ namespace Modelec
         rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr start_odo_sub_;
         bool start_odo_ = false;
 
-        rclcpp::TimerBase::SharedPtr odo_get_pos_timer_;
+        // rclcpp::TimerBase::SharedPtr odo_get_pos_timer_;
 
         // Promises and mutexes to synchronize service responses asynchronously
         std::queue<std::promise<long>> tof_promises_;

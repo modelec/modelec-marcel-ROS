@@ -9,6 +9,7 @@
 #include <std_srvs/srv/empty.hpp>
 
 #include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/empty.hpp>
 
 #include "deposite_zone.hpp"
 #include "pathfinding.hpp"
@@ -35,6 +36,8 @@ namespace Modelec
         std::shared_ptr<Pathfinding> GetPathfinding() const;
 
         int GetTeamId() const;
+
+        void Update();
 
         // void SendWaypoint() const;
         // void SendWaypoint(const std::vector<WaypointMsg>& waypoints) const;
@@ -155,6 +158,8 @@ namespace Modelec
 
         rclcpp::Publisher<modelec_interfaces::msg::Spawn>::SharedPtr spawn_pub_;
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr ask_spawn_srv_;
+
+        rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr odo_get_pos_pub_;
 
     };
 }

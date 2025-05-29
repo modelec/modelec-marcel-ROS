@@ -119,6 +119,8 @@ namespace Modelec
     {
         auto now = this->now();
 
+        nav_->Update();
+
         switch (state_)
         {
         case State::INIT:

@@ -155,8 +155,8 @@ namespace Modelec
         }
 
         auto w = waypoint_queue_.front().ToMsg();
-        RCLCPP_INFO(node_->get_logger(), "Sending waypoint: x: %d, y: %d, theta: %f, id: %d",
-                     w.x, w.y, w.theta, w.id);
+        /*RCLCPP_INFO(node_->get_logger(), "Sending waypoint: x: %d, y: %d, theta: %f, id: %d",
+                     w.x, w.y, w.theta, w.id);*/
         waypoint_pub_->publish(w);
         waypoint_queue_.pop();
     }

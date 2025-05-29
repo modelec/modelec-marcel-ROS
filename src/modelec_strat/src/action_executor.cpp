@@ -106,7 +106,7 @@ namespace Modelec
                 {
                     modelec_interfaces::msg::ActionServoPos msg;
                     msg.id = 5;
-                    msg.pos = 0;
+                    msg.pos = 1;
                     servo_move_pub_->publish(msg);
 
                     step_running_ = 1;
@@ -118,7 +118,7 @@ namespace Modelec
                 {
                     modelec_interfaces::msg::ActionServoPos msg;
                     msg.id = 5;
-                    msg.pos = 1;
+                    msg.pos = 0;
                     servo_move_pub_->publish(msg);
 
                     step_running_ = 1;

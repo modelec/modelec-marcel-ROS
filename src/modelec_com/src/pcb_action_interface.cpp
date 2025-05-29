@@ -385,7 +385,7 @@ namespace Modelec
             }
             else
             {
-                RCLCPP_WARN(this->get_logger(), "Unknown message format");
+                RCLCPP_WARN(this->get_logger(), "Unknown message format for OK response: '%s'", msg->data.c_str());
             }
         }
         else if (tokens[0] == "KO")
@@ -449,7 +449,7 @@ namespace Modelec
             }
             else
             {
-                RCLCPP_WARN(this->get_logger(), "Unknown message format");
+                RCLCPP_WARN(this->get_logger(), "Unknown message format: '%s'", msg->data.c_str());
             }
         }
     }

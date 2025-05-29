@@ -228,8 +228,8 @@ namespace Modelec
                 if ((now - last_movement_time_).seconds() > max_stationary_time_s_)
                 {
                     enemy_long_time_pub_->publish(last_enemy_pos_);
-                    RCLCPP_WARN(this->get_logger(), "Enemy has been stationary for too long at x=%f y=%f",
-                                last_enemy_pos_.x, last_enemy_pos_.y);
+                    /*RCLCPP_WARN(this->get_logger(), "Enemy has been stationary for too long at x=%f y=%f",
+                                last_enemy_pos_.x, last_enemy_pos_.y);*/
 
                     last_movement_time_ = now;
                 }

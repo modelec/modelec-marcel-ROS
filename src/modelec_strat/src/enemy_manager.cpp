@@ -237,7 +237,7 @@ namespace Modelec
         }
         else
         {
-            RCLCPP_INFO(this->get_logger(), "No enemy detected in Lidar scan");
+            // RCLCPP_INFO(this->get_logger(), "No enemy detected in Lidar scan");
         }
     }
 
@@ -251,7 +251,7 @@ namespace Modelec
         {
             enemy_pos_pub_->publish(last_enemy_pos_);
             last_publish_time_ = this->now();
-            RCLCPP_INFO(this->get_logger(), "Periodic refresh of enemy position");
+            // RCLCPP_INFO(this->get_logger(), "Periodic refresh of enemy position");
         }
     }
 }

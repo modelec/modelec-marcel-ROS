@@ -134,7 +134,7 @@ namespace Modelec
             {
                 RCLCPP_INFO_ONCE(get_logger(), "State: WAIT_START - Match starting");
 
-                nav_->SetSpawn(modelec_interfaces::msg::Spawn::BOTTOM);
+                nav_->SetSpawn(modelec_interfaces::msg::Spawn::TOP);
 
                 rclcpp::sleep_for(std::chrono::milliseconds(300));
 

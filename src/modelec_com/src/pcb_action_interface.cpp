@@ -212,7 +212,7 @@ namespace Modelec
         // SendMove("ASC", {std::to_string(asc_state_)});
 
         servo_pos_mapper_ = {
-            {0, {{0, M_PI_2}}},
+            {0, {{0, 0.55}, {1, 0}}},
             {1, {{0, 0}, {1, 0.4}}},
             {2, {{0, M_PI_2}}},
             {3, {{0, M_PI_2}}},
@@ -231,7 +231,7 @@ namespace Modelec
         }
 
         servo_value_ = {
-            {0, 0},
+            {0, 1},
             {1, 1},
             {2, 0},
             {3, 0},

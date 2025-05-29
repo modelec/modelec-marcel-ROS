@@ -553,7 +553,7 @@ namespace Modelec
 
         if (last_was_close_enemy_)
         {
-            if (Point::distance(Point(msg->x, msg->y, msg->theta), Point(current_pos_->x, current_pos_->y, current_pos_->theta)) > 400)
+            if (Point::distance(Point(msg->x, msg->y, msg->theta), Point(current_pos_->x, current_pos_->y, current_pos_->theta)) > 700)
             {
                 RCLCPP_INFO(node_->get_logger(), "Enemy was close try to replanning...");
                 if (Replan(false))

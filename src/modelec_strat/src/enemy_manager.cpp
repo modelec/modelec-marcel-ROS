@@ -61,6 +61,11 @@ namespace Modelec
                                                                                   {
                                                                                       game_stated_ = true;
                                                                                   }
+
+                                                                                  if (game_stated_ && msg->state == modelec_interfaces::msg::StratState::STOP)
+                                                                                  {
+                                                                                      game_stated_ = false;
+                                                                                  }
                                                                               });
 
         enemy_long_time_pub_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
@@ -84,6 +89,11 @@ namespace Modelec
 
     void EnemyManager::OnLidarData(const sensor_msgs::msg::LaserScan::SharedPtr msg)
     {
+        if (!game_stated_)
+        {
+            return;
+        }
+
         is_enemy_close_ = false;
 
         if (std::isnan(current_pos_.x) || std::isnan(current_pos_.y))
@@ -243,7 +253,7 @@ namespace Modelec
 
     void EnemyManager::TimerCallback()
     {
-        if (!enemy_initialized_)
+        if (!enemy_initialized_ || !game_stated_)
             return;
 
         rclcpp::Duration duration_since_last = this->now() - last_publish_time_;

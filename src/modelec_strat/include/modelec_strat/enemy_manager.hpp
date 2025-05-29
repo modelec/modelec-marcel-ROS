@@ -52,5 +52,7 @@ namespace Modelec
         float robot_length_ = 0;
         double robot_radius_ = 0;
         float min_emergency_distance_ = 0.0f;
+
+        bool verify_ = false;
     };
 }

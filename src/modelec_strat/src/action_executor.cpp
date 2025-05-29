@@ -237,12 +237,32 @@ namespace Modelec
                 break;
             case STICK_ALL:
                 {
+                    modelec_interfaces::msg::ActionRelayState relay_top_msg;
+                    relay_top_msg.state = true;
+                    relay_top_msg.id = 2;
+                    relay_move_pub_->publish(relay_top_msg);
+
+                    modelec_interfaces::msg::ActionRelayState relay_bottom_msg;
+                    relay_bottom_msg.state = true;
+                    relay_bottom_msg.id = 1;
+                    relay_move_pub_->publish(relay_bottom_msg);
+
+                    modelec_interfaces::msg::ActionServoPos first_pot_msg;
+                    first_pot_msg.id = 0;
+                    first_pot_msg.pos = 0;
+                    servo_move_pub_->publish(first_pot_msg);
+
+                    modelec_interfaces::msg::ActionServoPos fourth_pot_msg;
+                    fourth_pot_msg.id = 1;
+                    fourth_pot_msg.pos = 0;
+                    servo_move_pub_->publish(fourth_pot_msg);
+
                     modelec_interfaces::msg::ActionServoPos top_pot_msg;
                     top_pot_msg.id = 4;
                     top_pot_msg.pos = 0;
                     servo_move_pub_->publish(top_pot_msg);
 
-                    step_running_ = 1;
+                    step_running_ = 5;
                 }
 
                 break;

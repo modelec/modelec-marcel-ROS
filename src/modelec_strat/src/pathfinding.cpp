@@ -301,6 +301,7 @@ namespace Modelec
             goal_x >= grid_width_ || goal_y >= grid_height_)
         {
             RCLCPP_WARN(node_->get_logger(), "Start or Goal out of bounds");
+            RCLCPP_WARN(node_->get_logger(), "Start: (%d, %d), Goal: (%d, %d)", start_x, start_y, goal_x, goal_y);
             return {-2, waypoints};
         }
 

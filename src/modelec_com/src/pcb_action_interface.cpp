@@ -468,8 +468,6 @@ namespace Modelec
     {
         if (pcb_publisher_)
         {
-            RCLCPP_INFO(this->get_logger(), "Sending to PCB: '%s'", data.c_str());
-
             auto message = std_msgs::msg::String();
             message.data = data;
             pcb_publisher_->publish(message);

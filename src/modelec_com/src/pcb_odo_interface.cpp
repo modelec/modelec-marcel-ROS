@@ -183,7 +183,7 @@ namespace Modelec
             });
 
         odo_get_pos_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(100),
+            std::chrono::milliseconds(500),
             [this]()
             {
                 if (isOk && start_odo_)

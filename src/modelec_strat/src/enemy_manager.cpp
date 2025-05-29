@@ -220,7 +220,7 @@ namespace Modelec
                 last_publish_time_ = this->now();
                 last_movement_time_ = this->now(); // Mise à jour du dernier vrai mouvement
                 enemy_pos_pub_->publish(enemy_pos);
-                RCLCPP_INFO(this->get_logger(), "Enemy moved: x=%f, y=%f", enemy_pos.x, enemy_pos.y);
+                // RCLCPP_INFO(this->get_logger(), "Enemy moved: x=%f, y=%f", enemy_pos.x, enemy_pos.y);
             }
             else
             {

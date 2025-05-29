@@ -300,8 +300,8 @@ namespace Modelec
         {
             if (tokens[1] == "START")
             {
-                bool start = std::stoi(tokens[2]);
-                ResolveStartRequest(start);
+                // bool start = std::stoi(tokens[2]);
+                ResolveStartRequest(true);
             }
             else if (tokens[1] == "WAYPOINT")
             {

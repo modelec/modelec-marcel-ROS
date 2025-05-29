@@ -160,6 +160,7 @@ namespace Modelec
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr ask_spawn_srv_;
 
         rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr odo_get_pos_pub_;
+        rclcpp::Time last_odo_get_pos_time_;
 
     };
 }

@@ -105,6 +105,8 @@ namespace Modelec
 
         odo_get_pos_pub_ = node_->create_publisher<std_msgs::msg::Empty>(
             "odometry/get/pos", 30);
+
+        last_odo_get_pos_time_ = node_->now();
     }
 
     void NavigationHelper::ReInit()
@@ -129,8 +131,12 @@ namespace Modelec
 
     void NavigationHelper::Update()
     {
-        std_msgs::msg::Empty empty_msg;
-        odo_get_pos_pub_->publish(empty_msg);
+        if ((node_->now() - last_odo_get_pos_time_).seconds() > 0.5)
+        {
+            std_msgs::msg::Empty empty_msg;
+            odo_get_pos_pub_->publish(empty_msg);
+            last_odo_get_pos_time_ = node_->now();
+        }
     }
 
     void NavigationHelper::SendGoTo()

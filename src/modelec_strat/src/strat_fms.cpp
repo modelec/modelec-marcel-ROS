@@ -136,6 +136,8 @@ namespace Modelec
                 start_odo_msg.data = true;
                 start_odo_pub_->publish(start_odo_msg);
 
+                rclcpp::sleep_for(std::chrono::milliseconds(300));
+
                 nav_->SetSpawn(modelec_interfaces::msg::Spawn::BOTTOM);
 
                 match_start_time_ = now;

@@ -37,6 +37,7 @@ namespace Modelec
                 team_selected_ = true;
                 team_id_ = msg->team_id;
                 nav_->SetTeamId(team_id_);
+                nav_->SetSpawn(msg->name);
             });
 
         reset_strat_sub_ = create_subscription<std_msgs::msg::Empty>(
@@ -133,8 +134,6 @@ namespace Modelec
             if (started_)
             {
                 RCLCPP_INFO_ONCE(get_logger(), "State: WAIT_START - Match starting");
-
-                nav_->SetSpawn(modelec_interfaces::msg::Spawn::TOP);
 
                 rclcpp::sleep_for(std::chrono::milliseconds(300));
 

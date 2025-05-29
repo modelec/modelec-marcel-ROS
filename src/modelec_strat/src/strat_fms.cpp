@@ -30,10 +30,6 @@ namespace Modelec
         spawn_id_sub_ = create_subscription<modelec_interfaces::msg::Spawn>(
             "/strat/spawn", 10, [this](const modelec_interfaces::msg::Spawn::SharedPtr msg)
             {
-                std_msgs::msg::Bool start_odo_msg;
-                start_odo_msg.data = true;
-                start_odo_pub_->publish(start_odo_msg);
-
                 std_msgs::msg::Bool tir_msg;
                 tir_msg.data = true;
                 tir_arm_set_pub_->publish(tir_msg);
@@ -41,7 +37,6 @@ namespace Modelec
                 team_selected_ = true;
                 team_id_ = msg->team_id;
                 nav_->SetTeamId(team_id_);
-                nav_->SetSpawn(msg->name);
             });
 
         reset_strat_sub_ = create_subscription<std_msgs::msg::Empty>(
@@ -135,6 +130,13 @@ namespace Modelec
         case State::WAIT_START:
             if (started_)
             {
+
+                std_msgs::msg::Bool start_odo_msg;
+                start_odo_msg.data = true;
+                start_odo_pub_->publish(start_odo_msg);
+
+                nav_->SetSpawn(modelec_interfaces::msg::Spawn::BOTTOM);
+
                 match_start_time_ = now;
 
                 std_msgs::msg::Int64 msg;

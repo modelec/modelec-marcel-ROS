@@ -29,10 +29,10 @@ namespace Modelec
 
     void GoHomeMission::Update()
     {
-        /*if (!nav_->HasArrived())
+        if (!nav_->HasArrived())
         {
             return;
-        }*/
+        }
 
         switch (step_)
         {

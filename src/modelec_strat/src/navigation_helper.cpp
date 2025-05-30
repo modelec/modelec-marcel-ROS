@@ -16,7 +16,7 @@ namespace Modelec
 
         factor_close_enemy_ = Config::get<float>("config.enemy.factor_close_enemy", -0.5f);
 
-        enemy_emergency_distance_ = Config::get<int>("config.enemy.detection.min_emergency_distance_mm", 350);
+        enemy_emergency_distance_ = Config::get<int>("config.enemy.detection.min_emergency_distance_mm", 390);
 
         SetupSpawn();
 

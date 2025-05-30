@@ -159,9 +159,9 @@ namespace Modelec
                 {
                     Transition(State::DO_PROMOTION, "Start promotion");
                 }
-                else if (elapsed.seconds() >= 100)
+                else
                 {
-                    Transition(State::STOP, "All missions done");
+                    Transition(State::DO_GO_HOME, "All missions done");
                 }
 
                 /*if (elapsed.seconds() >= 2)

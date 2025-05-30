@@ -8,7 +8,7 @@
         <detection>
             <min_move_threshold_mm>50</min_move_threshold_mm>
             <refresh_rate>3</refresh_rate>
-            <max_stationary_time_s>5</max_stationary_time_s>
+            <max_stationary_time_s>0.5</max_stationary_time_s>
             <min_emergency_distance_mm>500</min_emergency_distance_mm>
             <margin_detection_table_mm>50</margin_detection_table_mm>
         </detection>

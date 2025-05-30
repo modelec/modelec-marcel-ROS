@@ -280,8 +280,6 @@ namespace Modelec
                 message.id = id;
 
                 odo_waypoint_reach_publisher_->publish(message);
-
-                RCLCPP_INFO(this->get_logger(), "Waypoint reached: %d", id);
             }
             else if (tokens[1] == "PID")
             {

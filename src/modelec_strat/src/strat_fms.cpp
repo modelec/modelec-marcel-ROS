@@ -155,16 +155,20 @@ namespace Modelec
             {
                 auto elapsed = now - match_start_time_;
 
-                // TODO : next thing to upgrade to have a good strat
-                /*if (!is_banner_done_)
+                if (!is_banner_done_)
                 {
                     Transition(State::DO_PROMOTION, "Start promotion");
-                }*/
-                if (elapsed.seconds() >= 2)
+                }
+                else
+                {
+                    Transition(State::STOP, "All missions done");
+                }
+
+                /*if (elapsed.seconds() >= 2)
                 {
                     Transition(State::DO_GO_HOME, "Go Home");
-                }
-                // TODO : check the time needed by the mission
+                }*/
+
                 /*else if (elapsed.seconds() < 70)
                 {
                     Transition(State::DO_PREPARE_CONCERT, "Proceed to concert");

@@ -16,6 +16,8 @@ namespace Modelec
 
         factor_close_enemy_ = Config::get<float>("config.enemy.factor_close_enemy", -0.5f);
 
+        enemy_emergency_distance_ = Config::get<int>("config.enemy.detection.min_emergency_distance_mm", 350);
+
         SetupSpawn();
 
         waypoint_reach_sub_ = node_->create_subscription<WaypointReachMsg>(
@@ -76,7 +78,7 @@ namespace Modelec
 
         ask_spawn_srv_ = node->create_service<std_srvs::srv::Empty>(
             "/nav/ask_spawn", [this](const std_srvs::srv::Empty::Request::SharedPtr,
-                                      const std_srvs::srv::Empty::Response::SharedPtr)
+                                     const std_srvs::srv::Empty::Response::SharedPtr)
             {
                 for (auto& ys : spawn_yellow_)
                 {
@@ -160,22 +162,22 @@ namespace Modelec
         waypoint_queue_.pop();
     }
 
-/*    void NavigationHelper::SendWaypoint() const
-    {
-        for (auto& w : waypoints_)
+    /*    void NavigationHelper::SendWaypoint() const
         {
-            waypoint_pub_->publish(w.ToMsg());
+            for (auto& w : waypoints_)
+            {
+                waypoint_pub_->publish(w.ToMsg());
+            }
         }
-    }
 
-    void NavigationHelper::SendWaypoint(const std::vector<WaypointMsg>& waypoints) const
-    {
-        for (auto& w : waypoints)
+        void NavigationHelper::SendWaypoint(const std::vector<WaypointMsg>& waypoints) const
         {
-            waypoint_pub_->publish(w);
+            for (auto& w : waypoints)
+            {
+                waypoint_pub_->publish(w);
+            }
         }
-    }
-*/
+    */
 
     void NavigationHelper::AddWaypoint(const PosMsg& pos, int index)
     {
@@ -543,14 +545,16 @@ namespace Modelec
             home->y = Config::get<int>("config.home.blue@y", 0);
             home->theta = Config::get<double>("config.home.blue@theta", 0);
         }
-        return home;    }
+        return home;
+    }
 
     void NavigationHelper::OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
         pathfinding_->OnEnemyPosition(msg);
         last_enemy_pos_ = *msg;
 
-        if (Point::distance(Point(msg->x, msg->y, msg->theta), Point(current_pos_->x, current_pos_->y, current_pos_->theta)) < 600)
+        if (Point::distance(Point(msg->x, msg->y, msg->theta),
+                            Point(current_pos_->x, current_pos_->y, current_pos_->theta)) < enemy_emergency_distance_)
         {
             RCLCPP_INFO(node_->get_logger(), "Enemy is close, stopping odometry...");
 
@@ -589,7 +593,6 @@ namespace Modelec
 
     void NavigationHelper::OnEnemyPositionClose(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
-
         if (!last_was_close_enemy_)
         {
             RCLCPP_INFO(node_->get_logger(), "Enemy is close, replanning...");
@@ -633,7 +636,8 @@ namespace Modelec
 
     bool NavigationHelper::EnemyOnPath(const modelec_interfaces::msg::OdometryPos msg)
     {
-        if (!current_pos_) {
+        if (!current_pos_)
+        {
             return false;
         }
 

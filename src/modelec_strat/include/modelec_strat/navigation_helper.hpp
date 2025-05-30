@@ -129,6 +129,8 @@ namespace Modelec
 
         float factor_close_enemy_ = 0;
 
+        int enemy_emergency_distance_ = 0;
+
         bool last_was_close_enemy_ = false;
 
         std::vector<Waypoint> waypoints_;

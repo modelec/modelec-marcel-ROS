@@ -39,13 +39,13 @@
     </home>
     <spawn>
         <yellow>
-            <top x="375" y="1600" theta="-1.5708" />
-            <side x="2775" y="875" theta="3.1415" />
+            <top x="375" y="1800" theta="-1.5708" />
+            <side x="2800" y="875" theta="3.1415" />
             <bottom x="1225" y="200" theta="1.5708" />
         </yellow>
         <blue>
-            <top x="2625" y="1600" theta="-1.5708" />
-            <side x="225" y="875" theta="0" />
+            <top x="2625" y="1800" theta="-1.5708" />
+            <side x="200" y="875" theta="0" />
             <bottom x="1775" y="200" theta="1.5708" />
         </blue>
         <width_mm>450</width_mm>

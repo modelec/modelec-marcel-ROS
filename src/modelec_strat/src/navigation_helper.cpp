@@ -134,7 +134,6 @@ namespace Modelec
         if ((node_->now() - last_odo_get_pos_time_).nanoseconds() > static_cast<int64_t>(1e8 * 2)) // 200ms
         {
             last_odo_get_pos_time_ = node_->now();
-            RCLCPP_INFO(node_->get_logger(), "Requesting current position from odometry");
             std_msgs::msg::Empty empty_msg;
             odo_get_pos_pub_->publish(empty_msg);
         }

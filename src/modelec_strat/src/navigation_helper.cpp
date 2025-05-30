@@ -551,19 +551,23 @@ namespace Modelec
         pathfinding_->OnEnemyPosition(msg);
         last_enemy_pos_ = *msg;
 
+        if (Point::distance(Point(msg->x, msg->y, msg->theta), Point(current_pos_->x, current_pos_->y, current_pos_->theta)) < 600)
+        {
+            std_msgs::msg::Bool start_odo_msg;
+            start_odo_msg.data = false;
+            start_odo_pub_->publish(start_odo_msg);
+
+            last_was_close_enemy_ = true;
+
+            return;
+        }
+
         if (last_was_close_enemy_)
         {
-            if (Point::distance(Point(msg->x, msg->y, msg->theta), Point(current_pos_->x, current_pos_->y, current_pos_->theta)) > 600)
+            RCLCPP_INFO(node_->get_logger(), "Enemy was close try to replanning...");
+            if (Replan(false))
             {
-                RCLCPP_INFO(node_->get_logger(), "Enemy was close try to replanning...");
-                if (Replan(false))
-                {
-                    last_was_close_enemy_ = false;
-                }
-            }
-            else
-            {
-                RCLCPP_INFO(node_->get_logger(), "Enemy is still close, waiting for more information...");
+                last_was_close_enemy_ = false;
             }
 
             return;

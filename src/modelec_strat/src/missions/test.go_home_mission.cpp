@@ -20,7 +20,7 @@ namespace Modelec
         auto curr = nav_->GetCurrentPos();
         RCLCPP_INFO(node_->get_logger(), "GoHomeMission: Starting at position (%f, %f)", curr->x, curr->y);
 
-        nav_->GoTo(375, 1000, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+        nav_->GoTo(375, 500, -M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
         go_home_time_ = node_->now();
 
@@ -29,6 +29,11 @@ namespace Modelec
 
     void GoHomeMission::Update()
     {
+        /*if (!nav_->HasArrived())
+        {
+            return;
+        }*/
+
         switch (step_)
         {
         case GO_FRONT:

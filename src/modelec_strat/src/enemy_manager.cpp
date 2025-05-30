@@ -61,8 +61,8 @@ namespace Modelec
                                                                                   {
                                                                                       game_stated_ = true;
                                                                                   }
-
-                                                                                  if (game_stated_ && msg->state == modelec_interfaces::msg::StratState::STOP)
+                                                                                  else if (game_stated_ && msg->state ==
+                                                                                      modelec_interfaces::msg::StratState::STOP)
                                                                                   {
                                                                                       game_stated_ = false;
                                                                                   }
@@ -91,6 +91,7 @@ namespace Modelec
     {
         if (!game_stated_)
         {
+            RCLCPP_INFO(this->get_logger(), "Game not started, ignoring Lidar data");
             return;
         }
 
@@ -112,7 +113,8 @@ namespace Modelec
         double best_x = 0.0;
         double best_y = 0.0;
 
-        // RCLCPP_INFO(this->get_logger(), "Processing Lidar min %f | %f | %f", msg->range_min, msg->range_max, msg->ranges[1]);
+        RCLCPP_INFO(this->get_logger(), "Processing Lidar min %f | %f | %f", msg->range_min, msg->range_max,
+                    msg->ranges[1]);
         // RCLCPP_INFO(this->get_logger(), "Robot pos %f | %f | %f", robot_x, robot_y, robot_theta);
 
         for (size_t i = 0; i < msg->ranges.size(); ++i)
@@ -127,17 +129,18 @@ namespace Modelec
                 continue;
             }
 
-            double range_mm = range * 1000.0;  // conversion en mm
+            double range_mm = range * 1000.0; // conversion en mm
 
             if (range_mm < robot_radius_)
             {
-                RCLCPP_INFO(this->get_logger(), "Ignoring Lidar point too close to robot body: range=%.2f mm", range_mm);
+                RCLCPP_INFO(this->get_logger(), "Ignoring Lidar point too close to robot body: range=%.2f mm",
+                            range_mm);
                 angle += msg->angle_increment;
                 continue;
             }
 
             // EMERGENCY detection: obstacle very close but not the robot itself
-            if (range_mm < min_emergency_distance_)
+            /*if (range_mm < min_emergency_distance_)
             {
                 // Convert to local robot frame
                 double x_local = range * std::cos(angle) * 1000.0; // meters -> mm
@@ -148,24 +151,21 @@ namespace Modelec
                 double y_global = robot_y + (x_local * std::sin(robot_theta) + y_local * std::cos(robot_theta));
 
                 // Check if in bounds
-                if (x_global >= 0 && x_global <= (map_width_ - margin_detection_table_) && y_global >= 0 && y_global <= (map_height_ - margin_detection_table_))
+                if (x_global >= 0 && x_global <= (map_width_ - margin_detection_table_) && y_global >= 0 && y_global <=
+                    (map_height_ - margin_detection_table_))
                 {
-                    if (!is_enemy_close_)
-                    {
-                        modelec_interfaces::msg::OdometryPos emergency_msg;
-                        emergency_msg.x = x_global;
-                        emergency_msg.y = y_global;
-                        emergency_msg.theta = 0.0;
+                    modelec_interfaces::msg::OdometryPos emergency_msg;
+                    emergency_msg.x = x_global;
+                    emergency_msg.y = y_global;
+                    emergency_msg.theta = 0.0;
 
-                        close_enemy_pos_pub_->publish(emergency_msg);
-                        RCLCPP_WARN(this->get_logger(), "EMERGENCY CLOSE OBJECT DETECTED at x=%.2f y=%.2f (%.1f mm)", x_global, y_global, range_mm);
+                    close_enemy_pos_pub_->publish(emergency_msg);
+                    RCLCPP_WARN(this->get_logger(), "EMERGENCY CLOSE OBJECT DETECTED at x=%.2f y=%.2f (%.1f mm)",
+                                x_global, y_global, range_mm);
 
-                        is_enemy_close_ = true;
-                    }
-
-                    return;
+                    // return;
                 }
-            }
+            }*/
 
             // Convert to local robot frame
             double x_local = range * std::cos(angle) * 1000.0; // meters -> mm
@@ -176,7 +176,8 @@ namespace Modelec
             double y_global = robot_y + (x_local * std::sin(robot_theta) + y_local * std::cos(robot_theta));
 
             // Ignore points outside of the table
-            if (x_global < 0 || x_global > (map_width_ - margin_detection_table_) || y_global < 0 || y_global > (map_height_ - margin_detection_table_))
+            if (x_global < 0 || x_global > (map_width_ - margin_detection_table_) || y_global < 0 || y_global > (
+                map_height_ - margin_detection_table_))
             {
                 // RCLCPP_INFO(this->get_logger(), "Lidar point out of bounds: x=%.2f, y=%.2f", x_global, y_global);
 

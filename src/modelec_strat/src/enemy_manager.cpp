@@ -72,7 +72,7 @@ namespace Modelec
             "/enemy/long_time", 10);
 
         timer_ = this->create_wall_timer(
-            std::chrono::seconds(1),
+            std::chrono::nanoseconds(static_cast<int>(refresh_rate_s_ )),
             [this]()
             {
                 TimerCallback();
@@ -113,8 +113,7 @@ namespace Modelec
         double best_x = 0.0;
         double best_y = 0.0;
 
-        RCLCPP_INFO(this->get_logger(), "Processing Lidar min %f | %f | %f", msg->range_min, msg->range_max,
-                    msg->ranges[1]);
+        // RCLCPP_INFO(this->get_logger(), "Processing Lidar min %f | %f | %f", msg->range_min, msg->range_max, msg->ranges[1]);
         // RCLCPP_INFO(this->get_logger(), "Robot pos %f | %f | %f", robot_x, robot_y, robot_theta);
 
         for (size_t i = 0; i < msg->ranges.size(); ++i)
@@ -262,7 +261,7 @@ namespace Modelec
         {
             enemy_pos_pub_->publish(last_enemy_pos_);
             last_publish_time_ = this->now();
-            // RCLCPP_INFO(this->get_logger(), "Periodic refresh of enemy position");
+            RCLCPP_INFO(this->get_logger(), "Periodic refresh of enemy position");
         }
     }
 }

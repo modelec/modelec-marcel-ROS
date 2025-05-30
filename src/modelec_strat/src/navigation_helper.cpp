@@ -553,6 +553,8 @@ namespace Modelec
 
         if (Point::distance(Point(msg->x, msg->y, msg->theta), Point(current_pos_->x, current_pos_->y, current_pos_->theta)) < 600)
         {
+            RCLCPP_INFO(node_->get_logger(), "Enemy is close, stopping odometry...");
+
             std_msgs::msg::Bool start_odo_msg;
             start_odo_msg.data = false;
             start_odo_pub_->publish(start_odo_msg);

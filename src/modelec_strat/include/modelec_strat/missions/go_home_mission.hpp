@@ -23,7 +23,10 @@ namespace Modelec
             GO_FRONT,
             AWAIT_95S,
             GO_HOME,
-            DONE
+            DONE,
+
+            ROTATE_TO_HOME,
+            GO_CLOSE,
         } step_;
 
         MissionStatus status_;

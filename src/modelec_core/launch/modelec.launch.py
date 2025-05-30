@@ -55,7 +55,7 @@ def generate_launch_description():
                     target_action=rplidar_node,
                     on_exit=[
                         TimerAction(
-                            period=5.0,
+                            period=3.0,
                             actions=[create_rplidar_node()]  # ✅ créer un NOUVEAU Node
                         )
                     ]

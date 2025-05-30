@@ -46,7 +46,7 @@ namespace ModelecGUI
                 {
                     modelec_interfaces::msg::Spawn team_msg;
                     team_msg.team_id = msg->team_id;
-                    team_msg.name = modelec_interfaces::msg::Spawn::TOP;
+                    team_msg.name = modelec_interfaces::msg::Spawn::BOTTOM;
                     spawn_pub_->publish(team_msg);
 
                     emit TeamChoose();

@@ -26,7 +26,7 @@ namespace Modelec
 
         robot_width_ = Config::get<float>("config.robot.size.width_mm", 500.0);
         robot_length_ = Config::get<float>("config.robot.size.length_mm", 500.0);
-        robot_radius_ = std::max(robot_width_, robot_length_) / 2.0;
+        robot_radius_ = std::max(robot_width_, robot_length_) * 0.4;
 
         min_emergency_distance_ = Config::get<float>("config.enemy.detection.min_emergency_distance_mm", 500.0f);
 

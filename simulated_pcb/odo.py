@@ -56,12 +56,12 @@ class SimulatedPCB:
                         self.waypoint_order.pop(0)
                         del self.waypoints[wp['id']]
                     else:
-                        speed = min(150.0, distance)
+                        speed = min(300.0, distance * 2)
                         self.vx = speed * math.cos(angle)
                         self.vy = speed * math.sin(angle)
                         self.vtheta = max(-9.0, min(9.0, angle_diff * 2))
                 else:
-                    speed = min(200.0, distance * 2)
+                    speed = min(400.0, distance * 3)
                     self.vx = speed * math.cos(angle)
                     self.vy = speed * math.sin(angle)
                     self.vtheta = 0.0

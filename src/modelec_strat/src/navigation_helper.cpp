@@ -587,7 +587,15 @@ namespace Modelec
         if (EnemyOnPath(*msg))
         {
             RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
-            Replan();
+            if (!Replan())
+            {
+                RCLCPP_WARN(node_->get_logger(), "Replanning failed, stopping odometry...");
+                std_msgs::msg::Bool start_odo_msg;
+                start_odo_msg.data = false;
+                start_odo_pub_->publish(start_odo_msg);
+
+                last_was_close_enemy_ = true;
+            }
         }
     }
 

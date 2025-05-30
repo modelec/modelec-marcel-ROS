@@ -21,7 +21,7 @@ namespace Modelec
         score_all_party_ = Config::get<int>("config.mission_score.pami.all_party");
         score_free_zone_ = 0;
 
-        score_to_add_ = 3 * score_goupie_ + score_superstar_ + score_all_party_ + score_free_zone_;
+        score_to_add_ = score_goupie_ + score_superstar_ + /*score_all_party_ +*/ score_free_zone_;
 
         std::string obstacles_path = ament_index_cpp::get_package_share_directory("modelec_strat") +
             "/data/pami_zone.xml";

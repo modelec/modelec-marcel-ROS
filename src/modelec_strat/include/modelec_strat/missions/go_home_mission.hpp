@@ -21,7 +21,7 @@ namespace Modelec
         enum Step
         {
             GO_FRONT,
-            AWAIT_10S,
+            AWAIT_95S,
             GO_HOME,
             DONE
         } step_;

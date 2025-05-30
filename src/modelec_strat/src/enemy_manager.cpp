@@ -130,13 +130,13 @@ namespace Modelec
 
             double range_mm = range * 1000.0; // conversion en mm
 
-            if (range_mm < robot_radius_)
+            /*if (range_mm < robot_radius_)
             {
                 RCLCPP_INFO(this->get_logger(), "Ignoring Lidar point too close to robot body: range=%.2f mm",
                             range_mm);
                 angle += msg->angle_increment;
                 continue;
-            }
+            }*/
 
             // EMERGENCY detection: obstacle very close but not the robot itself
             /*if (range_mm < min_emergency_distance_)

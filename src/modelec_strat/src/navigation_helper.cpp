@@ -752,8 +752,6 @@ namespace Modelec
             }
         }*/
 
-        RCLCPP_INFO(node_->get_logger(), "Waypoint reached, id: %d", waypoint_queue_.front().id);
-
         if (await_rotate_)
         {
             await_rotate_ = false;
@@ -768,8 +766,6 @@ namespace Modelec
         }
         else
         {
-            RCLCPP_INFO(node_->get_logger(), "Waypoint reached 2");
-
             if (!waypoint_queue_.empty())
             {
                 waypoint_pub_->publish(waypoint_queue_.front().ToMsg());

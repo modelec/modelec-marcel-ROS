@@ -61,14 +61,14 @@ namespace Modelec
 
         case DEPLOY_BANNER:
             {
-                if ((node_->now() - deploy_time_).seconds() >= 5)
+                if ((node_->now() - deploy_time_).seconds() >= 2)
                 {
-                    step_ = WAIT_5_SECONDS;
+                    step_ = WAIT_2_SECONDS;
                 }
             }
 
             break;
-        case WAIT_5_SECONDS:
+        case WAIT_2_SECONDS:
             {
                 action_executor_->UndeployBanner();
 

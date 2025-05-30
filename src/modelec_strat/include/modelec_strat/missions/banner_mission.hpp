@@ -27,7 +27,7 @@ namespace Modelec
         {
             GO_TO_FRONT,
             DEPLOY_BANNER,
-            WAIT_5_SECONDS,
+            WAIT_2_SECONDS,
             UNDEPLOY_BANNER,
             GO_FORWARD,
             DONE

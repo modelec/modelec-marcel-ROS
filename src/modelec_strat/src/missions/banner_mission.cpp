@@ -80,7 +80,7 @@ namespace Modelec
         case UNDEPLOY_BANNER:
             {
                 go_timeout_ = node_->now();
-                nav_->GoTo(spawn_.x, (nav_->GetPathfinding()->robot_length_mm_ / 2) + 550, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+                nav_->GoTo(spawn_.x, 500, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
                 step_ = GO_FORWARD;
             }

@@ -22,7 +22,7 @@ def generate_launch_description():
     frame_id = LaunchConfiguration('frame_id', default='laser')
     inverted = LaunchConfiguration('inverted', default='false')
     angle_compensate = LaunchConfiguration('angle_compensate', default='true')
-    scan_mode = LaunchConfiguration('scan_mode', default='Sensitivity')
+    scan_mode = LaunchConfiguration('scan_mode', default='Standard')
 
     # Get launch configs
     with_gui = LaunchConfiguration('with_gui')
@@ -43,7 +43,8 @@ def generate_launch_description():
                         'serial_baudrate': serial_baudrate,
                         'frame_id': frame_id,
                         'inverted': inverted,
-                        'angle_compensate': angle_compensate
+                        'angle_compensate': angle_compensate,
+                        'scan_mode': scan_mode
                     }],
                     output='screen'
                 )

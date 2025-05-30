@@ -37,5 +37,6 @@ namespace Modelec
         Point home_point_;
         rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr score_pub_;
         int mission_score_ = 0;
+        rclcpp::Time go_timeout_;
     };
 }

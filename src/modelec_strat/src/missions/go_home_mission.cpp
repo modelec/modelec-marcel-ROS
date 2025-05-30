@@ -29,6 +29,8 @@ namespace Modelec
         }
         nav_->RotateTo(home_point_);
 
+        go_timeout_ = node_->now();
+
         status_ = MissionStatus::RUNNING;
     }
 
@@ -36,7 +38,10 @@ namespace Modelec
     {
         if (!nav_->HasArrived())
         {
-            return;
+            if ((node_->now() - go_timeout_).seconds() < 10)
+            {
+                return;
+            }
         }
 
         switch (step_)
@@ -51,6 +56,8 @@ namespace Modelec
                         return;
                     }
                 }
+
+                go_timeout_ = node_->now();
             }
 
             step_ = GO_HOME;
@@ -60,6 +67,8 @@ namespace Modelec
             {
                 break;
             }
+
+            go_timeout_ = node_->now();
 
             nav_->GoTo(home_point_.GetTakePosition(0), true);
 

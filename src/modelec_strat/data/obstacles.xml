@@ -5,25 +5,25 @@
     <Obstacle id="3" x="2150" y="1900" theta="1.5708" width="400" height="200" type="estrade"/>
 
     <!-- Gradin TOP TO BOTTOM    LEFT -->
-    <Gradin id="10" x="825" y="1725" theta="-1.5708" width="400" height="100" type="gradin" />
+    <!--<Gradin id="10" x="825" y="1725" theta="-1.5708" width="400" height="100" type="gradin" />
     <Gradin id="11" x="75" y="1325" theta="0" width="400" height="100" type="gradin"/>
     <Gradin id="12" x="1100" y="950" theta="1.5708" width="400" height="100" type="gradin" >
         <possible-angle theta="-1.5708" />
     </Gradin>
     <Gradin id="13" x="75" y="400" theta="0" width="400" height="100" type="gradin"/>
-    <Gradin id="14" x="775" y="250" theta="1.5708" width="400" height="100" type="gradin"/>
+    <Gradin id="14" x="775" y="250" theta="1.5708" width="400" height="100" type="gradin"/>-->
 
     <!-- Gradin TOP TO BOTTOM    RIGHT -->
-    <Gradin id="20" x="2175" y="1725" theta="-1.5708" width="400" height="100" type="gradin" />
+    <!--<Gradin id="20" x="2175" y="1725" theta="-1.5708" width="400" height="100" type="gradin" />
     <Gradin id="21" x="2925" y="1325" theta="3.1415" width="400" height="100" type="gradin"/>
     <Gradin id="22" x="1900" y="950" theta="1.5708" width="400" height="100" type="gradin">
         <possible-angle theta="-1.5708" />
     </Gradin>
     <Gradin id="23" x="2925" y="400" theta="3.1415" width="400" height="100" type="gradin"/>
-    <Gradin id="24" x="2225" y="250" theta="1.5708" width="400" height="100" type="gradin"/>
+    <Gradin id="24" x="2225" y="250" theta="1.5708" width="400" height="100" type="gradin"/>-->
 
     <!-- PAMI Start -->
-    <Obstacle id="30" x="75" y="1750" theta="1.5708" width="150" height="450" type="pami-start"/>
-    <Obstacle id="31" x="2925" y="1750" theta="1.5708" width="150" height="450" type="pami-start"/>
+    <!--<Obstacle id="30" x="75" y="1750" theta="1.5708" width="150" height="450" type="pami-start"/>
+    <Obstacle id="31" x="2925" y="1750" theta="1.5708" width="150" height="450" type="pami-start"/>-->
 
 </Obstacles>

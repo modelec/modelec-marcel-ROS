@@ -2,6 +2,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <modelec_interfaces/msg/odometry_add_waypoint.hpp>
+#include <modelec_interfaces/msg/odometry_add_waypoints.hpp>
 #include <modelec_interfaces/msg/odometry_waypoint_reach.hpp>
 #include <modelec_interfaces/msg/odometry_pos.hpp>
 #include <modelec_interfaces/msg/odometry_go_to.hpp>
@@ -39,8 +40,13 @@ namespace Modelec
 
         void Update();
 
-        // void SendWaypoint() const;
-        // void SendWaypoint(const std::vector<WaypointMsg>& waypoints) const;
+        void SendWaypoint() const;
+        void SendWaypoint(const std::vector<WaypointMsg>& waypoints) const;
+
+        void SendWaypoints() const;
+        void SendWaypoints(const std::vector<WaypointMsg>& waypoints) const;
+        void SendWaypoints(const WaypointsMsg& waypoints) const;
+
         void SendGoTo();
 
         void AddWaypoint(const PosMsg& pos, int index);
@@ -142,6 +148,7 @@ namespace Modelec
 
         rclcpp::Subscription<WaypointReachMsg>::SharedPtr waypoint_reach_sub_;
         rclcpp::Publisher<WaypointMsg>::SharedPtr waypoint_pub_;
+        rclcpp::Publisher<WaypointsMsg>::SharedPtr waypoints_pub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryGoTo>::SharedPtr go_to_sub_;
         rclcpp::Subscription<PosMsg>::SharedPtr pos_sub_;

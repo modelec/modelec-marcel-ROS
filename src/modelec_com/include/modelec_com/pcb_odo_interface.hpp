@@ -13,6 +13,7 @@
 #include <modelec_interfaces/msg/odometry_to_f.hpp>
 #include <modelec_interfaces/msg/odometry_waypoint_reach.hpp>
 #include <modelec_interfaces/msg/odometry_add_waypoint.hpp>
+#include <modelec_interfaces/msg/odometry_add_waypoints.hpp>
 #include <modelec_interfaces/msg/odometry_start.hpp>
 #include <modelec_interfaces/msg/odometry_pid.hpp>
 
@@ -68,10 +69,12 @@ namespace Modelec
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPid>::SharedPtr odo_pid_publisher_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryAddWaypoint>::SharedPtr odo_add_waypoint_subscriber_;
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryAddWaypoints>::SharedPtr odo_add_waypoints_subscriber_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr odo_set_pos_subscriber_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPid>::SharedPtr odo_set_pid_subscriber_;
 
         void AddWaypointCallback(const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg);
+        void AddWaypointsCallback(const modelec_interfaces::msg::OdometryAddWaypoints::SharedPtr msg);
         void SetPosCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
         void SetPIDCallback(const modelec_interfaces::msg::OdometryPid::SharedPtr msg);
 
@@ -163,6 +166,8 @@ namespace Modelec
 
         void AddWaypoint(modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg);
         void AddWaypoint(int index, bool IsStopPoint, long x, long y, double theta);
+
+        void AddWaypoints(modelec_interfaces::msg::OdometryAddWaypoints::SharedPtr msg);
 
         void SetStart(const modelec_interfaces::msg::OdometryStart::SharedPtr msg);
         void SetStart(bool start);

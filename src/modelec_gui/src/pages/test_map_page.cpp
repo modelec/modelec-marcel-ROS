@@ -48,6 +48,25 @@ namespace ModelecGUI
                 update();
             });
 
+        add_waypoints_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryAddWaypoints>(
+            "odometry/add_waypoints", 10,
+            [this](const modelec_interfaces::msg::OdometryAddWaypoints::SharedPtr msg)
+            {
+                qpoints.clear();
+                lastWapointWasEnd = false;
+
+                qpoints.push_back(QPoint(robotPos.x * ratioBetweenMapAndWidgetX_,
+                                         height() - robotPos.y * ratioBetweenMapAndWidgetY_));
+
+                for (const auto& point : msg->waypoints)
+                {
+                    qpoints.push_back(QPoint(point.x * ratioBetweenMapAndWidgetX_,
+                                             height() - point.y * ratioBetweenMapAndWidgetY_));
+                }
+
+                update();
+            });
+
         odometry_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>("odometry/position", 10,
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
             {

@@ -7,6 +7,7 @@
 #include <tinyxml2.h>
 
 #include <modelec_interfaces/msg/odometry_add_waypoint.hpp>
+#include <modelec_interfaces/msg/odometry_add_waypoints.hpp>
 #include <modelec_interfaces/msg/odometry_waypoint_reach.hpp>
 #include <modelec_interfaces/msg/odometry_pos.hpp>
 #include <modelec_interfaces/msg/map.hpp>
@@ -22,6 +23,7 @@
 namespace Modelec
 {
     using WaypointMsg = modelec_interfaces::msg::OdometryAddWaypoint;
+    using WaypointsMsg = modelec_interfaces::msg::OdometryAddWaypoints;
     using WaypointReachMsg = modelec_interfaces::msg::OdometryWaypointReach;
     using PosMsg = modelec_interfaces::msg::OdometryPos;
     using WaypointListMsg = std::vector<WaypointMsg>;

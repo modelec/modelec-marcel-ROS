@@ -13,6 +13,7 @@
 #include <std_srvs/srv/empty.hpp>
 
 #include <modelec_interfaces/msg/odometry_add_waypoint.hpp>
+#include <modelec_interfaces/msg/odometry_add_waypoints.hpp>
 #include <modelec_interfaces/msg/odometry_pos.hpp>
 #include <modelec_interfaces/msg/odometry_go_to.hpp>
 #include <modelec_interfaces/srv/map.hpp>
@@ -80,6 +81,7 @@ namespace ModelecGUI
         rclcpp::Node::SharedPtr node_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryAddWaypoint>::SharedPtr add_waypoint_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryAddWaypoints>::SharedPtr add_waypoints_sub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr odometry_sub_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryGoTo>::SharedPtr go_to_pub_;

@@ -56,12 +56,12 @@ class SimulatedPCB:
                         self.waypoint_order.pop(0)
                         del self.waypoints[wp['id']]
                     else:
-                        speed = min(300.0, distance * 2)
+                        speed = min(100.0, distance / 2)
                         self.vx = speed * math.cos(angle)
                         self.vy = speed * math.sin(angle)
                         self.vtheta = max(-9.0, min(9.0, angle_diff * 2))
                 else:
-                    speed = min(400.0, distance * 3)
+                    speed = min(150.0, distance / 2)
                     self.vx = speed * math.cos(angle)
                     self.vy = speed * math.sin(angle)
                     self.vtheta = 0.0
@@ -80,9 +80,10 @@ class SimulatedPCB:
             self.theta += self.vtheta * dt
             self.theta = self.normalize_angle(self.theta)
 
-            if now - self.last_send > 0.1:
-                # self.ser.write(f'SET;POS;{int(self.x)};{int(self.y)};{self.theta:.5f}\n'.encode())
-                self.last_send = now
+        if now - self.last_send > 0.1:
+            # print(f'[TX] SET;POS;{int(self.x)};{int(self.y)};{self.theta:.5f}')
+            self.ser.write(f'SET;POS;{int(self.x)};{int(self.y)};{self.theta:.5f}\n'.encode())
+            self.last_send = now
 
     def run(self):
         while self.running:
@@ -119,12 +120,12 @@ class SimulatedPCB:
             print(f'[TX] OK;PID;1')
             self.ser.write(f'OK;PID;1\n'.encode())
 
-        elif msg.startswith("SET;START"):
+        elif msg.startswith("SET;START;"):
             self.start = msg.split(';')[2] == '1'
             print(f'[TX] OK;START;1')
             self.ser.write(f'OK;START;1\n'.encode())
 
-        elif msg.startswith("SET;WAYPOINT"):
+        elif msg.startswith("SET;WAYPOINT;"):
             parts = msg.split(';')
             if len(parts) >= 7:
                 wp = {
@@ -138,6 +139,25 @@ class SimulatedPCB:
                 if wp['id'] not in self.waypoint_order:
                     self.waypoint_order.append(wp['id'])
                 self.ser.write(f'OK;WAYPOINT;{wp["id"]}\n'.encode())
+
+        elif msg.startswith("SET;WAYPOINTS;"):
+            parts = msg.split(';')
+            if len(parts) / 7 >= 1:
+                self.waypoints.clear()
+                self.waypoint_order.clear()
+                for i in range(2, len(parts), 5):
+                    wp = {
+                        'id': int(parts[i]),
+                        'type': int(parts[i + 1]),
+                        'x': float(parts[i + 2]),
+                        'y': float(parts[i + 3]),
+                        'theta': float(parts[i + 4])
+                    }
+                    self.waypoints[wp['id']] = wp
+                    if wp['id'] not in self.waypoint_order:
+                        self.waypoint_order.append(wp['id'])
+                        self.ser.write(f'OK;WAYPOINT;{wp["id"]}\n'.encode())
+                self.ser.write(b'OK;WAYPOINTS;1\n')
 
         elif msg.startswith("SET;POS"):
             parts = msg.split(';')

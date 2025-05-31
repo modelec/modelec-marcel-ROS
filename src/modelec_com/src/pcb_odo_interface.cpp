@@ -106,9 +106,14 @@ namespace Modelec
             "odometry/add_waypoint", 30,
             [this](const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg)
             {
-                RCLCPP_INFO(this->get_logger(), "Received add waypoint request: %d %s %d %d %f",
-                            msg->id, msg->is_end ? "end" : "not end", msg->x, msg->y, msg->theta);
                 AddWaypointCallback(msg);
+            });
+
+        odo_add_waypoints_subscriber_ = this->create_subscription<modelec_interfaces::msg::OdometryAddWaypoints>(
+            "odometry/add_waypoints", 30,
+            [this](const modelec_interfaces::msg::OdometryAddWaypoints::SharedPtr msg)
+            {
+                AddWaypointsCallback(msg);
             });
 
         odo_set_pos_subscriber_ = this->create_subscription<modelec_interfaces::msg::OdometryPos>(
@@ -351,6 +356,11 @@ namespace Modelec
     void PCBOdoInterface::AddWaypointCallback(const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg)
     {
         AddWaypoint(msg);
+    }
+
+    void PCBOdoInterface::AddWaypointsCallback(const modelec_interfaces::msg::OdometryAddWaypoints::SharedPtr msg)
+    {
+        AddWaypoints(msg);
     }
 
     void PCBOdoInterface::SetPosCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
@@ -727,6 +737,28 @@ namespace Modelec
         };
 
         SendOrder("WAYPOINT", data);
+    }
+
+    void PCBOdoInterface::AddWaypoints(modelec_interfaces::msg::OdometryAddWaypoints::SharedPtr msg)
+    {
+        if (!start_odo_)
+        {
+            SendOrder("START", {std::to_string(true)});
+            start_odo_ = true;
+        }
+
+        std::vector<std::string> data = {};
+
+        for (const auto& waypoint : msg->waypoints)
+        {
+            data.push_back(std::to_string(waypoint.id));
+            data.push_back(std::to_string(waypoint.is_end));
+            data.push_back(std::to_string(waypoint.x));
+            data.push_back(std::to_string(waypoint.y));
+            data.push_back(std::to_string(waypoint.theta));
+        }
+
+        SendOrder("WAYPOINTS", data);
     }
 
     void PCBOdoInterface::SetStart(const modelec_interfaces::msg::OdometryStart::SharedPtr msg)

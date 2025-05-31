@@ -19,6 +19,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Odometry/OdometryToF.msg"
   "msg/Odometry/OdometryWaypointReach.msg"
   "msg/Odometry/OdometryAddWaypoint.msg"
+  "msg/Odometry/OdometryAddWaypoints.msg"
   "msg/Odometry/OdometryStart.msg"
   "msg/Odometry/PID/OdometryPid.msg"
   "msg/Strat/StratState.msg"

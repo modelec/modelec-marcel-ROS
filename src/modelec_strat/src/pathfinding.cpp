@@ -296,7 +296,7 @@ namespace Modelec
         const int goal_x = goal->x / cell_size_mm_x;
         const int goal_y = (grid_height_ - 1) - (goal->y / cell_size_mm_y);
 
-        RCLCPP_INFO(node_->get_logger(), "Start: (%d, %d), Goal: (%d, %d)", start_x, start_y, goal_x, goal_y);
+        // RCLCPP_INFO(node_->get_logger(), "Start: (%d, %d), Goal: (%d, %d)", start_x, start_y, goal_x, goal_y);
 
         if (start_x < 0 || start_y < 0 || goal_x < 0 || goal_y < 0 ||
             start_x >= grid_width_ || start_y >= grid_height_ ||

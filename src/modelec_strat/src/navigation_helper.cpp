@@ -28,6 +28,7 @@ namespace Modelec
             });
 
         waypoint_pub_ = node_->create_publisher<WaypointMsg>("odometry/add_waypoint", 100);
+        waypoints_pub_ = node_->create_publisher<WaypointsMsg>("odometry/add_waypoints", 100);
 
         pos_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 20,
@@ -137,13 +138,13 @@ namespace Modelec
         {
             last_odo_get_pos_time_ = node_->now();
             std_msgs::msg::Empty empty_msg;
-            odo_get_pos_pub_->publish(empty_msg);
+            //odo_get_pos_pub_->publish(empty_msg);
         }
     }
 
     void NavigationHelper::SendGoTo()
     {
-        while (!waypoint_queue_.empty())
+        /*while (!waypoint_queue_.empty())
         {
             waypoint_queue_.pop();
         }
@@ -153,31 +154,59 @@ namespace Modelec
             w.id = 0;
             w.is_end = true;
             waypoint_queue_.push(w);
-        }
+        }*/
 
-        auto w = waypoint_queue_.front().ToMsg();
+        // auto w = waypoint_queue_.front().ToMsg();
         /*RCLCPP_INFO(node_->get_logger(), "Sending waypoint: x: %d, y: %d, theta: %f, id: %d",
                      w.x, w.y, w.theta, w.id);*/
-        waypoint_pub_->publish(w);
-        waypoint_queue_.pop();
+        // waypoint_pub_->publish(w);
+        // waypoint_queue_.pop();
+        SendWaypoints();
     }
 
-    /*    void NavigationHelper::SendWaypoint() const
+    void NavigationHelper::SendWaypoint() const
+    {
+        for (auto& w : waypoints_)
         {
-            for (auto& w : waypoints_)
-            {
-                waypoint_pub_->publish(w.ToMsg());
-            }
+            waypoint_pub_->publish(w.ToMsg());
+        }
+    }
+
+    void NavigationHelper::SendWaypoint(const std::vector<WaypointMsg>& waypoints) const
+    {
+        for (auto& w : waypoints)
+        {
+            waypoint_pub_->publish(w);
+        }
+    }
+
+    void NavigationHelper::SendWaypoints() const
+    {
+        WaypointsMsg waypoints_msg;
+
+        for (auto& w : waypoints_)
+        {
+            waypoints_msg.waypoints.push_back(w.ToMsg());
         }
 
-        void NavigationHelper::SendWaypoint(const std::vector<WaypointMsg>& waypoints) const
+        SendWaypoints(waypoints_msg);
+    }
+
+    void NavigationHelper::SendWaypoints(const std::vector<WaypointMsg>& waypoints) const
+    {
+        WaypointsMsg waypoints_msg;
+        for (auto w : waypoints)
         {
-            for (auto& w : waypoints)
-            {
-                waypoint_pub_->publish(w);
-            }
+            waypoints_msg.waypoints.push_back(w);
         }
-    */
+
+        waypoints_pub_->publish(waypoints_msg);
+    }
+
+    void NavigationHelper::SendWaypoints(const WaypointsMsg& waypoints) const
+    {
+        waypoints_pub_->publish(waypoints);
+    }
 
     void NavigationHelper::AddWaypoint(const PosMsg& pos, int index)
     {
@@ -694,13 +723,13 @@ namespace Modelec
     {
         if (last_go_to_.goal)
         {
-            if (GoTo(last_go_to_.goal, last_go_to_.isClose, last_go_to_.collisionMask) != Pathfinding::FREE)
+            if (GoToRotateFirst(last_go_to_.goal, last_go_to_.isClose, last_go_to_.collisionMask) != Pathfinding::FREE)
             {
-                if (GoTo(last_go_to_.goal, true, last_go_to_.collisionMask) != Pathfinding::FREE)
+                if (GoToRotateFirst(last_go_to_.goal, true, last_go_to_.collisionMask) != Pathfinding::FREE)
                 {
                     if (!force) return false;
 
-                    if (GoTo(current_pos_, true,
+                    if (GoToRotateFirst(current_pos_, true,
                              Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE | Pathfinding::ENEMY) !=
                         Pathfinding::FREE)
                     {
@@ -742,9 +771,9 @@ namespace Modelec
         return spawn_;
     }
 
-    void NavigationHelper::OnWaypointReach(const WaypointReachMsg::SharedPtr)
+    void NavigationHelper::OnWaypointReach(const WaypointReachMsg::SharedPtr msg)
     {
-        /*for (auto& waypoint : waypoints_)
+        for (auto& waypoint : waypoints_)
         {
             if (waypoint.id == msg->id)
             {
@@ -762,9 +791,9 @@ namespace Modelec
                     SendWaypoint();
                 }
             }
-        }*/
+        }
 
-        if (await_rotate_)
+        /*if (await_rotate_)
         {
             await_rotate_ = false;
 
@@ -789,7 +818,7 @@ namespace Modelec
             {
                 waypoints_.back().reached = true;
             }
-        }
+        }*/
     }
 
     void NavigationHelper::OnPos(const PosMsg::SharedPtr msg)

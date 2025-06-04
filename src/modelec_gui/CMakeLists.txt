@@ -51,13 +51,6 @@ add_executable(modelec_gui
         include/modelec_gui/widget/action_widget.hpp
 )
 
-ament_target_dependencies(modelec_gui
-        rclcpp
-        std_msgs
-        std_srvs
-        modelec_interfaces
-        ament_index_cpp
-)
 target_link_libraries(modelec_gui
         Qt6::Core
         Qt6::Gui
@@ -65,6 +58,11 @@ target_link_libraries(modelec_gui
         Qt6::Svg
         modelec_utils::utils
         modelec_utils::config
+        rclcpp::rclcpp
+        ${std_msgs_TARGETS}
+        ${std_srvs_TARGETS}
+        ${modelec_interfaces_TARGETS}
+        ${ament_index_cpp_TARGETS}
 )
 
 target_include_directories(modelec_gui PUBLIC

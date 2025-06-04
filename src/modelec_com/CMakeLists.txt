@@ -20,8 +20,7 @@ find_library(WIRINGPI_LIB wiringPi)
 
 # Serial listener Node
 add_executable(serial_listener src/multiple_serial_listener.cpp)
-ament_target_dependencies(serial_listener rclcpp std_msgs modelec_interfaces ament_index_cpp)
-target_link_libraries(serial_listener Boost::system modelec_utils::utils modelec_utils::config)
+target_link_libraries(serial_listener Boost::system modelec_utils::utils modelec_utils::config rclcpp::rclcpp ${std_msgs_TARGETS} ${modelec_interfaces_TARGETS} ${ament_index_cpp_TARGETS})
 target_include_directories(serial_listener PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -29,8 +28,7 @@ target_include_directories(serial_listener PUBLIC
 
 # PCB Odometry Node
 add_executable(pcb_odo_interface src/pcb_odo_interface.cpp)
-ament_target_dependencies(pcb_odo_interface rclcpp std_msgs modelec_interfaces ament_index_cpp)
-target_link_libraries(pcb_odo_interface modelec_utils::utils modelec_utils::config)
+target_link_libraries(pcb_odo_interface modelec_utils::utils modelec_utils::config rclcpp::rclcpp ${std_msgs_TARGETS} ${modelec_interfaces_TARGETS} ${ament_index_cpp_TARGETS})
 target_include_directories(pcb_odo_interface PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -38,8 +36,7 @@ target_include_directories(pcb_odo_interface PUBLIC
 
 # PCB Alim Node
 add_executable(pcb_alim_interface src/pcb_alim_interface.cpp)
-ament_target_dependencies(pcb_alim_interface rclcpp std_msgs modelec_interfaces ament_index_cpp)
-target_link_libraries(pcb_alim_interface modelec_utils::utils modelec_utils::config)
+target_link_libraries(pcb_alim_interface modelec_utils::utils modelec_utils::config rclcpp::rclcpp ${std_msgs_TARGETS} ${modelec_interfaces_TARGETS} ${ament_index_cpp_TARGETS})
 target_include_directories(pcb_alim_interface PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -47,8 +44,7 @@ target_include_directories(pcb_alim_interface PUBLIC
 
 # PCB Action Node
 add_executable(pcb_action_interface src/pcb_action_interface.cpp)
-ament_target_dependencies(pcb_action_interface rclcpp std_msgs modelec_interfaces ament_index_cpp)
-target_link_libraries(pcb_action_interface modelec_utils::utils modelec_utils::config)
+target_link_libraries(pcb_action_interface modelec_utils::utils modelec_utils::config rclcpp::rclcpp ${std_msgs_TARGETS} ${modelec_interfaces_TARGETS} ${ament_index_cpp_TARGETS})
 target_include_directories(pcb_action_interface PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -56,8 +52,7 @@ target_include_directories(pcb_action_interface PUBLIC
 
 # PCA9685 Listener Node
 add_executable(pca9685_controller src/pca9685_controller.cpp)
-ament_target_dependencies(pca9685_controller rclcpp std_msgs modelec_interfaces)
-target_link_libraries(pca9685_controller ${WIRINGPI_LIB} modelec_utils::utils)
+target_link_libraries(pca9685_controller ${WIRINGPI_LIB} modelec_utils::utils rclcpp::rclcpp ${std_msgs_TARGETS} ${modelec_interfaces_TARGETS})
 target_include_directories(pca9685_controller PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>

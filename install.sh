@@ -24,21 +24,11 @@ sudo apt install ros-dev-tools ros-jazzy-desktop -y
 git submodule init
 git submodule update
 
-cd WiringPi || exit 1
-
-./build debian
-mv ./debian-template/wiringpi_*.deb .
-
-# install it
-sudo apt install ./wiringpi_*.deb -y
-
-cd ..
-
 sudo apt-get install qt6-base-dev qt6-svg-dev libxml2-dev socat -y
 
-echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
-echo "source ~/modelec-marcel-ROS/install/setup.bash" >> ~/.bashrc
-echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+echo "source /opt/ros/jazzy/setup.bash
+source ~/modelec-marcel-ROS/install/setup.bash
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export FASTRTPS_DEFAULT_PROFILES_FILE=~/modelec-marcel-ROS/fastdds_setup.xml
 export ROS_DOMAIN_ID=128" >> ~/.bashrc
 

@@ -2,6 +2,6 @@
 	path = src/rplidar_ros
 	url = https://github.com/Slamtec/rplidar_ros
 	branch = ros2
-[submodule "WiringPi"]
-	path = WiringPi
-	url = https://github.com/WiringPi/WiringPi.git
+[submodule "src/ros2_roboclaw_driver"]
+	path = src/ros2_roboclaw_driver
+	url = https://github.com/wimblerobotics/ros2_roboclaw_driver

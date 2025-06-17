@@ -16,7 +16,6 @@ find_package(ament_index_cpp REQUIRED)
 
 find_package(modelec_interfaces REQUIRED)
 find_package(modelec_utils REQUIRED)
-find_library(WIRINGPI_LIB wiringPi)
 
 # Serial listener Node
 add_executable(serial_listener src/multiple_serial_listener.cpp)
@@ -54,15 +53,6 @@ target_include_directories(pcb_action_interface PUBLIC
         $<INSTALL_INTERFACE:include>
 )
 
-# PCA9685 Listener Node
-add_executable(pca9685_controller src/pca9685_controller.cpp)
-ament_target_dependencies(pca9685_controller rclcpp std_msgs modelec_interfaces)
-target_link_libraries(pca9685_controller ${WIRINGPI_LIB} modelec_utils::utils)
-target_include_directories(pca9685_controller PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-)
-
 # Enable testing and linting
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -78,7 +68,6 @@ install(TARGETS
         pcb_alim_interface
         pcb_odo_interface
         pcb_action_interface
-        pca9685_controller
         DESTINATION lib/${PROJECT_NAME}
 )
 

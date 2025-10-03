@@ -2,7 +2,3 @@
 	path = src/rplidar_ros
 	url = https://github.com/Slamtec/rplidar_ros
 	branch = ros2
-[submodule "src/ros2_roboclaw_modelec"]
-	path = src/ros2_roboclaw_modelec
-	url = https://github.com/modelec/ros2_roboclaw_driver
-	branch = modelec

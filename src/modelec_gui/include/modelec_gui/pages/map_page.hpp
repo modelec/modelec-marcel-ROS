@@ -12,12 +12,12 @@
 
 #include <std_srvs/srv/empty.hpp>
 
-#include <modelec_interfaces/msg/odometry_add_waypoint.hpp>
+#include <modelec_interfaces/msg/odometry_waypoint.hpp>
+#include <modelec_interfaces/msg/odometry_waypoints.hpp>
 #include <modelec_interfaces/msg/odometry_pos.hpp>
 #include <modelec_interfaces/srv/map.hpp>
 #include <modelec_interfaces/srv/map_size.hpp>
 #include <modelec_interfaces/msg/obstacle.hpp>
-#include <modelec_interfaces/msg/odometry_waypoint_reach.hpp>
 #include <modelec_interfaces/msg/strat_state.hpp>
 
 #include <std_msgs/msg/bool.hpp>
@@ -78,7 +78,8 @@ namespace ModelecGUI {
 
         rclcpp::Node::SharedPtr node_;
 
-        rclcpp::Subscription<modelec_interfaces::msg::OdometryAddWaypoint>::SharedPtr add_waypoint_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryWaypoint>::SharedPtr add_waypoint_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryWaypoints>::SharedPtr add_waypoints_sub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr odometry_sub_;
         rclcpp::Subscription<std_msgs::msg::Int64>::SharedPtr score_sub_;

@@ -3,33 +3,27 @@
 #include <modelec_strat/obstacle/column.hpp>
 #include <modelec_utils/config.hpp>
 
-namespace Modelec
-{
-    struct AStarNode
-    {
+namespace Modelec {
+    struct AStarNode {
         int x, y;
         double g = std::numeric_limits<double>::infinity(); // Cost from start
         double f = std::numeric_limits<double>::infinity(); // g + heuristic
         int parent_x = -1;
         int parent_y = -1;
 
-        bool operator>(const AStarNode& other) const
-        {
+        bool operator>(const AStarNode &other) const {
             return f > other.f;
         }
     };
 
-    double Heuristic(int x1, int y1, int x2, int y2)
-    {
+    double Heuristic(int x1, int y1, int x2, int y2) {
         return std::hypot(x1 - x2, y1 - y2); // Euclidean distance
     }
 
-    Pathfinding::Pathfinding()
-    {
+    Pathfinding::Pathfinding() {
     }
 
-    Pathfinding::Pathfinding(const rclcpp::Node::SharedPtr& node) : node_(node)
-    {
+    Pathfinding::Pathfinding(const rclcpp::Node::SharedPtr &node) : node_(node) {
         map_width_mm_ = Config::get<int>("config.map.size.map_width_mm", 3000);
         map_height_mm_ = Config::get<int>("config.map.size.map_height_mm", 2000);
 
@@ -48,16 +42,14 @@ namespace Modelec
         grid_height_ = Config::get<int>("config.map.size.grid_height", 200);
 
         std::string obstacles_path = ament_index_cpp::get_package_share_directory("modelec_strat") +
-            "/data/obstacles.xml";
-        if (!LoadObstaclesFromXML(obstacles_path))
-        {
+                                     "/data/obstacles.xml";
+        if (!LoadObstaclesFromXML(obstacles_path)) {
             RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacles from XML");
         }
 
         obstacle_add_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>(
             "obstacle/add", 10,
-            [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg)
-            {
+            [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
                 RCLCPP_INFO(node_->get_logger(), "Obstacle add request received");
                 AddObstacle(std::make_shared<Obstacle>(*msg));
             });
@@ -67,8 +59,7 @@ namespace Modelec
 
         obstacle_remove_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>(
             "obstacle/remove", 10,
-            [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg)
-            {
+            [this](const modelec_interfaces::msg::Obstacle::SharedPtr msg) {
                 RCLCPP_INFO(node_->get_logger(), "Obstacle remove request received");
                 RemoveObstacle(msg->id);
             });
@@ -79,24 +70,21 @@ namespace Modelec
         ask_obstacle_srv_ = node_->create_service<std_srvs::srv::Empty>(
             "nav/ask_map_obstacle",
             [this](const std::shared_ptr<std_srvs::srv::Empty::Request> request,
-                   const std::shared_ptr<std_srvs::srv::Empty::Response> response)
-            {
+                   const std::shared_ptr<std_srvs::srv::Empty::Response> response) {
                 HandleAskObstacleRequest(request, response);
             });
 
         map_srv_ = node_->create_service<modelec_interfaces::srv::Map>(
             "nav/map",
             [this](const std::shared_ptr<modelec_interfaces::srv::Map::Request> request,
-                   const std::shared_ptr<modelec_interfaces::srv::Map::Response> response)
-            {
+                   const std::shared_ptr<modelec_interfaces::srv::Map::Response> response) {
                 HandleMapRequest(request, response);
             });
 
         map_size_srv_ = node_->create_service<modelec_interfaces::srv::MapSize>(
             "nav/map_size",
             [this](const std::shared_ptr<modelec_interfaces::srv::MapSize::Request> request,
-                   const std::shared_ptr<modelec_interfaces::srv::MapSize::Response> response)
-            {
+                   const std::shared_ptr<modelec_interfaces::srv::MapSize::Response> response) {
                 HandleMapSizeRequest(request, response);
             });
 
@@ -104,8 +92,7 @@ namespace Modelec
             "odometry/add_waypoint", 100);
     }
 
-    rclcpp::Node::SharedPtr Pathfinding::GetNode() const
-    {
+    rclcpp::Node::SharedPtr Pathfinding::GetNode() const {
         return node_;
     }
 
@@ -138,11 +125,9 @@ namespace Modelec
         }
     }*/
 
-    std::pair<int, WaypointListMsg> Pathfinding::FindPath(const PosMsg::SharedPtr& start, const PosMsg::SharedPtr& goal,
-                                                          bool isClose, int collisionMask)
-    {
-        if (!start || !goal)
-        {
+    std::pair<int, WaypointListMsg> Pathfinding::FindPath(const PosMsg::SharedPtr &start, const PosMsg::SharedPtr &goal,
+                                                          bool isClose, int collisionMask) {
+        if (!start || !goal) {
             RCLCPP_WARN(node_->get_logger(), "Start or Goal position is null");
             return {-3, WaypointListMsg()};
         }
@@ -156,13 +141,10 @@ namespace Modelec
         int inflate_x;
         int inflate_y;
 
-        if (isClose)
-        {
+        if (isClose) {
             inflate_x = std::ceil(((robot_width_mm_) / 2.0f) / cell_size_mm_x);
             inflate_y = std::ceil(((robot_length_mm_) / 2.0f) / cell_size_mm_y);
-        }
-        else
-        {
+        } else {
             inflate_x = std::ceil(((robot_width_mm_ + margin_mm_) / 2.0f) / cell_size_mm_x);
             inflate_y = std::ceil(((robot_length_mm_ + margin_mm_) / 2.0f) / cell_size_mm_y);
         }
@@ -170,27 +152,22 @@ namespace Modelec
         // 1. Build fresh empty grid
         grid_.clear();
         grid_.resize(grid_height_);
-        for (auto& row : grid_)
-        {
+        for (auto &row: grid_) {
             row.assign(grid_width_, FREE);
         }
 
-        if (has_enemy_pos_)
-        {
+        if (has_enemy_pos_) {
             int ex = (last_enemy_pos_.x / cell_size_mm_x);
             int ey = ((map_height_mm_ - last_enemy_pos_.y) / cell_size_mm_y);
 
             const int inflate_enemy_x = std::ceil((enemy_margin_mm_ + (enemy_width_mm_ / 2)) / cell_size_mm_x) +
-                inflate_x;
+                                        inflate_x;
             const int inflate_enemy_y = std::ceil((enemy_margin_mm_ + (enemy_length_mm_ / 2)) / cell_size_mm_y) +
-                inflate_y;
+                                        inflate_y;
 
-            for (int y = ey - inflate_enemy_y; y <= ey + inflate_enemy_y; ++y)
-            {
-                for (int x = ex - inflate_enemy_x; x <= ex + inflate_enemy_x; ++x)
-                {
-                    if (x >= 0 && y >= 0 && x < grid_width_ && y < grid_height_)
-                    {
+            for (int y = ey - inflate_enemy_y; y <= ey + inflate_enemy_y; ++y) {
+                for (int x = ex - inflate_enemy_x; x <= ex + inflate_enemy_x; ++x) {
+                    if (x >= 0 && y >= 0 && x < grid_width_ && y < grid_height_) {
                         grid_[y][x] |= ENEMY;
                     }
                 }
@@ -198,20 +175,16 @@ namespace Modelec
         }
 
         // Bord gauche et droit
-        for (int y = 0; y < grid_height_; ++y)
-        {
-            for (int x = 0; x < inflate_x; ++x)
-            {
+        for (int y = 0; y < grid_height_; ++y) {
+            for (int x = 0; x < inflate_x; ++x) {
                 grid_[y][x] |= WALL;
                 grid_[y][grid_width_ - 1 - x] |= WALL;
             }
         }
 
         // Bord haut et bas
-        for (int x = 0; x < grid_width_; ++x)
-        {
-            for (int y = 0; y < inflate_y; ++y)
-            {
+        for (int x = 0; x < grid_width_; ++x) {
+            for (int y = 0; y < inflate_y; ++y) {
                 grid_[y][x] |= WALL;
                 grid_[grid_height_ - 1 - y][x] |= WALL;
             }
@@ -219,8 +192,7 @@ namespace Modelec
 
         // 2. Fill obstacles with inflation
         // TODO some bug exist with the inflate
-        for (const auto& [id, obstacle] : obstacle_map_)
-        {
+        for (const auto &[id, obstacle]: obstacle_map_) {
             float cx = obstacle->GetX();
             float cy = obstacle->GetY();
             float width = obstacle->GetWidth() + inflate_x * 2 * cell_size_mm_x;
@@ -231,12 +203,11 @@ namespace Modelec
             float dy = height / 2.0f;
 
             // Compute corners in local space and rotate+translate to world
-            std::vector<std::pair<float, float>> corners = {
+            std::vector<std::pair<float, float> > corners = {
                 {-dx, -dy}, {dx, -dy}, {dx, dy}, {-dx, dy}
             };
 
-            for (auto& [x, y] : corners)
-            {
+            for (auto &[x, y]: corners) {
                 float rx = x * std::cos(theta) - y * std::sin(theta);
                 float ry = x * std::sin(theta) + y * std::cos(theta);
                 x = rx + cx;
@@ -249,24 +220,21 @@ namespace Modelec
             float min_y = corners[0].second;
             float max_y = corners[0].second;
 
-            for (const auto& [x, y] : corners)
-            {
+            for (const auto &[x, y]: corners) {
                 min_x = std::min(min_x, x);
                 max_x = std::max(max_x, x);
                 min_y = std::min(min_y, y);
                 max_y = std::max(max_y, y);
             }
 
-            int x_start = std::max(0, (int)(min_x / cell_size_mm_x));
-            int x_end = std::min(grid_width_ - 1, (int)(max_x / cell_size_mm_x));
-            int y_start = std::max(0, (int)(min_y / cell_size_mm_y));
-            int y_end = std::min(grid_height_ - 1, (int)(max_y / cell_size_mm_y));
+            int x_start = std::max(0, (int) (min_x / cell_size_mm_x));
+            int x_end = std::min(grid_width_ - 1, (int) (max_x / cell_size_mm_x));
+            int y_start = std::max(0, (int) (min_y / cell_size_mm_y));
+            int y_end = std::min(grid_height_ - 1, (int) (max_y / cell_size_mm_y));
 
             // Mark cells that fall inside rotated rectangle
-            for (int y = y_start; y <= y_end; ++y)
-            {
-                for (int x = x_start; x <= x_end; ++x)
-                {
+            for (int y = y_start; y <= y_end; ++y) {
+                for (int x = x_start; x <= x_end; ++x) {
                     // Convert cell center to world space
                     float wx = (x + 0.5f) * cell_size_mm_x;
                     float wy = (y + 0.5f) * cell_size_mm_y;
@@ -278,11 +246,9 @@ namespace Modelec
                     float lx = dx_ * std::cos(-theta) - dy_ * std::sin(-theta);
                     float ly = dx_ * std::sin(-theta) + dy_ * std::cos(-theta);
 
-                    if (std::abs(lx) <= dx + 1 && std::abs(ly) <= dy + 1)
-                    {
+                    if (std::abs(lx) <= dx + 1 && std::abs(ly) <= dy + 1) {
                         int gy = (grid_height_ - 1) - y;
-                        if (x >= 0 && gy >= 0 && x < grid_width_ && gy < grid_height_)
-                        {
+                        if (x >= 0 && gy >= 0 && x < grid_width_ && gy < grid_height_) {
                             grid_[gy][x] |= OBSTACLE;
                         }
                     }
@@ -300,38 +266,31 @@ namespace Modelec
 
         if (start_x < 0 || start_y < 0 || goal_x < 0 || goal_y < 0 ||
             start_x >= grid_width_ || start_y >= grid_height_ ||
-            goal_x >= grid_width_ || goal_y >= grid_height_)
-        {
+            goal_x >= grid_width_ || goal_y >= grid_height_) {
             RCLCPP_WARN(node_->get_logger(), "Start or Goal out of bounds");
             return {-2, waypoints};
         }
 
-        if (!TestCollision(start_x, start_y, collisionMask) || !TestCollision(goal_x, goal_y, collisionMask))
-        {
-            if (!TestCollision(start_x, start_y, collisionMask))
-            {
+        if (!TestCollision(start_x, start_y, collisionMask) || !TestCollision(goal_x, goal_y, collisionMask)) {
+            if (!TestCollision(start_x, start_y, collisionMask)) {
                 RCLCPP_WARN(node_->get_logger(), "Start inside an obstacle");
                 return {grid_[start_y][start_x], waypoints};
-            }
-            else
-            {
+            } else {
                 RCLCPP_WARN(node_->get_logger(), "Goal inside an obstacle");
                 return {grid_[goal_y][goal_x], waypoints};
             }
         }
 
         // 4. A* algorithm
-        std::priority_queue<AStarNode, std::vector<AStarNode>, std::greater<AStarNode>> open_list;
+        std::priority_queue<AStarNode, std::vector<AStarNode>, std::greater<AStarNode> > open_list;
         std::unordered_map<int64_t, AStarNode> all_nodes;
 
-        auto hash = [](int x, int y)
-        {
-            return (int64_t)x << 32 | (uint32_t)y;
+        auto hash = [](int x, int y) {
+            return (int64_t) x << 32 | (uint32_t) y;
         };
 
-        auto neighbors = [](int x, int y)
-        {
-            return std::vector<std::pair<int, int>>{
+        auto neighbors = [](int x, int y) {
+            return std::vector<std::pair<int, int> >{
                 {x + 1, y}, {x - 1, y}, {x, y + 1}, {x, y - 1},
                 {x + 1, y + 1}, {x - 1, y + 1}, {x + 1, y - 1}, {x - 1, y - 1} // diagonals
             };
@@ -346,20 +305,17 @@ namespace Modelec
 
         bool path_found = false;
 
-        while (!open_list.empty())
-        {
+        while (!open_list.empty()) {
             AStarNode current = open_list.top();
             open_list.pop();
 
-            if (current.x == goal_x && current.y == goal_y)
-            {
+            if (current.x == goal_x && current.y == goal_y) {
                 path_found = true;
                 break;
             }
 
-            for (const auto& [nx, ny] : neighbors(current.x, current.y))
-            {
-                if (nx < 0 || ny < 0 || ny >= (int)grid_.size() || nx >= (int)grid_[0].size())
+            for (const auto &[nx, ny]: neighbors(current.x, current.y)) {
+                if (nx < 0 || ny < 0 || ny >= (int) grid_.size() || nx >= (int) grid_[0].size())
                     continue;
 
                 if (!TestCollision(nx, ny, collisionMask))
@@ -368,8 +324,7 @@ namespace Modelec
                 double tentative_g = current.g + Heuristic(current.x, current.y, nx, ny);
                 int64_t neighbor_hash = hash(nx, ny);
 
-                if (all_nodes.find(neighbor_hash) == all_nodes.end() || tentative_g < all_nodes[neighbor_hash].g)
-                {
+                if (all_nodes.find(neighbor_hash) == all_nodes.end() || tentative_g < all_nodes[neighbor_hash].g) {
                     AStarNode neighbor;
                     neighbor.x = nx;
                     neighbor.y = ny;
@@ -383,19 +338,17 @@ namespace Modelec
             }
         }
 
-        if (!path_found)
-        {
+        if (!path_found) {
             RCLCPP_WARN(node_->get_logger(), "No path found");
             return {-1, waypoints};
         }
 
         // 5. Reconstruct path
-        std::vector<std::pair<int, int>> path;
+        std::vector<std::pair<int, int> > path;
         int cx = goal_x;
         int cy = goal_y;
 
-        while (!(cx == start_x && cy == start_y))
-        {
+        while (!(cx == start_x && cy == start_y)) {
             path.emplace_back(cx, cy);
             auto it = all_nodes.find(hash(cx, cy));
             if (it == all_nodes.end())
@@ -407,13 +360,11 @@ namespace Modelec
         std::reverse(path.begin(), path.end());
 
         // 6. Path smoothing
-        std::vector<std::pair<int, int>> smooth_path;
+        std::vector<std::pair<int, int> > smooth_path;
         size_t current = 0;
-        while (current < path.size())
-        {
+        while (current < path.size()) {
             size_t next = current + 1;
-            while (next < path.size())
-            {
+            while (next < path.size()) {
                 bool clear = true;
                 int x0 = path[current].first;
                 int y0 = path[current].second;
@@ -428,23 +379,19 @@ namespace Modelec
                 int x = x0;
                 int y = y0;
 
-                while (true)
-                {
-                    if (!TestCollision(x, y, collisionMask))
-                    {
+                while (true) {
+                    if (!TestCollision(x, y, collisionMask)) {
                         clear = false;
                         break;
                     }
                     if (x == x1 && y == y1)
                         break;
                     int e2 = 2 * err;
-                    if (e2 >= dy)
-                    {
+                    if (e2 >= dy) {
                         err += dy;
                         x += sx;
                     }
-                    if (e2 <= dx)
-                    {
+                    if (e2 <= dx) {
                         err += dx;
                         y += sy;
                     }
@@ -456,8 +403,7 @@ namespace Modelec
             }
 
             smooth_path.push_back(path[current]);
-            if (next == path.size())
-            {
+            if (next == path.size()) {
                 smooth_path.push_back(path.back());
                 break;
             }
@@ -498,13 +444,11 @@ namespace Modelec
 
         // 7. Fill Waypoints (reconvertir grille -> millimètres)
         int id = 0;
-        for (size_t i = 0; i < smooth_path.size(); ++i)
-        {
-            const auto& [x, y] = smooth_path[i];
+        for (size_t i = 0; i < smooth_path.size(); ++i) {
+            const auto &[x, y] = smooth_path[i];
 
             // Skip first point if it's too close to robot position
-            if (i == 0)
-            {
+            if (i == 0) {
                 float world_x = x * cell_size_mm_x;
                 float world_y = (grid_height_ - 1 - y) * cell_size_mm_y;
 
@@ -520,16 +464,15 @@ namespace Modelec
             wp.y = (grid_height_ - 1 - y) * cell_size_mm_y;
 
             // Calculer l'angle entre le point actuel et le prochain point
-            if (i < smooth_path.size() - 1) // Si ce n'est pas le dernier point
-            {
-                const auto& [next_x, next_y] = smooth_path[i + 1];
+            if (i < smooth_path.size() - 1) {
+                const auto &[next_x, next_y] = smooth_path[i + 1];
                 // Calcul de l'angle entre (x, y) et (next_x, next_y)
                 float delta_x = next_x * cell_size_mm_x - wp.x;
                 float delta_y = (grid_height_ - 1 - next_y) * cell_size_mm_y - wp.y;
                 wp.theta = std::atan2(delta_y, delta_x); // Calcul de l'angle en radians
-            }
-            else
-            {
+            } else {
+                wp.x = goal->x;
+                wp.y = goal->y;
                 wp.theta = goal->theta;
             }
 
@@ -537,26 +480,22 @@ namespace Modelec
             wp.is_end = false;
             waypoints.push_back(wp);
         }
-        if (!waypoints.empty())
-        {
+        if (!waypoints.empty()) {
             waypoints.back().is_end = true;
         }
 
         return {FREE, waypoints};
     }
 
-    void Pathfinding::SetCurrentPos(const PosMsg::SharedPtr& pos)
-    {
+    void Pathfinding::SetCurrentPos(const PosMsg::SharedPtr &pos) {
         current_start_ = pos;
     }
 
-    std::shared_ptr<Obstacle> Pathfinding::GetObstacle(int id) const
-    {
+    std::shared_ptr<Obstacle> Pathfinding::GetObstacle(int id) const {
         return obstacle_map_.at(id);
     }
 
-    void Pathfinding::RemoveObstacle(int id)
-    {
+    void Pathfinding::RemoveObstacle(int id) {
         obstacle_map_.erase(id);
 
         modelec_interfaces::msg::Obstacle msg;
@@ -564,38 +503,42 @@ namespace Modelec
         obstacle_remove_pub_->publish(msg);
     }
 
-    void Pathfinding::AddObstacle(const std::shared_ptr<Obstacle>& obstacle)
-    {
+    void Pathfinding::AddObstacle(const std::shared_ptr<Obstacle> &obstacle) {
         obstacle_map_[obstacle->GetId()] = obstacle;
         modelec_interfaces::msg::Obstacle msg = obstacle->toMsg();
         obstacle_add_pub_->publish(msg);
     }
 
-    std::shared_ptr<ColumnObstacle> Pathfinding::GetClosestColumn(const PosMsg::SharedPtr& pos,
-                                                                  const std::vector<int>& blacklistedId)
-    {
-        // TODO score (count dist and dist with enemy)
+    std::shared_ptr<ColumnObstacle> Pathfinding::GetClosestColumn(const PosMsg::SharedPtr &pos,
+                                                                  const std::vector<int> &blacklistedId) {
         std::shared_ptr<ColumnObstacle> closest_obstacle = nullptr;
         auto robotPos = Point(pos->x, pos->y, pos->theta);
         auto enemyPos = Point(last_enemy_pos_.x, last_enemy_pos_.y, last_enemy_pos_.theta);
         float score = std::numeric_limits<float>::max();
 
-        for (const auto& [id, obstacle] : obstacle_map_)
-        {
-            if (auto obs = std::dynamic_pointer_cast<ColumnObstacle>(obstacle))
-            {
+        for (const auto &[id, obstacle]: obstacle_map_) {
+            if (auto obs = std::dynamic_pointer_cast<ColumnObstacle>(obstacle)) {
                 if (!obs->IsAtObjective() && std::find(blacklistedId.begin(), blacklistedId.end(), obs->GetId()) ==
-                    blacklistedId.end())
-                {
-                    for (auto possiblePos : obs->GetAllPossiblePositions())
-                    {
+                    blacklistedId.end()) {
+                    for (auto possiblePos: obs->GetAllPossiblePositions()) {
                         auto dist = Point::distance(robotPos, possiblePos);
                         auto distEnemy = Point::distance(enemyPos, possiblePos);
+                        auto takePoint = possiblePos;
+                        takePoint.theta += M_PI;
+                        double theta = std::abs(Point::angleDiff(robotPos, takePoint));
 
-                        auto s = dist + distEnemy * factor_close_enemy_;
+                        auto dist_score = dist;
+                        auto distEnemy_score = distEnemy * factor_close_enemy_ * has_enemy_pos_;
+                        auto theta_score = (theta / M_PI * 250);
 
-                        if (s < score)
-                        {
+                        auto s = dist_score + distEnemy_score + theta_score;
+
+                        if (s < score) {
+                            /*RCLCPP_INFO(node_->get_logger(),
+                                        "Column %d at (%d, %d) with dist_s=%f, distEnemy_s=%f, theta=%f, theta_s=%f, score=%f",
+                                        obs->GetId(), possiblePos.x, possiblePos.y, dist_score, distEnemy_score, theta,
+                                        theta_score, s);*/
+
                             score = s;
                             closest_obstacle = obs;
                         }
@@ -608,63 +551,50 @@ namespace Modelec
     }
 
     void Pathfinding::HandleMapRequest(const std::shared_ptr<modelec_interfaces::srv::Map::Request>,
-                                       const std::shared_ptr<modelec_interfaces::srv::Map::Response> response)
-    {
+                                       const std::shared_ptr<modelec_interfaces::srv::Map::Response> response) {
         response->width = grid_[0].size();
         response->height = grid_.size();
         response->map = std::vector<int>(grid_.size() * grid_[0].size());
-        for (size_t i = 0; i < grid_.size(); i++)
-        {
-            for (size_t j = 0; j < grid_[i].size(); j++)
-            {
+        for (size_t i = 0; i < grid_.size(); i++) {
+            for (size_t j = 0; j < grid_[i].size(); j++) {
                 response->map[i * grid_[i].size() + j] = grid_[i][j];
             }
         }
     }
 
     void Pathfinding::HandleMapSizeRequest(const std::shared_ptr<modelec_interfaces::srv::MapSize::Request>,
-                                           const std::shared_ptr<modelec_interfaces::srv::MapSize::Response> response)
-    {
+                                           const std::shared_ptr<modelec_interfaces::srv::MapSize::Response> response) {
         response->width = grid_width_;
         response->height = grid_height_;
     }
 
     void Pathfinding::HandleAskObstacleRequest(const std::shared_ptr<std_srvs::srv::Empty::Request>,
-                                               const std::shared_ptr<std_srvs::srv::Empty::Response>)
-    {
-        for (auto& [index, obs] : obstacle_map_)
-        {
+                                               const std::shared_ptr<std_srvs::srv::Empty::Response>) {
+        for (auto &[index, obs]: obstacle_map_) {
             obstacle_add_pub_->publish(obs->toMsg());
         }
     }
 
-    void Pathfinding::OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
-    {
+    void Pathfinding::OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
         last_enemy_pos_ = *msg;
         has_enemy_pos_ = true;
     }
 
-    void Pathfinding::OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
-    {
+    void Pathfinding::OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
         Point enemyPos(msg->x, msg->y, msg->theta);
-        for (auto& [index, obs] : obstacle_map_)
-        {
-            if (auto column = std::dynamic_pointer_cast<ColumnObstacle>(obs))
-            {
+        for (auto &[index, obs]: obstacle_map_) {
+            if (auto column = std::dynamic_pointer_cast<ColumnObstacle>(obs)) {
                 if (Point::distance(enemyPos, column->GetPosition()) < enemy_width_mm_ + (column->GetWidth() / 2) +
-                    enemy_margin_mm_)
-                {
+                    enemy_margin_mm_) {
                     RemoveObstacle(column->GetId());
                 }
             }
         }
     }
 
-    bool Pathfinding::TestCollision(int x, int y, int collisionMask)
-    {
+    bool Pathfinding::TestCollision(int x, int y, int collisionMask) {
         if (y < 0 || y >= static_cast<int>(grid_.size()) ||
-            x < 0 || x >= static_cast<int>(grid_[y].size()))
-        {
+            x < 0 || x >= static_cast<int>(grid_[y].size())) {
             RCLCPP_WARN(node_->get_logger(), "TestCollision: access out of bounds x=%d y=%d", x, y);
             return false; // ou true, selon ce que tu veux (false = pas de collision)
         }
@@ -672,34 +602,29 @@ namespace Modelec
         return (grid_[y][x] & collisionMask) && !(grid_[y][x] & ~collisionMask);
     }
 
-    bool Pathfinding::LoadObstaclesFromXML(const std::string& filename)
-    {
+    bool Pathfinding::LoadObstaclesFromXML(const std::string &filename) {
         tinyxml2::XMLDocument doc;
-        if (doc.LoadFile(filename.c_str()) != tinyxml2::XML_SUCCESS)
-        {
+        if (doc.LoadFile(filename.c_str()) != tinyxml2::XML_SUCCESS) {
             RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacle XML file: %s", filename.c_str());
             return false;
         }
 
-        tinyxml2::XMLElement* root = doc.FirstChildElement("Obstacles");
-        if (!root)
-        {
+        tinyxml2::XMLElement *root = doc.FirstChildElement("Obstacles");
+        if (!root) {
             RCLCPP_ERROR(node_->get_logger(), "No <Obstacles> root element in file");
             return false;
         }
 
-        for (tinyxml2::XMLElement* obstacleElem = root->FirstChildElement("Obstacle");
+        for (tinyxml2::XMLElement *obstacleElem = root->FirstChildElement("Obstacle");
              obstacleElem != nullptr;
-             obstacleElem = obstacleElem->NextSiblingElement("Obstacle"))
-        {
+             obstacleElem = obstacleElem->NextSiblingElement("Obstacle")) {
             std::shared_ptr<Obstacle> obs = std::make_shared<Obstacle>(obstacleElem);
             obstacle_map_[obs->GetId()] = obs;
         }
 
-        for (tinyxml2::XMLElement* obstacleElem = root->FirstChildElement("Gradin");
+        for (tinyxml2::XMLElement *obstacleElem = root->FirstChildElement("Gradin");
              obstacleElem != nullptr;
-             obstacleElem = obstacleElem->NextSiblingElement("Gradin"))
-        {
+             obstacleElem = obstacleElem->NextSiblingElement("Gradin")) {
             std::shared_ptr<ColumnObstacle> obs = std::make_shared<ColumnObstacle>(obstacleElem);
             obstacle_map_[obs->GetId()] = obs;
         }
@@ -708,8 +633,7 @@ namespace Modelec
         return true;
     }
 
-    Waypoint::Waypoint(const modelec_interfaces::msg::OdometryPos& pos, int index, bool isLast)
-    {
+    Waypoint::Waypoint(const modelec_interfaces::msg::OdometryPos &pos, int index, bool isLast) {
         id = index;
         x = pos.x;
         y = pos.y;
@@ -718,8 +642,7 @@ namespace Modelec
         reached = false;
     }
 
-    Waypoint::Waypoint(const WaypointMsg& waypoint)
-    {
+    Waypoint::Waypoint(const WaypointMsg &waypoint) {
         id = waypoint.id;
         x = waypoint.x;
         y = waypoint.y;
@@ -728,8 +651,7 @@ namespace Modelec
         reached = false;
     }
 
-    WaypointMsg Waypoint::ToMsg() const
-    {
-        return static_cast<OdometryAddWaypoint_<std::allocator<void>>>(*this);
+    WaypointMsg Waypoint::ToMsg() const {
+        return static_cast<OdometryWaypoint_<std::allocator<void> >>(*this);
     }
 }

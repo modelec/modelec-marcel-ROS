@@ -12,13 +12,13 @@
 
 #include <std_srvs/srv/empty.hpp>
 
-#include <modelec_interfaces/msg/odometry_add_waypoint.hpp>
+#include <modelec_interfaces/msg/odometry_waypoint.hpp>
+#include <modelec_interfaces/msg/odometry_waypoints.hpp>
 #include <modelec_interfaces/msg/odometry_pos.hpp>
 #include <modelec_interfaces/msg/odometry_go_to.hpp>
 #include <modelec_interfaces/srv/map.hpp>
 #include <modelec_interfaces/srv/map_size.hpp>
 #include <modelec_interfaces/msg/obstacle.hpp>
-#include <modelec_interfaces/msg/odometry_waypoint_reach.hpp>
 #include <modelec_interfaces/msg/strat_state.hpp>
 
 #include <std_msgs/msg/bool.hpp>
@@ -47,8 +47,6 @@ namespace ModelecGUI
         void paintEvent(QPaintEvent*) override;
 
         void mousePressEvent(QMouseEvent* event) override;
-
-        void onOdometryReceived(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
         void OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg);
 
@@ -79,7 +77,8 @@ namespace ModelecGUI
 
         rclcpp::Node::SharedPtr node_;
 
-        rclcpp::Subscription<modelec_interfaces::msg::OdometryAddWaypoint>::SharedPtr add_waypoint_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryWaypoint>::SharedPtr add_waypoint_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::OdometryWaypoints>::SharedPtr add_waypoints_sub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr odometry_sub_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryGoTo>::SharedPtr go_to_pub_;

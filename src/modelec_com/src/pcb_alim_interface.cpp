@@ -8,16 +8,18 @@ namespace Modelec
     PCBAlimInterface::PCBAlimInterface() : Node("pcb_alim_interface")
     {
         // Service to create a new serial listener
-        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
-        if (!Config::load(config_path))
-        {
-            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
-        }
+        declare_parameter<std::string>("serial_port", "/dev/ttyUSB0");
+        declare_parameter<int>("baudrate", 115200);
+        declare_parameter<std::string>("name", "pcb_action");
 
         auto request = std::make_shared<modelec_interfaces::srv::AddSerialListener::Request>();
-        request->name = Config::get<std::string>("config.usb.pcb.pcb_alim.name", "pcb_odo");
-        request->bauds = Config::get<int>("config.usb.pcb.pcb_alim.baudrate", 115200);
-        request->serial_port = Config::get<std::string>("config.usb.pcb.pcb_alim.port", "/dev/ttyUSB0");
+        request->name = get_parameter("name").as_string();
+        request->bauds = get_parameter("baudrate").as_int();
+        request->serial_port = get_parameter("serial_port").as_string();
+
+        RCLCPP_INFO(this->get_logger(), "Requesting serial listener with parameters: "
+            "name='%s', bauds=%ld, serial_port='%s'",
+            request->name.c_str(), request->bauds, request->serial_port.c_str());
 
         auto client = this->create_client<modelec_interfaces::srv::AddSerialListener>("add_serial_listener");
         while (!client->wait_for_service(std::chrono::seconds(1)))

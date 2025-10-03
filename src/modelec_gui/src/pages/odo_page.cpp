@@ -13,7 +13,7 @@ namespace ModelecGUI
             RCLCPP_INFO(node_->get_logger(), "Start button clicked.");
             auto request = std::make_shared<modelec_interfaces::srv::OdometryStart::Request>();
             request->start = true;
-            client_start_->async_send_request(
+            /*client_start_->async_send_request(
                 request, [this](rclcpp::Client<modelec_interfaces::srv::OdometryStart>::SharedFuture response)
                 {
                     if (response.get()->success)
@@ -24,7 +24,7 @@ namespace ModelecGUI
                     {
                         RCLCPP_ERROR(node_->get_logger(), "Failed to send start command.");
                     }
-                });
+                });*/
         });
 
         // Initialize the UI components
@@ -49,7 +49,7 @@ namespace ModelecGUI
             auto request = std::make_shared<modelec_interfaces::srv::OdometryGetPid::Request>();
 
             // Make the asynchronous service call
-            client_get_pid_->async_send_request(
+            /*client_get_pid_->async_send_request(
                 request, [this](rclcpp::Client<modelec_interfaces::srv::OdometryGetPid>::SharedFuture response)
                 {
                     RCLCPP_INFO(node_->get_logger(), "Received PID response.");
@@ -68,7 +68,7 @@ namespace ModelecGUI
                     {
                         RCLCPP_ERROR(node_->get_logger(), "Failed to get response for PID request.");
                     }
-                });
+                });*/
         });
         pPIDBox_ = new QDoubleSpinBox(this);
         pPIDBox_->setMinimum(0);
@@ -106,7 +106,7 @@ namespace ModelecGUI
             request->d = dPIDBox_->text().toFloat();
 
             // Make the asynchronous service call
-            client_set_pid_->async_send_request(
+            /*client_set_pid_->async_send_request(
                 request, [this](rclcpp::Client<modelec_interfaces::srv::OdometrySetPid>::SharedFuture response)
                 {
                     if (response.get()->success)
@@ -117,7 +117,7 @@ namespace ModelecGUI
                     {
                         RCLCPP_ERROR(node_->get_logger(), "Failed to send set PID command.");
                     }
-                });
+                });*/
         });
 
         askSpeed_ = new QPushButton("Ask speed");
@@ -127,7 +127,7 @@ namespace ModelecGUI
             auto request = std::make_shared<modelec_interfaces::srv::OdometrySpeed::Request>();
 
             // Make the asynchronous service call
-            client_->async_send_request(
+            /*client_->async_send_request(
                 request, [this](rclcpp::Client<modelec_interfaces::srv::OdometrySpeed>::SharedFuture response)
                 {
                     if (auto res = response.get())
@@ -143,7 +143,7 @@ namespace ModelecGUI
                     {
                         RCLCPP_ERROR(node_->get_logger(), "Failed to get response for speed request.");
                     }
-                });
+                });*/
         });
 
         xSpeedBox_ = new QLineEdit("x speed: ?");
@@ -169,11 +169,11 @@ namespace ModelecGUI
         setLayout(mainLayout_);
 
         // Set up subscription
-        sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
-            "/odometry/position", 10,
-            std::bind(&OdoPage::PositionCallback, this, std::placeholders::_1));
+        /*sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
+            "/odom/position", 10,
+            std::bind(&OdoPage::PositionCallback, this, std::placeholders::_1));*/
 
-        client_ = node_->create_client<modelec_interfaces::srv::OdometrySpeed>("odometry/speed");
+        /*client_ = node_->create_client<modelec_interfaces::srv::OdometrySpeed>("odometry/speed");
         while (!client_->wait_for_service(std::chrono::seconds(1)))
         {
             if (!rclcpp::ok())
@@ -216,7 +216,7 @@ namespace ModelecGUI
                 return;
             }
             RCLCPP_INFO(node_->get_logger(), "Service not available, waiting again...");
-        }
+        }*/
     }
 
     OdoPage::~OdoPage() = default;

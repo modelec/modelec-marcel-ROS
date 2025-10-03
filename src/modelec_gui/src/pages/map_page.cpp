@@ -51,9 +51,9 @@ namespace ModelecGUI
         enemy_length_ = Modelec::Config::get<int>("config.enemy.size.length_mm", 300);
         enemy_width_ = Modelec::Config::get<int>("config.enemy.size.width_mm", 300);
 
-        add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryAddWaypoint>(
+        add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryWaypoint>(
             "odometry/add_waypoint", 100,
-            [this](const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg)
+            [this](const modelec_interfaces::msg::OdometryWaypoint::SharedPtr msg)
             {
                 if (lastWapointWasEnd)
                 {
@@ -73,6 +73,26 @@ namespace ModelecGUI
                                          height() - msg->y * ratioBetweenMapAndWidgetY_));
                 update();
             });
+
+        add_waypoints_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryWaypoints>(
+        "odometry/add_waypoints", 10,
+        [this](const modelec_interfaces::msg::OdometryWaypoints::SharedPtr msg)
+        {
+            qpoints.clear();
+            lastWapointWasEnd = false;
+
+            qpoints.push_back(QPoint(robotPos.x * ratioBetweenMapAndWidgetX_,
+                                     height() - robotPos.y * ratioBetweenMapAndWidgetY_));
+
+            for (const auto& point : msg->waypoints)
+            {
+                qpoints.push_back(QPoint(point.x * ratioBetweenMapAndWidgetX_,
+                                         height() - point.y * ratioBetweenMapAndWidgetY_));
+            }
+
+            update();
+        });
+
 
         odometry_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>("odometry/position", 10,
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
@@ -111,7 +131,7 @@ namespace ModelecGUI
                 update();
             });
 
-        strat_start_sub_ = node_->create_subscription<std_msgs::msg::Int64>("/strat/start_time", 10,
+        strat_start_sub_ = node_->create_subscription<std_msgs::msg::Int64>("strat/start_time", 10,
                                                                             [this](
                                                                             const std_msgs::msg::Int64::SharedPtr msg)
                                                                             {
@@ -119,7 +139,7 @@ namespace ModelecGUI
                                                                                 start_time_ = msg->data;
                                                                             });
 
-        strat_state_sub_ = node_->create_subscription<modelec_interfaces::msg::StratState>("/strat/state", 10,
+        strat_state_sub_ = node_->create_subscription<modelec_interfaces::msg::StratState>("strat/state", 10,
             [this](const modelec_interfaces::msg::StratState::SharedPtr msg)
             {
                 if (msg->state == modelec_interfaces::msg::StratState::STOP)

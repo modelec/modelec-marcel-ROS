@@ -13,25 +13,25 @@ namespace ModelecGUI {
         resize(1200, 800);
 
         home_page_ = new HomePage(get_node(), this);
-        odo_page_ = new OdoPage(get_node(), this);
+        //odo_page_ = new OdoPage(get_node(), this);
         test_map_page_ = new TestMapPage(get_node(), this);
         map_page_ = new MapPage(get_node(), this);
-        action_page_ = new ActionPage(get_node(), this);
-        alim_page_ = new AlimPage(get_node(), this);
+        // action_page_ = new ActionPage(get_node(), this);
+        // alim_page_ = new AlimPage(get_node(), this);
 
         stackedWidget->addWidget(home_page_);
-        stackedWidget->addWidget(odo_page_);
+        // stackedWidget->addWidget(odo_page_);
         stackedWidget->addWidget(test_map_page_);
         stackedWidget->addWidget(map_page_);
-        stackedWidget->addWidget(action_page_);
-        stackedWidget->addWidget(alim_page_);
+        // stackedWidget->addWidget(action_page_);
+        // stackedWidget->addWidget(alim_page_);
         setCentralWidget(stackedWidget);
 
         setupMenu();
 
         connect(home_page_, &HomePage::TeamChoose, this, [this]()
         {
-            stackedWidget->setCurrentIndex(3);
+            stackedWidget->setCurrentWidget(map_page_);
         });
     }
 
@@ -68,25 +68,25 @@ namespace ModelecGUI {
         optionsMenu->addAction(exit_action_);
 
         connect(home_action_, &QAction::triggered, this, [this]() {
-            stackedWidget->setCurrentIndex(0);
+            stackedWidget->setCurrentWidget(home_page_);
             home_page_->Init();
             map_page_->Reset();
         });
 
         connect(odo_action_, &QAction::triggered, this, [this]() {
-            stackedWidget->setCurrentIndex(1);
+            stackedWidget->setCurrentWidget(odo_page_);
         });
 
         connect(action_action_, &QAction::triggered, this, [this]() {
-            stackedWidget->setCurrentIndex(4);
+            stackedWidget->setCurrentWidget(action_page_);
         });
 
         connect(alim_action_, &QAction::triggered, this, [this]() {
-            stackedWidget->setCurrentIndex(5);
+            stackedWidget->setCurrentWidget(alim_page_);
         });
 
         connect(map_action_, &QAction::triggered, this, [this]() {
-            stackedWidget->setCurrentIndex(2);
+            stackedWidget->setCurrentWidget(map_page_);
         });
 
         connect(playmat_map_, &QAction::triggered, this, [this]() {

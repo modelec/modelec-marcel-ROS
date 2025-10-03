@@ -6,8 +6,8 @@
 
 #include <tinyxml2.h>
 
-#include <modelec_interfaces/msg/odometry_add_waypoint.hpp>
-#include <modelec_interfaces/msg/odometry_waypoint_reach.hpp>
+#include <modelec_interfaces/msg/odometry_waypoint.hpp>
+#include <modelec_interfaces/msg/odometry_waypoints.hpp>
 #include <modelec_interfaces/msg/odometry_pos.hpp>
 #include <modelec_interfaces/msg/map.hpp>
 #include <modelec_interfaces/srv/map.hpp>
@@ -21,8 +21,8 @@
 
 namespace Modelec
 {
-    using WaypointMsg = modelec_interfaces::msg::OdometryAddWaypoint;
-    using WaypointReachMsg = modelec_interfaces::msg::OdometryWaypointReach;
+    using WaypointMsg = modelec_interfaces::msg::OdometryWaypoint;
+    using WaypointsMsg = modelec_interfaces::msg::OdometryWaypoints;
     using PosMsg = modelec_interfaces::msg::OdometryPos;
     using WaypointListMsg = std::vector<WaypointMsg>;
 
@@ -65,7 +65,7 @@ namespace Modelec
 
         Pathfinding(const rclcpp::Node::SharedPtr& node);
 
-        rclcpp::Node::SharedPtr GetNode() const;
+        [[nodiscard]] rclcpp::Node::SharedPtr GetNode() const;
 
         std::pair<int, WaypointListMsg> FindPath(const PosMsg::SharedPtr& start,
                                                  const PosMsg::SharedPtr& goal, bool isClose = false,
@@ -77,7 +77,7 @@ namespace Modelec
 
         void SetCurrentPos(const PosMsg::SharedPtr& pos);
 
-        std::shared_ptr<Obstacle> GetObstacle(int id) const;
+        [[nodiscard]] std::shared_ptr<Obstacle> GetObstacle(int id) const;
 
         void RemoveObstacle(int id);
 

@@ -17,14 +17,6 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(modelec_interfaces REQUIRED)
 find_package(modelec_utils REQUIRED)
 
-add_executable(gamecontroller_listener src/gamecontroller_listener.cpp)
-ament_target_dependencies(gamecontroller_listener rclcpp std_msgs sensor_msgs modelec_interfaces)
-target_link_libraries(gamecontroller_listener modelec_utils::utils)
-target_include_directories(gamecontroller_listener PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-
 add_executable(speed_result src/speed_result.cpp)
 ament_target_dependencies(speed_result rclcpp std_msgs sensor_msgs modelec_interfaces)
 target_link_libraries(speed_result modelec_utils::utils)
@@ -43,7 +35,6 @@ endif()
 
 # Install targets
 install(TARGETS
-  gamecontroller_listener
   speed_result
   DESTINATION lib/${PROJECT_NAME}
 )

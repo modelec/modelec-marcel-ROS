@@ -122,7 +122,7 @@ class SimulatedPCB:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Simulated PCB")
-    parser.add_argument('--port', type=str, default='/dev/pts/6', help='Serial port to use')
+    parser.add_argument('--port', type=str, default='/tmp/USB_ACTION_SIM', help='Serial port to use')
     args = parser.parse_args()
 
     sim = None
@@ -132,3 +132,8 @@ if __name__ == '__main__':
         if sim:
             sim.stop()
         print("Simulation stopped")
+
+# socat -d -d pty,raw,echo=0,link=/tmp/MARCEL_ACTION_SIM pty,raw,echo=0,link=/tmp/MARCEL_ACTION
+# python3 simulated_pcb/action.py --port /tmp/MARCEL_ACTION_SIM
+# socat -d -d pty,raw,echo=0,link=/tmp/ENEMY_ACTION_SIM pty,raw,echo=0,link=/tmp/ENEMY_ACTION
+# python3 simulated_pcb/action.py --port /tmp/ENEMY_ACTION_SIM

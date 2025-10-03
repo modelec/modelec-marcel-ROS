@@ -1,8 +1,8 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <modelec_interfaces/msg/odometry_add_waypoint.hpp>
-#include <modelec_interfaces/msg/odometry_waypoint_reach.hpp>
+#include <modelec_interfaces/msg/odometry_waypoint.hpp>
+#include <modelec_interfaces/msg/odometry_waypoints.hpp>
 #include <modelec_interfaces/msg/odometry_pos.hpp>
 #include <modelec_interfaces/msg/odometry_go_to.hpp>
 #include <modelec_interfaces/msg/spawn.hpp>
@@ -41,6 +41,13 @@ namespace Modelec
 
         // void SendWaypoint() const;
         // void SendWaypoint(const std::vector<WaypointMsg>& waypoints) const;
+        void SendWaypoint() const;
+        void SendWaypoint(const std::vector<WaypointMsg>& waypoints) const;
+
+        void SendWaypoints() const;
+        void SendWaypoints(const std::vector<WaypointMsg>& waypoints) const;
+        void SendWaypoints(const WaypointsMsg& waypoints) const;
+
         void SendGoTo();
 
         void AddWaypoint(const PosMsg& pos, int index);
@@ -86,7 +93,6 @@ namespace Modelec
         PosMsg::SharedPtr GetHomePosition();
 
         void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
-        void OnEnemyPositionClose(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
         void OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
@@ -104,7 +110,7 @@ namespace Modelec
         Point GetSpawn() const;
 
     protected:
-        void OnWaypointReach(const WaypointReachMsg::SharedPtr msg);
+        void OnWaypointReach(const WaypointMsg::SharedPtr msg);
 
         void OnPos(const PosMsg::SharedPtr msg);
 
@@ -140,15 +146,15 @@ namespace Modelec
 
         std::map<int, std::shared_ptr<DepositeZone>> deposite_zones_;
 
-        rclcpp::Subscription<WaypointReachMsg>::SharedPtr waypoint_reach_sub_;
+        rclcpp::Subscription<WaypointMsg>::SharedPtr waypoint_reach_sub_;
         rclcpp::Publisher<WaypointMsg>::SharedPtr waypoint_pub_;
+        rclcpp::Publisher<WaypointsMsg>::SharedPtr waypoints_pub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryGoTo>::SharedPtr go_to_sub_;
         rclcpp::Subscription<PosMsg>::SharedPtr pos_sub_;
         rclcpp::Publisher<PosMsg>::SharedPtr pos_pub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
-        rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr close_enemy_pos_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_long_time_sub_;
 
         rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr start_odo_pub_;

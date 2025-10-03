@@ -1,14 +1,12 @@
 #include <modelec_strat/navigation_helper.hpp>
 #include <utility>
 #include <ament_index_cpp/get_package_share_directory.hpp>
-
-#include "../../modelec_utils/include/modelec_utils/config.hpp"
+#include <modelec_utils/config.hpp>
 
 namespace Modelec
 {
     NavigationHelper::NavigationHelper()
-    {
-    }
+    = default;
 
     NavigationHelper::NavigationHelper(const rclcpp::Node::SharedPtr& node) : node_(node)
     {
@@ -20,14 +18,15 @@ namespace Modelec
 
         SetupSpawn();
 
-        waypoint_reach_sub_ = node_->create_subscription<WaypointReachMsg>(
+        waypoint_reach_sub_ = node_->create_subscription<WaypointMsg>(
             "odometry/waypoint_reach", 10,
-            [this](const WaypointReachMsg::SharedPtr msg)
+            [this](const WaypointMsg::SharedPtr msg)
             {
                 OnWaypointReach(msg);
             });
 
-        waypoint_pub_ = node_->create_publisher<WaypointMsg>("odometry/add_waypoint", 100);
+        waypoint_pub_ = node_->create_publisher<WaypointMsg>("odometry/add_waypoint", 30);
+        waypoints_pub_ = node_->create_publisher<WaypointsMsg>("odometry/add_waypoints",  30);
 
         pos_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 20,
@@ -51,21 +50,14 @@ namespace Modelec
                 OnEnemyPosition(msg);
             });
 
-        close_enemy_pos_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
-            "enemy/position/emergency", 10,
-            [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
-            {
-                OnEnemyPositionClose(msg);
-            });
-
         enemy_pos_long_time_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryPos>(
-            "/enemy/long_time", 10,
+            "enemy/long_time", 10,
             [this](const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
             {
                 OnEnemyPositionLongTime(msg);
             });
 
-        start_odo_pub_ = node_->create_publisher<std_msgs::msg::Bool>("/odometry/start", 10);
+        start_odo_pub_ = node_->create_publisher<std_msgs::msg::Bool>("odometry/start", 10);
 
         std::string deposite_zone_path = ament_index_cpp::get_package_share_directory("modelec_strat") +
             "/data/deposite_zone.xml";
@@ -77,7 +69,7 @@ namespace Modelec
         spawn_pub_ = node_->create_publisher<modelec_interfaces::msg::Spawn>("nav/spawn", 10);
 
         ask_spawn_srv_ = node->create_service<std_srvs::srv::Empty>(
-            "/nav/ask_spawn", [this](const std_srvs::srv::Empty::Request::SharedPtr,
+            "nav/ask_spawn", [this](const std_srvs::srv::Empty::Request::SharedPtr,
                                      const std_srvs::srv::Empty::Response::SharedPtr)
             {
                 for (auto& ys : spawn_yellow_)
@@ -137,13 +129,13 @@ namespace Modelec
         {
             last_odo_get_pos_time_ = node_->now();
             std_msgs::msg::Empty empty_msg;
-            odo_get_pos_pub_->publish(empty_msg);
+            // odo_get_pos_pub_->publish(empty_msg);
         }
     }
 
     void NavigationHelper::SendGoTo()
     {
-        while (!waypoint_queue_.empty())
+        /*while (!waypoint_queue_.empty())
         {
             waypoint_queue_.pop();
         }
@@ -156,28 +148,44 @@ namespace Modelec
         }
 
         auto w = waypoint_queue_.front().ToMsg();
-        /*RCLCPP_INFO(node_->get_logger(), "Sending waypoint: x: %d, y: %d, theta: %f, id: %d",
-                     w.x, w.y, w.theta, w.id);*/
         waypoint_pub_->publish(w);
-        waypoint_queue_.pop();
+        waypoint_queue_.pop();*/
+
+        SendWaypoints();
     }
 
-    /*    void NavigationHelper::SendWaypoint() const
+    void NavigationHelper::SendWaypoint() const
+    {
+        for (auto& w : waypoints_)
         {
-            for (auto& w : waypoints_)
-            {
-                waypoint_pub_->publish(w.ToMsg());
-            }
+            waypoint_pub_->publish(w.ToMsg());
+        }
+    }
+
+    void NavigationHelper::SendWaypoint(const std::vector<WaypointMsg>& waypoints) const
+    {
+        for (auto& w : waypoints)
+        {
+            waypoint_pub_->publish(w);
+        }
+    }
+
+    void NavigationHelper::SendWaypoints() const
+    {
+        WaypointsMsg waypoints_msg;
+
+        for (auto& w : waypoints_)
+        {
+            waypoints_msg.waypoints.push_back(w.ToMsg());
         }
 
-        void NavigationHelper::SendWaypoint(const std::vector<WaypointMsg>& waypoints) const
-        {
-            for (auto& w : waypoints)
-            {
-                waypoint_pub_->publish(w);
-            }
-        }
-    */
+        SendWaypoints(waypoints_msg);
+    }
+
+    void NavigationHelper::SendWaypoints(const WaypointsMsg& waypoints) const
+    {
+        waypoints_pub_->publish(waypoints);
+    }
 
     void NavigationHelper::AddWaypoint(const PosMsg& pos, int index)
     {
@@ -302,7 +310,7 @@ namespace Modelec
     {
         double angle = std::atan2(pos.y - current_pos_->y, pos.x - current_pos_->x);
 
-        if (std::abs(angle - current_pos_->theta) > M_PI / 3)
+        if (std::abs(angle - current_pos_->theta) > M_PI / 4)
         {
             Rotate(angle);
             return true;
@@ -518,7 +526,8 @@ namespace Modelec
                 auto zonePoint = zone->GetNextPotPos().GetTakeBasePosition();
                 double distance = Point::distance(posPoint, zonePoint);
                 double enemy_distance = Point::distance(enemyPos, zone->GetPosition());
-                double s = distance + enemy_distance * factor_close_enemy_;
+                double theta = std::abs(Point::angleDiff(posPoint, zonePoint));
+                double s = distance + enemy_distance * factor_close_enemy_ + theta * 2;
                 if (s < score)
                 {
                     score = s;
@@ -599,31 +608,6 @@ namespace Modelec
         }
     }
 
-    void NavigationHelper::OnEnemyPositionClose(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
-    {
-        if (!last_was_close_enemy_)
-        {
-            RCLCPP_INFO(node_->get_logger(), "Enemy is close, replanning...");
-
-            last_was_close_enemy_ = true;
-
-            pathfinding_->OnEnemyPosition(msg);
-            last_enemy_pos_ = *msg;
-
-            std_msgs::msg::Bool start_odo_msg;
-            start_odo_msg.data = false;
-            start_odo_pub_->publish(start_odo_msg);
-
-            /*waypoints_.clear();
-
-            Waypoint w(*msg, -1, false);
-
-            waypoints_.emplace_back(w);
-
-            SendGoTo();*/
-        }
-    }
-
     void NavigationHelper::OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
         pathfinding_->OnEnemyPositionLongTime(msg);
@@ -632,8 +616,7 @@ namespace Modelec
         for (auto& [id, zone] : deposite_zones_)
         {
             auto zonePos = zone->GetPosition();
-            if (Point::distance(enemy_pos, zonePos) < pathfinding_->robot_width_mm_ + (zone->GetWidth() / 2) +
-                pathfinding_->enemy_margin_mm_)
+            if (Point::distance(enemy_pos, zonePos) < (zone->GetWidth() / 2) + pathfinding_->enemy_margin_mm_)
             {
                 std::shared_ptr<Obstacle> obs = std::make_shared<Obstacle>(
                     id, zonePos.x, zonePos.y, zonePos.theta, zone->GetWidth(), zone->GetHeight(), "enemy-zone");
@@ -694,13 +677,13 @@ namespace Modelec
     {
         if (last_go_to_.goal)
         {
-            if (GoTo(last_go_to_.goal, last_go_to_.isClose, last_go_to_.collisionMask) != Pathfinding::FREE)
+            if (GoToRotateFirst(last_go_to_.goal, last_go_to_.isClose, last_go_to_.collisionMask) != Pathfinding::FREE)
             {
-                if (GoTo(last_go_to_.goal, true, last_go_to_.collisionMask) != Pathfinding::FREE)
+                if (GoToRotateFirst(last_go_to_.goal, true, last_go_to_.collisionMask) != Pathfinding::FREE)
                 {
                     if (!force) return false;
 
-                    if (GoTo(current_pos_, true,
+                    if (GoToRotateFirst(current_pos_, true,
                              Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE | Pathfinding::ENEMY) !=
                         Pathfinding::FREE)
                     {
@@ -742,9 +725,9 @@ namespace Modelec
         return spawn_;
     }
 
-    void NavigationHelper::OnWaypointReach(const WaypointReachMsg::SharedPtr)
+    void NavigationHelper::OnWaypointReach(const WaypointMsg::SharedPtr msg)
     {
-        /*for (auto& waypoint : waypoints_)
+        for (auto& waypoint : waypoints_)
         {
             if (waypoint.id == msg->id)
             {
@@ -759,12 +742,12 @@ namespace Modelec
                     {
                         waypoints_.emplace_back(w);
                     }
-                    SendWaypoint();
+                    SendGoTo();
                 }
             }
-        }*/
+        }
 
-        if (await_rotate_)
+        /*if (await_rotate_)
         {
             await_rotate_ = false;
 
@@ -789,7 +772,7 @@ namespace Modelec
             {
                 waypoints_.back().reached = true;
             }
-        }
+        }*/
     }
 
     void NavigationHelper::OnPos(const PosMsg::SharedPtr msg)

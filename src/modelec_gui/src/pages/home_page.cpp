@@ -2,9 +2,7 @@
 #include <modelec_gui/pages/home_page.hpp>
 
 #include <QVBoxLayout>
-#include <modelec_interfaces/msg/detail/servo_mode__builder.hpp>
-
-#include "../../../modelec_utils/include/modelec_utils/config.hpp"
+#include <modelec_utils/config.hpp>
 
 namespace ModelecGUI
 {
@@ -12,12 +10,12 @@ namespace ModelecGUI
         : QWidget(parent), node_(node),
           renderer_(new QSvgRenderer(QString(":/img/playmat/2025_FINAL.svg"), this))
     {
-        spawn_pub_ = node_->create_publisher<modelec_interfaces::msg::Spawn>("/strat/spawn", 10);
+        spawn_pub_ = node_->create_publisher<modelec_interfaces::msg::Spawn>("strat/spawn", 10);
 
         auto w = Modelec::Config::get<int>("config.spawn.width_mm");
         auto h = Modelec::Config::get<int>("config.spawn.height_mm");
 
-        spawn_sub_ = node_->create_subscription<modelec_interfaces::msg::Spawn>("/nav/spawn", 10,
+        spawn_sub_ = node_->create_subscription<modelec_interfaces::msg::Spawn>("nav/spawn", 10,
             [this, w, h](const modelec_interfaces::msg::Spawn::SharedPtr msg)
             {
                 auto ratioX = 1200 / 3000.0f;
@@ -53,9 +51,9 @@ namespace ModelecGUI
                 });
             });
 
-        reset_strat_pub_ = node_->create_publisher<std_msgs::msg::Empty>("/strat/reset", 10);
+        reset_strat_pub_ = node_->create_publisher<std_msgs::msg::Empty>("strat/reset", 10);
 
-        ask_spawn_client_ = node_->create_client<std_srvs::srv::Empty>("/nav/ask_spawn");
+        ask_spawn_client_ = node_->create_client<std_srvs::srv::Empty>("nav/ask_spawn");
         ask_spawn_client_->wait_for_service();
         auto ask_spawn_request_ = std::make_shared<std_srvs::srv::Empty::Request>();
         auto res = ask_spawn_client_->async_send_request(ask_spawn_request_);

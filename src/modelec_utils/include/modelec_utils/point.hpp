@@ -11,11 +11,12 @@ namespace Modelec
         Point(int x, int y, double theta) : x(x), y(y), theta(theta) {}
 
         static double distance(const Point& p1, const Point& p2);
+        static double angleDiff(const Point& p1, const Point& p2);
 
-        Point GetTakePosition(int distance, double angle) const;
-        Point GetTakePosition(int distance) const;
+        [[nodiscard]] Point GetTakePosition(int distance, double angle) const;
+        [[nodiscard]] Point GetTakePosition(int distance) const;
 
-        Point GetTakeBasePosition() const;
-        Point GetTakeClosePosition() const;
+        [[nodiscard]] Point GetTakeBasePosition() const;
+        [[nodiscard]] Point GetTakeClosePosition() const;
     };
 }

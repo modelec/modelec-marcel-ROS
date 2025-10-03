@@ -124,20 +124,24 @@ class SimulatedPCB:
             print(f'[TX] OK;START;1')
             self.ser.write(f'OK;START;1\n'.encode())
 
-        elif msg.startswith("SET;WAYPOINT"):
+        elif msg.startswith("SET;WAYPOINTS;"):
             parts = msg.split(';')
-            if len(parts) >= 7:
-                wp = {
-                    'id': int(parts[2]),
-                    'type': int(parts[3]),
-                    'x': float(parts[4]),
-                    'y': float(parts[5]),
-                    'theta': float(parts[6])
-                }
-                self.waypoints[wp['id']] = wp
-                if wp['id'] not in self.waypoint_order:
-                    self.waypoint_order.append(wp['id'])
-                self.ser.write(f'OK;WAYPOINT;{wp["id"]}\n'.encode())
+            if len(parts) / 7 >= 1:
+                self.waypoints.clear()
+                self.waypoint_order.clear()
+                for i in range(2, len(parts), 5):
+                    wp = {
+                        'id': int(parts[i]),
+                        'type': int(parts[i + 1]),
+                        'x': float(parts[i + 2]),
+                        'y': float(parts[i + 3]),
+                        'theta': float(parts[i + 4])
+                    }
+                    self.waypoints[wp['id']] = wp
+                    if wp['id'] not in self.waypoint_order:
+                        self.waypoint_order.append(wp['id'])
+                        self.ser.write(f'OK;WAYPOINT;{wp["id"]}\n'.encode())
+                self.ser.write(b'OK;WAYPOINTS;1\n')
 
         elif msg.startswith("SET;POS"):
             parts = msg.split(';')

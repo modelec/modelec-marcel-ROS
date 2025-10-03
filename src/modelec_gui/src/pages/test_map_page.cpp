@@ -25,17 +25,17 @@ namespace ModelecGUI
         enemy_length_ = Modelec::Config::get<int>("config.enemy.size.length_mm", 300);
         enemy_width_ = Modelec::Config::get<int>("config.enemy.size.width_mm", 300);
 
-        add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryAddWaypoint>(
+        add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryWaypoint>(
             "odometry/add_waypoint", 100,
-            [this](const modelec_interfaces::msg::OdometryAddWaypoint::SharedPtr msg)
+            [this](const modelec_interfaces::msg::OdometryWaypoint::SharedPtr msg)
             {
                 if (lastWapointWasEnd)
                 {
                     qpoints.clear();
                     lastWapointWasEnd = false;
 
-                    qpoints.push_back(QPoint(robotPos.x * ratioBetweenMapAndWidgetX_,
-                                             height() - robotPos.y * ratioBetweenMapAndWidgetY_));
+                    qpoints.emplace_back(robotPos.x * ratioBetweenMapAndWidgetX_,
+                                             height() - robotPos.y * ratioBetweenMapAndWidgetY_);
                 }
 
                 if (msg->is_end)
@@ -43,8 +43,27 @@ namespace ModelecGUI
                     lastWapointWasEnd = true;
                 }
 
-                qpoints.push_back(QPoint(msg->x * ratioBetweenMapAndWidgetX_,
-                                         height() - msg->y * ratioBetweenMapAndWidgetY_));
+                qpoints.emplace_back(msg->x * ratioBetweenMapAndWidgetX_,
+                                         height() - msg->y * ratioBetweenMapAndWidgetY_);
+                update();
+            });
+
+        add_waypoints_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryWaypoints>(
+            "odometry/add_waypoints", 10,
+            [this](const modelec_interfaces::msg::OdometryWaypoints::SharedPtr msg)
+            {
+                qpoints.clear();
+                lastWapointWasEnd = false;
+
+                qpoints.emplace_back(robotPos.x * ratioBetweenMapAndWidgetX_,
+                                         height() - robotPos.y * ratioBetweenMapAndWidgetY_);
+
+                for (const auto& point : msg->waypoints)
+                {
+                    qpoints.emplace_back(point.x * ratioBetweenMapAndWidgetX_,
+                                             height() - point.y * ratioBetweenMapAndWidgetY_);
+                }
+
                 update();
             });
 
@@ -229,7 +248,8 @@ namespace ModelecGUI
             msg.close = true;
             if (show_obstacle_)
             {
-                msg.mask = modelec_interfaces::msg::OdometryGoTo::FREE | modelec_interfaces::msg::OdometryGoTo::WALL;
+                msg.mask = modelec_interfaces::msg::OdometryGoTo::FREE | modelec_interfaces::msg::OdometryGoTo::WALL |
+                                    modelec_interfaces::msg::OdometryGoTo::OBSTACLE | modelec_interfaces::msg::OdometryGoTo::ENEMY;
             }
             else
             {

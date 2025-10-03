@@ -9,7 +9,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <modelec_interfaces/msg/odometry_pos.hpp>
-#include <modelec_interfaces/msg/odometry_add_waypoint.hpp>
+#include <modelec_interfaces/msg/odometry_waypoint.hpp>
 #include <modelec_interfaces/srv/odometry_speed.hpp>
 #include <modelec_interfaces/srv/odometry_start.hpp>
 #include <modelec_interfaces/srv/odometry_get_pid.hpp>
@@ -45,13 +45,13 @@ namespace ModelecGUI
 
         rclcpp::Node::SharedPtr node_;
 
-        rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr sub_;
+        // rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr sub_;
 
         // client
-        rclcpp::Client<modelec_interfaces::srv::OdometrySpeed>::SharedPtr client_;
-        rclcpp::Client<modelec_interfaces::srv::OdometryStart>::SharedPtr client_start_;
-        rclcpp::Client<modelec_interfaces::srv::OdometryGetPid>::SharedPtr client_get_pid_;
-        rclcpp::Client<modelec_interfaces::srv::OdometrySetPid>::SharedPtr client_set_pid_;
+        /* rclcpp::Client<modelec_interfaces::srv::OdometrySpeed>::SharedPtr client_;
+         rclcpp::Client<modelec_interfaces::srv::OdometryStart>::SharedPtr client_start_;
+         rclcpp::Client<modelec_interfaces::srv::OdometryGetPid>::SharedPtr client_get_pid_;
+         rclcpp::Client<modelec_interfaces::srv::OdometrySetPid>::SharedPtr client_set_pid_;*/
 
         void PositionCallback(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
     };

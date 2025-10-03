@@ -8,6 +8,13 @@ namespace Modelec
         return sqrt(std::pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
     }
 
+    double Point::angleDiff(const Point &p1, const Point &p2) {
+        double diff = std::fmod(p1.theta - p2.theta + M_PI, 2 * M_PI);
+        if (diff < 0)
+            diff += 2 * M_PI;
+        return diff - M_PI;
+    }
+
     Point Point::GetTakePosition(int distance, double angle) const
     {
         Point pos;

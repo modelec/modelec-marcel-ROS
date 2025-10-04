@@ -108,7 +108,7 @@ namespace Modelec
             });
 
         odo_add_waypoints_subscriber_ = this->create_subscription<modelec_interfaces::msg::OdometryWaypoints>(
-            "odometry/add_waypoint", 30,
+            "odometry/add_waypoints", 30,
             [this](const modelec_interfaces::msg::OdometryWaypoints::SharedPtr msg)
             {
                 AddWaypointsCallback(msg);
@@ -134,7 +134,6 @@ namespace Modelec
             {
                 if (msg->data != start_odo_)
                 {
-                    RCLCPP_INFO(this->get_logger(), "Start Odo: %s", std::to_string(msg->data).c_str());
                     start_odo_ = msg->data;
                     SendOrder("START", {std::to_string(msg->data)});
                 }
@@ -235,7 +234,6 @@ namespace Modelec
             else if (tokens[1] == "WAYPOINT")
             {
             }
-
             else if (tokens[1] == "PID")
             {
             }
@@ -358,7 +356,7 @@ namespace Modelec
             start_odo_ = true;
         }
 
-        std::vector<std::string> data(msg->waypoints.size() * 5);
+        std::vector<std::string> data;
 
         for (const auto& wp : msg->waypoints)
         {
@@ -367,7 +365,7 @@ namespace Modelec
             data.push_back(std::to_string(wp.x));
             data.push_back(std::to_string(wp.y));
             data.push_back(std::to_string(wp.theta));
-        }
+       }
 
         SendOrder("WAYPOINT", data);
     }

@@ -10,7 +10,7 @@ namespace Modelec
         // Service to create a new serial listener
         declare_parameter<std::string>("serial_port", "/dev/ttyUSB0");
         declare_parameter<int>("baudrate", 115200);
-        declare_parameter<std::string>("name", "pcb_action");
+        declare_parameter<std::string>("name", "pcb_alim");
 
         auto request = std::make_shared<modelec_interfaces::srv::AddSerialListener::Request>();
         request->name = get_parameter("name").as_string();

@@ -56,7 +56,7 @@ def generate_launch_description():
                     on_exit=[
                         TimerAction(
                             period=8.0,
-                            actions=[create_rplidar_node()]  # ✅ créer un NOUVEAU Node
+                            actions=[create_rplidar_node()]
                         )
                     ]
                 )
@@ -88,8 +88,16 @@ def generate_launch_description():
         if context.launch_configurations.get('with_com') == 'true':
             return [
                 Node(package='modelec_com', executable='serial_listener', name='serial_listener'),
-                Node(package='modelec_com', executable='pcb_odo_interface', name='pcb_odo_interface'),
-                Node(package='modelec_com', executable='pcb_action_interface', name='pcb_action_interface'),
+                Node(package='modelec_com', executable='pcb_odo_interface', name='pcb_odo_interface', parameters=[{
+                    'serial_port': "/tmp/ODO",
+                    'baudrate': 115200,
+                    'name': "pcb_odo",
+                }]),
+                Node(package='modelec_com', executable='pcb_action_interface', name='pcb_action_interface', parameters=[{
+                    'serial_port': "/tmp/ACTION",
+                    'baudrate': 115200,
+                    'name': "pcb_action",
+                }]),
             ]
         return []
 

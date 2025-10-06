@@ -10,7 +10,7 @@ namespace ModelecGUI
 {
     MapPage::MapPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent),
                                                                       renderer(new QSvgRenderer(
-                                                                          QString(":/img/playmat/2025_FINAL.svg"),
+                                                                          QString(":/img/playmat/2026_BETA.svg"),
                                                                           this)), node_(node)
     {
         ratioBetweenMapAndWidgetX_ = width() / 3000.0f;

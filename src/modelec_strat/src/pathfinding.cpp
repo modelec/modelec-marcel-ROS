@@ -1,6 +1,5 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_strat/pathfinding.hpp>
-#include <modelec_strat/obstacle/column.hpp>
 #include <modelec_utils/config.hpp>
 
 namespace Modelec {
@@ -509,15 +508,15 @@ namespace Modelec {
         obstacle_add_pub_->publish(msg);
     }
 
-    std::shared_ptr<ColumnObstacle> Pathfinding::GetClosestColumn(const PosMsg::SharedPtr &pos,
-                                                                  const std::vector<int> &blacklistedId) {
-        std::shared_ptr<ColumnObstacle> closest_obstacle = nullptr;
+    std::shared_ptr<BoxObstacle> Pathfinding::GetClosestColumn(const PosMsg::SharedPtr &pos,
+                                                               const std::vector<int> &blacklistedId) {
+        std::shared_ptr<BoxObstacle> closest_obstacle = nullptr;
         auto robotPos = Point(pos->x, pos->y, pos->theta);
         auto enemyPos = Point(last_enemy_pos_.x, last_enemy_pos_.y, last_enemy_pos_.theta);
         float score = std::numeric_limits<float>::max();
 
         for (const auto &[id, obstacle]: obstacle_map_) {
-            if (auto obs = std::dynamic_pointer_cast<ColumnObstacle>(obstacle)) {
+            if (auto obs = std::dynamic_pointer_cast<BoxObstacle>(obstacle)) {
                 if (!obs->IsAtObjective() && std::find(blacklistedId.begin(), blacklistedId.end(), obs->GetId()) ==
                     blacklistedId.end()) {
                     for (auto possiblePos: obs->GetAllPossiblePositions()) {
@@ -583,7 +582,7 @@ namespace Modelec {
     void Pathfinding::OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
         Point enemyPos(msg->x, msg->y, msg->theta);
         for (auto &[index, obs]: obstacle_map_) {
-            if (auto column = std::dynamic_pointer_cast<ColumnObstacle>(obs)) {
+            if (auto column = std::dynamic_pointer_cast<BoxObstacle>(obs)) {
                 if (Point::distance(enemyPos, column->GetPosition()) < enemy_width_mm_ + (column->GetWidth() / 2) +
                     enemy_margin_mm_) {
                     RemoveObstacle(column->GetId());
@@ -622,10 +621,10 @@ namespace Modelec {
             obstacle_map_[obs->GetId()] = obs;
         }
 
-        for (tinyxml2::XMLElement *obstacleElem = root->FirstChildElement("Gradin");
+        for (tinyxml2::XMLElement *obstacleElem = root->FirstChildElement("Box");
              obstacleElem != nullptr;
-             obstacleElem = obstacleElem->NextSiblingElement("Gradin")) {
-            std::shared_ptr<ColumnObstacle> obs = std::make_shared<ColumnObstacle>(obstacleElem);
+             obstacleElem = obstacleElem->NextSiblingElement("Box")) {
+            std::shared_ptr<BoxObstacle> obs = std::make_shared<BoxObstacle>(obstacleElem);
             obstacle_map_[obs->GetId()] = obs;
         }
 

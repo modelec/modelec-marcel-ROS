@@ -8,7 +8,7 @@ namespace ModelecGUI
 {
     HomePage::HomePage(rclcpp::Node::SharedPtr node, QWidget* parent)
         : QWidget(parent), node_(node),
-          renderer_(new QSvgRenderer(QString(":/img/playmat/2025_FINAL.svg"), this))
+          renderer_(new QSvgRenderer(QString(":/img/playmat/2026_FINAL.svg"), this))
     {
         spawn_pub_ = node_->create_publisher<modelec_interfaces::msg::Spawn>("strat/spawn", 10);
 

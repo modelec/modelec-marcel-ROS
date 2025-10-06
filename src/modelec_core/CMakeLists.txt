@@ -17,14 +17,6 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(modelec_interfaces REQUIRED)
 find_package(modelec_utils REQUIRED)
 
-add_executable(speed_result src/speed_result.cpp)
-ament_target_dependencies(speed_result rclcpp std_msgs sensor_msgs modelec_interfaces)
-target_link_libraries(speed_result modelec_utils::utils)
-target_include_directories(speed_result PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-
 # Enable testing and linting
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -35,7 +27,6 @@ endif()
 
 # Install targets
 install(TARGETS
-  speed_result
   DESTINATION lib/${PROJECT_NAME}
 )
 

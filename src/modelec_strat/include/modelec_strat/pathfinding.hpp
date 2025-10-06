@@ -16,7 +16,7 @@
 
 #include <modelec_strat/obstacle/obstacle.hpp>
 
-#include "obstacle/column.hpp"
+#include "obstacle/box.hpp"
 
 
 namespace Modelec
@@ -87,8 +87,8 @@ namespace Modelec
                   typename = std::enable_if_t<std::is_base_of<Obstacle, T>::value>>
         std::shared_ptr<T> GetClosestObstacle(const PosMsg::SharedPtr& pos) const;
 
-        std::shared_ptr<ColumnObstacle> GetClosestColumn(const PosMsg::SharedPtr& pos,
-                                                         const std::vector<int>& blacklistedId = {});
+        std::shared_ptr<BoxObstacle> GetClosestColumn(const PosMsg::SharedPtr &pos,
+                                                      const std::vector<int> &blacklistedId = {});
 
         void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 

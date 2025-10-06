@@ -11,7 +11,7 @@ namespace ModelecGUI
     TestMapPage::TestMapPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent),
                                                                               renderer(new QSvgRenderer(
                                                                                   QString(
-                                                                                      ":/img/playmat/2025_FINAL.svg"),
+                                                                                      ":/img/playmat/2026_FINAL.svg"),
                                                                                   this)), node_(node)
     {
         ratioBetweenMapAndWidgetX_ = width() / 3000.0f;
@@ -147,7 +147,7 @@ namespace ModelecGUI
 
     void TestMapPage::setPlaymatMap()
     {
-        renderer->load(QString(":/img/playmat/2025_FINAL.svg"));
+        renderer->load(QString(":/img/playmat/2026_FINAL.svg"));
         update();
     }
 

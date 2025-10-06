@@ -2,6 +2,8 @@
 <RCC version="1.0">
     <qresource prefix="/">
         <file>img/playmat/2025_FINAL.svg</file>
+        <file>img/playmat/2026_BETA.svg</file>
+        <file>img/playmat/2026_FINAL.svg</file>
         <file>img/playmat/grid_v1.svg</file>
         <file>img/logo/ISEN-Nantes.png</file>
         <file>img/logo/ISEN-Nantes-fond-blanc.svg</file>

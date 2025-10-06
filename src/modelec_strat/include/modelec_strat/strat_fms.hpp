@@ -6,7 +6,6 @@
 #include "navigation_helper.hpp"
 #include "missions/mission_base.hpp"
 #include "missions/banner_mission.hpp"
-#include "missions/prepare_concert_mission.hpp"
 #include "missions/go_home_mission.hpp"
 
 #include <std_msgs/msg/bool.hpp>
@@ -28,7 +27,6 @@ namespace Modelec
         WAIT_START,
         SELECT_MISSION,
 
-        DO_PREPARE_CONCERT,
         DO_PROMOTION,
 
         DO_GO_HOME,

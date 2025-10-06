@@ -40,38 +40,14 @@
     <spawn>
         <yellow>
             <top x="375" y="1800" theta="-1.5708" />
-            <side x="2800" y="875" theta="3.1415" />
-            <bottom x="1225" y="200" theta="1.5708" />
         </yellow>
         <blue>
             <top x="2625" y="1800" theta="-1.5708" />
-            <side x="200" y="875" theta="0" />
-            <bottom x="1775" y="200" theta="1.5708" />
         </blue>
         <width_mm>450</width_mm>
         <height_mm>450</height_mm>
     </spawn>
     <usb>
-        <pcb>
-            <pcb_odo>
-                <name>pcb_odo</name>
-                <port>/dev/USB_ODO</port>
-                <!--<port>/tmp/USB_ODO</port>-->
-                <baud_rate>115200</baud_rate>
-            </pcb_odo>
-            <pcb_alim>
-                <name>pcb_alim</name>
-                <port>/dev/USB_ALIM</port>
-                <!--<port>/tmp/USB_ALIM</port>-->
-                <baud_rate>115200</baud_rate>
-            </pcb_alim>
-            <pcb_action>
-                <name>pcb_action</name>
-                <port>/dev/USB_ACTION</port>
-                <!--<port>/tmp/USB_ACTION</port>-->
-                <baud_rate>115200</baud_rate>
-            </pcb_action>
-        </pcb>
         <timeout_ms>300</timeout_ms>
         <attempt>5</attempt>
     </usb>

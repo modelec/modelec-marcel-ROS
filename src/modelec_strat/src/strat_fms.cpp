@@ -165,41 +165,13 @@ namespace Modelec
                     Transition(State::DO_GO_HOME, "Go Home");
                 }*/
 
-                /*else if (elapsed.seconds() < 70)
-                {
-                    Transition(State::DO_PREPARE_CONCERT, "Proceed to concert");
-                }
+                /*
                 else
                 {
                     Transition(State::DO_GO_HOME, "Cleanup and finish match");
                 }*/
                 break;
             }
-
-        case State::DO_PREPARE_CONCERT:
-            if (!current_mission_)
-            {
-                current_mission_ = std::make_unique<PrepareConcertMission>(nav_, action_executor_, (now - match_start_time_).seconds() < 65);
-                current_mission_->Start(shared_from_this());
-            }
-            current_mission_->Update();
-            if (current_mission_->GetStatus() == MissionStatus::DONE)
-            {
-                current_mission_.reset();
-                Transition(State::SELECT_MISSION, "PrepareConcert finished");
-            }
-            else if (current_mission_->GetStatus() == MissionStatus::FAILED)
-            {
-                current_mission_->Clear();
-                current_mission_.reset();
-                Transition(State::SELECT_MISSION, "PrepareConcert failed");
-            }
-            else if (current_mission_->GetStatus() == MissionStatus::FINISH_ALL)
-            {
-                current_mission_.reset();
-                Transition(State::DO_GO_HOME, "Finish all finished");
-            }
-            break;
 
         case State::DO_PROMOTION:
             if (!current_mission_)

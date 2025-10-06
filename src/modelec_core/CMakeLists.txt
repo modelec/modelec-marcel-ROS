@@ -26,14 +26,14 @@ if(BUILD_TESTING)
 endif()
 
 # Install targets
-install(TARGETS
-  DESTINATION lib/${PROJECT_NAME}
-)
+#install(TARGETS
+#  DESTINATION lib/${PROJECT_NAME}
+#)
 
 # Install include files
-install(DIRECTORY include/
-  DESTINATION include/
-)
+#install(DIRECTORY include/
+#  DESTINATION include/
+#)
 
 install(
   DIRECTORY config description launch worlds

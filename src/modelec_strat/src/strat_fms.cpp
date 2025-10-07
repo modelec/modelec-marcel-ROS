@@ -151,11 +151,7 @@ namespace Modelec
             {
                 auto elapsed = now - match_start_time_;
 
-                if (!is_banner_done_)
-                {
-                    Transition(State::DO_PROMOTION, "Start promotion");
-                }
-                else if (elapsed.seconds() >= 100)
+                if (elapsed.seconds() >= 100)
                 {
                     Transition(State::STOP, "All missions done");
                 }
@@ -172,27 +168,6 @@ namespace Modelec
                 }*/
                 break;
             }
-
-        case State::DO_PROMOTION:
-            if (!current_mission_)
-            {
-                current_mission_ = std::make_unique<BannerMission>(nav_, action_executor_);
-                current_mission_->Start(shared_from_this());
-            }
-            current_mission_->Update();
-            if (current_mission_->GetStatus() == MissionStatus::DONE)
-            {
-                current_mission_.reset();
-                is_banner_done_ = true;
-                Transition(State::SELECT_MISSION, "Promotion finished");
-            }
-            else if (current_mission_->GetStatus() == MissionStatus::FAILED)
-            {
-                current_mission_.reset();
-                is_banner_done_ = true;
-                Transition(State::SELECT_MISSION, "Promotion failed");
-            }
-            break;
 
         case State::DO_GO_HOME:
             if (!current_mission_)

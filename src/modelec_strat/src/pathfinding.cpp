@@ -508,47 +508,6 @@ namespace Modelec {
         obstacle_add_pub_->publish(msg);
     }
 
-    std::shared_ptr<BoxObstacle> Pathfinding::GetClosestColumn(const PosMsg::SharedPtr &pos,
-                                                               const std::vector<int> &blacklistedId) {
-        std::shared_ptr<BoxObstacle> closest_obstacle = nullptr;
-        auto robotPos = Point(pos->x, pos->y, pos->theta);
-        auto enemyPos = Point(last_enemy_pos_.x, last_enemy_pos_.y, last_enemy_pos_.theta);
-        float score = std::numeric_limits<float>::max();
-
-        for (const auto &[id, obstacle]: obstacle_map_) {
-            if (auto obs = std::dynamic_pointer_cast<BoxObstacle>(obstacle)) {
-                if (!obs->IsAtObjective() && std::find(blacklistedId.begin(), blacklistedId.end(), obs->GetId()) ==
-                    blacklistedId.end()) {
-                    for (auto possiblePos: obs->GetAllPossiblePositions()) {
-                        auto dist = Point::distance(robotPos, possiblePos);
-                        auto distEnemy = Point::distance(enemyPos, possiblePos);
-                        auto takePoint = possiblePos;
-                        takePoint.theta += M_PI;
-                        double theta = std::abs(Point::angleDiff(robotPos, takePoint));
-
-                        auto dist_score = dist;
-                        auto distEnemy_score = distEnemy * factor_close_enemy_ * has_enemy_pos_;
-                        auto theta_score = (theta / M_PI * 250);
-
-                        auto s = dist_score + distEnemy_score + theta_score;
-
-                        if (s < score) {
-                            /*RCLCPP_INFO(node_->get_logger(),
-                                        "Column %d at (%d, %d) with dist_s=%f, distEnemy_s=%f, theta=%f, theta_s=%f, score=%f",
-                                        obs->GetId(), possiblePos.x, possiblePos.y, dist_score, distEnemy_score, theta,
-                                        theta_score, s);*/
-
-                            score = s;
-                            closest_obstacle = obs;
-                        }
-                    }
-                }
-            }
-        }
-
-        return closest_obstacle;
-    }
-
     void Pathfinding::HandleMapRequest(const std::shared_ptr<modelec_interfaces::srv::Map::Request>,
                                        const std::shared_ptr<modelec_interfaces::srv::Map::Response> response) {
         response->width = grid_[0].size();

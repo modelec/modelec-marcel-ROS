@@ -1,26 +1,24 @@
 <Obstacles>
     <!-- TOP -->
-    <Obstacle id="1" x="850" y="1900" theta="1.5708" width="400" height="200" type="estrade"/>
-    <Obstacle id="2" x="1500" y="1775" theta="1.5708" width="900" height="450" type="estrade"/>
-    <Obstacle id="3" x="2150" y="1900" theta="1.5708" width="400" height="200" type="estrade"/>
+    <Obstacle id="1" x="1500" y="1800" theta="1.5708" width="1800" height="400" type="estrade"/>
+    <!--<Obstacle id="2" x="1500" y="1775" theta="1.5708" width="900" height="450" type="estrade"/>
+    <Obstacle id="3" x="2150" y="1900" theta="1.5708" width="400" height="200" type="estrade"/>-->
 
     <!-- Box TOP TO BOTTOM    LEFT -->
-    <Box id="10" x="825" y="1725" theta="-1.5708" width="400" height="100" type="box" />
-    <Box id="11" x="75" y="1325" theta="0" width="400" height="100" type="box"/>
-    <Box id="12" x="1100" y="950" theta="1.5708" width="400" height="100" type="box" >
+    <Box id="10" x="175" y="1200" theta="0" width="200" height="150" type="box" />
+    <Box id="11" x="1150" y="800" theta="1.5708" width="200" height="150" type="box" >
         <possible-angle theta="-1.5708" />
     </Box>
-    <Box id="13" x="75" y="400" theta="0" width="400" height="100" type="box"/>
-    <Box id="14" x="775" y="250" theta="1.5708" width="400" height="100" type="box"/>
+    <Box id="12" x="175" y="400" theta="0" width="200" height="150" type="box" />
+    <Box id="13" x="1100" y="175" theta="1.5708" width="200" height="150" type="box" />
 
     <!-- Box TOP TO BOTTOM    RIGHT -->
-    <Box id="20" x="2175" y="1725" theta="-1.5708" width="400" height="100" type="box" />
-    <Box id="21" x="2925" y="1325" theta="3.1415" width="400" height="100" type="box"/>
-    <Box id="22" x="1900" y="950" theta="1.5708" width="400" height="100" type="box">
+    <Box id="20" x="2825" y="1200" theta="3.1415" width="200" height="150" type="box" />
+    <Box id="21" x="1850" y="800" theta="1.5708" width="200" height="150" type="box">
         <possible-angle theta="-1.5708" />
     </Box>
-    <Box id="23" x="2925" y="400" theta="3.1415" width="400" height="100" type="box"/>
-    <Box id="24" x="2225" y="250" theta="1.5708" width="400" height="100" type="box"/>
+    <Box id="22" x="2825" y="400" theta="3.1415" width="200" height="150" type="box"/>
+    <Box id="23" x="1900" y="175" theta="-1.5708" width="200" height="150" type="box"/>
 
     <!-- PAMI Start -->
     <Obstacle id="30" x="75" y="1750" theta="1.5708" width="150" height="450" type="pami-start"/>

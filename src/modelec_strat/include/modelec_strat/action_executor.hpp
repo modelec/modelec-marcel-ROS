@@ -14,37 +14,10 @@ namespace Modelec
         enum Action
         {
             NONE,
-            DEPLOY_BANNER,
-            UNDEPLOY_BANNER,
-            TAKE_POT,
-            PLACE_POT,
-            DEPLOY_MAX_SIZE,
         };
 
         enum Step
         {
-            // Banner
-            DEPLOY_BANNER_STEP,
-            UNDEPLOY_BANNER_STEP,
-
-            // Take Pot
-            ASC_GO_DOWN,
-            STICK_TO_STRUCT,
-            ASC_GO_UP,
-            RETRACT_BOTTOM_PLATE,
-            ASC_GO_DOWN_TO_TAKE_POT,
-            STICK_POT,
-            ASC_GO_UP_TO_TAKE_POT,
-            PLACE_FIRST_PLATE,
-
-            // Take One floor
-            STICK_ALL,
-
-
-            // Place Pot
-            ASC_FINAL,
-            FREE_ALL,
-            REMOVE_ACTION_STEP,
         };
 
         ActionExecutor();
@@ -57,32 +30,9 @@ namespace Modelec
 
         void Update();
 
-        void DeployBanner();
-        void UndeployBanner();
-
-        void TakePot(bool two_floor = true);
-
-        void PlacePot(bool two_floor = true);
-
         void ReInit();
 
     protected:
-        /*
-        rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_get_pub_;
-        rclcpp::Publisher<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_get_pub_;
-        rclcpp::Publisher<modelec_interfaces::msg::ActionRelayState>::SharedPtr relay_get_pub_;
-
-        rclcpp::Subscription<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_get_res_sub_;
-        rclcpp::Subscription<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_get_res_sub_;
-        rclcpp::Subscription<modelec_interfaces::msg::ActionRelayState>::SharedPtr relay_get_res_sub_;
-
-        rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_set_pub_;
-        rclcpp::Publisher<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_set_pub_;
-
-        rclcpp::Subscription<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_set_res_sub_;
-        rclcpp::Subscription<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_set_res_sub_;
-        */
-
         rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_move_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::ActionRelayState>::SharedPtr relay_move_pub_;

@@ -86,7 +86,7 @@ namespace ModelecGUI {
         });
 
         connect(map_action_, &QAction::triggered, this, [this]() {
-            stackedWidget->setCurrentWidget(map_page_);
+            stackedWidget->setCurrentWidget(test_map_page_);
         });
 
         connect(playmat_map_, &QAction::triggered, this, [this]() {

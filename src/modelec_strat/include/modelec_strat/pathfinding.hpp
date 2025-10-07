@@ -83,13 +83,6 @@ namespace Modelec
 
         void AddObstacle(const std::shared_ptr<Obstacle>& obstacle);
 
-        template <typename T,
-                  typename = std::enable_if_t<std::is_base_of<Obstacle, T>::value>>
-        std::shared_ptr<T> GetClosestObstacle(const PosMsg::SharedPtr& pos) const;
-
-        std::shared_ptr<BoxObstacle> GetClosestColumn(const PosMsg::SharedPtr &pos,
-                                                      const std::vector<int> &blacklistedId = {});
-
         void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
         void OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
@@ -139,27 +132,4 @@ namespace Modelec
         rclcpp::Service<modelec_interfaces::srv::MapSize>::SharedPtr map_size_srv_;
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr ask_obstacle_srv_;
     };
-
-    template <typename T, typename>
-    std::shared_ptr<T> Pathfinding::GetClosestObstacle(const PosMsg::SharedPtr& pos) const
-    {
-        std::shared_ptr<T> closest_obstacle = nullptr;
-        auto robotPos = Point(pos->x, pos->y, pos->theta);
-        float distance = std::numeric_limits<float>::max();
-
-        for (const auto& obstacle : obstacle_map_)
-        {
-            if (auto obs = std::dynamic_pointer_cast<T>(obstacle.second))
-            {
-                auto dist = Point::distance(robotPos, obs->position());
-                if (dist < distance)
-                {
-                    distance = dist;
-                    closest_obstacle = obs;
-                }
-            }
-        }
-
-        return closest_obstacle;
-    }
 }

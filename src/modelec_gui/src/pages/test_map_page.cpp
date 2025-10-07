@@ -248,8 +248,7 @@ namespace ModelecGUI
             msg.close = true;
             if (show_obstacle_)
             {
-                msg.mask = modelec_interfaces::msg::OdometryGoTo::FREE | modelec_interfaces::msg::OdometryGoTo::WALL |
-                                    modelec_interfaces::msg::OdometryGoTo::OBSTACLE | modelec_interfaces::msg::OdometryGoTo::ENEMY;
+                msg.mask = modelec_interfaces::msg::OdometryGoTo::FREE | modelec_interfaces::msg::OdometryGoTo::WALL;
             }
             else
             {

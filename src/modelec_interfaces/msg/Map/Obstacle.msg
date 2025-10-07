@@ -1,5 +1,5 @@
 string ESTRADE="estrade"
-string GRADIN="gradin"
+string GRADIN="box"
 string PAMI_START="pami-start"
 
 int32 id

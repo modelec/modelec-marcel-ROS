@@ -5,7 +5,6 @@
 #include "action_executor.hpp"
 #include "navigation_helper.hpp"
 #include "missions/mission_base.hpp"
-#include "missions/banner_mission.hpp"
 #include "missions/go_home_mission.hpp"
 
 #include <std_msgs/msg/bool.hpp>
@@ -26,8 +25,6 @@ namespace Modelec
         INIT,
         WAIT_START,
         SELECT_MISSION,
-
-        DO_PROMOTION,
 
         DO_GO_HOME,
         STOP
@@ -60,7 +57,6 @@ namespace Modelec
         bool team_selected_ = false;
         std::unique_ptr<Mission> current_mission_;
         int team_id_ = 0;
-        bool is_banner_done_ = false;
 
         std::shared_ptr<NavigationHelper> nav_;
         std::shared_ptr<ActionExecutor> action_executor_;

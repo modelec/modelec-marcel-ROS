@@ -777,7 +777,6 @@ namespace Modelec
 
     void NavigationHelper::OnPos(const PosMsg::SharedPtr msg)
     {
-        RCLCPP_INFO(node_->get_logger(), "Current position updated to x: %f, y: %f, theta: %f", msg->x, msg->y, msg->theta);
         current_pos_ = msg;
         pathfinding_->SetCurrentPos(msg);
     }

@@ -15,25 +15,20 @@
             <builtin>
                 <initialPeersList>
                     <!-- Repeat this part for each Tailscale peer, use Tailscale machine/host name (from the admin console) -->
-                    <locator>
+                    <!--<locator>
                         <udpv4>
-                             <!-- <address>Tailscale IPv4 address / domain name</address> -->
+                             <address>Tailscale IPv4 address / domain name</address>
                         </udpv4>
-                    </locator>
+                    </locator>-->
                     <!-- End repeat -->
                     <locator>
                         <udpv4>
-                            <address>acki-windows.tail1f0d2.ts.net</address> <!-- ackimixs -->
+                            <address>acki-window.tail1f0d2.ts.net</address> <!-- ackimixs -->
                         </udpv4>
                     </locator>
                     <locator>
                         <udpv4>
                             <address>marcel.ayu-hops.ts.net</address>
-                        </udpv4>
-                    </locator>
-                    <locator>
-                        <udpv4>
-                            <address>robot-v1.ayu-hops.ts.net</address>
                         </udpv4>
                     </locator>
                 </initialPeersList>

@@ -23,12 +23,12 @@
                     <!-- End repeat -->
                     <locator>
                         <udpv4>
-                            <address>acki-windows.tail1f0d2.ts.net</address> <!-- ackimixs -->
+                            <address>100.103.182.79</address> <!-- ackimixs -->
                         </udpv4>
                     </locator>
                     <locator>
                         <udpv4>
-                            <address>marcel.ayu-hops.ts.net</address>
+                            <address>100.76.247.28</address>
                         </udpv4>
                     </locator>
                 </initialPeersList>

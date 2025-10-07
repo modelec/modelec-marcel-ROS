@@ -84,22 +84,67 @@ def generate_launch_description():
         return []
 
     # Function to launch COM nodes
-    def launch_com(context, *args, **kwargs):
-        if context.launch_configurations.get('with_com') == 'true':
-            return [
-                Node(package='modelec_com', executable='serial_listener', name='serial_listener'),
-                Node(package='modelec_com', executable='pcb_odo_interface', name='pcb_odo_interface', parameters=[{
-                    'serial_port': "/tmp/ODO",
-                    'baudrate': 115200,
-                    'name': "pcb_odo",
-                }]),
-                Node(package='modelec_com', executable='pcb_action_interface', name='pcb_action_interface', parameters=[{
-                    'serial_port': "/tmp/ACTION",
-                    'baudrate': 115200,
-                    'name': "pcb_action",
-                }]),
-            ]
-        return []
+def launch_com(context, *args, **kwargs):
+    if context.launch_configurations.get('with_com') == 'true':
+        serial_listener = Node(
+            package='modelec_com',
+            executable='serial_listener',
+            name='serial_listener'
+        )
+
+        pcb_odo_interface = Node(
+            package='modelec_com',
+            executable='pcb_odo_interface',
+            name='pcb_odo_interface',
+            parameters=[{
+                'serial_port': "/tmp/ODO",
+                'baudrate': 115200,
+                'name': "pcb_odo",
+            }]
+        )
+
+        pcb_action_interface = Node(
+            package='modelec_com',
+            executable='pcb_action_interface',
+            name='pcb_action_interface',
+            parameters=[{
+                'serial_port': "/tmp/ACTION",
+                'baudrate': 115200,
+                'name': "pcb_action",
+            }]
+        )
+
+        # Restart handler for pcb_odo_interface
+        odo_restart_handler = RegisterEventHandler(
+            OnProcessExit(
+                target_action=pcb_odo_interface,
+                on_exit=[
+                    TimerAction(
+                        period=5.0,  # wait 5 seconds before restart
+                        actions=[
+                            Node(
+                                package='modelec_com',
+                                executable='pcb_odo_interface',
+                                name='pcb_odo_interface',
+                                parameters=[{
+                                    'serial_port': "/tmp/ODO",
+                                    'baudrate': 115200,
+                                    'name': "pcb_odo",
+                                }]
+                            )
+                        ]
+                    )
+                ]
+            )
+        )
+
+        return [
+            serial_listener,
+            pcb_odo_interface,
+            odo_restart_handler,
+            pcb_action_interface,
+        ]
+    return []
 
     # Function to launch strategy nodes
     def launch_strat(context, *args, **kwargs):

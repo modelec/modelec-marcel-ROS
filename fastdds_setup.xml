@@ -28,7 +28,7 @@
                     </locator>
                     <locator>
                         <udpv4>
-                            <address>marcel.ayu-hops.ts.net</address>
+                            <address>modelec-robot.ayu-hops.ts.net</address>
                         </udpv4>
                     </locator>
                 </initialPeersList>

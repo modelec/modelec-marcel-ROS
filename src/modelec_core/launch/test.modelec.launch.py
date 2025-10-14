@@ -142,7 +142,7 @@ def generate_launch_description():
     lidar_launch = OpaqueFunction(function=launch_rplidar_restart_if_needed)
 
     delayed_others = TimerAction(
-        period=1.0,  # wait 1 second after LiDAR start
+        period=5.0,  # wait 1 second after LiDAR start
         actions=[
             OpaqueFunction(function=launch_gui),
             OpaqueFunction(function=launch_com),

@@ -99,7 +99,6 @@ namespace Modelec
     {
         if (!game_stated_)
         {
-            RCLCPP_INFO(this->get_logger(), "Game not started, ignoring Lidar data");
             return;
         }
 

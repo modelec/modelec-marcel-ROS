@@ -72,7 +72,7 @@ namespace Modelec
             "/enemy/long_time", 10);
 
         start_sub_ = this->create_subscription<std_msgs::msg::Bool>(
-            "/lidar/start", 10,
+            "lidar/start", 10,
             [this](const std_msgs::msg::Bool::SharedPtr msg)
             {
                 game_stated_ = msg->data;

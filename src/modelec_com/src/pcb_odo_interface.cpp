@@ -60,6 +60,8 @@ namespace Modelec
                     pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(res->subscriber, 10);
 
                     isOk = true;
+
+                    SetStart(true);
                 }
                 else
                 {

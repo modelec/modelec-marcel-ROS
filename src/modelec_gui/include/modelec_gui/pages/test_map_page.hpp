@@ -43,6 +43,8 @@ namespace ModelecGUI
 
         void AskMap();
 
+        void StartLidar();
+
     protected:
         void paintEvent(QPaintEvent*) override;
 
@@ -86,6 +88,8 @@ namespace ModelecGUI
         rclcpp::Subscription<modelec_interfaces::msg::Obstacle>::SharedPtr obstacle_added_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::Obstacle>::SharedPtr obstacle_removed_sub_;
         rclcpp::Client<std_srvs::srv::Empty>::SharedPtr ask_map_obstacle_client_;
+
+        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr start_lidar_pub_;
 
         modelec_interfaces::msg::OdometryPos enemy_pos_;
         bool hasEnemy = false;

@@ -88,6 +88,7 @@ namespace ModelecGUI {
 
         connect(map_action_, &QAction::triggered, this, [this]() {
             stackedWidget->setCurrentWidget(test_map_page_);
+            test_map_page_->StartLidar();
         });
 
         connect(playmat_map_, &QAction::triggered, this, [this]() {

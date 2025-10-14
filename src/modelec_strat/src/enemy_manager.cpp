@@ -71,6 +71,14 @@ namespace Modelec
         enemy_long_time_pub_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
             "/enemy/long_time", 10);
 
+        start_sub_ = this->create_subscription<std_msgs::msg::Bool>(
+            "/lidar/start", 10,
+            [this](const std_msgs::msg::Bool::SharedPtr msg)
+            {
+                game_stated_ = msg->data;
+                RCLCPP_INFO(this->get_logger(), "Game started state changed: %s", game_stated_ ? "true" : "false");
+            });
+
         timer_ = this->create_wall_timer(
             std::chrono::nanoseconds(static_cast<int>(refresh_rate_s_ )),
             [this]()
@@ -89,11 +97,11 @@ namespace Modelec
 
     void EnemyManager::OnLidarData(const sensor_msgs::msg::LaserScan::SharedPtr msg)
     {
-        /*if (!game_stated_)
+        if (!game_stated_)
         {
             RCLCPP_INFO(this->get_logger(), "Game not started, ignoring Lidar data");
             return;
-        }*/
+        }
 
         is_enemy_close_ = false;
 

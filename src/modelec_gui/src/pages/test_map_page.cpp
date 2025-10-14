@@ -137,6 +137,8 @@ namespace ModelecGUI
 
         auto result2 = ask_map_obstacle_client_->async_send_request(std::make_shared<std_srvs::srv::Empty::Request>());
         rclcpp::spin_until_future_complete(node_->get_node_base_interface(), result2);
+
+        start_lidar_pub_ = node_->create_publisher<std_msgs::msg::Bool>("lidar/start", 10);
     }
 
     void TestMapPage::setPlaymatGrid()
@@ -159,6 +161,12 @@ namespace ModelecGUI
     void TestMapPage::AskMap()
     {
         ask_map_obstacle_client_->async_send_request(std::make_shared<std_srvs::srv::Empty::Request>());
+    }
+
+    void TestMapPage::StartLidar() {
+        auto msg = std_msgs::msg::Bool();
+        msg.data = true;
+        start_lidar_pub_->publish(msg);
     }
 
     void TestMapPage::paintEvent(QPaintEvent* paint_event)

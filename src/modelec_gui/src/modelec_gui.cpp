@@ -10,7 +10,8 @@ namespace ModelecGUI {
         : QMainWindow(parent), node_(std::move(node)), stackedWidget(new QStackedWidget(this)) {
 
         // Add pages to stack
-        resize(1200, 800);
+        // resize(1200, 800);
+        this->showFullScreen();
 
         home_page_ = new HomePage(get_node(), this);
         //odo_page_ = new OdoPage(get_node(), this);

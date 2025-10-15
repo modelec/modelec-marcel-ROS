@@ -252,7 +252,7 @@ namespace ModelecGUI
             modelec_interfaces::msg::OdometryGoTo msg;
             msg.x = Modelec::mapValue(event->pos().x(), 0, width(), 0, 3000);
             msg.y = 2000 - Modelec::mapValue(event->pos().y(), 0, height(), 0, 2000);
-            msg.theta = atan2(msg.y, msg.x);
+            msg.theta = atan2(-msg.y, msg.x);
             msg.close = true;
             if (show_obstacle_)
             {

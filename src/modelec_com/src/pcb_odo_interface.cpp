@@ -18,66 +18,6 @@ namespace Modelec
         request->bauds = get_parameter("baudrate").as_int();
         request->serial_port = get_parameter("serial_port").as_string();
 
-        auto client = this->create_client<modelec_interfaces::srv::AddSerialListener>("add_serial_listener");
-        while (!client->wait_for_service(std::chrono::seconds(1)))
-        {
-            if (!rclcpp::ok())
-            {
-                RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
-                return;
-            }
-            RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
-        }
-        auto result = client->async_send_request(request);
-        if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
-            rclcpp::FutureReturnCode::SUCCESS)
-        {
-            if (auto res = result.get())
-            {
-                if (res->success)
-                {
-                    pcb_callback_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-
-                    rclcpp::SubscriptionOptions options;
-                    options.callback_group = pcb_callback_group_;
-
-                    pcb_subscriber_ = this->create_subscription<std_msgs::msg::String>(
-                        res->publisher, 10,
-                        [this](const std_msgs::msg::String::SharedPtr msg)
-                        {
-                            PCBCallback(msg);
-                        },
-                        options);
-
-                    pcb_executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
-                    pcb_executor_->add_callback_group(pcb_callback_group_, this->get_node_base_interface());
-
-                    pcb_executor_thread_ = std::thread([this]()
-                    {
-                        pcb_executor_->spin();
-                    });
-
-                    pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(res->subscriber, 10);
-
-                    isOk = true;
-
-                    SetStart(true);
-                }
-                else
-                {
-                    RCLCPP_ERROR(this->get_logger(), "Failed to add serial listener");
-                }
-            }
-            else
-            {
-                RCLCPP_ERROR(this->get_logger(), "Failed to ask for a serial listener");
-            }
-        }
-        else
-        {
-            RCLCPP_ERROR(this->get_logger(), "Service call failed");
-        }
-
         odo_pos_publisher_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10);
 
@@ -140,6 +80,66 @@ namespace Modelec
                     SendOrder("START", {std::to_string(msg->data)});
                 }
             });
+
+                auto client = this->create_client<modelec_interfaces::srv::AddSerialListener>("add_serial_listener");
+        while (!client->wait_for_service(std::chrono::seconds(1)))
+        {
+            if (!rclcpp::ok())
+            {
+                RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
+                return;
+            }
+            RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
+        }
+        auto result = client->async_send_request(request);
+        if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
+            rclcpp::FutureReturnCode::SUCCESS)
+        {
+            if (auto res = result.get())
+            {
+                if (res->success)
+                {
+                    pcb_callback_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+
+                    rclcpp::SubscriptionOptions options;
+                    options.callback_group = pcb_callback_group_;
+
+                    pcb_subscriber_ = this->create_subscription<std_msgs::msg::String>(
+                        res->publisher, 10,
+                        [this](const std_msgs::msg::String::SharedPtr msg)
+                        {
+                            PCBCallback(msg);
+                        },
+                        options);
+
+                    pcb_executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+                    pcb_executor_->add_callback_group(pcb_callback_group_, this->get_node_base_interface());
+
+                    pcb_executor_thread_ = std::thread([this]()
+                    {
+                        pcb_executor_->spin();
+                    });
+
+                    pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(res->subscriber, 10);
+
+                    isOk = true;
+
+                    SetStart(true);
+                }
+                else
+                {
+                    RCLCPP_ERROR(this->get_logger(), "Failed to add serial listener");
+                }
+            }
+            else
+            {
+                RCLCPP_ERROR(this->get_logger(), "Failed to ask for a serial listener");
+            }
+        }
+        else
+        {
+            RCLCPP_ERROR(this->get_logger(), "Service call failed");
+        }
     }
 
     PCBOdoInterface::~PCBOdoInterface()
@@ -179,7 +179,9 @@ namespace Modelec
                 message.y = y;
                 message.theta = theta;
 
-                odo_pos_publisher_->publish(message);
+                if (odo_pos_publisher_) {
+                    odo_pos_publisher_->publish(message);
+                }
             }
             else if (tokens[1] == "SPEED")
             {

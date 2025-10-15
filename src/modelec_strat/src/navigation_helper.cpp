@@ -593,7 +593,7 @@ namespace Modelec
             return;
         }
 
-        if (EnemyOnPath(*msg))
+        /*if (EnemyOnPath(*msg))
         {
             RCLCPP_INFO(node_->get_logger(), "Enemy is blocking the path, replanning...");
             if (!Replan())
@@ -605,7 +605,7 @@ namespace Modelec
 
                 last_was_close_enemy_ = true;
             }
-        }
+        }*/
     }
 
     void NavigationHelper::OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)

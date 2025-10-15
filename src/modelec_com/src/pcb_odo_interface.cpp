@@ -10,7 +10,7 @@ namespace Modelec
     {
         declare_parameter<std::string>("serial_port", "/dev/USB_ODO");
         declare_parameter<int>("baudrate", 115200);
-        declare_parameter<std::string>("name", "pcb_action");
+        declare_parameter<std::string>("name", "pcb_odo");
 
         // Service to create a new serial listener
         auto request = std::make_shared<modelec_interfaces::srv::AddSerialListener::Request>();

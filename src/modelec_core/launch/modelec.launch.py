@@ -92,6 +92,7 @@ def generate_launch_description():
                 name='serial_listener'
             )
 
+            '''
             pcb_odo_interface = Node(
                 package='modelec_com',
                 executable='pcb_odo_interface',
@@ -102,6 +103,7 @@ def generate_launch_description():
                     'name': "pcb_odo",
                 }]
             )
+            '''
 
             pcb_action_interface = Node(
                 package='modelec_com',
@@ -116,7 +118,7 @@ def generate_launch_description():
 
             return [
                 serial_listener,
-                pcb_odo_interface,
+                #pcb_odo_interface,
                 pcb_action_interface,
             ]
         return []

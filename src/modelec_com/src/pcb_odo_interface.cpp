@@ -62,6 +62,8 @@ namespace Modelec
                     isOk = true;
 
                     SetStart(true);
+
+                    SetPID("THETA", 8, 0, 0.1);
                 }
                 else
                 {
@@ -140,8 +142,6 @@ namespace Modelec
                     SendOrder("START", {std::to_string(msg->data)});
                 }
             });
-
-        SetPID("THETA", 8, 0, 0.1);
     }
 
     PCBOdoInterface::~PCBOdoInterface()

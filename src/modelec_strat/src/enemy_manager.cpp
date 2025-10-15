@@ -236,7 +236,7 @@ namespace Modelec
         {
             enemy_pos_pub_->publish(last_enemy_pos_);
             last_publish_time_ = this->now();
-            RCLCPP_INFO(this->get_logger(), "Periodic refresh of enemy position");
+            RCLCPP_DEBUG(this->get_logger(), "Periodic refresh of enemy position");
         }
     }
 }

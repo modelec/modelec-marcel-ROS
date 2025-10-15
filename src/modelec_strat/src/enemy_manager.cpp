@@ -102,8 +102,6 @@ namespace Modelec
             return;
         }
 
-        is_enemy_close_ = false;
-
         if (std::isnan(current_pos_.x) || std::isnan(current_pos_.y))
         {
             RCLCPP_WARN(this->get_logger(), "Current robot position unknown, cannot compute enemy position");
@@ -145,34 +143,6 @@ namespace Modelec
                 continue;
             }
 
-            // EMERGENCY detection: obstacle very close but not the robot itself
-            /*if (range_mm < min_emergency_distance_)
-            {
-                // Convert to local robot frame
-                double x_local = range * std::cos(angle) * 1000.0; // meters -> mm
-                double y_local = range * std::sin(angle) * 1000.0; // meters -> mm
-
-                // Rotate + translate into global frame
-                double x_global = robot_x + (x_local * std::cos(robot_theta) - y_local * std::sin(robot_theta));
-                double y_global = robot_y + (x_local * std::sin(robot_theta) + y_local * std::cos(robot_theta));
-
-                // Check if in bounds
-                if (x_global >= 0 && x_global <= (map_width_ - margin_detection_table_) && y_global >= 0 && y_global <=
-                    (map_height_ - margin_detection_table_))
-                {
-                    modelec_interfaces::msg::OdometryPos emergency_msg;
-                    emergency_msg.x = x_global;
-                    emergency_msg.y = y_global;
-                    emergency_msg.theta = 0.0;
-
-                    close_enemy_pos_pub_->publish(emergency_msg);
-                    RCLCPP_WARN(this->get_logger(), "EMERGENCY CLOSE OBJECT DETECTED at x=%.2f y=%.2f (%.1f mm)",
-                                x_global, y_global, range_mm);
-
-                    // return;
-                }
-            }*/
-
             // Convert to local robot frame
             double x_local = range * std::cos(angle) * 1000.0; // meters -> mm
             double y_local = range * std::sin(angle) * 1000.0; // meters -> mm
@@ -205,8 +175,6 @@ namespace Modelec
 
         if (min_distance < std::numeric_limits<double>::max())
         {
-            if (is_enemy_close_) return;
-
             modelec_interfaces::msg::OdometryPos enemy_pos;
             enemy_pos.x = best_x;
             enemy_pos.y = best_y;

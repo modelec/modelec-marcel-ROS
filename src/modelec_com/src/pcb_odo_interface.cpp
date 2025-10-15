@@ -144,6 +144,8 @@ namespace Modelec
 
     PCBOdoInterface::~PCBOdoInterface()
     {
+        SetStart(false);
+
         if (pcb_executor_)
         {
             pcb_executor_->cancel();

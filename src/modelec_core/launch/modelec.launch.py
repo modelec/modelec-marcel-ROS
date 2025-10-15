@@ -114,34 +114,9 @@ def generate_launch_description():
                 }]
             )
 
-            # Restart handler for pcb_odo_interface
-            odo_restart_handler = RegisterEventHandler(
-                OnProcessExit(
-                    target_action=pcb_odo_interface,
-                    on_exit=[
-                        TimerAction(
-                            period=5.0,  # wait 5 seconds before restart
-                            actions=[
-                                Node(
-                                    package='modelec_com',
-                                    executable='pcb_odo_interface',
-                                    name='pcb_odo_interface',
-                                    parameters=[{
-                                        'serial_port': "/tmp/ODO",
-                                        'baudrate': 115200,
-                                        'name': "pcb_odo",
-                                    }]
-                                )
-                            ]
-                        )
-                    ]
-                )
-            )
-
             return [
                 serial_listener,
                 pcb_odo_interface,
-                odo_restart_handler,
                 pcb_action_interface,
             ]
         return []

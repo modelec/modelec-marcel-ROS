@@ -52,7 +52,7 @@ def main():
                     print("Fermeture du programme.")
                     break
                 elif user_input == "":
-		    send_command(ser, hola)
+                    send_command(ser, hola)
                     continue
                 else:
                     send_command(ser, user_input)

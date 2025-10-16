@@ -8,8 +8,7 @@ BAUDRATE = 115200
 
 stop_thread = False
 
-hola = ("SET;START;1"
-        "SET;PID;THETA;8;1;1")
+hola = "SET;START;1\nSET;PID;THETA;8;1;1"
 
 def read_serial(ser):
     """Thread de lecture asynchrone du port série"""

@@ -8,6 +8,7 @@ BAUDRATE = 115200
 stop_thread = False
 
 def read_serial(ser, log_lines, log_lock):
+    """Thread de lecture du port série"""
     global stop_thread
     while not stop_thread:
         if ser.in_waiting:
@@ -41,23 +42,20 @@ def curses_main(stdscr):
 
         while True:
             stdscr.clear()
-
-            # Get terminal size
             h, w = stdscr.getmaxyx()
             log_height = h - 2
 
-            # Display log window
+            # Display log lines
             with log_lock:
                 visible_logs = log_lines[-log_height:]
             for i, line in enumerate(visible_logs):
                 stdscr.addnstr(i, 0, line, w - 1)
 
-            # Draw input line
+            # Input line
             stdscr.addstr(log_height, 0, "-" * (w - 1))
             stdscr.addstr(log_height + 1, 0, f"Commande >>> {user_input}")
             stdscr.refresh()
 
-            # Handle user input
             try:
                 ch = stdscr.get_wch()
             except curses.error:
@@ -65,18 +63,23 @@ def curses_main(stdscr):
 
             if ch is None:
                 continue
-            elif isinstance(ch, str):
-                if ch == "\n":
+
+            # Handle input
+            if isinstance(ch, str):
+                if ch in ("\n", "\r"):
                     cmd = user_input.strip()
                     if cmd.lower() in ("exit", "quit"):
                         stop_thread = True
                         break
-                    ser.write((cmd + "\n").encode())
+                    if cmd:
+                        ser.write((cmd + "\n").encode())
                     user_input = ""
-                elif ch == "\x7f":  # Backspace
+                elif ch in ("\b", "\x7f"):  # Backspace compatibility
                     user_input = user_input[:-1]
-                else:
+                elif ch.isprintable():
                     user_input += ch
+            elif ch == curses.KEY_BACKSPACE:
+                user_input = user_input[:-1]
             elif ch == 27:  # ESC
                 stop_thread = True
                 break

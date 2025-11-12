@@ -71,7 +71,9 @@ def curses_main(stdscr, port, baudrate):
             stdscr.vline(0, split_x, "|", log_height)
             history_start_x = split_x + 2
             stdscr.addstr(0, history_start_x, "Command History:")
-            for i, cmd in enumerate(reversed(cmd_history[-(log_height - 2):])):
+
+            visible_history = cmd_history[-(log_height - 2):]
+            for i, cmd in enumerate(visible_history):
                 stdscr.addnstr(i + 1, history_start_x, cmd, w - history_start_x - 1)
 
             # --- Input line ---

@@ -95,7 +95,10 @@ def curses_main(stdscr, port, baudrate):
                     if cmd.lower() in ("exit", "quit"):
                         stop_thread = True
                         break
-                    if cmd:
+                    elif cmd.lower() == "clear":
+                        with log_lock:
+                            log_lines.clear()
+                    elif cmd:
                         ser.write((cmd + "\n").encode())
                         cmd_history.append(cmd)
                         history_index = -1

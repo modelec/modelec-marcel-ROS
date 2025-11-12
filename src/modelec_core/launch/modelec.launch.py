@@ -41,15 +41,15 @@ def generate_launch_description():
             output='screen'
         )
 
-        # Register a restart handler that re-creates both node + handler
+        # Instead of recursion at definition time, we delay the re-creation using a lambda
         restart_handler = RegisterEventHandler(
             OnProcessExit(
                 target_action=lidar_node,
                 on_exit=[
-                    LogInfo(msg="[Launch] RPLIDAR crashed — restarting in 2s..."),
+                    LogInfo(msg='[Launch] RPLIDAR crashed — restarting in 2s...'),
                     TimerAction(
                         period=2.0,
-                        actions=create_lidar_with_restart()  # recursive: spawns new node + handler
+                        actions=[OpaqueFunction(function=lambda *_: create_lidar_with_restart())]
                     )
                 ]
             )

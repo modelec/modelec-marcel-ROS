@@ -70,7 +70,7 @@ namespace Modelec
 
             go_timeout_ = node_->now();
 
-            nav_->GoTo(home_point_.GetTakePosition(0), true);
+            nav_->GoTo(home_point_, true);
 
             step_ = GO_CLOSE;
             break;

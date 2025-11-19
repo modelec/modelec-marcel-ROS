@@ -63,7 +63,10 @@ namespace Modelec
 
                     SetStart(true);
 
-                    SetPID("THETA", 8, 0, 0.1);
+                    SetPID("THETA", 14, 0, 0);
+                    SetPID("POS", 10, 0, 0);
+                    SetPID("LEFT", 5, 0, 0);
+                    SetPID("RIGHT", 5, 0, 0);
                 }
                 else
                 {
@@ -424,7 +427,7 @@ namespace Modelec
         SetPID(msg->name, msg->p, msg->i, msg->d);
     }
 
-    void PCBOdoInterface::SetPID(std::string name, float p, float i, float d)
+    void PCBOdoInterface::SetPID(std::string name, float p, float i, float d, std::optional<float> min, std::optional<float> max)
     {
         std::vector<std::string> data = {
             name,
@@ -432,6 +435,16 @@ namespace Modelec
             std::to_string(i),
             std::to_string(d)
         };
+
+        if (min.has_value())
+        {
+            data.push_back(std::to_string(min.value()));
+        }
+
+        if (max.has_value())
+        {
+            data.push_back(std::to_string(max.value()));
+        }
 
         SendOrder("PID", data);
     }

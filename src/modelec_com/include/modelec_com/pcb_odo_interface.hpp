@@ -109,6 +109,6 @@ namespace Modelec
 
         void GetPID();
         void SetPID(const modelec_interfaces::msg::OdometryPid::SharedPtr msg);
-        void SetPID(std::string name, float p, float i, float d);
+        void SetPID(std::string name, float p, float i, float d, std::optional<float> min = std::nullopt, std::optional<float> max = std::nullopt);
     };
 } // namespace Modelec

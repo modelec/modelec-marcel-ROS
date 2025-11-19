@@ -70,6 +70,26 @@ namespace Modelec
         {
             switch (step_.front())
             {
+            case SEND_STEP:
+                {
+                    modelec_interfaces::msg::ActionServoPos msg;
+                    msg.id = 5;
+                    msg.pos = 1;
+                    servo_move_pub_->publish(msg);
+
+                    step_running_ = 1;
+                }
+                break;
+            case TAKE_STEP:
+                {
+                    modelec_interfaces::msg::ActionServoPos msg;
+                    msg.id = 6;
+                    msg.pos = 1;
+                    servo_move_pub_->publish(msg);
+
+                    step_running_ = 1;
+                }
+                break;
             default:
                 return;
             }
@@ -87,5 +107,31 @@ namespace Modelec
             step_.pop();
         }
         action_ = NONE;
+    }
+
+    void ActionExecutor::Send() {
+        if (action_done_)
+        {
+            action_ = SEND;
+            action_done_ = false;
+            step_running_ = 0;
+
+            step_.push(SEND_STEP);
+
+            Update();
+        }
+    }
+
+    void ActionExecutor::Take() {
+        if (action_done_)
+        {
+            action_ = TAKE;
+            action_done_ = false;
+            step_running_ = 0;
+
+            step_.push(TAKE_STEP);
+
+            Update();
+        }
     }
 }

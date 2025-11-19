@@ -2,6 +2,9 @@
 #include <modelec_utils/config.hpp>
 #include <modelec_strat/strat_fms.hpp>
 
+#include <modelec_strat/missions/go_home_mission.hpp>
+#include <modelec_strat/missions/take_send_mission.hpp>
+
 namespace Modelec
 {
 
@@ -156,6 +159,15 @@ namespace Modelec
                     Transition(State::STOP, "All missions done");
                 }
 
+                if (elapsed.seconds() < 70)
+                {
+                    Transition(State::TAKE_SEND_MISSION, "Proceed to concert");
+                }
+                else
+                {
+                    Transition(State::DO_GO_HOME, "Cleanup and finish match");
+                }
+
                 /*if (elapsed.seconds() >= 2)
                 {
                     Transition(State::DO_GO_HOME, "Go Home");
@@ -168,6 +180,20 @@ namespace Modelec
                 }*/
                 break;
             }
+
+        case State::TAKE_SEND_MISSION:
+            if (!current_mission_)
+            {
+                current_mission_ = std::make_unique<TakeSendMission>(nav_, action_executor_);
+                current_mission_->Start(shared_from_this());
+            }
+            current_mission_->Update();
+            if (current_mission_->GetStatus() == MissionStatus::DONE)
+            {
+                current_mission_.reset();
+                Transition(State::SELECT_MISSION, "Take and Send done");
+            }
+            break;
 
         case State::DO_GO_HOME:
             if (!current_mission_)

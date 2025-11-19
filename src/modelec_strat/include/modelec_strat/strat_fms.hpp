@@ -5,7 +5,6 @@
 #include "action_executor.hpp"
 #include "navigation_helper.hpp"
 #include "missions/mission_base.hpp"
-#include "missions/go_home_mission.hpp"
 
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/int64.hpp>
@@ -25,6 +24,8 @@ namespace Modelec
         INIT,
         WAIT_START,
         SELECT_MISSION,
+
+        TAKE_SEND_MISSION,
 
         DO_GO_HOME,
         STOP

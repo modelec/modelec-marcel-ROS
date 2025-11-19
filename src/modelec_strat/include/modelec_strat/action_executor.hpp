@@ -14,10 +14,14 @@ namespace Modelec
         enum Action
         {
             NONE,
+            TAKE,
+            SEND,
         };
 
         enum Step
         {
+            TAKE_STEP,
+            SEND_STEP
         };
 
         ActionExecutor();
@@ -31,6 +35,10 @@ namespace Modelec
         void Update();
 
         void ReInit();
+
+        void Send();
+
+        void Take();
 
     protected:
         rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_pub_;

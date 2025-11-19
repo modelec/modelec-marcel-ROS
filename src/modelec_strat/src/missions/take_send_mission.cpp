@@ -10,7 +10,7 @@ namespace Modelec {
         node_ = node;
 
 
-        nav_->GoToRotateFirst(2500, 1200, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+        nav_->GoTo(2500, 1200, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
         go_timeout_ = node_->now();
 
@@ -26,7 +26,7 @@ namespace Modelec {
 
         if (!nav_->HasArrived())
         {
-            if ((node_->now() - go_timeout_).seconds() < 4)
+            if ((node_->now() - go_timeout_).seconds() < 10)
             {
                 return;
             }
@@ -49,7 +49,7 @@ namespace Modelec {
             break;
         case WAIT_5S:
             go_timeout_ = node_->now();
-            nav_->GoToRotateFirst(2000, 700, 0, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+            nav_->GoTo(2000, 700, 0, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
             step_ = GO_TO_SEND;
             break;

@@ -48,7 +48,7 @@ def generate_launch_description():
                 on_exit=[
                     LogInfo(msg='[Launch] RPLIDAR crashed — restarting in 2s...'),
                     TimerAction(
-                        period=2.0,
+                        period=0.5,
                         actions=[OpaqueFunction(function=lambda *_: create_lidar_with_restart())]
                     )
                 ]

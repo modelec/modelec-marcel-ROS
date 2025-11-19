@@ -36,6 +36,7 @@ namespace Modelec {
         {
         case GO_TO_TAKE:
             action_executor_->Take();
+            deploy_time_ = node_->now();
 
             step_ = TAKE;
             break;
@@ -53,6 +54,7 @@ namespace Modelec {
             break;
         case GO_TO_SEND:
             action_executor_->Send();
+            deploy_time_ = node_->now();
 
             step_ = SEND;
             break;

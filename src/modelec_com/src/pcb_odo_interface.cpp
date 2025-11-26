@@ -241,6 +241,7 @@ namespace Modelec
         {
             if (tokens[1] == "START")
             {
+                start_odo_ = tokens[2] == "1";
             }
             else if (tokens[1] == "WAYPOINT")
             {
@@ -364,7 +365,6 @@ namespace Modelec
         if (!start_odo_)
         {
             SendOrder("START", {std::to_string(true)});
-            start_odo_ = true;
         }
 
         std::vector<std::string> data;
@@ -393,7 +393,6 @@ namespace Modelec
         if (!start_odo_)
         {
             SendOrder("START", {std::to_string(true)});
-            start_odo_ = true;
         }
 
         std::vector<std::string> data = {

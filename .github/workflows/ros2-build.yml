@@ -5,41 +5,13 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macOS-latest, windows-latest]
-    steps:
-      - name: Setup ROS
-        uses: ros-tooling/setup-ros@v0.7
-        with:
-          required-ros-distributions: jazzy
-
-      - name: Build
-        run: colcon build --event-handlers console_direct+
-
-      - name: Test
-        run: |
-          colcon test --event-handlers console_direct+
-          colcon test-result --verbose
-      
-
-  build_docker:
+  build_and_test_ros2:
     runs-on: ubuntu-latest
-    container:
-      image: ubuntu:noble
     steps:
-      - name: Setup ROS
-        uses: ros-tooling/setup-ros@v0.7
+      - uses: ros-tooling/setup-ros@v0.7
         with:
           required-ros-distributions: jazzy
-
-      - name: Build
-        run: colcon build --event-handlers console_direct+
-
-      - name: Test
-        run: |
-          colcon test --event-handlers console_direct+
-          colcon test-result --verbose
+      - uses: ros-tooling/action-ros-ci@v0.4
+        with:
+          package-name: modelec_utils
+          target-ros2-distro: jazzy

@@ -7,6 +7,7 @@ endif()
 
 # Dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_gtest REQUIRED)
 
 find_package(tinyxml2 REQUIRED)
 
@@ -32,9 +33,6 @@ target_include_directories(utils PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-
-# Si utils dépend de config, décommente :
-# target_link_libraries(${PROJECT_NAME} PUBLIC modelec_config)
 
 # === Install headers ===
 install(DIRECTORY include/
@@ -68,6 +66,28 @@ install(EXPORT utilsTargets
         NAMESPACE ${PROJECT_NAME}::
         DESTINATION lib/cmake/utils
 )
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # ament_lint_auto_find_test_dependencies()
+
+  ament_add_gtest(${PROJECT_NAME}_test
+          test/point.test.cpp
+          test/utils.test.cpp
+          test/config.test.cpp
+  )
+
+  target_include_directories(${PROJECT_NAME}_test PUBLIC
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+          $<INSTALL_INTERFACE:include>
+  )
+
+  target_link_libraries(${PROJECT_NAME}_test
+          utils
+          config
+          tinyxml2::tinyxml2
+  )
+endif()
 
 # === Export metadata for ament ===
 ament_export_targets(utilsTargets)

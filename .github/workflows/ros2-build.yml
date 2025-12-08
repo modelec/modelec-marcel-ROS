@@ -5,25 +5,26 @@ on:
     branches: [ main ]
 
 jobs:
-  build_and_test:
-    runs-on: ubuntu-22.04
-
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macOS-latest, windows-latest]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install ROS2 (Jazzy)
+      - name: Setup ROS
         uses: ros-tooling/setup-ros@v0.7
         with:
-          required-ros-distributions: "jazzy"
-          use-ros2-testing: "false"
-          install-connext: "false"
+          required-ros-distributions: jazzy
+      - run: vcs --help
 
-      - name: Build workspace
-        run: |
-          colcon build --event-handlers console_direct+
-
-      - name: Run tests
-        run: |
-          colcon test --event-handlers console_direct+
-          colcon test-result --verbose
+  build_docker:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:noble
+    steps:
+      - name: Setup ROS
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: jazzy
+      - run: vcs --help

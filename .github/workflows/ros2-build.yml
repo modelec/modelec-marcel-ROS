@@ -1,0 +1,29 @@
+name: ROS2 Build & Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ROS2 (Jazzy)
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: "jazzy"
+          use-ros2-testing: "false"
+          install-connext: "false"
+
+      - name: Build workspace
+        run: |
+          colcon build --event-handlers console_direct+
+
+      - name: Run tests
+        run: |
+          colcon test --event-handlers console_direct+
+          colcon test-result --verbose

@@ -106,7 +106,7 @@ def generate_launch_description():
                 ),
                 Node(
                     package='modelec_com',
-                    executable='pcb_action_interface',
+                    executable='pcb_action_interface_new',
                     name='pcb_action_interface',
                     parameters=[{
                         'serial_port': "/dev/USB_ACTION",

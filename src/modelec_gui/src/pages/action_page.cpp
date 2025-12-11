@@ -154,7 +154,7 @@ namespace ModelecGUI
 
                 servo_move.id = 2;
                 servo_move.pos = 1;
-                servo_move.angle = -M_PI_2;
+                servo_move.angle = 0;
                 servo_set_pub_->publish(servo_move);
                 servo_actions_[2]->setDisabled(true);
 

@@ -417,7 +417,8 @@ namespace Modelec
     {
         if (IsOk())
         {
-            RCLCPP_DEBUG(this->get_logger(), "Sending to PCB: %s", data.c_str());
+            RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", data.c_str());
+            // RCLCPP_DEBUG(this->get_logger(), "Sending to PCB: %s", data.c_str());
             this->write(data);
         }
     }

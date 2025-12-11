@@ -128,6 +128,10 @@ namespace Modelec
             {
                 started_ = false;
 
+                std_msgs::msg::Bool arm_msg;
+                arm_msg.data = true;
+                tir_arm_set_pub_->publish(arm_msg);
+
                 Transition(State::WAIT_START, "System ready");
             }
             break;

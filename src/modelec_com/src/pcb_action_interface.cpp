@@ -138,18 +138,18 @@ namespace Modelec
 
 
         // TODO : check for real value there
-        asc_value_mapper_ = {
+        /*asc_value_mapper_ = {
             {0, 0},
             {1, 100},
             {2, 200},
             {3, 300}
-        };
+        };*/
         /*for (auto & [id, v] : asc_value_mapper_)
         {
             SendOrder("ASC", {std::to_string(id), std::to_string(v)});
         }*/
 
-        asc_state_ = 3;
+        // asc_state_ = 3;
 
         // SendMove("ASC", {std::to_string(asc_state_)});
 
@@ -190,22 +190,18 @@ namespace Modelec
             SendMove("SERVO" + std::to_string(id), {"POS" + std::to_string(v)});
         }
 
-        relay_value_ = {
+        /*relay_value_ = {
             {1, false},
             {2, false},
             {3, false},
-        };
+        };*/
 
-        for (auto & [id, v] : relay_value_)
+        /*for (auto & [id, v] : relay_value_)
         {
             rclcpp::sleep_for(std::chrono::milliseconds(100));
 
             SendMove("RELAY" + std::to_string(id), {std::to_string(v)});
-        }
-
-        rclcpp::sleep_for(std::chrono::milliseconds(100));
-
-        SendOrder("TIR", {"ARM", "1"});
+        }*/
     }
 
     PCBActionInterface::~PCBActionInterface()

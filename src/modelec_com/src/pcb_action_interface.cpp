@@ -153,13 +153,19 @@ namespace Modelec
 
         // SendMove("ASC", {std::to_string(asc_state_)});
 
-        servo_pos_mapper_ = {
+        /*servo_pos_mapper_ = {
             {0, {{0, 0.55}, {1, 0}}},
             {1, {{0, 0}, {1, 0.4}}},
             {2, {{0, M_PI_2}}},
             {3, {{0, M_PI_2}}},
             {4, {{0, 1.25}, {1, 0.45}}},
             {5, {{0, 0}, {1, M_PI}}},
+        };*/
+
+        servo_pos_mapper_ = {
+            {0, {{0, 0}, {1, M_PI_2}}},
+            {1, {{0, 0}, {1, M_PI_2}}},
+            {2, {{0, M_PI_2}}},
         };
 
         for (auto & [id, v] : servo_pos_mapper_)
@@ -174,13 +180,19 @@ namespace Modelec
             }
         }
 
-        servo_value_ = {
+        /*servo_value_ = {
             {0, 1},
             {1, 1},
             {2, 0},
             {3, 0},
             {4, 1},
             {5, 0}
+        };*/
+
+        servo_value_ = {
+            {0, 0},
+            {1, 0},
+            {2, 0},
         };
 
         for (auto & [id, v] : servo_value_)

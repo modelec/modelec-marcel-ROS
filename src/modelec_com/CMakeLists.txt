@@ -35,6 +35,15 @@ target_include_directories(pcb_odo_interface PUBLIC
         $<INSTALL_INTERFACE:include>
 )
 
+# PCB Odometry Node
+add_executable(pcb_odo_interface_new src/pcb_odo_interface.new.cpp src/serial_listener.cpp)
+ament_target_dependencies(pcb_odo_interface_new rclcpp std_msgs modelec_interfaces ament_index_cpp)
+target_link_libraries(pcb_odo_interface_new modelec_utils::utils modelec_utils::config)
+target_include_directories(pcb_odo_interface_new PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
 # PCB Alim Node
 add_executable(pcb_alim_interface src/pcb_alim_interface.cpp)
 ament_target_dependencies(pcb_alim_interface rclcpp std_msgs modelec_interfaces ament_index_cpp)
@@ -67,6 +76,7 @@ install(TARGETS
         serial_listener
         pcb_alim_interface
         pcb_odo_interface
+        pcb_odo_interface_new
         pcb_action_interface
         DESTINATION lib/${PROJECT_NAME}
 )

@@ -96,7 +96,7 @@ def generate_launch_description():
                 Node(package='modelec_com', executable='serial_listener', name='serial_listener'),
                 Node(
                     package='modelec_com',
-                    executable='pcb_odo_interface',
+                    executable='pcb_odo_interface_new',
                     name='pcb_odo_interface',
                     parameters=[{
                         'serial_port': "/dev/USB_ODO",

@@ -17,14 +17,14 @@ namespace ModelecGUI {
         //odo_page_ = new OdoPage(get_node(), this);
         test_map_page_ = new TestMapPage(get_node(), this);
         map_page_ = new MapPage(get_node(), this);
-        // action_page_ = new ActionPage(get_node(), this);
+        action_page_ = new ActionPage(get_node(), this);
         // alim_page_ = new AlimPage(get_node(), this);
 
         stackedWidget->addWidget(home_page_);
         // stackedWidget->addWidget(odo_page_);
         stackedWidget->addWidget(test_map_page_);
         stackedWidget->addWidget(map_page_);
-        // stackedWidget->addWidget(action_page_);
+        stackedWidget->addWidget(action_page_);
         // stackedWidget->addWidget(alim_page_);
         setCentralWidget(stackedWidget);
 

@@ -126,6 +126,8 @@ namespace Modelec
         case State::INIT:
             if (team_selected_)
             {
+                started_ = false;
+
                 Transition(State::WAIT_START, "System ready");
             }
             break;

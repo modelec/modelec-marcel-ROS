@@ -142,10 +142,12 @@ namespace ModelecGUI
         connect(test_button_, &QPushButton::clicked, this,
             [this]()
             {
+                test_ = !test_;
+
                 ActionServoPos servo_move;
                 servo_move.id = 1;
-                servo_move.pos = 1;
-                servo_move.angle = M_PI_2;
+                servo_move.pos = test_ ? 1 : 0;
+                servo_move.angle = test_ ? M_PI_2 : 0;
                 servo_set_pub_->publish(servo_move);
                 servo_actions_[1]->setDisabled(true);
 
@@ -153,8 +155,8 @@ namespace ModelecGUI
 
 
                 servo_move.id = 2;
-                servo_move.pos = 1;
-                servo_move.angle = 0;
+                servo_move.pos = test_ ? 1 : 0;
+                servo_move.angle = test_ ? 0 : M_PI_2;
                 servo_set_pub_->publish(servo_move);
                 servo_actions_[2]->setDisabled(true);
 

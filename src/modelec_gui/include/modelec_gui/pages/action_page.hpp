@@ -57,6 +57,7 @@ namespace ModelecGUI
         std::vector<bool> waiting_for_move_servo_;
 
         QPushButton* test_button_;
+        bool test_ = false;
 
         QHBoxLayout* relay_layout_;
 

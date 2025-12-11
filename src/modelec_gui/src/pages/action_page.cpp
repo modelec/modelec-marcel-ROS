@@ -138,6 +138,29 @@ namespace ModelecGUI
                 });
         }
 
+        test_button_ = new QPushButton("Test Servos");
+        connect(test_button_, &QPushButton::clicked, this,
+            [this]()
+            {
+                ActionServoPos servo_move;
+                servo_move.id = 1;
+                servo_move.pos = 1;
+                servo_move.angle = M_PI_2;
+                servo_set_pub_->publish(servo_move);
+                servo_actions_[1]->setDisabled(true);
+
+                waiting_for_move_servo_[1] = true;
+
+
+                servo_move.id = 1;
+                servo_move.pos = 1;
+                servo_move.angle = M_PI_2;
+                servo_set_pub_->publish(servo_move);
+                servo_actions_[2]->setDisabled(true);
+
+                waiting_for_move_servo_[2] = true;
+            });
+
         relay_layout_ = new QHBoxLayout;
 
         relay_top_button_ = new QPushButton(this);
@@ -184,6 +207,7 @@ namespace ModelecGUI
         layout_->addWidget(max_size_button_);
         layout_->addLayout(asc_layout_);
         layout_->addLayout(servo_layout_);
+        layout_->addWidget(test_button_);
         layout_->addLayout(relay_layout_);
         layout_->addWidget(deploy_banner_button_);
 

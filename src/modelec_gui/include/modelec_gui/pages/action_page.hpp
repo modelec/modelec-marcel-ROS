@@ -56,6 +56,8 @@ namespace ModelecGUI
         std::vector<ActionWidget*> servo_actions_;
         std::vector<bool> waiting_for_move_servo_;
 
+        QPushButton* test_button_;
+
         QHBoxLayout* relay_layout_;
 
         QPushButton* relay_top_button_;

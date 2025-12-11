@@ -37,9 +37,6 @@ namespace Modelec
     public:
         PCBOdoInterface();
 
-        rclcpp::CallbackGroup::SharedPtr pcb_callback_group_;
-        std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> pcb_executor_;
-        std::thread pcb_executor_thread_;
         ~PCBOdoInterface() override;
 
         struct OdometryData
@@ -57,9 +54,6 @@ namespace Modelec
         };
 
     private:
-        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pcb_publisher_;
-        rclcpp::Subscription<std_msgs::msg::String>::SharedPtr pcb_subscriber_;
-
         void read(const std::string& msg) override;
 
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr odo_pos_publisher_;

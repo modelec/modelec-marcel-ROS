@@ -153,20 +153,11 @@ namespace Modelec
     PCBOdoInterface::~PCBOdoInterface()
     {
         SetStart(false);
-
-        if (pcb_executor_)
-        {
-            pcb_executor_->cancel();
-        }
-        if (pcb_executor_thread_.joinable())
-        {
-            pcb_executor_thread_.join();
-        }
     }
 
     void PCBOdoInterface::read(const std::string& msg)
     {
-        RCLCPP_INFO(this->get_logger(), "Received from PCB: %s", msg.c_str());
+        RCLCPP_DEBUG(this->get_logger(), "Received from PCB: %s", msg.c_str());
         std::vector<std::string> tokens = split(trim(msg), ';');
         if (tokens.size() < 2)
         {
@@ -300,12 +291,10 @@ namespace Modelec
 
     void PCBOdoInterface::SendToPCB(const std::string& data)
     {
-        if (pcb_publisher_)
+        if (IsOk())
         {
             RCLCPP_DEBUG(this->get_logger(), "Sending to PCB: %s", data.c_str());
-            auto message = std_msgs::msg::String();
-            message.data = data;
-            pcb_publisher_->publish(message);
+            this->write(data);
         }
     }
 

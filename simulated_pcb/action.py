@@ -133,7 +133,7 @@ if __name__ == '__main__':
             sim.stop()
         print("Simulation stopped")
 
-# socat -d -d pty,raw,echo=0,link=/tmp/MARCEL_ACTION_SIM pty,raw,echo=0,link=/tmp/MARCEL_ACTION
-# python3 simulated_pcb/action.py --port /tmp/MARCEL_ACTION_SIM
-# socat -d -d pty,raw,echo=0,link=/tmp/ENEMY_ACTION_SIM pty,raw,echo=0,link=/tmp/ENEMY_ACTION
-# python3 simulated_pcb/action.py --port /tmp/ENEMY_ACTION_SIM
+# socat -d -d pty,raw,echo=0,link=/tmp/ACTION_SIM pty,raw,echo=0,link=/tmp/ACTION_USB
+# python3 simulated_pcb/action.py --port /tmp/ACTION_SIM
+# socat -d -d pty,raw,echo=0,link=/tmp/ODO_SIM pty,raw,echo=0,link=/tmp/ODO_USB
+# python3 simulated_pcb/action.py --port /tmp/ODO_SIM

@@ -1,12 +1,11 @@
 #include <modelec_com/pcb_odo_interface.hpp>
 #include <modelec_utils/utils.hpp>
-#include <modelec_interfaces/srv/add_serial_listener.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_utils/config.hpp>
 
 namespace Modelec
 {
-    PCBOdoInterface::PCBOdoInterface() : Node("pcb_odo_interface")
+    PCBOdoInterface::PCBOdoInterface() : Node("pcb_odo_interface"), SerialListener()
     {
         declare_parameter<std::string>("serial_port", "/dev/USB_ODO");
         declare_parameter<int>("baudrate", 115200);
@@ -18,70 +17,7 @@ namespace Modelec
         request->bauds = get_parameter("baudrate").as_int();
         request->serial_port = get_parameter("serial_port").as_string();
 
-        auto client = this->create_client<modelec_interfaces::srv::AddSerialListener>("add_serial_listener");
-        while (!client->wait_for_service(std::chrono::seconds(1)))
-        {
-            if (!rclcpp::ok())
-            {
-                RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
-                return;
-            }
-            RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
-        }
-        auto result = client->async_send_request(request);
-        if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
-            rclcpp::FutureReturnCode::SUCCESS)
-        {
-            if (auto res = result.get())
-            {
-                if (res->success)
-                {
-                    pcb_callback_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-
-                    rclcpp::SubscriptionOptions options;
-                    options.callback_group = pcb_callback_group_;
-
-                    pcb_subscriber_ = this->create_subscription<std_msgs::msg::String>(
-                        res->publisher, 10,
-                        [this](const std_msgs::msg::String::SharedPtr msg)
-                        {
-                            PCBCallback(msg);
-                        },
-                        options);
-
-                    pcb_executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
-                    pcb_executor_->add_callback_group(pcb_callback_group_, this->get_node_base_interface());
-
-                    pcb_executor_thread_ = std::thread([this]()
-                    {
-                        pcb_executor_->spin();
-                    });
-
-                    pcb_publisher_ = this->create_publisher<std_msgs::msg::String>(res->subscriber, 10);
-
-                    isOk = true;
-
-                    SetStart(true);
-
-                    SetPID("THETA", 14, 0, 0);
-                    SetPID("POS", 10, 0, 0);
-                    SetPID("LEFT", 5, 0, 0);
-                    SetPID("RIGHT", 5, 0, 0);
-                }
-                else
-                {
-                    RCLCPP_ERROR(this->get_logger(), "Failed to add serial listener");
-                }
-            }
-            else
-            {
-                RCLCPP_ERROR(this->get_logger(), "Failed to ask for a serial listener");
-            }
-        }
-        else
-        {
-            RCLCPP_ERROR(this->get_logger(), "Service call failed");
-        }
+        this->open(request->name, request->bauds, request->serial_port, MAX_MESSAGE_LEN);
 
         odo_pos_publisher_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10);
@@ -89,7 +25,7 @@ namespace Modelec
         odo_get_pos_sub_ = this->create_subscription<std_msgs::msg::Empty>(
             "odometry/get/pos", 30, [this](const std_msgs::msg::Empty::SharedPtr)
             {
-                if (isOk)
+                if (IsOk())
                 {
                     GetPos();
                 }
@@ -145,29 +81,27 @@ namespace Modelec
                     SendOrder("START", {std::to_string(msg->data)});
                 }
             });
+
+
+        SetPID("THETA", 14, 0, 0);
+        SetPID("POS", 10, 0, 0);
+        SetPID("LEFT", 5, 0, 0);
+        SetPID("RIGHT", 5, 0, 0);
     }
 
     PCBOdoInterface::~PCBOdoInterface()
     {
         SetStart(false);
-
-        if (pcb_executor_)
-        {
-            pcb_executor_->cancel();
-        }
-        if (pcb_executor_thread_.joinable())
-        {
-            pcb_executor_thread_.join();
-        }
     }
 
-    void PCBOdoInterface::PCBCallback(const std_msgs::msg::String::SharedPtr msg)
+    void PCBOdoInterface::read(const std::string& msg)
     {
-        RCLCPP_DEBUG(this->get_logger(), "Received from PCB: %s", msg->data.c_str());
-        std::vector<std::string> tokens = split(trim(msg->data), ';');
+        RCLCPP_INFO_ONCE(this->get_logger(), "Received from PCB: %s", msg.c_str());
+        RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Received from PCB: %s", msg.c_str());
+        std::vector<std::string> tokens = split(trim(msg), ';');
         if (tokens.size() < 2)
         {
-            RCLCPP_ERROR(this->get_logger(), "Invalid message format: %s", msg->data.c_str());
+            RCLCPP_ERROR(this->get_logger(), "Invalid message format: %s", msg.c_str());
             return;
         }
 
@@ -254,7 +188,7 @@ namespace Modelec
             }
             else
             {
-                RCLCPP_INFO(this->get_logger(), "PCB response: %s", msg->data.c_str());
+                RCLCPP_INFO(this->get_logger(), "PCB response: %s", msg.c_str());
             }
         }
         else if (tokens[0] == "KO")
@@ -271,7 +205,7 @@ namespace Modelec
             }
             else
             {
-                RCLCPP_WARN(this->get_logger(), "PCB error: %s", msg->data.c_str());
+                RCLCPP_WARN(this->get_logger(), "PCB error: %s", msg.c_str());
             }
         }
     }
@@ -297,12 +231,10 @@ namespace Modelec
 
     void PCBOdoInterface::SendToPCB(const std::string& data)
     {
-        if (pcb_publisher_)
+        if (IsOk())
         {
             RCLCPP_DEBUG(this->get_logger(), "Sending to PCB: %s", data.c_str());
-            auto message = std_msgs::msg::String();
-            message.data = data;
-            pcb_publisher_->publish(message);
+            this->write(data);
         }
     }
 
@@ -449,17 +381,18 @@ namespace Modelec
     }
 } // Modelec
 
+#ifndef MODELEC_COM_TESTING
 int main(int argc, char** argv)
 {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<Modelec::PCBOdoInterface>();
 
-    // Increase number of threads explicitly!
     rclcpp::executors::MultiThreadedExecutor executor(
-        rclcpp::ExecutorOptions(), 2 /* or more threads! */);
+        rclcpp::ExecutorOptions(), 2);
 
     executor.add_node(node);
     executor.spin();
     rclcpp::shutdown();
     return 0;
 }
+#endif

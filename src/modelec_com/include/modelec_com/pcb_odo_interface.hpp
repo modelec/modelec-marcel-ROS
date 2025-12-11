@@ -1,5 +1,7 @@
 #pragma once
 
+#include <modelec_com/serial_listener.hpp>
+
 #include <rclcpp/rclcpp.hpp>
 
 #include <queue>
@@ -30,14 +32,11 @@
 
 namespace Modelec
 {
-    class PCBOdoInterface : public rclcpp::Node
+    class PCBOdoInterface : public rclcpp::Node, public SerialListener
     {
     public:
         PCBOdoInterface();
 
-        rclcpp::CallbackGroup::SharedPtr pcb_callback_group_;
-        std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> pcb_executor_;
-        std::thread pcb_executor_thread_;
         ~PCBOdoInterface() override;
 
         struct OdometryData
@@ -55,10 +54,7 @@ namespace Modelec
         };
 
     private:
-        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pcb_publisher_;
-        rclcpp::Subscription<std_msgs::msg::String>::SharedPtr pcb_subscriber_;
-
-        void PCBCallback(const std_msgs::msg::String::SharedPtr msg);
+        void read(const std::string& msg) override;
 
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr odo_pos_publisher_;
         rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr odo_get_pos_sub_;
@@ -82,8 +78,6 @@ namespace Modelec
 
         int timeout_ms = 1000;
         int attempt = 5;
-
-        bool isOk = false;
 
     public:
         void SendToPCB(const std::string& data);

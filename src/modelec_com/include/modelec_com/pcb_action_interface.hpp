@@ -1,5 +1,7 @@
 #pragma once
 
+#include <modelec_com/serial_listener.hpp>
+
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <std_msgs/msg/empty.hpp>
@@ -11,14 +13,11 @@
 
 namespace Modelec
 {
-    class PCBActionInterface : public rclcpp::Node
+    class PCBActionInterface : public rclcpp::Node, public SerialListener
     {
     public:
 
         PCBActionInterface();
-        rclcpp::CallbackGroup::SharedPtr pcb_callback_group_;
-        std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> pcb_executor_;
-        std::thread pcb_executor_thread_;
 
         ~PCBActionInterface() override;
 
@@ -31,10 +30,7 @@ namespace Modelec
         std::map<int, bool> relay_value_;
 
     private:
-        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pcb_publisher_;
-        rclcpp::Subscription<std_msgs::msg::String>::SharedPtr pcb_subscriber_;
-
-        void PCBCallback(const std_msgs::msg::String::SharedPtr msg);
+        void read(const std::string& msg) override;
 
         rclcpp::Subscription<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_get_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::ActionServoPos>::SharedPtr servo_get_sub_;
@@ -67,16 +63,14 @@ namespace Modelec
         rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr tir_disarm_sub_;
         rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr tir_arm_set_sub_;
 
-
-        bool isOk = false;
     public:
-        void SendToPCB(const std::string& data) const;
+        void SendToPCB(const std::string& data);
         void SendToPCB(const std::string& order, const std::string& elem,
-                       const std::vector<std::string>& data = {}) const;
+                       const std::vector<std::string>& data = {});
 
-        void GetData(const std::string& elem, const std::vector<std::string>& data = {}) const;
-        void SendOrder(const std::string& elem, const std::vector<std::string>& data = {}) const;
-        void SendMove(const std::string& elem, const std::vector<std::string>& data = {}) const;
-        void RespondEvent(const std::string& elem, const std::vector<std::string>& data = {}) const;
+        void GetData(const std::string& elem, const std::vector<std::string>& data = {});
+        void SendOrder(const std::string& elem, const std::vector<std::string>& data = {});
+        void SendMove(const std::string& elem, const std::vector<std::string>& data = {});
+        void RespondEvent(const std::string& elem, const std::vector<std::string>& data = {});
     };
 }

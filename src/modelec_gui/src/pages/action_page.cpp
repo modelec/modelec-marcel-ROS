@@ -152,7 +152,7 @@ namespace ModelecGUI
                 waiting_for_move_servo_[1] = true;
 
 
-                servo_move.id = 1;
+                servo_move.id = 2;
                 servo_move.pos = 1;
                 servo_move.angle = M_PI_2;
                 servo_set_pub_->publish(servo_move);

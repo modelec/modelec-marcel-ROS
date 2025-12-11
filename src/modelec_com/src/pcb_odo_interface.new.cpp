@@ -97,6 +97,7 @@ namespace Modelec
     void PCBOdoInterface::read(const std::string& msg)
     {
         RCLCPP_INFO_ONCE(this->get_logger(), "Received from PCB: %s", msg.c_str());
+        RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Received from PCB: %s", msg.c_str());
         std::vector<std::string> tokens = split(trim(msg), ';');
         if (tokens.size() < 2)
         {

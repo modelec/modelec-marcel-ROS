@@ -7,7 +7,7 @@ namespace Modelec
 {
     PCBOdoInterface::PCBOdoInterface() : Node("pcb_odo_interface"), SerialListener()
     {
-        declare_parameter<std::string>("serial_port", "/tmp/USB_ODO");
+        declare_parameter<std::string>("serial_port", "/dev/USB_ODO");
         declare_parameter<int>("baudrate", 115200);
         declare_parameter<std::string>("name", "pcb_odo");
 
@@ -96,7 +96,7 @@ namespace Modelec
 
     void PCBOdoInterface::read(const std::string& msg)
     {
-        RCLCPP_DEBUG(this->get_logger(), "Received from PCB: %s", msg.c_str());
+        RCLCPP_INFO_ONCE(this->get_logger(), "Received from PCB: %s", msg.c_str());
         std::vector<std::string> tokens = split(trim(msg), ';');
         if (tokens.size() < 2)
         {

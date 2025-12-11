@@ -214,7 +214,7 @@ namespace Modelec
 
     void PCBActionInterface::read(const std::string& msg)
     {
-        RCLCPP_DEBUG(this->get_logger(), "Received message: '%s'", msg.c_str());
+        RCLCPP_INFO_ONCE(this->get_logger(), "Received message: '%s'", msg.c_str());
         std::vector<std::string> tokens = split(trim(msg), ';');
 
         if (tokens.size() < 2)

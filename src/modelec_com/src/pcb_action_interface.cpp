@@ -26,25 +26,35 @@ namespace Modelec
                 GetData("ASC", {"POS"});
             });
 
-        servo_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPos>(
+        servo_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPosArray>(
             "action/get/servo", 10,
-            [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
+            [this](const modelec_interfaces::msg::ActionServoPosArray::SharedPtr msg)
             {
-                GetData("SERVO" + std::to_string(msg->id), {"POS"});
+                std::string data = "GET;SERVO;POS;" + std::to_string(msg->items.size()) + ";";
+                for (const auto& item : msg->items) {
+                    data += std::to_string(item.id) + ";";
+                }
+
+                SendToPCB(data);
             });
 
-        relay_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionRelayState>(
+        relay_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionRelayStateArray>(
             "action/get/relay", 10,
-            [this](const modelec_interfaces::msg::ActionRelayState::SharedPtr msg)
+            [this](const modelec_interfaces::msg::ActionRelayStateArray::SharedPtr msg)
             {
-                GetData("RELAY" + std::to_string(msg->id), {"STATE"});
+                std::string data = "GET;RELAY;STATE;" + std::to_string(msg->items.size()) + ";";
+                for (const auto& item : msg->items) {
+                    data += std::to_string(item.id) + ";";
+                }
+
+                SendToPCB(data);
             });
 
         asc_get_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionAscPos>(
             "action/get/asc/res", 10);
-        servo_get_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPos>(
+        servo_get_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPosArray>(
             "action/get/servo/res", 10);
-        relay_get_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionRelayState>(
+        relay_get_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionRelayStateArray>(
             "action/get/relay/res", 10);
 
         asc_set_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
@@ -54,20 +64,23 @@ namespace Modelec
                 SendOrder("ASC", {std::to_string(msg->pos), std::to_string(msg->value)});
             });
 
-        servo_set_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPos>(
+        /*servo_set_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPosArray>(
             "action/set/servo", 10,
-            [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
+            [this](const modelec_interfaces::msg::ActionServoPosArray::SharedPtr msg)
             {
-                SendOrder("SERVO" + std::to_string(msg->id), {
-                              "POS" + std::to_string(msg->pos), std::to_string(static_cast<int>(msg->angle * 100))
-                          });
-            });
+                std::string data = "SET;SERVO;POS;" + std::to_string(msg->items.size()) + ";";
+                for (const auto& item : msg->items) {
+                    data += std::to_string(item.id) + ";" + std::to_string(item.pos) + ";" + std::to_string(static_cast<int>(item.angle)) + ";";
+                }
+
+                SendToPCB(data);
+            });*/
 
         asc_set_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionAscPos>(
             "action/set/asc/res", 10);
 
-        servo_set_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPos>(
-            "action/set/servo/res", 10);
+        /*servo_set_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPosArray>(
+            "action/set/servo/res", 10);*/
 
         asc_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
             "action/move/asc", 10,
@@ -76,27 +89,39 @@ namespace Modelec
                 SendMove("ASC", {std::to_string(msg->pos)});
             });
 
-        servo_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPos>(
+        servo_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPosArray>(
             "action/move/servo", 10,
-            [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr msg)
+            [this](const modelec_interfaces::msg::ActionServoPosArray::SharedPtr msg)
             {
-                SendMove("SERVO" + std::to_string(msg->id), {"POS" + std::to_string(msg->pos)});
+                std::string data = "MOV;SERVO;" + std::to_string(msg->items.size()) + ";";
+                for (const auto& item : msg->items)
+                {
+                    data += std::to_string(item.id) + ";" + std::to_string(item.angle) + ";";
+                }
+
+                SendToPCB(data);
             });
 
-        relay_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionRelayState>(
+        relay_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionRelayStateArray>(
             "action/move/relay", 10,
-            [this](const modelec_interfaces::msg::ActionRelayState::SharedPtr msg)
+            [this](const modelec_interfaces::msg::ActionRelayStateArray::SharedPtr msg)
             {
-                SendMove("RELAY" + std::to_string(msg->id), {std::to_string(msg->state)});
+                std::string data = "MOV;RELAY;STATE;" + std::to_string(msg->items.size()) + ";";
+                for (const auto& item : msg->items)
+                {
+                    data += std::to_string(item.id) + ";" + std::to_string(item.state) + ";";
+                }
+
+                SendToPCB(data);
             });
 
         asc_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionAscPos>(
             "action/move/asc/res", 10);
 
-        servo_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPos>(
+        servo_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPosArray>(
             "action/move/servo/res", 10);
 
-        relay_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionRelayState>(
+        relay_move_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionRelayStateArray>(
             "action/move/relay/res", 10);
 
         tir_start_pub_ = this->create_publisher<std_msgs::msg::Empty>(
@@ -153,34 +178,7 @@ namespace Modelec
 
         // SendMove("ASC", {std::to_string(asc_state_)});
 
-        /*servo_pos_mapper_ = {
-            {0, {{0, 0.55}, {1, 0}}},
-            {1, {{0, 0}, {1, 0.4}}},
-            {2, {{0, M_PI_2}}},
-            {3, {{0, M_PI_2}}},
-            {4, {{0, 1.25}, {1, 0.45}}},
-            {5, {{0, 0}, {1, M_PI}}},
-        };*/
-
-        servo_pos_mapper_ = {
-            {0, {{0, 0}, {1, M_PI_2}}},
-            {1, {{0, 0}, {1, M_PI_2}}},
-            {2, {{0, M_PI_2}, {1, 0}}},
-            {3, {{0, 0}, {1, M_PI_2}}},
-            {4, {{0, 0}, {1, M_PI_2}}},
-        };
-
-        for (auto & [id, v] : servo_pos_mapper_)
-        {
-            if (id == 5) continue;
-
-            for (auto & [key, angle] : v)
-            {
-                rclcpp::sleep_for(std::chrono::milliseconds(100));
-
-                SendOrder("SERVO" + std::to_string(id), {"POS" + std::to_string(key), std::to_string(static_cast<int>(angle * 100))});
-            }
-        }
+        // rclcpp::sleep_for(std::chrono::milliseconds(100));
 
         /*servo_value_ = {
             {0, 1},
@@ -194,23 +192,37 @@ namespace Modelec
         servo_value_ = {
             {0, 0},
             {1, 0},
-            {2, 0},
+            {2, M_PI_2},
             {3, 0},
             {4, 0},
         };
 
+        std::string data = "MOV;SERVO;" + std::to_string(servo_value_.size()) + ";";
+
         for (auto & [id, v] : servo_value_)
         {
-            rclcpp::sleep_for(std::chrono::milliseconds(100));
-
-            SendMove("SERVO" + std::to_string(id), {"POS" + std::to_string(v)});
+            data += std::to_string(id) + ";" + std::to_string(v) + ";";
         }
+
+        SendToPCB(data);
 
         /*relay_value_ = {
             {1, false},
             {2, false},
             {3, false},
         };*/
+
+        /*rclcpp::sleep_for(std::chrono::milliseconds(100));
+
+        data = "SET;RELAY;STATE;";
+        data += std::to_string(relay_value_.size()) + ";";
+
+        for (auto & [id, v] : relay_value_)
+        {
+            data += std::to_string(id) + ";" + std::to_string(v) + ";";
+        }
+
+        SendToPCB(data);*/
 
         /*for (auto & [id, v] : relay_value_)
         {
@@ -249,37 +261,49 @@ namespace Modelec
                 asc_msg.success = true;
                 asc_get_res_pub_->publish(asc_msg);
             }
-            else if (startsWith(tokens[1], "SERVO"))
+            else if (tokens[1] == "SERVO")
             {
-                int servo_id = std::stoi(tokens[1].substr(5));
-                int v = std::stoi(tokens[3]);
-                servo_value_[servo_id] = v;
+                modelec_interfaces::msg::ActionServoPosArray servo_msg;
 
-                modelec_interfaces::msg::ActionServoPos servo_msg;
-                servo_msg.id = servo_id;
-                servo_msg.pos = v;
-                servo_msg.angle = servo_pos_mapper_[servo_id][v];
+                for (int i = 0; i < std::stoi(tokens[2]); ++i)
+                {
+                    int servo_id = std::stoi(tokens[3 + i * 2]);
+                    int angle = std::stoi(tokens[4 + i * 2]);
+
+                    servo_msg.items[i].id = servo_id;
+                    servo_msg.items[i].angle = angle;
+                    servo_msg.items[i].success = true;
+                }
                 servo_msg.success = true;
+
                 servo_get_res_pub_->publish(servo_msg);
             }
-            else if (startsWith(tokens[1], "RELAY"))
+            else if (tokens[1] == "RELAY")
             {
-                int relay_id = std::stoi(tokens[1].substr(5));
-                bool state = (tokens[3] == "1");
-                relay_value_[relay_id] = state;
+                modelec_interfaces::msg::ActionRelayStateArray relay_msg;
 
-                modelec_interfaces::msg::ActionRelayState relay_msg;
-                relay_msg.id = relay_id;
-                relay_msg.state = state;
+                for (int i = 0; i < std::stoi(tokens[2]); ++i)
+                {
+                    int relay_id = std::stoi(tokens[3 + i * 2]);
+                    bool state = (tokens[4 + i * 2] == "1");
+                    relay_value_[relay_id] = state;
+
+                    relay_msg.items[i].id = relay_id;
+                    relay_msg.items[i].state = state;
+                    relay_msg.items[i].success = true;
+                }
                 relay_msg.success = true;
+
                 relay_get_res_pub_->publish(relay_msg);
             }
         }
         else if (tokens[0] == "OK")
         {
-            if (tokens.size() == 4)
+            // TODO rework this part with the pcb protocol
+
+            if (tokens[1] == "ASC")
             {
-                if (tokens[1] == "ASC")
+                if (tokens.size() == 4)
                 {
                     int pos = std::stoi(tokens[2]);
                     int v = std::stoi(tokens[3]);
@@ -291,24 +315,7 @@ namespace Modelec
                     asc_msg.success = true;
                     asc_set_res_pub_->publish(asc_msg);
                 }
-                else if (startsWith(tokens[1], "SERVO"))
-                {
-                    int servo_id = std::stoi(tokens[1].substr(5));
-                    int key = std::stoi(tokens[2].substr(3));
-                    int v = std::stoi(tokens[3]);
-                    servo_pos_mapper_[servo_id][key] = v;
-
-                    modelec_interfaces::msg::ActionServoPos servo_msg;
-                    servo_msg.id = servo_id;
-                    servo_msg.pos = key;
-                    servo_msg.angle = v;
-                    servo_msg.success = true;
-                    servo_set_res_pub_->publish(servo_msg);
-                }
-            }
-            else if (tokens.size() == 3)
-            {
-                if (tokens[1] == "ASC")
+                else
                 {
                     asc_state_ = std::stoi(tokens[2]);
 
@@ -317,30 +324,42 @@ namespace Modelec
                     asc_msg.success = true;
                     asc_move_res_pub_->publish(asc_msg);
                 }
-                else if (startsWith(tokens[1], "SERVO"))
-                {
-                    int servo_id = std::stoi(tokens[1].substr(5));
-                    int key = std::stoi(tokens[2].substr(3));
-                    servo_value_[servo_id] = key;
+            }
+            else if (tokens[1] == "SERVO")
+            {
+                modelec_interfaces::msg::ActionServoPosArray servo_msg;
 
-                    modelec_interfaces::msg::ActionServoPos servo_msg;
-                    servo_msg.id = servo_id;
-                    servo_msg.pos = key;
-                    servo_msg.success = true;
-                    servo_move_res_pub_->publish(servo_msg);
-                }
-                else if (startsWith(tokens[1], "RELAY"))
+                for (int i = 0; i < std::stoi(tokens[2]); ++i)
                 {
-                    int relay_id = std::stoi(tokens[1].substr(5));
-                    bool state = (tokens[2] == "1");
+                    int servo_id = std::stoi(tokens[3 + i * 2]);
+                    float angle = std::stof(tokens[4 + i * 2]);
+                    servo_value_[servo_id] = angle;
+
+                    servo_msg.items[i].id = servo_id;
+                    servo_msg.items[i].angle = angle;
+                    servo_msg.items[i].success = true;
+                }
+                servo_msg.success = true;
+
+                servo_move_res_pub_->publish(servo_msg);
+            }
+            else if (tokens[1] == "RELAY")
+            {
+                modelec_interfaces::msg::ActionRelayStateArray relay_msg;
+
+                for (int i = 0; i < std::stoi(tokens[2]); ++i)
+                {
+                    int relay_id = std::stoi(tokens[3 + i * 2]);
+                    bool state = (tokens[4 + i * 2] == "1");
                     relay_value_[relay_id] = state;
 
-                    modelec_interfaces::msg::ActionRelayState relay_msg;
-                    relay_msg.id = relay_id;
-                    relay_msg.state = state;
-                    relay_msg.success = true;
-                    relay_move_res_pub_->publish(relay_msg);
+                    relay_msg.items[i].id = relay_id;
+                    relay_msg.items[i].state = state;
+                    relay_msg.items[i].success = true;
                 }
+                relay_msg.success = true;
+
+                relay_move_res_pub_->publish(relay_msg);
             }
             else
             {
@@ -349,41 +368,32 @@ namespace Modelec
         }
         else if (tokens[0] == "KO")
         {
-            if (tokens.size() == 4)
+            if (tokens[1] == "ASC")
             {
-                if (tokens[1] == "ASC")
+                if (tokens.size() == 4)
                 {
                     modelec_interfaces::msg::ActionAscPos asc_msg;
                     asc_msg.success = false;
                     asc_set_res_pub_->publish(asc_msg);
                 }
-                else if (startsWith(tokens[1], "SERVO"))
-                {
-                    modelec_interfaces::msg::ActionServoPos servo_msg;
-                    servo_msg.success = false;
-                    servo_set_res_pub_->publish(servo_msg);
-                }
-            }
-            else if (tokens.size() == 3)
-            {
-                if (tokens[1] == "ASC")
+                else
                 {
                     modelec_interfaces::msg::ActionAscPos asc_msg;
                     asc_msg.success = false;
                     asc_move_res_pub_->publish(asc_msg);
                 }
-                else if (startsWith(tokens[1], "SERVO"))
-                {
-                    modelec_interfaces::msg::ActionServoPos servo_msg;
-                    servo_msg.success = false;
-                    servo_move_res_pub_->publish(servo_msg);
-                }
-                else if (startsWith(tokens[1], "RELAY"))
-                {
-                    modelec_interfaces::msg::ActionRelayState relay_msg;
-                    relay_msg.success = false;
-                    relay_move_res_pub_->publish(relay_msg);
-                }
+            }
+            else if (tokens[1] == "SERVO")
+            {
+                modelec_interfaces::msg::ActionServoPosArray servo_msg;
+                servo_msg.success = false;
+                servo_move_res_pub_->publish(servo_msg);
+            }
+            else if (tokens[1] == "RELAY")
+            {
+                modelec_interfaces::msg::ActionRelayStateArray relay_msg;
+                relay_msg.success = false;
+                relay_move_res_pub_->publish(relay_msg);
             }
             else
             {
@@ -436,6 +446,7 @@ namespace Modelec
         SendToPCB(command);
     }
 
+    // TODO CHANGE TO AAA;BBB;N;X;Y;X;Y;X;Y where N is number of elem you want to send
     void PCBActionInterface::GetData(const std::string& elem, const std::vector<std::string>& data)
     {
         SendToPCB("GET", elem, data);

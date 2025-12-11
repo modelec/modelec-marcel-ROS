@@ -9,7 +9,6 @@ namespace Modelec {
     {
         node_ = node;
 
-
         nav_->GoToRotateFirst(2500, 1200, M_PI_2, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
         go_timeout_ = node_->now();

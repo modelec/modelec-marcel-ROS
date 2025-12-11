@@ -9,8 +9,8 @@ namespace Modelec
     ActionExecutor::ActionExecutor(const rclcpp::Node::SharedPtr& node) : node_(node)
     {
         asc_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionAscPos>("/action/move/asc", 10);
-        servo_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionServoPos>("/action/move/servo", 10);
-        relay_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionRelayState>("/action/move/relay", 10);
+        servo_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionServoPosArray>("/action/move/servo", 10);
+        relay_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionRelayStateArray>("/action/move/relay", 10);
 
         asc_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionAscPos>(
             "/action/move/asc/res", 10, [this](const modelec_interfaces::msg::ActionAscPos::SharedPtr)
@@ -19,15 +19,15 @@ namespace Modelec
                 Update();
             });
 
-        servo_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionServoPos>(
-            "/action/move/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPos::SharedPtr)
+        servo_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionServoPosArray>(
+            "/action/move/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPosArray::SharedPtr)
             {
                 step_running_--;
                 Update();
             });
 
-        relay_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionRelayState>(
-            "/action/move/relay/res", 10, [this](const modelec_interfaces::msg::ActionRelayState::SharedPtr)
+        relay_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionRelayStateArray>(
+            "/action/move/relay/res", 10, [this](const modelec_interfaces::msg::ActionRelayStateArray::SharedPtr)
             {
                 step_running_--;
                 Update();
@@ -72,9 +72,14 @@ namespace Modelec
             {
             case SEND_STEP:
                 {
-                    modelec_interfaces::msg::ActionServoPos msg;
-                    msg.id = 5;
-                    msg.pos = 1;
+                    modelec_interfaces::msg::ActionServoPosArray msg;
+
+                    msg.items[0].id = 0;
+                    msg.items[0].angle = 0;
+
+                    msg.items[1].id = 1;
+                    msg.items[1].angle = M_PI_2;
+
                     servo_move_pub_->publish(msg);
 
                     step_running_ = 1;
@@ -82,9 +87,14 @@ namespace Modelec
                 break;
             case TAKE_STEP:
                 {
-                    modelec_interfaces::msg::ActionServoPos msg;
-                    msg.id = 6;
-                    msg.pos = 1;
+                    modelec_interfaces::msg::ActionServoPosArray msg;
+
+                    msg.items[0].id = 0;
+                    msg.items[0].angle = M_PI_2;
+
+                    msg.items[1].id = 1;
+                    msg.items[1].angle = 0;
+
                     servo_move_pub_->publish(msg);
 
                     step_running_ = 1;

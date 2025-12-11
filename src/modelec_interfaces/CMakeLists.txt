@@ -13,6 +13,7 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
         "msg/Alim/AlimEmg.msg"
+
         "msg/Odometry/OdometryPos.msg"
         "msg/Odometry/OdometryGoTo.msg"
         "msg/Odometry/OdometrySpeed.msg"
@@ -22,19 +23,26 @@ rosidl_generate_interfaces(${PROJECT_NAME}
         "msg/Odometry/OdometryWaypoints.msg"
         "msg/Odometry/OdometryStart.msg"
         "msg/Odometry/PID/OdometryPid.msg"
+
         "msg/Strat/StratState.msg"
+
         "msg/Map/Map.msg"
         "msg/Map/Obstacle.msg"
         "msg/Map/Spawn.msg"
+
         "msg/Action/ActionAscPos.msg"
         "msg/Action/ActionRelayState.msg"
         "msg/Action/ActionServoPos.msg"
         "msg/Action/ActionExec.msg"
+        "msg/Action/Array/ActionServoPosArray.msg"
+        "msg/Action/Array/ActionRelayStateArray.msg"
+
         "srv/Alim/AlimOut.srv"
         "srv/Alim/AlimIn.srv"
         "srv/Alim/AlimTemp.srv"
         "srv/Alim/AlimBau.srv"
         "srv/Alim/AlimEmg.srv"
+
         "srv/Odometry/OdometryPosition.srv"
         "srv/Odometry/OdometrySpeed.srv"
         "srv/Odometry/OdometryToF.srv"
@@ -42,8 +50,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
         "srv/Odometry/OdometryAddWaypoint.srv"
         "srv/Odometry/PID/OdometryGetPid.srv"
         "srv/Odometry/PID/OdometrySetPid.srv"
+
         "srv/Map/Map.srv"
         "srv/Map/MapSize.srv"
+
         "srv/AddServoMotor.srv"
         "srv/AddSolenoid.srv"
         "srv/Tirette.srv"

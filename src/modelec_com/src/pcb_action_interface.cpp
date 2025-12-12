@@ -97,7 +97,7 @@ namespace Modelec
                 std::string data = "MOV;SERVO;" + std::to_string(msg->items.size()) + ";";
                 for (const auto& item : msg->items)
                 {
-                    data += std::to_string(item.id) + ";" + std::to_string(item.angle) + ";";
+                    data += std::to_string(item.id) + ";" + fmt::format("{:.3f}", item.angle) + ";";
                 }
 
                 SendToPCB(data);
@@ -262,7 +262,7 @@ namespace Modelec
 
         for (auto & [id, v] : servo_value_)
         {
-            data += std::to_string(id) + ";" + fmt::format("{:.2f}", v) + ";";
+            data += std::to_string(id) + ";" + fmt::format("{:.3f}", v) + ";";
         }
 
         SendToPCB(data);

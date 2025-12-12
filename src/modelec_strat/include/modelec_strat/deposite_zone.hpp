@@ -12,41 +12,21 @@ namespace Modelec
     public:
         DepositeZone(tinyxml2::XMLElement* obstacleElem);
 
-        Point GetPosition() const { return position_; }
+        Point GetPosition() const;
 
-        Point GetNextPotPos()
-        {
-            if (pot_queue_.empty())
-                return Point(std::numeric_limits<int>::min(), std::numeric_limits<int>::min(), 0);
-            return pot_queue_.front();
-        }
+        void Validate(bool valid);
 
-        Point ValidNextPotPos()
-        {
-            if (pot_queue_.empty())
-                return Point(std::numeric_limits<int>::min(), std::numeric_limits<int>::min(), 0);
-            Point p = pot_queue_.front();
-            pot_queue_.pop();
-            return p;
-        }
+        int GetId() const;
+        int GetMaxPot() const;
 
-        int GetTeam() const { return team_; }
-        int GetId() const { return id_; }
-        int GetMaxPot() const { return max_pot_; }
-
-        int GetWidth() const { return w_; }
-        int GetHeight() const { return h_; }
-
-        int RemainingPotPos() const
-        {
-            return pot_queue_.size();
-        }
+        int GetWidth() const;
+        int GetHeight() const;
 
     protected:
-        int id_, team_, max_pot_;
+        int id_, max_pot_;
         int w_, h_;
         Point position_;
 
-        std::queue<Point> pot_queue_;
+        bool has_box_ = false;
     };
 }

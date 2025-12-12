@@ -87,7 +87,7 @@ namespace Modelec
 
         bool LoadDepositeZoneFromXML(const std::string& filename);
 
-        std::shared_ptr<DepositeZone> GetClosestDepositeZone(const PosMsg::SharedPtr& pos, int teamId,
+        std::shared_ptr<DepositeZone> GetClosestDepositeZone(const PosMsg::SharedPtr& pos,
                                                              const std::vector<int>& blacklistedId = {});
 
         PosMsg::SharedPtr GetHomePosition();

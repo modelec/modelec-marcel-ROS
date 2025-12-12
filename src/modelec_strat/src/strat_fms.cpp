@@ -128,6 +128,10 @@ namespace Modelec
             {
                 started_ = false;
 
+                std_msgs::msg::Bool start_odo_msg;
+                start_odo_msg.data = true;
+                start_odo_pub_->publish(start_odo_msg);
+
                 std_msgs::msg::Bool arm_msg;
                 arm_msg.data = true;
                 tir_arm_set_pub_->publish(arm_msg);
@@ -139,10 +143,6 @@ namespace Modelec
             if (started_)
             {
                 rclcpp::sleep_for(std::chrono::milliseconds(300));
-
-                std_msgs::msg::Bool start_odo_msg;
-                start_odo_msg.data = true;
-                start_odo_pub_->publish(start_odo_msg);
 
                 match_start_time_ = now;
 

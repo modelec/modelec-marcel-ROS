@@ -82,26 +82,27 @@ namespace Modelec
             case DOWN_STEP:
                 {
                     modelec_interfaces::msg::ActionServoTimedArray msg;
+                    msg.items.resize(4);
 
                     msg.items[0].id = 0;
                     msg.items[0].start_angle = 1.49;
                     msg.items[0].end_angle = 0;
-                    msg.items[0].duration_ms = 1000;
+                    msg.items[0].duration_s = 10;
 
                     msg.items[1].id = 1;
                     msg.items[1].start_angle = 1.5;
                     msg.items[1].end_angle = 3;
-                    msg.items[1].duration_ms = 1000;
+                    msg.items[1].duration_s = 10;
 
                     msg.items[2].id = 4;
                     msg.items[2].start_angle = 3;
                     msg.items[2].end_angle = 1.45;
-                    msg.items[2].duration_ms = 1000;
+                    msg.items[2].duration_s = 10;
 
                     msg.items[3].id = 5;
                     msg.items[3].start_angle = 0;
                     msg.items[3].end_angle = 1.6;
-                    msg.items[3].duration_ms = 1000;
+                    msg.items[3].duration_s = 10;
 
                     servo_timed_move_pub_->publish(msg);
 
@@ -111,26 +112,27 @@ namespace Modelec
             case UP_STEP:
                 {
                     modelec_interfaces::msg::ActionServoTimedArray msg;
+                    msg.items.resize(4);
 
                     msg.items[0].id = 0;
                     msg.items[0].start_angle = 0;
                     msg.items[0].end_angle = 1.49;
-                    msg.items[0].duration_ms = 1000;
+                    msg.items[0].duration_s = 10;
 
                     msg.items[1].id = 1;
                     msg.items[1].start_angle = 3;
                     msg.items[1].end_angle = 1.5;
-                    msg.items[1].duration_ms = 1000;
+                    msg.items[1].duration_s = 10;
 
                     msg.items[2].id = 4;
                     msg.items[2].start_angle = 1.45;
                     msg.items[2].end_angle = 3;
-                    msg.items[2].duration_ms = 1000;
+                    msg.items[2].duration_s = 10;
 
                     msg.items[3].id = 5;
                     msg.items[3].start_angle = 1.6;
                     msg.items[3].end_angle = 0;
-                    msg.items[3].duration_ms = 1000;
+                    msg.items[3].duration_s = 10;
 
                     servo_timed_move_pub_->publish(msg);
 

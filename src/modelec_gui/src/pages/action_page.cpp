@@ -127,6 +127,8 @@ namespace ModelecGUI
                 [this, i](double value)
                 {
                     ActionServoPosArray servo_move;
+                    servo_move.items.resize(1);
+
                     servo_move.items[0].id = i;
                     servo_move.items[0].angle = value * M_PI / 180.0;
                     servo_move_pub_->publish(servo_move);
@@ -141,6 +143,8 @@ namespace ModelecGUI
                 test_ = !test_;
 
                 ActionServoPosArray servo_move;
+                servo_move.items.resize(2);
+
                 servo_move.items[0].id = 1;
                 servo_move.items[0].angle = test_ ? M_PI_2 : 0;
                 servo_actions_[1]->setDisabled(true);
@@ -178,6 +182,7 @@ namespace ModelecGUI
                 [this, i]()
                 {
                     ActionRelayStateArray relay_state;
+                    relay_state.items.resize(1);
                     relay_state.items[0].id = i;
                     relay_state.items[0].state = !relay_values_[i];
                     relay_move_pub_->publish(relay_state);

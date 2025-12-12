@@ -6,7 +6,7 @@
 
 namespace Modelec
 {
-    PCBActionInterface::PCBActionInterface() : Node("pcb_action_interface"), SerialListener()
+    PCBActionInterface::PCBActionInterface() : Node("pcb_action_interface")
     {
         // Service to create a new serial listener
         declare_parameter<std::string>("serial_port", "/dev/USB_ACTION");
@@ -17,8 +17,6 @@ namespace Modelec
         request->name = get_parameter("name").as_string();
         request->bauds = get_parameter("baudrate").as_int();
         request->serial_port = get_parameter("serial_port").as_string();
-
-        this->open(request->name, request->bauds, request->serial_port, MAX_MESSAGE_LEN);
 
         asc_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
             "action/get/asc", 10,
@@ -35,6 +33,7 @@ namespace Modelec
                 for (const auto& item : msg->items) {
                     data += std::to_string(item.id) + ";";
                 }
+                data += "\n";
 
                 SendToPCB(data);
             });
@@ -47,6 +46,7 @@ namespace Modelec
                 for (const auto& item : msg->items) {
                     data += std::to_string(item.id) + ";";
                 }
+                data += "\n";
 
                 SendToPCB(data);
             });
@@ -65,23 +65,8 @@ namespace Modelec
                 SendOrder("ASC", {std::to_string(msg->pos), std::to_string(msg->value)});
             });
 
-        /*servo_set_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoPosArray>(
-            "action/set/servo", 10,
-            [this](const modelec_interfaces::msg::ActionServoPosArray::SharedPtr msg)
-            {
-                std::string data = "SET;SERVO;POS;" + std::to_string(msg->items.size()) + ";";
-                for (const auto& item : msg->items) {
-                    data += std::to_string(item.id) + ";" + std::to_string(item.pos) + ";" + std::to_string(static_cast<int>(item.angle)) + ";";
-                }
-
-                SendToPCB(data);
-            });*/
-
         asc_set_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionAscPos>(
             "action/set/asc/res", 10);
-
-        /*servo_set_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoPosArray>(
-            "action/set/servo/res", 10);*/
 
         asc_move_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
             "action/move/asc", 10,
@@ -99,6 +84,7 @@ namespace Modelec
                 {
                     data += std::to_string(item.id) + ";" + fmt::format("{:.3f}", item.angle) + ";";
                 }
+                data += "\n";
 
                 SendToPCB(data);
             });
@@ -112,6 +98,7 @@ namespace Modelec
                 {
                     data += std::to_string(item.id) + ";" + std::to_string(item.state) + ";";
                 }
+                data += "\n";
 
                 SendToPCB(data);
             });
@@ -174,8 +161,11 @@ namespace Modelec
                     ServoTimedSet servo_timed_set;
                     servo_timed_set.servo_timed = item;
                     servo_timed_set.start_time = now;
-                    servo_timed_set.end_time = now + rclcpp::Duration::from_seconds(item.duration_ms);
+                    servo_timed_set.end_time = now + rclcpp::Duration::from_seconds(item.duration_s);
                     servo_timed_set.active = true;
+
+                    RCLCPP_DEBUG(this->get_logger(), "Scheduled timed move for Servo ID %d from %.3f to %.3f over %.3f seconds",
+                                 item.id, item.start_angle, item.end_angle, item.duration_s);
 
                     servo_timed_buffer_[item.id] = servo_timed_set;
                 }
@@ -192,12 +182,16 @@ namespace Modelec
 
                 modelec_interfaces::msg::ActionServoTimedArray servo_timed_msg;
 
+				std::map<int, double> to_send;
+
                 for (auto& [id, servo_timed_set] : servo_timed_buffer_)
                 {
-                    if (servo_timed_set.active && now >= servo_timed_set.end_time)
+                    if (servo_timed_set.active && now.nanoseconds() >= servo_timed_set.end_time.nanoseconds())
                     {
-                        // Time is up, set servo to final position
-                        SendMove("SERVO", {std::to_string(id), std::to_string(servo_timed_set.servo_timed.end_angle)});
+                        RCLCPP_DEBUG(this->get_logger(), "Timed move for Servo ID %d completed. Setting to final angle %.3f",
+                                     id, servo_timed_set.servo_timed.end_angle);
+
+                        to_send[id] = servo_timed_set.servo_timed.end_angle;
                         servo_timed_set.active = false;
 
                         servo_timed_msg.items.push_back(servo_timed_set.servo_timed);
@@ -207,11 +201,28 @@ namespace Modelec
                         double elapsed = (now - servo_timed_set.start_time).seconds();
                         double duration = (servo_timed_set.end_time - servo_timed_set.start_time).seconds();
                         double progress = elapsed / duration;
+
+                        RCLCPP_DEBUG(this->get_logger(), "Servo ID %d progress: %.3f | %.3f %.3f", id, progress, elapsed, duration);
+
                         double intermediate_angle = servo_timed_set.servo_timed.start_angle +
                                                     progress * (servo_timed_set.servo_timed.end_angle - servo_timed_set.servo_timed.start_angle);
 
-                        SendMove("SERVO", {std::to_string(id), std::to_string(intermediate_angle)});
+						to_send[id] = intermediate_angle;
                     }
+                }
+
+                if (!to_send.empty())
+                {
+                    std::string data = "MOV;SERVO;" + std::to_string(to_send.size()) + ";";
+
+                    for (const auto& [id, angle] : to_send)
+                    {
+                        data += std::to_string(id) + ";" + fmt::format("{:.3f}", angle) + ";";
+                    }
+
+                    data += "\n";
+
+                    SendToPCB(data);
                 }
 
                 if (!servo_timed_msg.items.empty())
@@ -221,6 +232,8 @@ namespace Modelec
                 }
 
 			});
+
+        this->open(request->name, request->bauds, request->serial_port, MAX_MESSAGE_LEN);
 
         // TODO : check for real value there
         /*asc_value_mapper_ = {
@@ -265,6 +278,8 @@ namespace Modelec
             data += std::to_string(id) + ";" + fmt::format("{:.3f}", v) + ";";
         }
 
+		data += "\n";
+
         SendToPCB(data);
 
         /*relay_value_ = {
@@ -300,8 +315,8 @@ namespace Modelec
     void PCBActionInterface::read(const std::string& msg)
     {
         // RCLCPP_INFO(this->get_logger(), "Received message: '%s'", msg.c_str());
-        RCLCPP_INFO_ONCE(this->get_logger(), "Received message: '%s'", msg.c_str());
-        RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Received message: '%s'", msg.c_str());
+        RCLCPP_INFO_ONCE(this->get_logger(), "Received message: '%s'", trim(msg).c_str());
+        RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Received message: '%s'", trim(msg).c_str());
         std::vector<std::string> tokens = split(trim(msg), ';');
 
         if (tokens.size() < 2)
@@ -324,9 +339,11 @@ namespace Modelec
             }
             else if (tokens[1] == "SERVO")
             {
+                int n = std::stoi(tokens[2]);
                 modelec_interfaces::msg::ActionServoPosArray servo_msg;
+                servo_msg.items.resize(n);
 
-                for (int i = 0; i < std::stoi(tokens[2]); ++i)
+                for (int i = 0; i < n; ++i)
                 {
                     int servo_id = std::stoi(tokens[3 + i * 2]);
                     int angle = std::stoi(tokens[4 + i * 2]);
@@ -341,9 +358,11 @@ namespace Modelec
             }
             else if (tokens[1] == "RELAY")
             {
+                int n = std::stoi(tokens[2]);
                 modelec_interfaces::msg::ActionRelayStateArray relay_msg;
+                relay_msg.items.resize(n);
 
-                for (int i = 0; i < std::stoi(tokens[2]); ++i)
+                for (int i = 0; i < n; ++i)
                 {
                     int relay_id = std::stoi(tokens[3 + i * 2]);
                     bool state = (tokens[4 + i * 2] == "1");
@@ -361,7 +380,6 @@ namespace Modelec
         else if (tokens[0] == "OK")
         {
             // TODO rework this part with the pcb protocol
-
             if (tokens[1] == "ASC")
             {
                 if (tokens.size() == 4)
@@ -388,9 +406,11 @@ namespace Modelec
             }
             else if (tokens[1] == "SERVO")
             {
+                int n = std::stoi(tokens[2]);
                 modelec_interfaces::msg::ActionServoPosArray servo_msg;
+                servo_msg.items.resize(n);
 
-                for (int i = 0; i < std::stoi(tokens[2]); ++i)
+                for (int i = 0; i < n; ++i)
                 {
                     int servo_id = std::stoi(tokens[3 + i * 2]);
                     float angle = std::stof(tokens[4 + i * 2]);
@@ -406,9 +426,11 @@ namespace Modelec
             }
             else if (tokens[1] == "RELAY")
             {
+                int n = std::stoi(tokens[2]);
                 modelec_interfaces::msg::ActionRelayStateArray relay_msg;
+                relay_msg.items.resize(n);
 
-                for (int i = 0; i < std::stoi(tokens[2]); ++i)
+                for (int i = 0; i < n; ++i)
                 {
                     int relay_id = std::stoi(tokens[3 + i * 2]);
                     bool state = (tokens[4 + i * 2] == "1");
@@ -424,7 +446,7 @@ namespace Modelec
             }
             else
             {
-                RCLCPP_WARN(this->get_logger(), "Unknown message format for OK response: '%s'", msg.c_str());
+                RCLCPP_WARN(this->get_logger(), "Unknown message format for OK response: '%s'", trim(msg).c_str());
             }
         }
         else if (tokens[0] == "KO")
@@ -458,7 +480,7 @@ namespace Modelec
             }
             else
             {
-                RCLCPP_WARN(this->get_logger(), "Unknown message format: '%s'", msg.c_str());
+                RCLCPP_WARN(this->get_logger(), "Unknown message format: '%s'", trim(msg).c_str());
             }
         }
         else if (tokens[0] == "EVENT")
@@ -488,8 +510,9 @@ namespace Modelec
     {
         if (IsOk())
         {
-            // RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", data.c_str());
-            RCLCPP_INFO_ONCE(this->get_logger(), "Sending to PCB: %s", data.c_str());
+            // RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
+            RCLCPP_INFO_ONCE(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
+            RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Sending to PCB: %s", data.c_str());
             this->write(data);
         }
     }

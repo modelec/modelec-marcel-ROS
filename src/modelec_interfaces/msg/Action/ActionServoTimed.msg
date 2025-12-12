@@ -1,5 +1,5 @@
 int32 id
 float64 start_angle
 float64 end_angle
-int32 duration_ms
+float64 duration_s
 bool success

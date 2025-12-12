@@ -252,7 +252,7 @@ namespace Modelec
         servo_value_ = {
             {0, 0},
             {1, 0},
-            {2, M_PI_2},
+            {2, 0},
             {3, 0},
             {4, 0},
             {5, 0},

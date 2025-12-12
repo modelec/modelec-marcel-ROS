@@ -20,16 +20,16 @@ namespace Modelec
             });
 
         servo_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionServoPosArray>(
-            "/action/move/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPosArray::SharedPtr)
+            "/action/move/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPosArray::SharedPtr msg)
             {
-                step_running_--;
+                step_running_ -= msg->items.size();
                 Update();
             });
 
         relay_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionRelayStateArray>(
-            "/action/move/relay/res", 10, [this](const modelec_interfaces::msg::ActionRelayStateArray::SharedPtr)
+            "/action/move/relay/res", 10, [this](const modelec_interfaces::msg::ActionRelayStateArray::SharedPtr msg)
             {
-                step_running_--;
+                step_running_ -= msg->items.size();
                 Update();
             });
 
@@ -49,9 +49,9 @@ namespace Modelec
         servo_timed_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionServoTimedArray>("/action/move/servo/timed", 10);
 
         servo_timed_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionServoTimedArray>(
-            "/action/move/servo/timed/res", 10, [this](const modelec_interfaces::msg::ActionServoTimedArray::SharedPtr)
+            "/action/move/servo/timed/res", 10, [this](const modelec_interfaces::msg::ActionServoTimedArray::SharedPtr msg)
             {
-                step_running_--;
+                step_running_ -= msg->items.size();
                 Update();
             });
     }
@@ -81,7 +81,7 @@ namespace Modelec
             {
             case SEND_STEP:
                 {
-                    modelec_interfaces::msg::ActionServoPosArray msg;
+                    modelec_interfaces::msg::ActionServoTimedArray msg;
 
                     msg.items[0].id = 0;
                     msg.items[0].start_angle = 0;
@@ -93,34 +93,48 @@ namespace Modelec
                     msg.items[1].end_angle = 0;
                     msg.items[1].duration_ms = 1000;
 
-                    msg.items[2].id = 4
+                    msg.items[2].id = 4;
                     msg.items[2].start_angle = 0;
                     msg.items[2].end_angle = 1.57;
                     msg.items[2].duration_ms = 1000;
 
-                    msg.items[3].id = 5
+                    msg.items[3].id = 5;
                     msg.items[3].start_angle = 1.57;
                     msg.items[3].end_angle = 0;
                     msg.items[3].duration_ms = 1000;
 
-                    servo_move_pub_->publish(msg);
+                    servo_timed_move_pub_->publish(msg);
 
-                    step_running_ = 4;
+                    step_running_ = msg.items.size();
                 }
                 break;
             case TAKE_STEP:
                 {
-                    modelec_interfaces::msg::ActionServoPosArray msg;
+                    modelec_interfaces::msg::ActionServoTimedArray msg;
 
                     msg.items[0].id = 0;
-                    msg.items[0].angle = M_PI_2;
+                    msg.items[0].start_angle = 1.43;
+                    msg.items[0].end_angle = 0;
+                    msg.items[0].duration_ms = 1000;
 
                     msg.items[1].id = 1;
-                    msg.items[1].angle = 0;
+                    msg.items[1].start_angle = 0;
+                    msg.items[1].end_angle = 1.43;
+                    msg.items[1].duration_ms = 1000;
 
-                    servo_move_pub_->publish(msg);
+                    msg.items[2].id = 4;
+                    msg.items[2].start_angle = 1.57;
+                    msg.items[2].end_angle = 0;
+                    msg.items[2].duration_ms = 1000;
 
-                    step_running_ = 1;
+                    msg.items[3].id = 5;
+                    msg.items[3].start_angle = 0;
+                    msg.items[3].end_angle = 1.57;
+                    msg.items[3].duration_ms = 1000;
+
+                    servo_timed_move_pub_->publish(msg);
+
+                    step_running_ = msg.items.size();
                 }
                 break;
             default:

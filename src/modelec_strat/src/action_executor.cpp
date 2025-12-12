@@ -45,6 +45,15 @@ namespace Modelec
                 step_running_ = 0;
                 Update();
             });
+
+        servo_timed_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionServoTimedArray>("/action/move/servo/timed", 10);
+
+        servo_timed_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionServoTimedArray>(
+            "/action/move/servo/timed/res", 10, [this](const modelec_interfaces::msg::ActionServoTimedArray::SharedPtr)
+            {
+                step_running_--;
+                Update();
+            });
     }
 
     rclcpp::Node::SharedPtr ActionExecutor::GetNode() const
@@ -75,14 +84,28 @@ namespace Modelec
                     modelec_interfaces::msg::ActionServoPosArray msg;
 
                     msg.items[0].id = 0;
-                    msg.items[0].angle = 0;
+                    msg.items[0].start_angle = 0;
+                    msg.items[0].end_angle = 1.43;
+                    msg.items[0].duration_ms = 1000;
 
                     msg.items[1].id = 1;
-                    msg.items[1].angle = M_PI_2;
+                    msg.items[1].start_angle = 1.43;
+                    msg.items[1].end_angle = 0;
+                    msg.items[1].duration_ms = 1000;
+
+                    msg.items[2].id = 4
+                    msg.items[2].start_angle = 0;
+                    msg.items[2].end_angle = 1.57;
+                    msg.items[2].duration_ms = 1000;
+
+                    msg.items[3].id = 5
+                    msg.items[3].start_angle = 1.57;
+                    msg.items[3].end_angle = 0;
+                    msg.items[3].duration_ms = 1000;
 
                     servo_move_pub_->publish(msg);
 
-                    step_running_ = 1;
+                    step_running_ = 4;
                 }
                 break;
             case TAKE_STEP:

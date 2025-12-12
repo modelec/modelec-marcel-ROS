@@ -251,11 +251,11 @@ namespace Modelec
 
         servo_value_ = {
             {0, 0},
-            {1, 1.43},
+            {1, 3},
             {2, 0},
             {3, 0},
-            {4, 1.57},
-            {5, 0},
+            {4, 1.45},
+            {5, 1.6},
         };
 
         std::string data = "MOV;SERVO;" + std::to_string(servo_value_.size()) + ";";

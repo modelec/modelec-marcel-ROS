@@ -162,6 +162,65 @@ namespace Modelec
             });
 
 
+        servo_move_timed_sub_ = this->create_subscription<modelec_interfaces::msg::ActionServoTimedArray>(
+            "action/move/servo/timed", 10,
+            [this](const modelec_interfaces::msg::ActionServoTimedArray::SharedPtr msg)
+            {
+                rclcpp::Time now = this->now();
+
+                for (const auto& item : msg->items)
+                {
+                    ServoTimedSet servo_timed_set;
+                    servo_timed_set.servo_timed = item;
+                    servo_timed_set.start_time = now;
+                    servo_timed_set.end_time = now + rclcpp::Duration::from_seconds(item.duration_ms);
+                    servo_timed_set.active = true;
+
+                    servo_timed_buffer_[item.id] = servo_timed_set;
+                }
+            });
+
+        servo_move_timed_res_pub_ = this->create_publisher<modelec_interfaces::msg::ActionServoTimedArray>(
+            "action/move/servo/timed/res", 10);
+
+		servo_timed_timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(TIMER_SERVO_TIMED_MS),
+            [this]()
+            {
+                rclcpp::Time now = this->now();
+
+                modelec_interfaces::msg::ActionServoTimedArray servo_timed_msg;
+
+                for (auto& [id, servo_timed_set] : servo_timed_buffer_)
+                {
+                    if (servo_timed_set.active && now >= servo_timed_set.end_time)
+                    {
+                        // Time is up, set servo to final position
+                        SendMove("SERVO", {std::to_string(id), std::to_string(servo_timed_set.servo_timed.end_angle)});
+                        servo_timed_set.active = false;
+
+                        servo_timed_msg.items.push_back(servo_timed_set.servo_timed);
+                    }
+                    else if (servo_timed_set.active)
+                    {
+                        double elapsed = (now - servo_timed_set.start_time).seconds();
+                        double duration = (servo_timed_set.end_time - servo_timed_set.start_time).seconds();
+                        double progress = elapsed / duration;
+                        double intermediate_angle = servo_timed_set.servo_timed.start_angle +
+                                                    progress * (servo_timed_set.servo_timed.end_angle - servo_timed_set.servo_timed.start_angle);
+
+                        SendMove("SERVO", {std::to_string(id), std::to_string(intermediate_angle)});
+                    }
+                }
+
+                if (!servo_timed_msg.items.empty())
+                {
+                    servo_timed_msg.success = true;
+                    servo_move_timed_res_pub_->publish(servo_timed_msg);
+                }
+
+			});
+
         // TODO : check for real value there
         /*asc_value_mapper_ = {
             {0, 0},

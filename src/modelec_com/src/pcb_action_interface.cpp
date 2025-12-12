@@ -261,7 +261,7 @@ namespace Modelec
 
         for (auto & [id, v] : servo_value_)
         {
-            data += std::to_string(id) + ";" + std::to_string(v) + ";";
+            data += std::to_string(id) + ";" + std::format("{:.2f}", value + ";";
         }
 
         SendToPCB(data);

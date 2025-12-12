@@ -2,7 +2,7 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_utils/config.hpp>
 #include <modelec_utils/utils.hpp>
-#include <format>
+#include <fmt/core.h>
 
 namespace Modelec
 {
@@ -262,7 +262,7 @@ namespace Modelec
 
         for (auto & [id, v] : servo_value_)
         {
-            data += std::to_string(id) + ";" + std::format("{:.2f}", value + ";";
+            data += std::to_string(id) + ";" + fmt::format("{:.2f}", v) + ";";
         }
 
         SendToPCB(data);

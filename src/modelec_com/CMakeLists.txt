@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(ament_index_cpp REQUIRED)
+find_package(fmt)
 
 find_package(modelec_interfaces REQUIRED)
 find_package(modelec_utils REQUIRED)
@@ -27,7 +28,7 @@ target_include_directories(pcb_odo_interface PUBLIC
 # PCB Action Node
 add_executable(pcb_action_interface src/pcb_action_interface.cpp src/serial_listener.cpp)
 ament_target_dependencies(pcb_action_interface rclcpp std_msgs modelec_interfaces ament_index_cpp)
-target_link_libraries(pcb_action_interface Boost::system modelec_utils::utils modelec_utils::config)
+target_link_libraries(pcb_action_interface Boost::system modelec_utils::utils modelec_utils::config fmt::fmt)
 target_include_directories(pcb_action_interface PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>

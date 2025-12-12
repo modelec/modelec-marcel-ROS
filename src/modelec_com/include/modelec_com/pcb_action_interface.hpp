@@ -24,7 +24,7 @@ namespace Modelec
         std::map<int, int> asc_value_mapper_;
 
         int asc_state_ = 0;
-        std::map<int, int> servo_value_;
+        std::map<int, double> servo_value_;
         std::map<int, bool> relay_value_;
 
     private:

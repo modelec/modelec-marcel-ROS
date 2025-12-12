@@ -79,7 +79,7 @@ namespace Modelec
         {
             switch (step_.front())
             {
-            case SEND_STEP:
+            case DOWN_STEP:
                 {
                     modelec_interfaces::msg::ActionServoTimedArray msg;
 
@@ -108,7 +108,7 @@ namespace Modelec
                     step_running_ = msg.items.size();
                 }
                 break;
-            case TAKE_STEP:
+            case UP_STEP:
                 {
                     modelec_interfaces::msg::ActionServoTimedArray msg;
 
@@ -137,6 +137,31 @@ namespace Modelec
                     step_running_ = msg.items.size();
                 }
                 break;
+            case TAKE_STEP:
+                {
+                    modelec_interfaces::msg::ActionServoPosArray msg;
+
+                    msg.items[0].id = 2;
+                    msg.items[0].angle = 0;
+
+                    servo_move_pub_->publish(msg);
+
+                    step_running_ = msg.items.size();
+                }
+                break;
+            case FREE_STEP:
+                {
+                    modelec_interfaces::msg::ActionServoPosArray msg;
+
+                    msg.items[0].id = 2;
+                    msg.items[0].angle = M_PI;
+
+                    servo_move_pub_->publish(msg);
+
+                    step_running_ = msg.items.size();
+                }
+
+                break;
             default:
                 return;
             }
@@ -156,14 +181,27 @@ namespace Modelec
         action_ = NONE;
     }
 
-    void ActionExecutor::Send() {
+    void ActionExecutor::Down() {
         if (action_done_)
         {
-            action_ = SEND;
+            action_ = DOWN;
             action_done_ = false;
             step_running_ = 0;
 
-            step_.push(SEND_STEP);
+            step_.push(DOWN_STEP);
+
+            Update();
+        }
+    }
+
+    void ActionExecutor::Up() {
+        if (action_done_)
+        {
+            action_ = UP;
+            action_done_ = false;
+            step_running_ = 0;
+
+            step_.push(UP_STEP);
 
             Update();
         }
@@ -177,6 +215,19 @@ namespace Modelec
             step_running_ = 0;
 
             step_.push(TAKE_STEP);
+
+            Update();
+        }
+    }
+
+    void ActionExecutor::Free() {
+        if (action_done_)
+        {
+            action_ = FREE;
+            action_done_ = false;
+            step_running_ = 0;
+
+            step_.push(FREE_STEP);
 
             Update();
         }

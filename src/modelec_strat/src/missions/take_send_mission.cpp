@@ -34,7 +34,7 @@ namespace Modelec {
         switch (step_)
         {
         case GO_TO_TAKE:
-            action_executor_->Take();
+            action_executor_->Up();
             deploy_time_ = node_->now();
 
             step_ = TAKE;
@@ -53,7 +53,7 @@ namespace Modelec {
             step_ = GO_TO_SEND;
             break;
         case GO_TO_SEND:
-            action_executor_->Send();
+            action_executor_->Down();
             deploy_time_ = node_->now();
 
             step_ = SEND;

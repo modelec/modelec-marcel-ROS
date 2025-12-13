@@ -2,7 +2,7 @@ name: ROS2 Build & Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
   build_and_test_ros2:

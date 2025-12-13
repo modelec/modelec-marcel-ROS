@@ -9,6 +9,8 @@ namespace Modelec {
     {
         node_ = node;
 
+        go_timeout_ = node_->now();
+
         status_ = MissionStatus::RUNNING;
         step_ = GO_TO_TAKE;
     }
@@ -31,13 +33,13 @@ namespace Modelec {
         switch (step_)
         {
         case GO_TO_TAKE:
-
-            // TODO find box
             {
 
-                auto closestBox = nav_->GetPathfinding()->GetClosestObstacle<BoxObstacle>(nav_->GetCurrentPos());
+                auto closestBox = nav_->GetClosestObstacle<BoxObstacle>(nav_->GetCurrentPos());
 
-                auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
+                auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
+
+                nav_->GetPathfinding()->RemoveObstacle(closestBox->GetId());
 
                 nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL);
 

@@ -27,8 +27,9 @@ namespace Modelec {
         MissionStatus status_;
         std::shared_ptr<NavigationHelper> nav_;
         std::shared_ptr<ActionExecutor> action_executor_;
-        rclcpp::Time go_home_time_;
         rclcpp::Node::SharedPtr node_;
+
+        std::shared_ptr<DepositeZone> target_deposite_zone_;
 
         rclcpp::Time go_timeout_;
         rclcpp::Time deploy_time_;

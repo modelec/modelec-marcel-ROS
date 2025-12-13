@@ -65,8 +65,8 @@ namespace Modelec
         }
 
         game_action_sequence_.push(State::TAKE_MISSION);
-        game_action_sequence_.push(State::TAKE_MISSION);
         game_action_sequence_.push(State::FREE_MISSION);
+        game_action_sequence_.push(State::TAKE_MISSION);
         game_action_sequence_.push(State::FREE_MISSION);
     }
 
@@ -183,9 +183,16 @@ namespace Modelec
             }
         case State::SELECT_GAME_ACTION:
             {
-                auto action = game_action_sequence_.front();
-                game_action_sequence_.pop();
-                Transition(action, "Selected game action");
+                if (game_action_sequence_.empty())
+                {
+                    Transition(State::DO_GO_HOME, "No more game actions");
+                }
+                else
+                {
+                    auto action = game_action_sequence_.front();
+                    game_action_sequence_.pop();
+                    Transition(action, "Selected game action");
+                }
             }
 
             break;
@@ -206,7 +213,7 @@ namespace Modelec
         case State::FREE_MISSION:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<TakeMission>(nav_, action_executor_);
+                current_mission_ = std::make_unique<FreeMission>(nav_, action_executor_);
                 current_mission_->Start(shared_from_this());
             }
             current_mission_->Update();

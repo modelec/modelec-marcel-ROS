@@ -16,6 +16,8 @@ namespace Modelec
 
         void Validate(bool valid);
 
+        bool Validate() const;
+
         int GetId() const;
         int GetMaxPot() const;
 

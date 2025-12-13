@@ -88,7 +88,11 @@ namespace Modelec
         bool LoadDepositeZoneFromXML(const std::string& filename);
 
         std::shared_ptr<DepositeZone> GetClosestDepositeZone(const PosMsg::SharedPtr& pos,
-                                                             const std::vector<int>& blacklistedId = {});
+                                                             const std::vector<int>& blacklistedId = {}, bool only_free = false);
+
+        template <typename T,
+          typename = std::enable_if_t<std::is_base_of<Obstacle, T>::value>>
+        std::shared_ptr<T> GetClosestObstacle(const PosMsg::SharedPtr& pos) const;
 
         PosMsg::SharedPtr GetHomePosition();
 
@@ -171,4 +175,27 @@ namespace Modelec
         rclcpp::Time last_odo_get_pos_time_;
 
     };
+
+    template <typename T, typename>
+    std::shared_ptr<T> NavigationHelper::GetClosestObstacle(const PosMsg::SharedPtr& pos) const
+    {
+        std::shared_ptr<T> closest_obstacle = nullptr;
+        auto robotPos = Point(pos->x, pos->y, pos->theta);
+        float distance = std::numeric_limits<float>::max();
+
+        for (const auto& obstacle : GetPathfinding()->GetObstacles())
+        {
+            if (auto obs = std::dynamic_pointer_cast<T>(obstacle.second))
+            {
+                auto dist = Point::distance(robotPos, obs->GetPosition());
+                if (dist < distance)
+                {
+                    distance = dist;
+                    closest_obstacle = obs;
+                }
+            }
+        }
+
+        return closest_obstacle;
+    }
 }

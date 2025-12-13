@@ -505,7 +505,7 @@ namespace Modelec
     }
 
     std::shared_ptr<DepositeZone> NavigationHelper::GetClosestDepositeZone(
-        const PosMsg::SharedPtr& pos, const std::vector<int>& blacklistedId)
+        const PosMsg::SharedPtr& pos, const std::vector<int>& blacklistedId, bool only_free)
     {
         std::shared_ptr<DepositeZone> closest_zone = nullptr;
         double score = std::numeric_limits<double>::max();
@@ -515,7 +515,8 @@ namespace Modelec
         for (const auto& [id, zone] : deposite_zones_)
         {
             if (blacklistedId.end() == std::find(
-                blacklistedId.begin(), blacklistedId.end(), id))
+                blacklistedId.begin(), blacklistedId.end(), id)
+                && (!only_free || !zone->Validate()))
             {
                 auto zonePoint = zone->GetPosition();
                 double distance = Point::distance(posPoint, zonePoint);

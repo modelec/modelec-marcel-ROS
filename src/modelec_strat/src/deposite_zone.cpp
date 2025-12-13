@@ -28,6 +28,9 @@ namespace Modelec
         has_box_ = valid;
     }
 
+    bool DepositeZone::Validate() const
+    { return has_box_; }
+
     int DepositeZone::GetId() const
     { return id_; }
 

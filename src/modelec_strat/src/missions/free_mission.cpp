@@ -9,6 +9,8 @@ namespace Modelec {
     {
         node_ = node;
 
+        go_timeout_ = node_->now();
+
         status_ = MissionStatus::RUNNING;
         step_ = GO_TO_FREE;
     }
@@ -37,10 +39,15 @@ namespace Modelec {
                 auto dist = std::clamp(Point::distance(Point(currPos->x, currPos->y, currPos->theta),
                     nav_->GetClosestDepositeZone(nav_->GetCurrentPos())->GetPosition()), 0.0, 200.0);
 
-                auto depoPoint = nav_->GetClosestDepositeZone(nav_->GetCurrentPos())->GetPosition().GetTakePosition(dist,
-                    nav_->GetCurrentPos()->theta);
+                target_deposite_zone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), {}, true);
 
-                nav_->GoToRotateFirst(depoPoint, true, Pathfinding::FREE);
+                auto depoPoint = target_deposite_zone_->GetPosition();
+
+                auto angle = atan2(depoPoint.y - currPos->y,
+                    depoPoint.x - currPos->x);
+
+                nav_->GoToRotateFirst(depoPoint.GetTakePosition(dist,
+                    angle + M_PI), true, Pathfinding::FREE);
 
                 go_timeout_ = node_->now();
 
@@ -56,6 +63,10 @@ namespace Modelec {
             }
             break;
         case DONE:
+            {
+                target_deposite_zone_->Validate(true);
+            }
+
             status_ = MissionStatus::DONE;
             break;
         default:

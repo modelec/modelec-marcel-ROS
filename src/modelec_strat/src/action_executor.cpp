@@ -79,7 +79,7 @@ namespace Modelec
         {
             switch (step_.front())
             {
-            case DOWN_STEP:
+            case FRONT_DOWN_STEP:
                 {
                     modelec_interfaces::msg::ActionServoTimedArray msg;
                     msg.items.resize(4);
@@ -109,7 +109,7 @@ namespace Modelec
                     step_running_ = msg.items.size();
                 }
                 break;
-            case UP_STEP:
+            case FRONT_UP_STEP:
                 {
                     modelec_interfaces::msg::ActionServoTimedArray msg;
                     msg.items.resize(4);
@@ -139,7 +139,7 @@ namespace Modelec
                     step_running_ = msg.items.size();
                 }
                 break;
-            case TAKE_STEP:
+            case FRONT_TAKE_1_STEP:
                 {
                     modelec_interfaces::msg::ActionServoPosArray msg;
 
@@ -151,7 +151,7 @@ namespace Modelec
                     step_running_ = msg.items.size();
                 }
                 break;
-            case FREE_STEP:
+            case FRONT_FREE_1_STEP:
                 {
                     modelec_interfaces::msg::ActionServoPosArray msg;
 
@@ -163,6 +163,11 @@ namespace Modelec
                     step_running_ = msg.items.size();
                 }
 
+                break;
+            case MAX_DEPLOY_STEP:
+                {
+
+                }
                 break;
             default:
                 return;
@@ -183,53 +188,53 @@ namespace Modelec
         action_ = NONE;
     }
 
-    void ActionExecutor::Down() {
+    void ActionExecutor::Down(bool front) {
         if (action_done_)
         {
-            action_ = DOWN;
+            action_ = front ? FRONT_DOWN : BACK_DOWN;
             action_done_ = false;
             step_running_ = 0;
 
-            step_.push(DOWN_STEP);
+            step_.push(front ? FRONT_DOWN_STEP : BACK_DOWN_STEP);
 
             Update();
         }
     }
 
-    void ActionExecutor::Up() {
+    void ActionExecutor::Up(bool front) {
         if (action_done_)
         {
-            action_ = UP;
+            action_ = front ? FRONT_UP : BACK_UP;
             action_done_ = false;
             step_running_ = 0;
 
-            step_.push(UP_STEP);
+            step_.push(front ? FRONT_UP_STEP : BACK_UP_STEP);
 
             Update();
         }
     }
 
-    void ActionExecutor::Take() {
+    void ActionExecutor::Take(bool front, int n) {
         if (action_done_)
         {
-            action_ = TAKE;
+            action_ = static_cast<Action>(n * 10 + (front ? 0 : 100));
             action_done_ = false;
             step_running_ = 0;
 
-            step_.push(TAKE_STEP);
+            step_.push(static_cast<Step>(n * 10 + (front ? 0 : 100)));
 
             Update();
         }
     }
 
-    void ActionExecutor::Free() {
+    void ActionExecutor::Free(bool front, int n) {
         if (action_done_)
         {
-            action_ = FREE;
+            action_ = static_cast<Action>(1 + n * 10 + (front ? 0 : 100));
             action_done_ = false;
             step_running_ = 0;
 
-            step_.push(FREE_STEP);
+            step_.push(static_cast<Step>(1 + n * 10 + (front ? 0 : 100)));
 
             Update();
         }

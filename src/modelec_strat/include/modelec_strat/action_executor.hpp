@@ -14,20 +14,68 @@ namespace Modelec
     public:
         enum Action
         {
-            NONE,
-            UP,
-            DOWN,
+            NONE = 0,
 
-            TAKE,
-            FREE
+            FRONT_UP = 1,
+            FRONT_DOWN = 2,
+
+            FRONT_TAKE_1 = 10,
+            FRONT_FREE_1 = 11,
+            FRONT_TAKE_2 = 20,
+            FRONT_FREE_2 = 21,
+            FRONT_TAKE_3 = 30,
+            FRONT_FREE_3 = 31,
+            FRONT_TAKE_4 = 40,
+            FRONT_FREE_4 = 41,
+
+            BACK_UP = 101,
+            BACK_DOWN = 102,
+
+            BACK_TAKE_1 = 110,
+            BACK_FREE_1 = 111,
+            BACK_TAKE_2 = 120,
+            BACK_FREE_2 = 121,
+            BACK_TAKE_3 = 130,
+            BACK_FREE_3 = 131,
+            BACK_TAKE_4 = 140,
+            BACK_FREE_4 = 141,
+
+            THERMO_DEPLOY = 200,
+            THERMO_UNDEPLOY = 201,
+
+            MAX_DEPLOY = 99
         };
 
         enum Step
         {
-            UP_STEP,
-            DOWN_STEP,
-            TAKE_STEP,
-            FREE_STEP
+            FRONT_UP_STEP = 1,
+            FRONT_DOWN_STEP = 2,
+
+            FRONT_TAKE_1_STEP = 10,
+            FRONT_FREE_1_STEP = 11,
+            FRONT_TAKE_2_STEP = 20,
+            FRONT_FREE_2_STEP = 21,
+            FRONT_TAKE_3_STEP = 30,
+            FRONT_FREE_3_STEP = 31,
+            FRONT_TAKE_4_STEP = 40,
+            FRONT_FREE_4_STEP = 41,
+
+            BACK_UP_STEP = 101,
+            BACK_DOWN_STEP = 102,
+
+            BACK_TAKE_1_STEP = 110,
+            BACK_FREE_1_STEP = 111,
+            BACK_TAKE_2_STEP = 120,
+            BACK_FREE_2_STEP = 121,
+            BACK_TAKE_3_STEP = 130,
+            BACK_FREE_3_STEP = 131,
+            BACK_TAKE_4_STEP = 140,
+            BACK_FREE_4_STEP = 141,
+
+            THERMO_DEPLOY_STEP = 200,
+            THERMO_UNDEPLOY_STEP = 201,
+
+            MAX_DEPLOY_STEP = 99,
         };
 
         ActionExecutor();
@@ -42,13 +90,13 @@ namespace Modelec
 
         void ReInit();
 
-        void Down();
+        void Down(bool front = true);
 
-        void Up();
+        void Up(bool front = true);
 
-        void Take();
+        void Take(bool front = true, int n = 1);
 
-        void Free();
+        void Free(bool front = true, int n = 1);
 
     protected:
         rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_pub_;

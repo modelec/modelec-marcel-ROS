@@ -17,7 +17,7 @@
 namespace Modelec
 {
     struct ServoTimedSet
-    {s
+    {
         modelec_interfaces::msg::ActionServoTimed servo_timed;
         rclcpp::Time start_time;
         rclcpp::Time end_time;

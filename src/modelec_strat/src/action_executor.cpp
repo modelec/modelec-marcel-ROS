@@ -127,7 +127,7 @@ namespace Modelec
                     msg.items[2].id = 4;
                     msg.items[2].start_angle = 1.57;
                     msg.items[2].end_angle = 3;
-                    msg.items[2].duration_s = 3;
+                    msg.items[2].duration_s = 1;
 
                     msg.items[3].id = 5;
                     msg.items[3].start_angle = 1.4;

@@ -156,7 +156,7 @@ namespace Modelec
                     modelec_interfaces::msg::ActionServoPosArray msg;
 
                     msg.items[0].id = 2;
-                    msg.items[0].angle = M_PI;
+                    msg.items[0].angle = 3;
 
                     servo_move_pub_->publish(msg);
 

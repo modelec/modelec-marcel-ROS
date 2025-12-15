@@ -14,7 +14,7 @@ namespace ModelecGUI {
         this->showFullScreen();
 
         home_page_ = new HomePage(get_node(), this);
-        //odo_page_ = new OdoPage(get_node(), this);
+        // odo_page_ = new OdoPage(get_node(), this);
         test_map_page_ = new TestMapPage(get_node(), this);
         map_page_ = new MapPage(get_node(), this);
         action_page_ = new ActionPage(get_node(), this);

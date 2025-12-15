@@ -24,8 +24,10 @@ namespace Modelec
         INIT,
         WAIT_START,
         SELECT_MISSION,
+        SELECT_GAME_ACTION,
 
-        TAKE_SEND_MISSION,
+        TAKE_MISSION,
+        FREE_MISSION,
 
         DO_GO_HOME,
         STOP
@@ -58,6 +60,8 @@ namespace Modelec
         bool team_selected_ = false;
         std::unique_ptr<Mission> current_mission_;
         int team_id_ = 0;
+
+        std::queue<State> game_action_sequence_;
 
         std::shared_ptr<NavigationHelper> nav_;
         std::shared_ptr<ActionExecutor> action_executor_;

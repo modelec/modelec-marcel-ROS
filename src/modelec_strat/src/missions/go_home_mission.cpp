@@ -17,21 +17,10 @@ namespace Modelec
 
         score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
 
-        auto pos = nav_->GetHomePosition();
-        home_point_ = Point(pos->x, pos->y, pos->theta);
-        if (nav_->CanGoTo(home_point_.GetTakeBasePosition()) != Pathfinding::FREE)
-        {
-            if (nav_->CanGoTo(home_point_.GetTakeBasePosition(), true) != Pathfinding::FREE)
-            {
-                status_ = MissionStatus::FAILED;
-                return;
-            }
-        }
-        nav_->RotateTo(home_point_);
-
         go_timeout_ = node_->now();
 
         status_ = MissionStatus::RUNNING;
+        step_ = ROTATE_TO_HOME;
     }
 
     void GoHomeMission::Update()
@@ -48,6 +37,25 @@ namespace Modelec
         {
         case ROTATE_TO_HOME:
             {
+                auto pos = nav_->GetHomePosition();
+                home_point_ = Point(pos->x, pos->y, pos->theta);
+                if (nav_->CanGoTo(home_point_.GetTakeBasePosition()) != Pathfinding::FREE)
+                {
+                    if (nav_->CanGoTo(home_point_.GetTakeBasePosition(), true) != Pathfinding::FREE)
+                    {
+                        status_ = MissionStatus::FAILED;
+                        return;
+                    }
+                }
+                nav_->RotateTo(home_point_);
+
+                go_timeout_ = node_->now();
+
+                step_ = GO_HOME;
+            }
+            break;
+        case GO_HOME:
+            {
                 if (nav_->GoTo(home_point_.GetTakeBasePosition()) != Pathfinding::FREE)
                 {
                     if (nav_->GoTo(home_point_.GetTakeBasePosition(), true) != Pathfinding::FREE)
@@ -58,34 +66,34 @@ namespace Modelec
                 }
 
                 go_timeout_ = node_->now();
+
+                step_ = GO_CLOSE;
             }
-
-            step_ = GO_HOME;
             break;
-        case GO_HOME:
-            if ((node_->now() - start_time_).seconds() < 94)
-            {
-                break;
-            }
-
-            go_timeout_ = node_->now();
-
-            nav_->GoTo(home_point_, true);
-
-            step_ = GO_CLOSE;
-            break;
-
         case GO_CLOSE:
             {
-                std_msgs::msg::Int64 msg;
-                msg.data = mission_score_;
-                score_pub_->publish(msg);
+                if ((node_->now() - start_time_).seconds() < 94)
+                {
+                    break;
+                }
+
+                nav_->GoTo(home_point_, true);
+
+                go_timeout_ = node_->now();
 
                 step_ = DONE;
-                status_ = MissionStatus::DONE;
 
-                break;
             }
+            break;
+        case DONE:
+            {
+                std_msgs::msg::Int64 score_msg;
+                score_msg.data = mission_score_;
+                score_pub_->publish(score_msg);
+
+                status_ = MissionStatus::DONE;
+            }
+            break;
         default:
             break;
         }

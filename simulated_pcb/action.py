@@ -1,34 +1,47 @@
 import argparse
-
 import serial
-import time
-import math
 import threading
+import time
 
 class SimulatedPCB:
-    def __init__(self, port='/dev/pts/6', baud=115200):
-        self.ser = serial.Serial(port, baud, timeout=1)
+    def __init__(self, port='/tmp/ACTION_SIM', baud=115200):
+        self.ser = serial.Serial(port, baud, timeout=0.1)
         self.running = True
-        self.last_update = time.time()
 
-        # État simulé
-        self.servos = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, }  # {id: pos_index}
-        self.servo_angles = {0: {0: 0, 1: 0, 3: 0}, 1: {0: 0, 1: 0, 3: 0}, 2: {0: 0, 1: 0, 3: 0}, 3: {0: 0, 1: 0, 3: 0}, 4: {0: 0, 1: 0, 3: 0}, 5: {0: 0, 1: 0, 3: 0}, }  # {id: {pos_index: angle}}
-        self.relais = {0: 0, 1: 0, 2: 0}
-        self.ascenseur_pos = 0
-        self.fin_course = {}  # à implémenter si besoin
-        self.tirette_arm = False
+        # State identical to STM32 getters
+        self.servo_angles = {i: 0.0 for i in range(16)}     # angle as float
+        self.relay_state = {i: 0 for i in range(16)}        # 0/1
+        self.tirette_armed = False
 
         self.thread = threading.Thread(target=self.run)
         self.thread.start()
 
-    def send_response(self, msg):
-        print(f"[TX] {msg}")
+    def tx(self, msg):
+        print(f"[TX] {msg.strip()}")
         self.ser.write((msg + "\n").encode())
 
-    def process_command(self, line):
-        parts = line.strip().split(';')
-        if not parts:
+    # ----------------------------------------------------------------------
+    # STM32-LIKE FUNCTIONS
+    # ----------------------------------------------------------------------
+    def getServoAngle(self, sid):
+        return float(self.servo_angles.get(sid, 0.0))
+
+    def getRelayState(self, rid):
+        return int(self.relay_state.get(rid, 0))
+
+    def moveServo(self, sid, angle):
+        self.servo_angles[sid] = float(angle)
+
+    def moveRelay(self, rid, state):
+        self.relay_state[rid] = 1 if int(state) else 0
+
+    # ----------------------------------------------------------------------
+    # COMMAND PARSER (as close as possible to STM32 version)
+    # ----------------------------------------------------------------------
+    def process(self, line):
+        print(f"[RX] {line}")
+        parts = line.split(";")
+        if len(parts) < 2:
             return
 
         cmd = parts[0]
@@ -39,80 +52,143 @@ class SimulatedPCB:
             self.handle_set(parts)
         elif cmd == "MOV":
             self.handle_mov(parts)
+        elif cmd == "ACK":
+            # simulate ACK reception ignore for now
+            pass
 
-    def handle_get(self, parts):
-        if len(parts) != 3:
+    # ----------------------------------------------------------------------
+    # GET handler (SERVO POS / RELAY STATE)
+    # ----------------------------------------------------------------------
+    def handle_get(self, p):
+        # GET;SERVO;POS;n;id...
+        if p[1] == "SERVO" and p[2] == "POS":
+            if len(p) < 4:
+                self.tx("KO;SET;SERVO;POS")
+                return
+
+            n = int(p[3])
+            if n <= 0:
+                self.tx("SET;SERVO;POS;0")
+                return
+
+            resp = f"SET;SERVO;POS;{n}"
+            idx = 4
+            for _ in range(n):
+                if idx >= len(p):
+                    self.tx("KO;SET;SERVO;POS")
+                    return
+                sid = int(p[idx])
+                idx += 1
+                angle = self.getServoAngle(sid)
+                resp += f";{sid};{angle:.4f}"
+
+            self.tx(resp)
             return
 
-        category, data = parts[1], parts[2]
+        # GET;RELAY;STATE;n;id...
+        if p[1] == "RELAY" and p[2] == "STATE":
+            if len(p) < 4:
+                self.tx("KO;SET;RELAY;STATE")
+                return
+            n = int(p[3])
+            if n <= 0:
+                self.tx("SET;RELAY;STATE;0")
+                return
 
-        if category.startswith("SERVO") and data == "POS":
-            sid = int(category[5:])
-            pos = self.servos.get(sid, 0)
-            self.send_response(f"SET;{category};{data};{pos}")
-        elif category == "ASC" and data == "POS":
-            self.send_response(f"SET;ASC;POS;{self.ascenseur_pos}")
-        elif category.startswith("RELAY") and data == "STATE":
-            rid = int(category[5:])
-            state = self.relais.get(rid, 0)
-            self.send_response(f"SET;{category};{data};{state}")
+            resp = f"SET;RELAY;STATE;{n}"
+            idx = 4
+            for _ in range(n):
+                if idx >= len(p):
+                    self.tx("KO;SET;RELAY;STATE")
+                    return
+                rid = int(p[idx])
+                idx += 1
+                state = self.getRelayState(rid)
+                resp += f";{rid};{state}"
 
-    def handle_set(self, parts):
-        if len(parts) != 4:
+            self.tx(resp)
             return
 
-        category, data, val = parts[1], parts[2], parts[3]
+    # ----------------------------------------------------------------------
+    # SET handler (only TIR;ARM)
+    # ----------------------------------------------------------------------
+    def handle_set(self, p):
+        if p[1] == "TIR" and p[2] == "ARM":
+            if len(p) < 4:
+                self.tx("KO;TIR;ARM")
+                return
 
-        if category.startswith("SERVO") and data.startswith("POS"):
-            sid = int(category[5:])
-            pos_index = int(data[3:])
-            angle = float(val)
-
-            if sid not in self.servo_angles:
-                self.servo_angles[sid] = {}
-            self.servo_angles[sid][pos_index] = angle
-
-            self.send_response(f"OK;{category};{data};{val}")
-        elif category == "ASC":
-            self.send_response(f"OK;ASC;{data};{val}")
-        else:
-            self.send_response(f"KO;{category};{data};{val}")
-
-    def handle_mov(self, parts):
-        if len(parts) != 3:
+            val = int(p[3])
+            self.tirette_armed = bool(val)
+            self.tx(f"OK;TIR;ARM;{val}")
             return
 
-        category, data = parts[1], parts[2]
+        self.tx(f"KO;{p[1]};{p[2]}")
 
-        if category == "ASC":
-            self.ascenseur_pos = data
-            self.send_response(f"OK;{category};{data}")
-            time.sleep(.5)
-        elif category.startswith("SERVO") and data.startswith("POS"):
-            sid = int(category[5:])
-            pos_index = int(data[3:])
-            if sid in self.servo_angles and pos_index in self.servo_angles[sid]:
-                time.sleep(0.1)
-                self.servos[sid] = pos_index
-                self.send_response(f"OK;{category};{data}")
-            else:
-                self.send_response(f"KO;{category};{data}")
-        elif category.startswith("RELAY"):
-            rid = int(category[5:])
-            self.relais[rid] = 1 if data == "1" else 0
-            time.sleep(.1)
-            self.send_response(f"OK;{category};{data}")
-        else:
-            self.send_response(f"KO;{category};{data}")
+    # ----------------------------------------------------------------------
+    # MOV handler (SERVO multi / RELAY multi)
+    # ----------------------------------------------------------------------
+    def handle_mov(self, p):
+        # MOV;SERVO;n;id;angle;id;angle...
+        if p[1] == "SERVO":
+            n = int(p[2])
+            idx = 3
 
+            resp = f"OK;SERVO;{n}"
+            for _ in range(n):
+                if idx + 1 >= len(p):
+                    self.tx(f"KO;MOV;SERVO;{p[2]}")
+                    return
+
+                sid = int(p[idx])
+                ang = float(p[idx+1])
+                idx += 2
+
+                self.moveServo(sid, ang)
+                resp += f";{sid};{ang}"
+
+            self.tx(resp)
+            return
+
+        # MOV;RELAY;n;id;state...
+        if p[1] == "RELAY":
+            n = int(p[2])
+            idx = 3
+
+            resp = f"OK;RELAY;{n}"
+            for _ in range(n):
+                if idx + 1 >= len(p):
+                    self.tx(f"KO;MOV;RELAY;{p[2]}")
+                    return
+
+                rid = int(p[idx])
+                st = int(p[idx+1])
+                idx += 2
+
+                self.moveRelay(rid, st)
+                resp += f";{rid};{st}"
+
+            self.tx(resp)
+            return
+
+        self.tx(f"KO;MOV;{p[1]}")
+
+    # ----------------------------------------------------------------------
+    # Loop
+    # ----------------------------------------------------------------------
     def run(self):
+        buf = b""
         while self.running:
-            if self.ser.in_waiting:
-                msg = self.ser.readline().decode().strip()
-                print(f"[RX] {msg}")
-                self.process_command(msg)
-
-            time.sleep(0.1)
+            try:
+                data = self.ser.read(64)
+                if data:
+                    buf += data
+                    while b"\n" in buf:
+                        line, buf = buf.split(b"\n", 1)
+                        self.process(line.decode().strip())
+            except Exception as e:
+                print(f"Serial error: {e}")
+                time.sleep(0.2)
 
     def stop(self):
         self.running = False
@@ -120,18 +196,19 @@ class SimulatedPCB:
         self.ser.close()
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Simulated PCB")
-    parser.add_argument('--port', type=str, default='/tmp/USB_ACTION_SIM', help='Serial port to use')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", type=str, default="/tmp/ACTION_SIM")
     args = parser.parse_args()
-
     sim = None
     try:
-        sim = SimulatedPCB(port=args.port)
+        sim = SimulatedPCB(args.port)
+        while True:
+            time.sleep(1)
     except KeyboardInterrupt:
         if sim:
             sim.stop()
-        print("Simulation stopped")
+        print("Stopped.")
 
 # socat -d -d pty,raw,echo=0,link=/tmp/ACTION_SIM pty,raw,echo=0,link=/tmp/ACTION_USB
 # python3 simulated_pcb/action.py --port /tmp/ACTION_SIM

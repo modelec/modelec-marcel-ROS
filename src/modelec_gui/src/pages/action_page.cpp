@@ -16,8 +16,8 @@ namespace ModelecGUI
             [this]()
             {
                 ActionExec action_exec;
-                action_exec.action = ActionExec::DEPLOY_MAX_SIZE;
-                action_exec.mission = {ActionExec::ASC_GO_UP, ActionExec::RETRACT_BOTTOM_PLATE};
+                // action_exec.action = ActionExec::DEPLOY_MAX;
+                // action_exec.mission = {ActionExec::DEPLOY_MAX_STEP};
                 action_exec_pub_->publish(action_exec);
             });
 
@@ -120,23 +120,41 @@ namespace ModelecGUI
         servo_actions_.push_back(servo6_action_);
         servo_actions_.push_back(servo7_action_);
         servo_actions_.push_back(servo8_action_);
-        waiting_for_move_servo_ = std::vector<bool>(servo_actions_.size(), false);
 
         for (size_t i = 0; i < servo_actions_.size(); ++i)
         {
             connect(servo_actions_[i], &ActionWidget::ButtonClicked, this,
                 [this, i](double value)
                 {
-                    ActionServoPos servo_move;
-                    servo_move.id = i;
-                    servo_move.pos = 128;
-                    servo_move.angle = value * M_PI / 180.0;
-                    servo_set_pub_->publish(servo_move);
-                    servo_actions_[i]->setDisabled(true);
+                    ActionServoPosArray servo_move;
+                    servo_move.items.resize(1);
 
-                    waiting_for_move_servo_[i] = true;
+                    servo_move.items[0].id = i;
+                    servo_move.items[0].angle = value * M_PI / 180.0;
+                    servo_move_pub_->publish(servo_move);
+                    servo_actions_[i]->setDisabled(true);
                 });
         }
+
+        test_button_ = new QPushButton("Test POC Servos");
+        connect(test_button_, &QPushButton::clicked, this,
+            [this]()
+            {
+                test_ = !test_;
+
+                ActionServoPosArray servo_move;
+                servo_move.items.resize(2);
+
+                servo_move.items[0].id = 1;
+                servo_move.items[0].angle = test_ ? M_PI_2 : 0;
+                servo_actions_[1]->setDisabled(true);
+
+                servo_move.items[1].id = 2;
+                servo_move.items[1].angle = test_ ? 0 : M_PI_2;
+                servo_actions_[2]->setDisabled(true);
+
+                servo_move_pub_->publish(servo_move);
+            });
 
         relay_layout_ = new QHBoxLayout;
 
@@ -163,9 +181,10 @@ namespace ModelecGUI
             connect(relay_buttons_[i], &QPushButton::clicked, this,
                 [this, i]()
                 {
-                    ActionRelayState relay_state;
-                    relay_state.id = i;
-                    relay_state.state = !relay_values_[i];
+                    ActionRelayStateArray relay_state;
+                    relay_state.items.resize(1);
+                    relay_state.items[0].id = i;
+                    relay_state.items[0].state = !relay_values_[i];
                     relay_move_pub_->publish(relay_state);
                     relay_buttons_[i]->setDisabled(true);
                 });
@@ -176,14 +195,15 @@ namespace ModelecGUI
             [this]()
             {
                 ActionExec action_exec;
-                action_exec.action = ActionExec::DEPLOY_BANNER;
-                action_exec.mission = {ActionExec::DEPLOY_BANNER_STEP};
+                action_exec.action = ActionExec::DOWN;
+                action_exec.mission = {ActionExec::DOWN_STEP};
                 action_exec_pub_->publish(action_exec);
             });
 
         layout_->addWidget(max_size_button_);
         layout_->addLayout(asc_layout_);
         layout_->addLayout(servo_layout_);
+        layout_->addWidget(test_button_);
         layout_->addLayout(relay_layout_);
         layout_->addWidget(deploy_banner_button_);
 
@@ -220,62 +240,58 @@ namespace ModelecGUI
                 asc_action_->setDisabled(false);
             });
 
-        servo_get_sub_ = node_->create_subscription<ActionServoPos>(
-            "action/get/servo", 10, [this](const ActionServoPos::SharedPtr msg)
+        servo_get_sub_ = node_->create_subscription<ActionServoPosArray>(
+            "action/get/servo", 10, [this](const ActionServoPosArray::SharedPtr msg)
             {
-                if (static_cast<int>(servo_actions_.size()) > msg->id && servo_actions_[msg->id] != nullptr)
+                for (const auto& item : msg->items)
                 {
-                    servo_actions_[msg->id]->SetSpinBoxValue(msg->angle * 180.0 / M_PI);
+                    if (static_cast<int>(servo_actions_.size()) > item.id && servo_actions_[item.id] != nullptr)
+                    {
+                        servo_actions_[item.id]->SetSpinBoxValue(item.angle * 180.0 / M_PI);
+                    }
                 }
             });
 
-        servo_set_pub_ = node_->create_publisher<ActionServoPos>(
-            "action/set/servo", 10);
-
-        servo_set_res_sub_ = node_->create_subscription<ActionServoPos>(
-            "action/set/servo/res", 10, [this](const ActionServoPos::SharedPtr msg)
-            {
-                if (waiting_for_move_servo_[msg->id])
-                {
-                    ActionServoPos servo_move;
-                    servo_move.id = msg->id;
-                    servo_move.pos = msg->pos;
-                    servo_move_pub_->publish(servo_move);
-                    waiting_for_move_servo_[msg->id] = false;
-                }
-            });
-
-        servo_move_pub_ = node_->create_publisher<ActionServoPos>(
+        servo_move_pub_ = node_->create_publisher<ActionServoPosArray>(
             "action/move/servo", 10);
 
-        servo_move_res_sub_ = node_->create_subscription<ActionServoPos>(
-            "action/move/servo/res", 10, [this](const ActionServoPos::SharedPtr msg)
+        servo_move_res_sub_ = node_->create_subscription<ActionServoPosArray>(
+            "action/move/servo/res", 10, [this](const ActionServoPosArray::SharedPtr msg)
             {
-                if (static_cast<int>(servo_actions_.size()) > msg->id && servo_actions_[msg->id] != nullptr)
+                for (const auto& item : msg->items)
                 {
-                    servo_actions_[msg->id]->setDisabled(false);
+                    if (static_cast<int>(servo_actions_.size()) > item.id && servo_actions_[item.id] != nullptr)
+                    {
+                        servo_actions_[item.id]->setDisabled(false);
+                    }
                 }
             });
 
-        relay_get_sub_ = node_->create_subscription<ActionRelayState>(
-            "action/get/relay", 10, [this](const ActionRelayState::SharedPtr msg)
+        relay_get_sub_ = node_->create_subscription<ActionRelayStateArray>(
+            "action/get/relay", 10, [this](const ActionRelayStateArray::SharedPtr msg)
             {
-                if (static_cast<int>(relay_values_.size()) > msg->id)
+                for (const auto& item : msg->items)
                 {
-                    relay_values_[msg->id] = msg->state;
+                    if (static_cast<int>(relay_buttons_.size()) > item.id && relay_buttons_[item.id] != nullptr)
+                    {
+                        relay_values_[item.id] = item.state;
+                    }
                 }
             });
 
-        relay_move_pub_ = node_->create_publisher<ActionRelayState>(
+        relay_move_pub_ = node_->create_publisher<ActionRelayStateArray>(
             "action/move/relay", 10);
 
-        relay_move_res_sub_ = node_->create_subscription<ActionRelayState>(
-            "action/move/relay/res", 10, [this](const ActionRelayState::SharedPtr msg)
+        relay_move_res_sub_ = node_->create_subscription<ActionRelayStateArray>(
+            "action/move/relay/res", 10, [this](const ActionRelayStateArray::SharedPtr msg)
             {
-                if (static_cast<int>(relay_buttons_.size()) > msg->id && relay_buttons_[msg->id] != nullptr && static_cast<int>(relay_values_.size()) > msg->id)
+                for (const auto& item : msg->items)
                 {
-                    relay_buttons_[msg->id]->setDisabled(false);
-                    relay_values_[msg->id] = msg->state;
+                    if (static_cast<int>(relay_buttons_.size()) > item.id && relay_buttons_[item.id] != nullptr)
+                    {
+                        relay_buttons_[item.id]->setDisabled(false);
+                        relay_values_[item.id] = item.state;
+                    }
                 }
             });
     }

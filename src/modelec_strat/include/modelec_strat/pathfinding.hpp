@@ -79,6 +79,10 @@ namespace Modelec
 
         [[nodiscard]] std::shared_ptr<Obstacle> GetObstacle(int id) const;
 
+        std::map<int, std::shared_ptr<Obstacle>> GetObstacles() const {
+            return obstacle_map_;
+        }
+
         void RemoveObstacle(int id);
 
         void AddObstacle(const std::shared_ptr<Obstacle>& obstacle);

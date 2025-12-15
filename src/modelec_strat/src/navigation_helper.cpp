@@ -125,12 +125,6 @@ namespace Modelec
 
     void NavigationHelper::Update()
     {
-        if ((node_->now() - last_odo_get_pos_time_).nanoseconds() > static_cast<int64_t>(1e8 * 2)) // 200ms
-        {
-            last_odo_get_pos_time_ = node_->now();
-            std_msgs::msg::Empty empty_msg;
-            // odo_get_pos_pub_->publish(empty_msg);
-        }
     }
 
     void NavigationHelper::SendGoTo()
@@ -511,7 +505,7 @@ namespace Modelec
     }
 
     std::shared_ptr<DepositeZone> NavigationHelper::GetClosestDepositeZone(
-        const PosMsg::SharedPtr& pos, int teamId, const std::vector<int>& blacklistedId)
+        const PosMsg::SharedPtr& pos, const std::vector<int>& blacklistedId, bool only_free)
     {
         std::shared_ptr<DepositeZone> closest_zone = nullptr;
         double score = std::numeric_limits<double>::max();
@@ -520,10 +514,11 @@ namespace Modelec
 
         for (const auto& [id, zone] : deposite_zones_)
         {
-            if (zone->GetTeam() == teamId && zone->RemainingPotPos() > 0 && blacklistedId.end() == std::find(
-                blacklistedId.begin(), blacklistedId.end(), id))
+            if (blacklistedId.end() == std::find(
+                blacklistedId.begin(), blacklistedId.end(), id)
+                && (!only_free || !zone->Validate()))
             {
-                auto zonePoint = zone->GetNextPotPos().GetTakeBasePosition();
+                auto zonePoint = zone->GetPosition();
                 double distance = Point::distance(posPoint, zonePoint);
                 double enemy_distance = Point::distance(enemyPos, zone->GetPosition());
                 double theta = std::abs(Point::angleDiff(posPoint, zonePoint));
@@ -746,33 +741,6 @@ namespace Modelec
                 }
             }
         }
-
-        /*if (await_rotate_)
-        {
-            await_rotate_ = false;
-
-            waypoints_.clear();
-            for (auto& w : send_back_waypoints_)
-            {
-                waypoints_.emplace_back(w);
-            }
-            // SendWaypoint();
-            SendGoTo();
-        }
-        else
-        {
-            if (!waypoint_queue_.empty())
-            {
-                waypoint_pub_->publish(waypoint_queue_.front().ToMsg());
-                waypoint_queue_.pop();
-
-                waypoints_[waypoints_.size() - waypoint_queue_.size() - 1].reached = true;
-            }
-            else
-            {
-                waypoints_.back().reached = true;
-            }
-        }*/
     }
 
     void NavigationHelper::OnPos(const PosMsg::SharedPtr msg)

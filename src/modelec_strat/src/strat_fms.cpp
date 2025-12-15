@@ -1,9 +1,11 @@
-#include <ament_index_cpp/get_package_share_directory.hpp>
-#include <modelec_utils/config.hpp>
 #include <modelec_strat/strat_fms.hpp>
 
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <modelec_utils/config.hpp>
+
 #include <modelec_strat/missions/go_home_mission.hpp>
-#include <modelec_strat/missions/take_send_mission.hpp>
+#include <modelec_strat/missions/take_mission.hpp>
+#include <modelec_strat/missions/free_mission.hpp>
 
 namespace Modelec
 {
@@ -61,6 +63,11 @@ namespace Modelec
         {
             RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
         }
+
+        game_action_sequence_.push(State::TAKE_MISSION);
+        game_action_sequence_.push(State::FREE_MISSION);
+        game_action_sequence_.push(State::TAKE_MISSION);
+        game_action_sequence_.push(State::FREE_MISSION);
     }
 
     void StratFMS::Init()
@@ -119,14 +126,16 @@ namespace Modelec
     {
         auto now = this->now();
 
-        nav_->Update();
-
         switch (state_)
         {
         case State::INIT:
             if (team_selected_)
             {
                 started_ = false;
+
+                std_msgs::msg::Bool start_odo_msg;
+                start_odo_msg.data = true;
+                start_odo_pub_->publish(start_odo_msg);
 
                 std_msgs::msg::Bool arm_msg;
                 arm_msg.data = true;
@@ -139,10 +148,6 @@ namespace Modelec
             if (started_)
             {
                 rclcpp::sleep_for(std::chrono::milliseconds(300));
-
-                std_msgs::msg::Bool start_odo_msg;
-                start_odo_msg.data = true;
-                start_odo_pub_->publish(start_odo_msg);
 
                 match_start_time_ = now;
 
@@ -165,39 +170,57 @@ namespace Modelec
                     Transition(State::STOP, "All missions done");
                 }
 
-                if (elapsed.seconds() < 70)
+                else if (elapsed.seconds() < 70)
                 {
-                    Transition(State::TAKE_SEND_MISSION, "Proceed to concert");
+                    Transition(State::SELECT_GAME_ACTION, "Selecting a game action");
                 }
                 else
                 {
                     Transition(State::DO_GO_HOME, "Cleanup and finish match");
                 }
 
-                /*if (elapsed.seconds() >= 2)
-                {
-                    Transition(State::DO_GO_HOME, "Go Home");
-                }*/
-
-                /*
-                else
-                {
-                    Transition(State::DO_GO_HOME, "Cleanup and finish match");
-                }*/
                 break;
             }
+        case State::SELECT_GAME_ACTION:
+            {
+                if (game_action_sequence_.empty())
+                {
+                    Transition(State::DO_GO_HOME, "No more game actions");
+                }
+                else
+                {
+                    auto action = game_action_sequence_.front();
+                    game_action_sequence_.pop();
+                    Transition(action, "Selected game action");
+                }
+            }
 
-        case State::TAKE_SEND_MISSION:
+            break;
+        case State::TAKE_MISSION:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<TakeSendMission>(nav_, action_executor_);
+                current_mission_ = std::make_unique<TakeMission>(nav_, action_executor_);
                 current_mission_->Start(shared_from_this());
             }
             current_mission_->Update();
             if (current_mission_->GetStatus() == MissionStatus::DONE)
             {
                 current_mission_.reset();
-                Transition(State::SELECT_MISSION, "Take and Send done");
+                Transition(State::SELECT_MISSION, "Take done");
+            }
+            break;
+
+        case State::FREE_MISSION:
+            if (!current_mission_)
+            {
+                current_mission_ = std::make_unique<FreeMission>(nav_, action_executor_);
+                current_mission_->Start(shared_from_this());
+            }
+            current_mission_->Update();
+            if (current_mission_->GetStatus() == MissionStatus::DONE)
+            {
+                current_mission_.reset();
+                Transition(State::SELECT_MISSION, "Free done");
             }
             break;
 

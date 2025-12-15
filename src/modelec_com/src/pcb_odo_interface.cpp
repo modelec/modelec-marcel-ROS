@@ -5,7 +5,7 @@
 
 namespace Modelec
 {
-    PCBOdoInterface::PCBOdoInterface() : Node("pcb_odo_interface"), SerialListener()
+    PCBOdoInterface::PCBOdoInterface() : Node("pcb_odo_interface")
     {
         declare_parameter<std::string>("serial_port", "/dev/USB_ODO");
         declare_parameter<int>("baudrate", 115200);
@@ -16,8 +16,6 @@ namespace Modelec
         request->name = get_parameter("name").as_string();
         request->bauds = get_parameter("baudrate").as_int();
         request->serial_port = get_parameter("serial_port").as_string();
-
-        this->open(request->name, request->bauds, request->serial_port, MAX_MESSAGE_LEN);
 
         odo_pos_publisher_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10);
@@ -82,6 +80,7 @@ namespace Modelec
                 }
             });
 
+        this->open(request->name, request->bauds, request->serial_port, MAX_MESSAGE_LEN);
 
         SetPID("THETA", 14, 0, 0);
         SetPID("POS", 10, 0, 0);
@@ -96,12 +95,13 @@ namespace Modelec
 
     void PCBOdoInterface::read(const std::string& msg)
     {
-        RCLCPP_INFO_ONCE(this->get_logger(), "Received from PCB: %s", msg.c_str());
+        // RCLCPP_INFO(this->get_logger(), "Received from PCB: %s", trim(msg).c_str());
+        RCLCPP_INFO_ONCE(this->get_logger(), "Received from PCB: %s", trim(msg).c_str());
         RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Received from PCB: %s", msg.c_str());
         std::vector<std::string> tokens = split(trim(msg), ';');
         if (tokens.size() < 2)
         {
-            RCLCPP_ERROR(this->get_logger(), "Invalid message format: %s", msg.c_str());
+            RCLCPP_ERROR(this->get_logger(), "Invalid message format: %s", trim(msg).c_str());
             return;
         }
 
@@ -188,7 +188,7 @@ namespace Modelec
             }
             else
             {
-                RCLCPP_INFO(this->get_logger(), "PCB response: %s", msg.c_str());
+                RCLCPP_INFO(this->get_logger(), "PCB response: %s", trim(msg).c_str());
             }
         }
         else if (tokens[0] == "KO")
@@ -205,7 +205,7 @@ namespace Modelec
             }
             else
             {
-                RCLCPP_WARN(this->get_logger(), "PCB error: %s", msg.c_str());
+                RCLCPP_WARN(this->get_logger(), "PCB error: %s", trim(msg).c_str());
             }
         }
     }
@@ -233,7 +233,9 @@ namespace Modelec
     {
         if (IsOk())
         {
-            RCLCPP_DEBUG(this->get_logger(), "Sending to PCB: %s", data.c_str());
+            // RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
+            RCLCPP_INFO_ONCE(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
+            RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Sending to PCB: %s", data.c_str());
             this->write(data);
         }
     }

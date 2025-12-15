@@ -6,8 +6,6 @@ namespace Modelec
     DepositeZone::DepositeZone(tinyxml2::XMLElement* obstacleElem)
     {
         obstacleElem->QueryIntAttribute("id", &id_);
-        obstacleElem->QueryIntAttribute("team", &team_);
-        obstacleElem->QueryIntAttribute("max_pot", &max_pot_);
 
         auto posElem = obstacleElem->FirstChildElement("Pos");
         if (posElem)
@@ -18,19 +16,30 @@ namespace Modelec
             posElem->QueryIntAttribute("w", &w_);
             posElem->QueryIntAttribute("h", &h_);
         }
-
-        auto posPotList = obstacleElem->FirstChildElement("PotPos");
-        if (posPotList)
-        {
-            for (auto elemPos = posPotList->FirstChildElement("Pos"); elemPos; elemPos = elemPos->
-                 NextSiblingElement("Pos"))
-            {
-                Point pos;
-                elemPos->QueryIntAttribute("x", &pos.x);
-                elemPos->QueryIntAttribute("y", &pos.y);
-                elemPos->QueryDoubleAttribute("theta", &pos.theta);
-                pot_queue_.emplace(pos);
-            }
-        }
     }
+
+    Point DepositeZone::GetPosition() const
+    {
+        return position_;
+    }
+
+    void DepositeZone::Validate(bool valid)
+    {
+        has_box_ = valid;
+    }
+
+    bool DepositeZone::Validate() const
+    { return has_box_; }
+
+    int DepositeZone::GetId() const
+    { return id_; }
+
+    int DepositeZone::GetMaxPot() const
+    { return max_pot_; }
+
+    int DepositeZone::GetWidth() const
+    { return w_; }
+
+    int DepositeZone::GetHeight() const
+    { return h_; }
 }

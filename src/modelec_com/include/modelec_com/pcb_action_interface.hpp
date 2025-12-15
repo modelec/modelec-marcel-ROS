@@ -12,7 +12,7 @@
 #include <modelec_interfaces/msg/action_servo_timed_array.hpp>
 #include <modelec_interfaces/msg/action_servo_timed.hpp>
 
-#define TIMER_SERVO_TIMED_MS 100 // 10 Hz
+#define TIMER_SERVO_TIMED_MS 20 // 50 Hz
 
 namespace Modelec
 {

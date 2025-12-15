@@ -16,8 +16,8 @@ namespace ModelecGUI
             [this]()
             {
                 ActionExec action_exec;
-                action_exec.action = ActionExec::DEPLOY_MAX;
-                action_exec.mission = {ActionExec::DEPLOY_MAX_STEP};
+                // action_exec.action = ActionExec::DEPLOY_MAX;
+                // action_exec.mission = {ActionExec::DEPLOY_MAX_STEP};
                 action_exec_pub_->publish(action_exec);
             });
 

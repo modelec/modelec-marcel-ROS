@@ -143,6 +143,8 @@ namespace Modelec
                 {
                     modelec_interfaces::msg::ActionServoPosArray msg;
 
+                    msg.items.resize(1);
+
                     msg.items[0].id = 2;
                     msg.items[0].angle = 0;
 
@@ -154,6 +156,8 @@ namespace Modelec
             case FRONT_FREE_1_STEP:
                 {
                     modelec_interfaces::msg::ActionServoPosArray msg;
+
+                    msg.items.resize(1);
 
                     msg.items[0].id = 2;
                     msg.items[0].angle = 3;

@@ -1,40 +1,66 @@
 #include <modelec_strat/action/up_action.hpp>
 
-Modelec::UPAction::UPAction(const ActionExecutor& action_executor) : BaseAction(action_executor)
+#include "modelec_strat/action_executor.hpp"
+
+Modelec::UPAction::UPAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor)
 {
+    steps_.push(ActionExecNewMsg::UP_STEP);
+    steps_.push(ActionExecNewMsg::DONE_STEP);
 }
 
 void Modelec::UPAction::Execute()
 {
-    ActionServoTimedArray msg;
-    msg.items.resize(4);
-
-    msg.items[0].id = 0;
-    msg.items[0].start_angle = 0;
-    msg.items[0].end_angle = 1.49;
-    msg.items[0].duration_s = 10;
-
-    msg.items[1].id = 1;
-    msg.items[1].start_angle = 3;
-    msg.items[1].end_angle = 1.5;
-    msg.items[1].duration_s = 10;
-
-    msg.items[2].id = 4;
-    msg.items[2].start_angle = 1.45;
-    msg.items[2].end_angle = 3;
-    msg.items[2].duration_s = 10;
-
-    msg.items[3].id = 5;
-    msg.items[3].start_angle = 1.6;
-    msg.items[3].end_angle = 0;
-    msg.items[3].duration_s = 10;
-
-    // action_executor_->something(msg);
 }
 
-std::string Modelec::UPAction::GetName() const
+void Modelec::UPAction::Next()
 {
-    return ActionExecNewMsg::UP;
+    if (steps_.empty())
+    {
+        done_ = true;
+        return;
+    }
+
+    auto step = steps_.front();
+    steps_.pop();
+
+    switch (step)
+    {
+    case ActionExecNewMsg::UP_STEP:
+        {
+            ActionServoTimedArray msg;
+            msg.items.resize(4);
+
+            msg.items[0].id = 0;
+            msg.items[0].start_angle = 0;
+            msg.items[0].end_angle = 1.49;
+            msg.items[0].duration_s = 10;
+
+            msg.items[1].id = 1;
+            msg.items[1].start_angle = 3;
+            msg.items[1].end_angle = 1.5;
+            msg.items[1].duration_s = 10;
+
+            msg.items[2].id = 4;
+            msg.items[2].start_angle = 1.45;
+            msg.items[2].end_angle = 3;
+            msg.items[2].duration_s = 10;
+
+            msg.items[3].id = 5;
+            msg.items[3].start_angle = 1.6;
+            msg.items[3].end_angle = 0;
+            msg.items[3].duration_s = 10;
+
+            action_executor_->MoveServoTimed(msg);
+        }
+        break;
+    case ActionExecNewMsg::DONE_STEP:
+        {
+            done_ = true;
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 void Modelec::UPAction::Init(const std::vector<std::string>& params)

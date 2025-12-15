@@ -4,7 +4,8 @@ string DELIMITER = ";"
 string UP = "UP"
 
 # Step
-string UP_STEP = "UP_STEP"
+int32 DONE_STEP = 0
+int32 UP_STEP = 1
 
-string[] steps
+int32[] steps
 string action

@@ -6,10 +6,13 @@
 #include <modelec_interfaces/msg/action_servo_pos_array.hpp>
 #include <modelec_interfaces/msg/action_servo_timed_array.hpp>
 #include <modelec_interfaces/msg/action_exec.hpp>
+#include <modelec_interfaces/msg/action_exec_new.hpp>
 
 namespace Modelec
 {
-    class ActionExecutor
+    class BaseAction;
+
+    class ActionExecutor : public std::enable_shared_from_this<ActionExecutor>
     {
     public:
         enum Action
@@ -20,14 +23,6 @@ namespace Modelec
 
             TAKE,
             FREE
-        };
-
-        enum Step
-        {
-            UP_STEP,
-            DOWN_STEP,
-            TAKE_STEP,
-            FREE_STEP
         };
 
         ActionExecutor();
@@ -50,6 +45,9 @@ namespace Modelec
 
         void Free();
 
+
+        void MoveServoTimed(const modelec_interfaces::msg::ActionServoTimedArray& msg);
+
     protected:
         rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::ActionServoPosArray>::SharedPtr servo_move_pub_;
@@ -61,11 +59,9 @@ namespace Modelec
         rclcpp::Subscription<modelec_interfaces::msg::ActionRelayStateArray>::SharedPtr relay_move_res_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::ActionServoTimedArray>::SharedPtr servo_timed_move_res_sub_;
 
-        rclcpp::Subscription<modelec_interfaces::msg::ActionExec>::SharedPtr action_exec_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::ActionExecNew>::SharedPtr action_exec_sub_;
 
-        Action action_ = NONE;
-
-        std::queue<Step> step_;
+        std::shared_ptr<BaseAction> action_;
 
         bool action_done_ = true;
         int step_running_ = 0;

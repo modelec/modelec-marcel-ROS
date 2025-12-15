@@ -1,6 +1,7 @@
 #include <modelec_strat/action_executor.hpp>
 
 #include "modelec_strat/action/up_action.hpp"
+#include "modelec_utils/utils.hpp"
 
 namespace Modelec
 {
@@ -35,14 +36,13 @@ namespace Modelec
                 Update();
             });
 
-        action_exec_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionExec>(
-            "/action/exec", 10, [this](const modelec_interfaces::msg::ActionExec::SharedPtr msg)
+        action_exec_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionExecNew>(
+            "/action/exec", 10, [this](const modelec_interfaces::msg::ActionExecNew::SharedPtr msg)
             {
-                action_ = static_cast<Action>(msg->action);
-                for (const auto& step : msg->mission)
-                {
-                    step_.push(static_cast<Step>(step));
-                }
+                action_ = BaseAction::CreateAction(
+                    msg->action,
+                    shared_from_this());
+                action_->Init(split(msg->action, ActionExecNewMsg::DELIMITER[0]));
                 action_done_ = false;
                 step_running_ = 0;
                 Update();
@@ -70,86 +70,20 @@ namespace Modelec
 
     void ActionExecutor::Update()
     {
-        if (step_.empty())
+        if (action_ != nullptr && !action_->IsDone() && step_running_ <= 0)
         {
-            action_ = NONE;
-            action_done_ = true;
-            return;
+            action_->Next();
+            if (action_->IsDone())
+            {
+                action_done_ = true;
+                action_ = nullptr;
+            }
         }
 
-        if (step_running_ <= 0)
+        if (action_ != nullptr && action_->IsDone())
         {
-            switch (step_.front())
-            {
-            case DOWN_STEP:
-                {
-                    modelec_interfaces::msg::ActionServoTimedArray msg;
-                    msg.items.resize(4);
-
-                    msg.items[0].id = 0;
-                    msg.items[0].start_angle = 1.49;
-                    msg.items[0].end_angle = 0;
-                    msg.items[0].duration_s = 10;
-
-                    msg.items[1].id = 1;
-                    msg.items[1].start_angle = 1.5;
-                    msg.items[1].end_angle = 3;
-                    msg.items[1].duration_s = 10;
-
-                    msg.items[2].id = 4;
-                    msg.items[2].start_angle = 3;
-                    msg.items[2].end_angle = 1.45;
-                    msg.items[2].duration_s = 10;
-
-                    msg.items[3].id = 5;
-                    msg.items[3].start_angle = 0;
-                    msg.items[3].end_angle = 1.6;
-                    msg.items[3].duration_s = 10;
-
-                    servo_timed_move_pub_->publish(msg);
-
-                    step_running_ = msg.items.size();
-                }
-                break;
-            case UP_STEP:
-                {
-                    UPAction action(this);
-
-                    servo_timed_move_pub_->publish(msg);
-
-                    step_running_ = msg.items.size();
-                }
-                break;
-            case TAKE_STEP:
-                {
-                    modelec_interfaces::msg::ActionServoPosArray msg;
-
-                    msg.items[0].id = 2;
-                    msg.items[0].angle = 0;
-
-                    servo_move_pub_->publish(msg);
-
-                    step_running_ = msg.items.size();
-                }
-                break;
-            case FREE_STEP:
-                {
-                    modelec_interfaces::msg::ActionServoPosArray msg;
-
-                    msg.items[0].id = 2;
-                    msg.items[0].angle = M_PI;
-
-                    servo_move_pub_->publish(msg);
-
-                    step_running_ = msg.items.size();
-                }
-
-                break;
-            default:
-                return;
-            }
-
-            step_.pop();
+            action_done_ = true;
+            action_ = nullptr;
         }
     }
 
@@ -157,21 +91,17 @@ namespace Modelec
     {
         action_done_ = true;
         step_running_ = 0;
-        while (!step_.empty())
-        {
-            step_.pop();
-        }
-        action_ = NONE;
+        action_ = nullptr;
     }
 
     void ActionExecutor::Down() {
         if (action_done_)
         {
-            action_ = DOWN;
+            // action_ = DOWN;
             action_done_ = false;
             step_running_ = 0;
 
-            step_.push(DOWN_STEP);
+            // step_.push(DOWN_STEP);
 
             Update();
         }
@@ -180,11 +110,9 @@ namespace Modelec
     void ActionExecutor::Up() {
         if (action_done_)
         {
-            action_ = UP;
+            action_ = std::make_shared<UPAction>(shared_from_this());
             action_done_ = false;
             step_running_ = 0;
-
-            step_.push(UP_STEP);
 
             Update();
         }
@@ -193,11 +121,9 @@ namespace Modelec
     void ActionExecutor::Take() {
         if (action_done_)
         {
-            action_ = TAKE;
+            // action_ = TAKE;
             action_done_ = false;
             step_running_ = 0;
-
-            step_.push(TAKE_STEP);
 
             Update();
         }
@@ -206,13 +132,19 @@ namespace Modelec
     void ActionExecutor::Free() {
         if (action_done_)
         {
-            action_ = FREE;
+            // action_ = FREE;
             action_done_ = false;
             step_running_ = 0;
 
-            step_.push(FREE_STEP);
+            // step_.push(FREE_STEP);
 
             Update();
         }
+    }
+
+    void ActionExecutor::MoveServoTimed(const modelec_interfaces::msg::ActionServoTimedArray& msg)
+    {
+        servo_timed_move_pub_->publish(msg);
+        step_running_ += msg.items.size();
     }
 }

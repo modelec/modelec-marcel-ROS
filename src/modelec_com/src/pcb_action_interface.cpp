@@ -267,8 +267,8 @@ namespace Modelec
             {1, 3},
             {2, 3},
             {3, 0},
-            {4, 1.45},
-            {5, 1.6},
+            {4, 3.3},
+            {5, 0},
         };
 
         std::string data = "MOV;SERVO;" + std::to_string(servo_value_.size()) + ";";

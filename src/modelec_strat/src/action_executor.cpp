@@ -95,13 +95,13 @@ namespace Modelec
                     msg.items[1].duration_s = 1;
 
                     msg.items[2].id = 4;
-                    msg.items[2].start_angle = 3.3;
-                    msg.items[2].end_angle = 1.7;
+                    msg.items[2].start_angle = 1.7;
+                    msg.items[2].end_angle = 3.3;
                     msg.items[2].duration_s = 1;
 
                     msg.items[3].id = 5;
-                    msg.items[3].start_angle = 0;
-                    msg.items[3].end_angle = 1.5;
+                    msg.items[3].start_angle = 1.5;
+                    msg.items[3].end_angle = 0;
                     msg.items[3].duration_s = 1;
 
                     servo_timed_move_pub_->publish(msg);
@@ -125,13 +125,13 @@ namespace Modelec
                     msg.items[1].duration_s = 1;
 
                     msg.items[2].id = 4;
-                    msg.items[2].start_angle = 1.7;
-                    msg.items[2].end_angle = 3.3;
+                    msg.items[2].start_angle = 3.3;
+                    msg.items[2].end_angle = 1.7;
                     msg.items[2].duration_s = 1;
 
                     msg.items[3].id = 5;
-                    msg.items[3].start_angle = 1.5;
-                    msg.items[3].end_angle = 0;
+                    msg.items[3].start_angle = 0;
+                    msg.items[3].end_angle = 1.5;
                     msg.items[3].duration_s = 1;
 
                     servo_timed_move_pub_->publish(msg);

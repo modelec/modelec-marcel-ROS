@@ -19,6 +19,10 @@ void Modelec::UPAction::Execute()
 
 void Modelec::UPAction::Next()
 {
+    RCLCPP_INFO(
+        action_executor_->GetNode()->get_logger(),
+        "UPAction Next step");
+
     if (steps_.empty())
     {
         done_ = true;

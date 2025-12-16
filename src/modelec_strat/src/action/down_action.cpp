@@ -19,11 +19,19 @@ void Modelec::DownAction::Execute()
 
 void Modelec::DownAction::Next()
 {
+    RCLCPP_INFO(
+    action_executor_->GetNode()->get_logger(),
+    "Down Next step 1");
+
     if (steps_.empty())
     {
         done_ = true;
         return;
     }
+
+    RCLCPP_INFO(
+    action_executor_->GetNode()->get_logger(),
+    "Down Next step 2");
 
     auto step = steps_.front();
     steps_.pop();

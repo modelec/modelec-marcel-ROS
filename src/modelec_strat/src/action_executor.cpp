@@ -100,8 +100,7 @@ namespace Modelec
                 action_ = nullptr;
             }
         }
-
-        if (action_ != nullptr && action_->IsDone())
+        else if (action_ != nullptr && action_->IsDone())
         {
             action_done_ = true;
             action_ = nullptr;

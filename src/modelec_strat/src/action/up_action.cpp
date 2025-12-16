@@ -8,6 +8,11 @@ Modelec::UPAction::UPAction(const std::shared_ptr<ActionExecutor>& action_execut
     steps_.push(ActionExec::DONE_STEP);
 }
 
+Modelec::UPAction::UPAction(const std::shared_ptr<ActionExecutor>& action_executor, bool front) : UPAction(action_executor)
+{
+    front_ = front;
+}
+
 void Modelec::UPAction::Execute()
 {
 }

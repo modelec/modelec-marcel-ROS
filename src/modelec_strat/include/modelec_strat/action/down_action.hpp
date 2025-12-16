@@ -9,6 +9,7 @@ namespace Modelec
     {
     public:
         DownAction(const std::shared_ptr<ActionExecutor>& action_executor);
+        DownAction(const std::shared_ptr<ActionExecutor>& action_executor, bool front);
 
         void Execute() override;
         void Next() override;

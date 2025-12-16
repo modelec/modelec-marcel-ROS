@@ -8,6 +8,11 @@ Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_ex
     steps_.push(ActionExec::DONE_STEP);
 }
 
+Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor, bool front) : DownAction(action_executor)
+{
+    front_ = front;
+}
+
 void Modelec::DownAction::Execute()
 {
 }

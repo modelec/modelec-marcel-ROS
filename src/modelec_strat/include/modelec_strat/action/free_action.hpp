@@ -9,6 +9,7 @@ namespace Modelec
     {
     public:
         FreeAction(const std::shared_ptr<ActionExecutor>& action_executor);
+        FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, bool front, int n);
 
         void Execute() override;
         void Next() override;

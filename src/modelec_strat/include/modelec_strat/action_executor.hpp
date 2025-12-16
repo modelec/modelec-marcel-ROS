@@ -36,13 +36,13 @@ namespace Modelec
 
         void ReInit();
 
-        void Down();
+        void Down(bool front = true);
 
-        void Up();
+        void Up(bool front = true);
 
-        void Take();
+        void Take(bool front = true, int n = 0);
 
-        void Free();
+        void Free(bool front = true, int n = 0);
 
 
         void MoveServoTimed(const modelec_interfaces::msg::ActionServoTimedArray& msg);

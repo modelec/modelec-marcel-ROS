@@ -8,6 +8,12 @@ Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_ex
     steps_.push(ActionExec::DONE_STEP);
 }
 
+Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, bool front, int n) : TakeAction(action_executor)
+{
+    front_ = front;
+    n_ = n;
+}
+
 void Modelec::TakeAction::Execute()
 {
 }

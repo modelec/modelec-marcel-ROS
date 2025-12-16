@@ -1,6 +1,9 @@
 #include <modelec_strat/action_executor.hpp>
 
+#include "modelec_strat/action/down_action.hpp"
 #include "modelec_strat/action/up_action.hpp"
+#include "modelec_strat/action/free_action.hpp"
+#include "modelec_strat/action/take_action.hpp"
 #include "modelec_utils/utils.hpp"
 
 namespace Modelec
@@ -112,23 +115,10 @@ namespace Modelec
         action_ = nullptr;
     }
 
-    void ActionExecutor::Down() {
+    void ActionExecutor::Down(bool front) {
         if (action_done_)
         {
-            // action_ = DOWN;
-            action_done_ = false;
-            step_running_ = 0;
-
-            // step_.push(DOWN_STEP);
-
-            Update();
-        }
-    }
-
-    void ActionExecutor::Up() {
-        if (action_done_)
-        {
-            action_ = std::make_shared<UPAction>(shared_from_this());
+            action_ = std::make_shared<DownAction>(shared_from_this(), front);
             action_done_ = false;
             step_running_ = 0;
 
@@ -136,10 +126,10 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::Take() {
+    void ActionExecutor::Up(bool front) {
         if (action_done_)
         {
-            // action_ = TAKE;
+            action_ = std::make_shared<UPAction>(shared_from_this(), front);
             action_done_ = false;
             step_running_ = 0;
 
@@ -147,14 +137,23 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::Free() {
+    void ActionExecutor::Take(bool front, int n) {
         if (action_done_)
         {
-            // action_ = FREE;
+            action_ = std::make_shared<TakeAction>(shared_from_this(), front, n);
             action_done_ = false;
             step_running_ = 0;
 
-            // step_.push(FREE_STEP);
+            Update();
+        }
+    }
+
+    void ActionExecutor::Free(bool front, int n) {
+        if (action_done_)
+        {
+            action_ = std::make_shared<FreeAction>(shared_from_this(), front, n);
+            action_done_ = false;
+            step_running_ = 0;
 
             Update();
         }

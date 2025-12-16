@@ -147,4 +147,10 @@ namespace Modelec
         servo_timed_move_pub_->publish(msg);
         step_running_ += msg.items.size();
     }
+
+    void ActionExecutor::MoveServo(const modelec_interfaces::msg::ActionServoPosArray& msg)
+    {
+        servo_move_pub_->publish(msg);
+        step_running_ += msg.items.size();
+    }
 }

@@ -9,6 +9,8 @@
 #include <modelec_interfaces/msg/action_exec.hpp>
 #include <modelec_interfaces/msg/action_servo_timed_array.hpp>
 #include <modelec_interfaces/msg/action_servo_timed.hpp>
+#include <modelec_interfaces/msg/action_servo_pos_array.hpp>
+#include <modelec_interfaces/msg/action_servo_pos.hpp>
 
 namespace Modelec
 {
@@ -17,6 +19,8 @@ namespace Modelec
     using ActionExec = modelec_interfaces::msg::ActionExec;
     using ActionServoTimedArray = modelec_interfaces::msg::ActionServoTimedArray;
     using ActionServoTimed = modelec_interfaces::msg::ActionServoTimed;
+    using ActionServoPosArray = modelec_interfaces::msg::ActionServoPosArray;
+    using ActionServoPos = modelec_interfaces::msg::ActionServoPos;
 
     class BaseAction
     {

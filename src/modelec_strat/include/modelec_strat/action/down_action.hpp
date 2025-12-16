@@ -5,17 +5,17 @@
 
 namespace Modelec
 {
-    class UPAction : public BaseAction
+    class DownAction : public BaseAction
     {
     public:
-        UPAction(const std::shared_ptr<ActionExecutor>& action_executor);
+        DownAction(const std::shared_ptr<ActionExecutor>& action_executor);
 
         void Execute() override;
         void Next() override;
         void Init(const std::vector<std::string>& params) override;
         void SetFront(bool front);
 
-        inline static const std::string Name = ActionExec::UP;
+        inline static const std::string Name = ActionExec::DOWN;
 
     private:
         bool front_;
@@ -28,7 +28,7 @@ namespace Modelec
             BaseAction::Registry()[Name] =
                 [](const std::shared_ptr<ActionExecutor>& exec)
                 {
-                    return std::make_shared<UPAction>(exec);
+                    return std::make_shared<DownAction>(exec);
                 };
             return true;
         }();

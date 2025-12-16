@@ -1,0 +1,77 @@
+#include <modelec_strat/action/down_action.hpp>
+
+#include "modelec_strat/action_executor.hpp"
+
+Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor)
+{
+    steps_.push(ActionExec::DOWN_STEP);
+    steps_.push(ActionExec::DONE_STEP);
+}
+
+void Modelec::DownAction::Execute()
+{
+}
+
+void Modelec::DownAction::Next()
+{
+    if (steps_.empty())
+    {
+        done_ = true;
+        return;
+    }
+
+    auto step = steps_.front();
+    steps_.pop();
+
+    switch (step)
+    {
+    case ActionExec::DOWN_STEP:
+        {
+            ActionServoTimedArray msg;
+            msg.items.resize(4);
+
+            msg.items[0].id = front_ ? 0 : 8;
+            msg.items[0].start_angle = front_ ? 0 : 0;
+            msg.items[0].end_angle = front_ ? 1.49 : 0;
+            msg.items[0].duration_s = 10;
+
+            msg.items[1].id = front_ ? 1 : 9;
+            msg.items[1].start_angle = front_ ? 3 : 0;
+            msg.items[1].end_angle = front_ ? 1.5 : 0;
+            msg.items[1].duration_s = 10;
+
+            msg.items[2].id = front_ ? 2 : 10;
+            msg.items[2].start_angle = front_ ? 1.45 : 0;
+            msg.items[2].end_angle = front_ ? 3 : 0;
+            msg.items[2].duration_s = 10;
+
+            msg.items[3].id = front_ ? 3 : 11;
+            msg.items[3].start_angle = front_ ? 1.6 : 0;
+            msg.items[3].end_angle = front_ ? 0 : 0;
+            msg.items[3].duration_s = 10;
+
+            action_executor_->MoveServoTimed(msg);
+        }
+        break;
+    case ActionExec::DONE_STEP:
+        {
+            done_ = true;
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+void Modelec::DownAction::Init(const std::vector<std::string>& params)
+{
+    if (!params.empty())
+    {
+        SetFront(params[0] == "1" || params[0] == "true" || params[0] == "front");
+    }
+}
+
+void Modelec::DownAction::SetFront(bool front)
+{
+    front_ = front;
+}

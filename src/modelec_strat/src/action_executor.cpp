@@ -42,7 +42,7 @@ namespace Modelec
                 action_ = BaseAction::CreateAction(
                     msg->action,
                     shared_from_this());
-                action_->Init(split(msg->action, ActionExecNewMsg::DELIMITER[0]));
+                action_->Init(split(msg->action, ActionExec::DELIMITER[0]));
                 action_done_ = false;
                 step_running_ = 0;
                 Update();

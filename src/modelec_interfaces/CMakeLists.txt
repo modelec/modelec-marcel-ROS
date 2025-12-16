@@ -39,11 +39,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
         "msg/Action/Array/ActionServoTimedArray.msg"
         "msg/Action/Array/ActionRelayStateArray.msg"
 
-        "msg/Action/ActionExecNew.msg"
-        "msg/Action/Array/ActionServoPosArray.msg"
-        "msg/Action/Array/ActionServoTimedArray.msg"
-        "msg/Action/Array/ActionRelayStateArray.msg"
-
         "srv/Alim/AlimOut.srv"
         "srv/Alim/AlimIn.srv"
         "srv/Alim/AlimTemp.srv"

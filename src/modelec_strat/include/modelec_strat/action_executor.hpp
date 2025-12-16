@@ -5,7 +5,6 @@
 #include <modelec_interfaces/msg/action_relay_state_array.hpp>
 #include <modelec_interfaces/msg/action_servo_pos_array.hpp>
 #include <modelec_interfaces/msg/action_servo_timed_array.hpp>
-#include <modelec_interfaces/msg/action_exec.hpp>
 #include <modelec_interfaces/msg/action_exec_new.hpp>
 
 namespace Modelec

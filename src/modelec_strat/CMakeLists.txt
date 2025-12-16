@@ -22,6 +22,7 @@ set(strat_fsm_sources
 
         src/action_executor.cpp
         src/action/up_action.cpp
+        src/action/down_action.cpp
 
         src/missions/go_home_mission.cpp
         src/missions/take_mission.cpp

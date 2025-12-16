@@ -4,8 +4,8 @@
 
 Modelec::UPAction::UPAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor)
 {
-    steps_.push(ActionExecNewMsg::UP_STEP);
-    steps_.push(ActionExecNewMsg::DONE_STEP);
+    steps_.push(ActionExec::UP_STEP);
+    steps_.push(ActionExec::DONE_STEP);
 }
 
 void Modelec::UPAction::Execute()
@@ -25,7 +25,7 @@ void Modelec::UPAction::Next()
 
     switch (step)
     {
-    case ActionExecNewMsg::UP_STEP:
+    case ActionExec::UP_STEP:
         {
             ActionServoTimedArray msg;
             msg.items.resize(4);
@@ -53,7 +53,7 @@ void Modelec::UPAction::Next()
             action_executor_->MoveServoTimed(msg);
         }
         break;
-    case ActionExecNewMsg::DONE_STEP:
+    case ActionExec::DONE_STEP:
         {
             done_ = true;
         }

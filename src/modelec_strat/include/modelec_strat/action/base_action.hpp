@@ -14,7 +14,7 @@ namespace Modelec
 {
     class ActionExecutor;
 
-    using ActionExecNewMsg = modelec_interfaces::msg::ActionExecNew;
+    using ActionExec = modelec_interfaces::msg::ActionExecNew;
     using ActionServoTimedArray = modelec_interfaces::msg::ActionServoTimedArray;
     using ActionServoTimed = modelec_interfaces::msg::ActionServoTimed;
 

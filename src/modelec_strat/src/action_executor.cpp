@@ -162,11 +162,23 @@ namespace Modelec
     {
         servo_timed_move_pub_->publish(msg);
         step_running_ += msg.items.size();
+
+        RCLCPP_INFO(
+            node_->get_logger(),
+            "ActionExecutor MoveServoTimed called with %d items, step_running_=%d",
+            static_cast<int>(msg.items.size()),
+            step_running_);
     }
 
     void ActionExecutor::MoveServo(const modelec_interfaces::msg::ActionServoPosArray& msg)
     {
         servo_move_pub_->publish(msg);
         step_running_ += msg.items.size();
+
+        RCLCPP_INFO(
+            node_->get_logger(),
+            "ActionExecutor MoveServoTimed called with %d items, step_running_=%d",
+            static_cast<int>(msg.items.size()),
+            step_running_);
     }
 }

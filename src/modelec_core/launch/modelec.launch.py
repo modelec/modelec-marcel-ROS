@@ -122,7 +122,7 @@ def generate_launch_description():
     def launch_strat(context, *args, **kwargs):
         if context.launch_configurations.get('with_strat') == 'true':
             return [
-                Node(package='modelec_strat', executable='strat_fsm', name='strat_fsm', prefix=['xterm -e gdb -ex run --args']),
+                Node(package='modelec_strat', executable='strat_fsm', name='strat_fsm'),
                 Node(package='modelec_strat', executable='pami_manager', name='pami_manager'),
                 Node(package='modelec_strat', executable='enemy_manager', name='enemy_manager'),
             ]
@@ -150,3 +150,5 @@ def generate_launch_description():
         OpaqueFunction(function=launch_com),
         OpaqueFunction(function=launch_strat),
     ])
+
+# to run in debug : , prefix=['xterm -e gdb -ex run --args']

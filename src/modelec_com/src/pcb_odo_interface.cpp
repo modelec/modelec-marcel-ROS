@@ -82,10 +82,10 @@ namespace Modelec
 
         this->open(request->name, request->bauds, request->serial_port, MAX_MESSAGE_LEN);
 
-        SetPID("THETA", 14, 0, 0);
-        SetPID("POS", 10, 0, 0);
-        SetPID("LEFT", 5, 0, 0);
-        SetPID("RIGHT", 5, 0, 0);
+        // SetPID("THETA", 14, 0, 0);
+        // SetPID("POS", 10, 0, 0);
+        // SetPID("LEFT", 5, 0, 0);
+        // SetPID("RIGHT", 5, 0, 0);
     }
 
     PCBOdoInterface::~PCBOdoInterface()

@@ -16,8 +16,8 @@ namespace ModelecGUI
             [this]()
             {
                 ActionExec action_exec;
-                action_exec.action = ActionExec::UP + ActionExec::DELIMITER + "";
-                action_exec.steps = {ActionExec::UP_STEP};
+                // action_exec.action = ActionExec::DEPLOY_MAX;
+                // action_exec.mission = {ActionExec::DEPLOY_MAX_STEP};
                 action_exec_pub_->publish(action_exec);
             });
 
@@ -195,8 +195,8 @@ namespace ModelecGUI
             [this]()
             {
                 ActionExec action_exec;
-                // action_exec.action = ActionExec::DOWN;
-                // action_exec.mission = {ActionExec::DOWN_STEP};
+                action_exec.action = ActionExec::DOWN;
+                action_exec.mission = {ActionExec::DOWN_STEP};
                 action_exec_pub_->publish(action_exec);
             });
 

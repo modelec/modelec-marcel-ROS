@@ -93,6 +93,10 @@ namespace Modelec
     {
         if (action_ != nullptr && !action_->IsDone() && step_running_ <= 0)
         {
+            RCLCPP_INFO(
+                node_->get_logger(),
+                "ActionExecutor Update: Executing next step of action, step_running_=%d", step_running_);
+
             action_->Next();
             if (action_->IsDone())
             {
@@ -102,6 +106,10 @@ namespace Modelec
         }
         else if (action_ != nullptr && action_->IsDone())
         {
+            RCLCPP_INFO(
+                node_->get_logger(),
+                "ActionExecutor Update: Action is done, step_running_=%d", step_running_);
+
             action_done_ = true;
             action_ = nullptr;
         }
@@ -177,7 +185,7 @@ namespace Modelec
 
         RCLCPP_INFO(
             node_->get_logger(),
-            "ActionExecutor MoveServoTimed called with %d items, step_running_=%d",
+            "ActionExecutor MoveServo called with %d items, step_running_=%d",
             static_cast<int>(msg.items.size()),
             step_running_);
     }

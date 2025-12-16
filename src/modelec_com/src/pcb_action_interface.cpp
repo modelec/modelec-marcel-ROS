@@ -202,7 +202,7 @@ namespace Modelec
                         double duration = (servo_timed_set.end_time - servo_timed_set.start_time).seconds();
                         double progress = elapsed / duration;
 
-                        // RCLCPP_INFO(this->get_logger(), "Servo ID %d progress: %.3f | %.3f %.3f", id, progress, elapsed, duration);
+                        RCLCPP_DEBUG(this->get_logger(), "Servo ID %d progress: %.3f | %.3f %.3f", id, progress, elapsed, duration);
 
                         double intermediate_angle = servo_timed_set.servo_timed.start_angle +
                                                     progress * (servo_timed_set.servo_timed.end_angle - servo_timed_set.servo_timed.start_angle);

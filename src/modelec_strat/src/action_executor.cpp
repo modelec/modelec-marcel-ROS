@@ -95,7 +95,7 @@ namespace Modelec
     {
         if (action_ != nullptr && !action_->IsDone() && step_running_ <= 0)
         {
-            RCLCPP_INFO(
+            RCLCPP_DEBUG(
                 node_->get_logger(),
                 "ActionExecutor Update: Executing next step of action, step_running_=%d", step_running_);
 
@@ -108,7 +108,7 @@ namespace Modelec
         }
         else if (action_ != nullptr && action_->IsDone())
         {
-            RCLCPP_INFO(
+            RCLCPP_DEBUG(
                 node_->get_logger(),
                 "ActionExecutor Update: Action is done, step_running_=%d", step_running_);
 
@@ -173,7 +173,7 @@ namespace Modelec
         servo_timed_move_pub_->publish(msg);
         step_running_ += msg.items.size();
 
-        RCLCPP_INFO(
+        RCLCPP_DEBUG(
             node_->get_logger(),
             "ActionExecutor MoveServoTimed called with %d items, step_running_=%d",
             static_cast<int>(msg.items.size()),

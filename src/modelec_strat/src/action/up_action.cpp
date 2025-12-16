@@ -33,22 +33,22 @@ void Modelec::UPAction::Next()
             msg.items[0].id = front_ ? 0 : 8;
             msg.items[0].start_angle = front_ ? 0 : 0;
             msg.items[0].end_angle = front_ ? 1.49 : 0;
-            msg.items[0].duration_s = 2;
+            msg.items[0].duration_s = 0.5;
 
             msg.items[1].id = front_ ? 1 : 9;
             msg.items[1].start_angle = front_ ? 3 : 0;
             msg.items[1].end_angle = front_ ? 1.5 : 0;
-            msg.items[1].duration_s = 2;
+            msg.items[1].duration_s = 0.5;
 
             msg.items[2].id = front_ ? 2 : 10;
             msg.items[2].start_angle = front_ ? 1.45 : 0;
             msg.items[2].end_angle = front_ ? 3 : 0;
-            msg.items[2].duration_s = 2;
+            msg.items[2].duration_s = 0.5;
 
             msg.items[3].id = front_ ? 3 : 11;
             msg.items[3].start_angle = front_ ? 1.6 : 0;
             msg.items[3].end_angle = front_ ? 0 : 0;
-            msg.items[3].duration_s = 2;
+            msg.items[3].duration_s = 0.5;
 
             action_executor_->MoveServoTimed(msg);
         }

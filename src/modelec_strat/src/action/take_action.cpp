@@ -33,13 +33,15 @@ void Modelec::TakeAction::Next()
     {
     case ActionExec::TAKE_STEP:
         {
-            modelec_interfaces::msg::ActionServoPosArray msg;
+            modelec_interfaces::msg::ActionServoTimedArray msg;
 
             msg.items.resize(1);
 
             msg.items[0].id = n_ + (front_ ? 3 : 11);
-            msg.items[0].angle = front_ ? 3 : 0;
-            action_executor_->MoveServo(msg);
+            msg.items[0].start_angle = front_ ? 0 : 0;
+            msg.items[0].end_angle = front_ ? 3 : 0;
+            msg.items[0].duration_s = 0.5;
+            action_executor_->MoveServoTimed(msg);
         }
         break;
     case ActionExec::DONE_STEP:

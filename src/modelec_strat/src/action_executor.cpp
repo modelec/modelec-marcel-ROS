@@ -26,7 +26,7 @@ namespace Modelec
             });
 
         servo_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionServoPosArray>(
-            "/action/move/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPosArray::SharedPtr msg)
+            "/action/move/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPosArray::SharedPtr)
             {
                 // BUG
                 // if ServoTimed is called this one will trigger so step_running_ will be decremented at the beginning of the Timed one

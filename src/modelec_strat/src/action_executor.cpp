@@ -36,8 +36,8 @@ namespace Modelec
                 Update();
             });
 
-        action_exec_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionExecNew>(
-            "/action/exec", 10, [this](const modelec_interfaces::msg::ActionExecNew::SharedPtr msg)
+        action_exec_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionExec>(
+            "/action/exec", 10, [this](const modelec_interfaces::msg::ActionExec::SharedPtr msg)
             {
                 action_ = BaseAction::CreateAction(
                     msg->action,

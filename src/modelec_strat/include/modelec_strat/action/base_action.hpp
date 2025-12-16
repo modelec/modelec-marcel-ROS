@@ -6,7 +6,7 @@
 #include <functional>
 #include <vector>
 
-#include <modelec_interfaces/msg/action_exec_new.hpp>
+#include <modelec_interfaces/msg/action_exec.hpp>
 #include <modelec_interfaces/msg/action_servo_timed_array.hpp>
 #include <modelec_interfaces/msg/action_servo_timed.hpp>
 
@@ -14,7 +14,7 @@ namespace Modelec
 {
     class ActionExecutor;
 
-    using ActionExec = modelec_interfaces::msg::ActionExecNew;
+    using ActionExec = modelec_interfaces::msg::ActionExec;
     using ActionServoTimedArray = modelec_interfaces::msg::ActionServoTimedArray;
     using ActionServoTimed = modelec_interfaces::msg::ActionServoTimed;
 

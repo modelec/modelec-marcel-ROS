@@ -16,7 +16,7 @@
 #include <modelec_interfaces/msg/action_servo_pos_array.hpp>
 #include <modelec_interfaces/msg/action_servo_timed_array.hpp>
 #include <modelec_interfaces/msg/action_relay_state_array.hpp>
-#include <modelec_interfaces/msg/action_exec_new.hpp>
+#include <modelec_interfaces/msg/action_exec.hpp>
 
 namespace ModelecGUI
 {
@@ -30,7 +30,7 @@ namespace ModelecGUI
         using ActionServoPosArray = modelec_interfaces::msg::ActionServoPosArray;
         using ActionRelayStateArray = modelec_interfaces::msg::ActionRelayStateArray;
         using ActionServoTimedArray = modelec_interfaces::msg::ActionServoTimedArray;
-        using ActionExec = modelec_interfaces::msg::ActionExecNew;
+        using ActionExec = modelec_interfaces::msg::ActionExec;
 
         ActionPage(rclcpp::Node::SharedPtr node, QWidget* parent = nullptr);
         ~ActionPage() override;

@@ -5,7 +5,7 @@
 #include <modelec_interfaces/msg/action_relay_state_array.hpp>
 #include <modelec_interfaces/msg/action_servo_pos_array.hpp>
 #include <modelec_interfaces/msg/action_servo_timed_array.hpp>
-#include <modelec_interfaces/msg/action_exec_new.hpp>
+#include <modelec_interfaces/msg/action_exec.hpp>
 
 namespace Modelec
 {
@@ -58,7 +58,7 @@ namespace Modelec
         rclcpp::Subscription<modelec_interfaces::msg::ActionRelayStateArray>::SharedPtr relay_move_res_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::ActionServoTimedArray>::SharedPtr servo_timed_move_res_sub_;
 
-        rclcpp::Subscription<modelec_interfaces::msg::ActionExecNew>::SharedPtr action_exec_sub_;
+        rclcpp::Subscription<modelec_interfaces::msg::ActionExec>::SharedPtr action_exec_sub_;
 
         std::shared_ptr<BaseAction> action_;
 

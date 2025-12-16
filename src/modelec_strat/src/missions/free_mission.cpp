@@ -46,7 +46,7 @@ namespace Modelec {
                 auto angle = atan2(depoPoint.y - currPos->y,
                     depoPoint.x - currPos->x);
 
-                nav_->GoToRotateFirst(depoPoint.GetTakePosition(dist,
+                nav_->GoTo(depoPoint.GetTakePosition(dist,
                     angle + M_PI), true, Pathfinding::FREE);
 
                 go_timeout_ = node_->now();

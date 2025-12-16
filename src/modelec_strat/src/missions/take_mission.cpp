@@ -41,7 +41,7 @@ namespace Modelec {
 
                 nav_->GetPathfinding()->RemoveObstacle(closestBox->GetId());
 
-                nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL);
+                nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::WALL);
 
                 go_timeout_ = node_->now();
             }

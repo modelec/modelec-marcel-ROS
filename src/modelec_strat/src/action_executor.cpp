@@ -184,11 +184,5 @@ namespace Modelec
     {
         servo_move_pub_->publish(msg);
         step_running_ += msg.items.size();
-
-        RCLCPP_INFO(
-            node_->get_logger(),
-            "ActionExecutor MoveServo called with %d items, step_running_=%d",
-            static_cast<int>(msg.items.size()),
-            step_running_);
     }
 }

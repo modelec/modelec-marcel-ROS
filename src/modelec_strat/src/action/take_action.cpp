@@ -50,8 +50,8 @@ void Modelec::TakeAction::Init(const std::vector<std::string>& params)
 {
     if (params.size() >= 2)
     {
-        SetFront(params[0] == "1" || params[0] == "true" || params[0] == "front");
-        SetN(std::stoi(params[1]));
+        SetFront(params[1] == "1" || params[1] == "true" || params[1] == "front");
+        SetN(std::stoi(params[2]));
     }
 }
 

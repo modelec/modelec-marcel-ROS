@@ -39,10 +39,28 @@ namespace Modelec
         action_exec_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionExec>(
             "/action/exec", 10, [this](const modelec_interfaces::msg::ActionExec::SharedPtr msg)
             {
+                auto token = split(msg->action, ActionExec::DELIMITER[0]);
+
+                if (token.size() == 0)
+                {
+                    RCLCPP_WARN(
+                        node_->get_logger(),
+                        "Empty action received");
+                    return;
+                }
+
                 action_ = BaseAction::CreateAction(
-                    msg->action,
+                    token[0],
                     shared_from_this());
-                action_->Init(split(msg->action, ActionExec::DELIMITER[0]));
+                if (action_ == nullptr)
+                {
+                    RCLCPP_WARN(
+                        node_->get_logger(),
+                        "Unknown action: %s",
+                        msg->action.c_str());
+                    return;
+                }
+                action_->Init(token);
                 action_done_ = false;
                 step_running_ = 0;
                 Update();

@@ -67,7 +67,7 @@ void Modelec::DownAction::Init(const std::vector<std::string>& params)
 {
     if (!params.empty())
     {
-        SetFront(params[0] == "1" || params[0] == "true" || params[0] == "front");
+        SetFront(params[1] == "1" || params[1] == "true" || params[1] == "front");
     }
 }
 

@@ -8,7 +8,7 @@
 #include <modelec_gui/pages/test_map_page.hpp>
 #include <modelec_gui/pages/odo_page.hpp>
 #include <modelec_gui/pages/map_page.hpp>
-#include <modelec_gui/pages/action_page.new.hpp>
+#include <modelec_gui/pages/action_page.hpp>
 #include <modelec_gui/pages/alim_page.hpp>
 
 

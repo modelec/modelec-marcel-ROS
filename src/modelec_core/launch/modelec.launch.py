@@ -150,3 +150,5 @@ def generate_launch_description():
         OpaqueFunction(function=launch_com),
         OpaqueFunction(function=launch_strat),
     ])
+
+# to run in debug : , prefix=['xterm -e gdb -ex run --args']

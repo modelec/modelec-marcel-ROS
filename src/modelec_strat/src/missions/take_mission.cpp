@@ -24,7 +24,7 @@ namespace Modelec {
 
         if (!nav_->HasArrived())
         {
-            if ((node_->now() - go_timeout_).seconds() < 10)
+            if ((node_->now() - go_timeout_).seconds() < 20)
             {
                 return;
             }

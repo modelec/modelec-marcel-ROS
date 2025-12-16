@@ -1,5 +1,11 @@
 #include <modelec_strat/action_executor.hpp>
 
+#include "modelec_strat/action/down_action.hpp"
+#include "modelec_strat/action/up_action.hpp"
+#include "modelec_strat/action/free_action.hpp"
+#include "modelec_strat/action/take_action.hpp"
+#include "modelec_utils/utils.hpp"
+
 namespace Modelec
 {
     ActionExecutor::ActionExecutor()
@@ -20,10 +26,12 @@ namespace Modelec
             });
 
         servo_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionServoPosArray>(
-            "/action/move/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPosArray::SharedPtr msg)
+            "/action/move/servo/res", 10, [this](const modelec_interfaces::msg::ActionServoPosArray::SharedPtr)
             {
-                step_running_ -= msg->items.size();
-                Update();
+                // BUG
+                // if ServoTimed is called this one will trigger so step_running_ will be decremented at the beginning of the Timed one
+                // step_running_ -= msg->items.size();
+                // Update();
             });
 
         relay_move_res_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionRelayStateArray>(
@@ -36,11 +44,28 @@ namespace Modelec
         action_exec_sub_ = node_->create_subscription<modelec_interfaces::msg::ActionExec>(
             "/action/exec", 10, [this](const modelec_interfaces::msg::ActionExec::SharedPtr msg)
             {
-                action_ = static_cast<Action>(msg->action);
-                for (const auto& step : msg->mission)
+                auto token = split(msg->action, ActionExec::DELIMITER[0]);
+
+                if (token.size() == 0)
                 {
-                    step_.push(static_cast<Step>(step));
+                    RCLCPP_WARN(
+                        node_->get_logger(),
+                        "Empty action received");
+                    return;
                 }
+
+                action_ = BaseAction::CreateAction(
+                    token[0],
+                    shared_from_this());
+                if (action_ == nullptr)
+                {
+                    RCLCPP_WARN(
+                        node_->get_logger(),
+                        "Unknown action: %s",
+                        msg->action.c_str());
+                    return;
+                }
+                action_->Init(token);
                 action_done_ = false;
                 step_running_ = 0;
                 Update();
@@ -68,116 +93,27 @@ namespace Modelec
 
     void ActionExecutor::Update()
     {
-        if (step_.empty())
+        if (action_ != nullptr && !action_->IsDone() && step_running_ <= 0)
         {
-            action_ = NONE;
-            action_done_ = true;
-            return;
-        }
+            RCLCPP_DEBUG(
+                node_->get_logger(),
+                "ActionExecutor Update: Executing next step of action, step_running_=%d", step_running_);
 
-        if (step_running_ <= 0)
-        {
-            switch (step_.front())
+            action_->Next();
+            if (action_->IsDone())
             {
-            case FRONT_DOWN_STEP:
-                {
-                    modelec_interfaces::msg::ActionServoTimedArray msg;
-                    msg.items.resize(4);
-
-                    msg.items[0].id = 0;
-                    msg.items[0].start_angle = 1.49;
-                    msg.items[0].end_angle = 0;
-                    msg.items[0].duration_s = 1;
-
-                    msg.items[1].id = 1;
-                    msg.items[1].start_angle = 1.5;
-                    msg.items[1].end_angle = 3;
-                    msg.items[1].duration_s = 1;
-
-                    msg.items[2].id = 4;
-                    msg.items[2].start_angle = 3;
-                    msg.items[2].end_angle = 1.57;
-                    msg.items[2].duration_s = 1;
-
-                    msg.items[3].id = 5;
-                    msg.items[3].start_angle = 0;
-                    msg.items[3].end_angle = 1.4;
-                    msg.items[3].duration_s = 1;
-
-                    servo_timed_move_pub_->publish(msg);
-
-                    step_running_ = msg.items.size();
-                }
-                break;
-            case FRONT_UP_STEP:
-                {
-                    modelec_interfaces::msg::ActionServoTimedArray msg;
-                    msg.items.resize(4);
-
-                    msg.items[0].id = 0;
-                    msg.items[0].start_angle = 0;
-                    msg.items[0].end_angle = 1.49;
-                    msg.items[0].duration_s = 1;
-
-                    msg.items[1].id = 1;
-                    msg.items[1].start_angle = 3;
-                    msg.items[1].end_angle = 1.5;
-                    msg.items[1].duration_s = 1;
-
-                    msg.items[2].id = 4;
-                    msg.items[2].start_angle = 1.57;
-                    msg.items[2].end_angle = 3;
-                    msg.items[2].duration_s = 1;
-
-                    msg.items[3].id = 5;
-                    msg.items[3].start_angle = 1.4;
-                    msg.items[3].end_angle = 0;
-                    msg.items[3].duration_s = 1;
-
-                    servo_timed_move_pub_->publish(msg);
-
-                    step_running_ = msg.items.size();
-                }
-                break;
-            case FRONT_TAKE_1_STEP:
-                {
-                    modelec_interfaces::msg::ActionServoPosArray msg;
-
-                    msg.items.resize(1);
-
-                    msg.items[0].id = 2;
-                    msg.items[0].angle = 0;
-
-                    servo_move_pub_->publish(msg);
-
-                    step_running_ = msg.items.size();
-                }
-                break;
-            case FRONT_FREE_1_STEP:
-                {
-                    modelec_interfaces::msg::ActionServoPosArray msg;
-
-                    msg.items.resize(1);
-
-                    msg.items[0].id = 2;
-                    msg.items[0].angle = 3;
-
-                    servo_move_pub_->publish(msg);
-
-                    step_running_ = msg.items.size();
-                }
-
-                break;
-            case MAX_DEPLOY_STEP:
-                {
-
-                }
-                break;
-            default:
-                return;
+                action_done_ = true;
+                action_ = nullptr;
             }
+        }
+        else if (action_ != nullptr && action_->IsDone())
+        {
+            RCLCPP_DEBUG(
+                node_->get_logger(),
+                "ActionExecutor Update: Action is done, step_running_=%d", step_running_);
 
-            step_.pop();
+            action_done_ = true;
+            action_ = nullptr;
         }
     }
 
@@ -185,21 +121,15 @@ namespace Modelec
     {
         action_done_ = true;
         step_running_ = 0;
-        while (!step_.empty())
-        {
-            step_.pop();
-        }
-        action_ = NONE;
+        action_ = nullptr;
     }
 
     void ActionExecutor::Down(bool front) {
         if (action_done_)
         {
-            action_ = front ? FRONT_DOWN : BACK_DOWN;
+            action_ = std::make_shared<DownAction>(shared_from_this(), front);
             action_done_ = false;
             step_running_ = 0;
-
-            step_.push(front ? FRONT_DOWN_STEP : BACK_DOWN_STEP);
 
             Update();
         }
@@ -208,11 +138,9 @@ namespace Modelec
     void ActionExecutor::Up(bool front) {
         if (action_done_)
         {
-            action_ = front ? FRONT_UP : BACK_UP;
+            action_ = std::make_shared<UPAction>(shared_from_this(), front);
             action_done_ = false;
             step_running_ = 0;
-
-            step_.push(front ? FRONT_UP_STEP : BACK_UP_STEP);
 
             Update();
         }
@@ -221,11 +149,9 @@ namespace Modelec
     void ActionExecutor::Take(bool front, int n) {
         if (action_done_)
         {
-            action_ = static_cast<Action>(n * 10 + (front ? 0 : 100));
+            action_ = std::make_shared<TakeAction>(shared_from_this(), front, n);
             action_done_ = false;
             step_running_ = 0;
-
-            step_.push(static_cast<Step>(n * 10 + (front ? 0 : 100)));
 
             Update();
         }
@@ -234,13 +160,29 @@ namespace Modelec
     void ActionExecutor::Free(bool front, int n) {
         if (action_done_)
         {
-            action_ = static_cast<Action>(1 + n * 10 + (front ? 0 : 100));
+            action_ = std::make_shared<FreeAction>(shared_from_this(), front, n);
             action_done_ = false;
             step_running_ = 0;
 
-            step_.push(static_cast<Step>(1 + n * 10 + (front ? 0 : 100)));
-
             Update();
         }
+    }
+
+    void ActionExecutor::MoveServoTimed(const modelec_interfaces::msg::ActionServoTimedArray& msg)
+    {
+        servo_timed_move_pub_->publish(msg);
+        step_running_ += msg.items.size();
+
+        RCLCPP_DEBUG(
+            node_->get_logger(),
+            "ActionExecutor MoveServoTimed called with %d items, step_running_=%d",
+            static_cast<int>(msg.items.size()),
+            step_running_);
+    }
+
+    void ActionExecutor::MoveServo(const modelec_interfaces::msg::ActionServoPosArray& msg)
+    {
+        servo_move_pub_->publish(msg);
+        step_running_ += msg.items.size();
     }
 }

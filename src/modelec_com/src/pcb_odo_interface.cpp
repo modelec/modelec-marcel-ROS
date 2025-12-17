@@ -69,6 +69,25 @@ namespace Modelec
                 SetPIDCallback(msg);
             });
 
+        cmd_vel_subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
+            "cmd_vel", 30,
+            [this](const sensor_msgs::msg::Joy::SharedPtr msg)
+            {
+                double forward = msg->axes[1];
+                double turn = msg->axes[3];
+
+                if (fabs(forward) < 0.05) forward = 0.0;
+                if (fabs(turn) < 0.05) turn = 0.0;
+
+                int left  = static_cast<int>(forward * 626 - turn * 626);
+                int right = static_cast<int>(forward * 626 + turn * 626);
+
+                left  = std::max(-626, std::min(626, left));
+                right = std::max(-626, std::min(626, right));
+
+                SetMotor(left, right);
+            });
+
         start_odo_sub_ = this->create_subscription<std_msgs::msg::Bool>(
             "odometry/start", 10,
             [this](const std_msgs::msg::Bool::SharedPtr msg)
@@ -380,6 +399,16 @@ namespace Modelec
         }
 
         SendOrder("PID", data);
+    }
+
+    void PCBOdoInterface::SetMotor(int left, int right)
+    {
+        std::vector<std::string> data = {
+            std::to_string(left),
+            std::to_string(right)
+        };
+
+        SendOrder("MOTOR", data);
     }
 } // Modelec
 

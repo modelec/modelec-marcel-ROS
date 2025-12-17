@@ -4,11 +4,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <queue>
-#include <mutex>
 #include <future>
-
-#include <std_msgs/msg/string.hpp>
 
 #include <modelec_interfaces/msg/odometry_pos.hpp>
 #include <modelec_interfaces/msg/odometry_speed.hpp>
@@ -18,17 +14,10 @@
 #include <modelec_interfaces/msg/odometry_start.hpp>
 #include <modelec_interfaces/msg/odometry_pid.hpp>
 
-#include <modelec_interfaces/srv/odometry_position.hpp>
-#include <modelec_interfaces/srv/odometry_speed.hpp>
-#include <modelec_interfaces/srv/odometry_to_f.hpp>
-#include <modelec_interfaces/srv/add_serial_listener.hpp>
-#include <modelec_interfaces/srv/odometry_start.hpp>
-#include <modelec_interfaces/srv/odometry_get_pid.hpp>
-#include <modelec_interfaces/srv/odometry_set_pid.hpp>
-#include <modelec_interfaces/srv/odometry_add_waypoint.hpp>
-
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/empty.hpp>
+
+#include <sensor_msgs/msg/joy.hpp>
 
 namespace Modelec
 {
@@ -67,6 +56,7 @@ namespace Modelec
         rclcpp::Subscription<modelec_interfaces::msg::OdometryWaypoints>::SharedPtr odo_add_waypoints_subscriber_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr odo_set_pos_subscriber_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPid>::SharedPtr odo_set_pid_subscriber_;
+        rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr cmd_vel_subscriber_;
 
         void AddWaypointCallback(const modelec_interfaces::msg::OdometryWaypoint::SharedPtr msg);
         void AddWaypointsCallback(const modelec_interfaces::msg::OdometryWaypoints::SharedPtr msg);
@@ -104,5 +94,7 @@ namespace Modelec
         void GetPID();
         void SetPID(const modelec_interfaces::msg::OdometryPid::SharedPtr msg);
         void SetPID(std::string name, float p, float i, float d, std::optional<float> min = std::nullopt, std::optional<float> max = std::nullopt);
+
+        void SetMotor(int left, int right);
     };
 } // namespace Modelec

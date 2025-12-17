@@ -69,8 +69,8 @@ namespace Modelec
                 SetPIDCallback(msg);
             });
 
-        cmd_vel_subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
-            "cmd_vel", 30,
+        joy_subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
+            "joy", 30,
             [this](const sensor_msgs::msg::Joy::SharedPtr msg)
             {
                 double forward = msg->axes[1];

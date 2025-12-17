@@ -24,7 +24,12 @@ namespace Modelec {
 
         if (!nav_->HasArrived())
         {
-            if ((node_->now() - go_timeout_).seconds() < 20)
+            if ((node_->now() - go_timeout_).seconds() < 2)
+            {
+                nav_->AskWaypoint();
+                return;
+            }
+            if ((node_->now() - go_timeout_).seconds() < 10)
             {
                 return;
             }

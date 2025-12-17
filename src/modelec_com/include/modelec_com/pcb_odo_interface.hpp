@@ -56,6 +56,7 @@ namespace Modelec
         rclcpp::Subscription<modelec_interfaces::msg::OdometryWaypoints>::SharedPtr odo_add_waypoints_subscriber_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr odo_set_pos_subscriber_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPid>::SharedPtr odo_set_pid_subscriber_;
+        rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr odo_ask_active_waypoint_subscriber_;
         rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_subscriber_;
 
         void AddWaypointCallback(const modelec_interfaces::msg::OdometryWaypoint::SharedPtr msg);

@@ -97,10 +97,8 @@ namespace Modelec
                 }
             });
 
-        odo_get_pos_pub_ = node_->create_publisher<std_msgs::msg::Empty>(
-            "odometry/get/pos", 30);
-
-        last_odo_get_pos_time_ = node_->now();
+        odo_ask_waypoint_pub_ = node_->create_publisher<std_msgs::msg::Empty>(
+            "odometry/ask_active_waypoint", 30);
     }
 
     void NavigationHelper::ReInit()
@@ -722,6 +720,12 @@ namespace Modelec
     Point NavigationHelper::GetSpawn() const
     {
         return spawn_;
+    }
+
+    void NavigationHelper::AskWaypoint()
+    {
+        std_msgs::msg::Empty msg;
+        odo_ask_waypoint_pub_->publish(msg);
     }
 
     void NavigationHelper::OnWaypointReach(const WaypointMsg::SharedPtr msg)

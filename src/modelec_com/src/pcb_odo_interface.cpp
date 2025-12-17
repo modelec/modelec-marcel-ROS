@@ -74,7 +74,7 @@ namespace Modelec
             [this](const sensor_msgs::msg::Joy::SharedPtr msg)
             {
                 double forward = msg->axes[1];
-                double turn = msg->axes[3];
+                double turn = msg->axes[2];
 
                 if (fabs(forward) < 0.05) forward = 0.0;
                 if (fabs(turn) < 0.05) turn = 0.0;
@@ -207,7 +207,7 @@ namespace Modelec
             }
             else
             {
-                RCLCPP_INFO(this->get_logger(), "PCB response: %s", trim(msg).c_str());
+                RCLCPP_DEBUG(this->get_logger(), "PCB response: %s", trim(msg).c_str());
             }
         }
         else if (tokens[0] == "KO")

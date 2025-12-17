@@ -74,7 +74,7 @@ namespace Modelec
             [this](const sensor_msgs::msg::Joy::SharedPtr msg)
             {
                 double left_axis = msg->axes[1];
-                double right_axis = msg->axes[2];
+                double right_axis = msg->axes[3];
 
                 if (fabs(left_axis) < 0.05) left_axis = 0.0;
                 if (fabs(right_axis) < 0.05) right_axis = 0.0;

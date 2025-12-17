@@ -39,6 +39,6 @@ source src/rplidar_ros/scripts/create_udev_rules.sh
 
 cd ../..
 
-cp ros2_launch_marcel.desktop ~/Desktop
-chmod +x ~/Desktop/ros2_launch_marcel.desktop
-gio set ~/Desktop/ros2_launch_marcel.desktop "metadata::trusted" true
+cp ./*.desktop ~/Desktop
+chmod +x ~/Desktop/*.desktop
+gio set ~/Desktop/*.desktop "metadata::trusted" true

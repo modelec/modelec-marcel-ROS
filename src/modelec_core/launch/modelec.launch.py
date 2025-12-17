@@ -11,6 +11,7 @@ def generate_launch_description():
     with_rplidar_arg = DeclareLaunchArgument('with_rplidar', default_value='true', description='Launch RPLIDAR?')
     with_com_arg = DeclareLaunchArgument('with_com', default_value='true', description='Launch COM nodes?')
     with_strat_arg = DeclareLaunchArgument('with_strat', default_value='true', description='Launch strategy nodes?')
+    with_joy_arg = DeclareLaunchArgument('with_joy', default_value='true', description='Launch joystick node?')
 
     channel_type = LaunchConfiguration('channel_type', default='serial')
     serial_port = LaunchConfiguration('serial_port', default='/dev/rplidar')
@@ -129,6 +130,24 @@ def generate_launch_description():
         return []
 
     # ----------------------------
+    # Joy node
+    # ----------------------------
+    def launch_joy(context, *args, **kwargs):
+        if context.launch_configurations.get('with_joy', 'true') == 'true':
+            joy = Node(
+                package='joy',
+                executable='joy_node',
+                name='joy_node',
+                output='screen',
+                parameters=[{
+                    'dev': '/dev/input/js0',  # optional: specify your joystick device
+                    'deadzone': 0.05
+                }]
+            )
+            return [joy]
+        return []
+
+    # ----------------------------
     # Final launch description
     # ----------------------------
     return LaunchDescription([
@@ -144,11 +163,13 @@ def generate_launch_description():
         with_rplidar_arg,
         with_com_arg,
         with_strat_arg,
+        with_joy_arg,
 
         OpaqueFunction(function=launch_rplidar_restart_if_needed),
         OpaqueFunction(function=launch_gui),
         OpaqueFunction(function=launch_com),
         OpaqueFunction(function=launch_strat),
+        OpaqueFunction(function=launch_joy),
     ])
 
 # to run in debug : , prefix=['xterm -e gdb -ex run --args']

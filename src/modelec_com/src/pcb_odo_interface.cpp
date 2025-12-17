@@ -179,9 +179,9 @@ namespace Modelec
             {
                 if (tokens[2] == "REACH")
                 {
-                    RCLCPP_INFO(this->get_logger(), "Waypoint reached: ID %s", tokens[2].c_str());
+                    RCLCPP_INFO(this->get_logger(), "Waypoint reached: ID %s", tokens[3].c_str());
 
-                    int id = std::stoi(tokens[2]);
+                    int id = std::stoi(tokens[3]);
 
                     auto message = modelec_interfaces::msg::OdometryWaypoint();
                     message.id = id;
@@ -190,12 +190,12 @@ namespace Modelec
                 }
                 else if (tokens.size() >= 7)
                 {
-                    int id = std::stoi(tokens[2]);
-                    bool is_end = tokens[3] == "1";
-                    long x = std::stol(tokens[4]);
-                    long y = std::stol(tokens[5]);
-                    double theta = std::stod(tokens[6]);
-                    bool reach = tokens.size() > 7 ? tokens[7] == "1" : false;
+                    int id = std::stoi(tokens[3]);
+                    bool is_end = tokens[4] == "1";
+                    long x = std::stol(tokens[5]);
+                    long y = std::stol(tokens[6]);
+                    double theta = std::stod(tokens[7]);
+                    bool reach = tokens.size() > 7 ? tokens[8] == "1" : false;
 
                     if (reach)
                     {

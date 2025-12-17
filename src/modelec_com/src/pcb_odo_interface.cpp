@@ -170,6 +170,8 @@ namespace Modelec
             }
             else if (tokens[1] == "WAYPOINT")
             {
+                RCLCPP_INFO(this->get_logger(), "Waypoint reached: ID %s", tokens[2].c_str());
+
                 int id = std::stoi(tokens[2]);
 
                 auto message = modelec_interfaces::msg::OdometryWaypoint();

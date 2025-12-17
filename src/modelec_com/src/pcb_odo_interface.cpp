@@ -201,6 +201,7 @@ namespace Modelec
             }
             else if (tokens[1] == "WAYPOINT")
             {
+                RCLCPP_INFO(this->get_logger(), "Waypoint added successfully.");
             }
             else if (tokens[1] == "PID")
             {
@@ -255,9 +256,9 @@ namespace Modelec
     {
         if (IsOk())
         {
-            // RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
-            RCLCPP_INFO_ONCE(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
-            RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Sending to PCB: %s", data.c_str());
+            RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
+            // RCLCPP_INFO_ONCE(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
+            // RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Sending to PCB: %s", data.c_str());
             this->write(data);
         }
     }

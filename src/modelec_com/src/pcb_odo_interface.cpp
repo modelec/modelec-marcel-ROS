@@ -124,9 +124,9 @@ namespace Modelec
 
     void PCBOdoInterface::read(const std::string& msg)
     {
-        RCLCPP_INFO(this->get_logger(), "Received from PCB: %s", trim(msg).c_str());
-        // RCLCPP_INFO_ONCE(this->get_logger(), "Received from PCB: %s", trim(msg).c_str());
-        // RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Received from PCB: %s", msg.c_str());
+        // RCLCPP_INFO(this->get_logger(), "Received from PCB: %s", trim(msg).c_str());
+        RCLCPP_INFO_ONCE(this->get_logger(), "Received from PCB: %s", trim(msg).c_str());
+        RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Received from PCB: %s", msg.c_str());
         std::vector<std::string> tokens = split(trim(msg), ';');
         if (tokens.size() < 2)
         {
@@ -179,7 +179,7 @@ namespace Modelec
             {
                 if (tokens[2] == "REACH")
                 {
-                    RCLCPP_INFO(this->get_logger(), "Waypoint reached: ID %s", tokens[3].c_str());
+                    // RCLCPP_INFO(this->get_logger(), "Waypoint reached: ID %s", tokens[3].c_str());
 
                     int id = std::stoi(tokens[3]);
 
@@ -234,7 +234,7 @@ namespace Modelec
             }
             else if (tokens[1] == "WAYPOINT")
             {
-                RCLCPP_INFO(this->get_logger(), "Waypoint added successfully.");
+                // RCLCPP_INFO(this->get_logger(), "Waypoint added successfully.");
             }
             else if (tokens[1] == "PID")
             {
@@ -289,9 +289,9 @@ namespace Modelec
     {
         if (IsOk())
         {
-            RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
-            // RCLCPP_INFO_ONCE(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
-            // RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Sending to PCB: %s", data.c_str());
+            // RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
+            RCLCPP_INFO_ONCE(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
+            RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Sending to PCB: %s", data.c_str());
             this->write(data);
         }
     }

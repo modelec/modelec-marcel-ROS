@@ -79,8 +79,8 @@ namespace Modelec
                 if (fabs(left_axis) < 0.05) left_axis = 0.0;
                 if (fabs(right_axis) < 0.05) right_axis = 0.0;
 
-                int left_motor  = static_cast<int>(forward * 626 - turn * 626);
-                int right_motor = static_cast<int>(forward * 626 + turn * 626);
+                int left_motor  = static_cast<int>(left_axis * 626 - right_axis * 626);
+                int right_motor = static_cast<int>(left_axis * 626 + right_axis * 626);
 
                 // int left_motor  = static_cast<int>(left_axis  * 626);
                 // int right_motor = static_cast<int>(right_axis * 626);

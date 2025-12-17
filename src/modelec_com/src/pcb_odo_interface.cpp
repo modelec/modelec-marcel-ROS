@@ -73,19 +73,22 @@ namespace Modelec
             "joy", 30,
             [this](const sensor_msgs::msg::Joy::SharedPtr msg)
             {
-                double forward = msg->axes[1];
-                double turn = msg->axes[2];
+                double left_axis = msg->axes[1];
+                double right_axis = msg->axes[2];
 
-                if (fabs(forward) < 0.05) forward = 0.0;
-                if (fabs(turn) < 0.05) turn = 0.0;
+                if (fabs(left_axis) < 0.05) left_axis = 0.0;
+                if (fabs(right_axis) < 0.05) right_axis = 0.0;
 
-                int left  = static_cast<int>(forward * 626 - turn * 626);
-                int right = static_cast<int>(forward * 626 + turn * 626);
+                // int left  = static_cast<int>(forward * 626 - turn * 626);
+                // int right = static_cast<int>(forward * 626 + turn * 626);
 
-                left  = std::max(-626, std::min(626, left));
-                right = std::max(-626, std::min(626, right));
+                int left_motor  = static_cast<int>(left_axis  * 626);
+                int right_motor = static_cast<int>(right_axis * 626);
 
-                SetMotor(left, right);
+                left_motor  = std::max(-626, std::min(626, left_motor));
+                right_motor = std::max(-626, std::min(626, right_motor));
+
+                SetMotor(left_motor, right_motor);
             });
 
         start_odo_sub_ = this->create_subscription<std_msgs::msg::Bool>(

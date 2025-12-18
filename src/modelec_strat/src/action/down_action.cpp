@@ -37,12 +37,12 @@ void Modelec::DownAction::Next()
 
             msg.items[0].id = front_ ? 0 : 8;
             msg.items[0].start_angle = front_ ? 1.95 : 0;
-            msg.items[0].end_angle = front_ ? 2.75 : 0;
+            msg.items[0].end_angle = front_ ? 2.95 : 0;
             msg.items[0].duration_s = 1;
 
             msg.items[1].id = front_ ? 1 : 9;
-            msg.items[1].start_angle = front_ ? 1.9 : 0;
-            msg.items[1].end_angle = front_ ? 1.13 : 0;
+            msg.items[1].start_angle = front_ ? 0.9 : 0;
+            msg.items[1].end_angle = front_ ? 1.9 : 0;
             msg.items[1].duration_s = 1;
 
             action_executor_->MoveServoTimed(msg);

@@ -38,8 +38,8 @@ void Modelec::TakeAction::Next()
             msg.items.resize(1);
 
             msg.items[0].id = n_ + (front_ ? 3 : 11);
-            msg.items[0].start_angle = front_ ? 0 : 0;
-            msg.items[0].end_angle = front_ ? 3 : 0;
+            msg.items[0].start_angle = front_ ? 0.8 : 0;
+            msg.items[0].end_angle = front_ ? 2.5 : 0;
             msg.items[0].duration_s = 0.5;
             action_executor_->MoveServoTimed(msg);
         }

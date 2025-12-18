@@ -81,9 +81,28 @@ namespace Modelec
             });
 
         joy_sub_ = node_->create_subscription<sensor_msgs::msg::Joy>(
-            "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr)
+            "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg)
             {
                 // use game controller to manually control all the action. make it carefully
+                if (msg->buttons.size() >= 5)
+                {
+                    if (msg->buttons[0] == 1) // A button
+                    {
+                        Down(true);
+                    }
+                    else if (msg->buttons[1] == 1) // B button
+                    {
+                        Up(true);
+                    }
+                    else if (msg->buttons[3] == 1) // X button
+                    {
+                        Down(false);
+                    }
+                    else if (msg->buttons[4] == 1) // Y button
+                    {
+                        Up(false);
+                    }
+                }
             });
     }
 

@@ -37,7 +37,7 @@ set(strat_fsm_sources
 )
 
 add_executable(strat_fsm ${strat_fsm_sources})
-ament_target_dependencies(strat_fsm rclcpp std_msgs std_srvs modelec_interfaces ament_index_cpp)
+ament_target_dependencies(strat_fsm rclcpp std_msgs sensor_msgs std_srvs modelec_interfaces ament_index_cpp)
 target_link_libraries(strat_fsm modelec_utils::utils modelec_utils::config)
 target_include_directories(strat_fsm PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

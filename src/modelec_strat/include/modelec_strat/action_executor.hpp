@@ -7,6 +7,8 @@
 #include <modelec_interfaces/msg/action_servo_timed_array.hpp>
 #include <modelec_interfaces/msg/action_exec.hpp>
 
+#include <sensor_msgs/msg/joy.hpp>
+
 namespace Modelec
 {
     class BaseAction;
@@ -60,6 +62,7 @@ namespace Modelec
         rclcpp::Subscription<modelec_interfaces::msg::ActionServoTimedArray>::SharedPtr servo_timed_move_res_sub_;
 
         rclcpp::Subscription<modelec_interfaces::msg::ActionExec>::SharedPtr action_exec_sub_;
+        rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
 
         std::shared_ptr<BaseAction> action_;
 

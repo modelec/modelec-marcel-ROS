@@ -79,6 +79,12 @@ namespace Modelec
                 step_running_ -= msg->items.size();
                 Update();
             });
+
+        joy_sub_ = node_->create_subscription<sensor_msgs::msg::Joy>(
+            "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr)
+            {
+                // use game controller to manually control all the action. make it carefully
+            });
     }
 
     rclcpp::Node::SharedPtr ActionExecutor::GetNode() const

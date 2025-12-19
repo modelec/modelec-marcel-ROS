@@ -42,7 +42,7 @@ namespace Modelec {
                 auto currPos = nav_->GetCurrentPos();
 
                 auto dist = std::clamp(Point::distance(Point(currPos->x, currPos->y, currPos->theta),
-                    nav_->GetClosestDepositeZone(nav_->GetCurrentPos())->GetPosition()), 0.0, 200.0);
+                    nav_->GetClosestDepositeZone(nav_->GetCurrentPos())->GetPosition()), 0.0, 300.0);
 
                 target_deposite_zone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), {}, true);
 

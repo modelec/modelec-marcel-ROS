@@ -4,18 +4,12 @@
 
 Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor)
 {
-    steps_.push(ActionExec::TAKE_STEP);
-    steps_.push(ActionExec::DONE_STEP);
 }
 
 Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, bool front, int n) : TakeAction(action_executor)
 {
     front_ = front;
     n_ = n;
-}
-
-void Modelec::TakeAction::Execute()
-{
 }
 
 void Modelec::TakeAction::Next()
@@ -61,6 +55,10 @@ void Modelec::TakeAction::Init(const std::vector<std::string>& params)
         SetFront(params[1] == "1" || params[1] == "true" || params[1] == "front");
         SetN(std::stoi(params[2]));
     }
+}
+
+void Modelec::TakeAction::Init(bool front, int n)
+{
 }
 
 void Modelec::TakeAction::SetFront(bool front)

@@ -14,10 +14,6 @@ Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_ex
     n_ = n;
 }
 
-void Modelec::FreeAction::Execute()
-{
-}
-
 void Modelec::FreeAction::Next()
 {
     if (steps_.empty())
@@ -38,7 +34,7 @@ void Modelec::FreeAction::Next()
             msg.items.resize(1);
 
             msg.items[0].id = n_ + (front_ ? 3 : 11);
-            msg.items[0].start_angle = front_ ? 2.7 : 0;
+            msg.items[0].start_angle = front_ ? 2.5 : 0;
             msg.items[0].end_angle = front_ ? 0.8 : 0;
             msg.items[0].duration_s = 0.5;
             action_executor_->MoveServoTimed(msg);

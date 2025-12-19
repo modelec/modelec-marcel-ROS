@@ -13,10 +13,6 @@ Modelec::UPAction::UPAction(const std::shared_ptr<ActionExecutor>& action_execut
     front_ = front;
 }
 
-void Modelec::UPAction::Execute()
-{
-}
-
 void Modelec::UPAction::Next()
 {
     if (steps_.empty())
@@ -52,7 +48,7 @@ void Modelec::UPAction::Next()
 
             msg.items[3].id = front_ ? 3 : 11;
             msg.items[3].start_angle = front_ ? 3 : 0;
-            msg.items[3].end_angle = front_ ? 2.7 : 0;
+            msg.items[3].end_angle = front_ ? 2.5 : 0;
             msg.items[3].duration_s = 1;
 
             action_executor_->MoveServoTimed(msg);

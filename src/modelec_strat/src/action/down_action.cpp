@@ -13,10 +13,6 @@ Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_ex
     front_ = front;
 }
 
-void Modelec::DownAction::Execute()
-{
-}
-
 void Modelec::DownAction::Next()
 {
     if (steps_.empty())

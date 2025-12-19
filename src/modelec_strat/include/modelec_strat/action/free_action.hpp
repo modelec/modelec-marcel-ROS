@@ -11,7 +11,6 @@ namespace Modelec
         FreeAction(const std::shared_ptr<ActionExecutor>& action_executor);
         FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, bool front, int n);
 
-        void Execute() override;
         void Next() override;
         void Init(const std::vector<std::string>& params) override;
         void SetFront(bool front);

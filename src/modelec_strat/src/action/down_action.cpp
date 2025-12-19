@@ -8,7 +8,7 @@ Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_ex
     steps_.push(ActionExec::DONE_STEP);
 }
 
-Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor, bool front) : DownAction(action_executor)
+Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front) : DownAction(action_executor)
 {
     front_ = front;
 }
@@ -29,27 +29,54 @@ void Modelec::DownAction::Next()
     case ActionExec::DOWN_STEP:
         {
             ActionServoTimedArray msg;
-            msg.items.resize(4);
+            msg.items.resize(front_ == BOTH ? 8 : 4);
 
-            msg.items[0].id = front_ ? 0 : 8;
-            msg.items[0].start_angle = front_ ? 1.95 : 0;
-            msg.items[0].end_angle = front_ ? 2.95 : 0;
-            msg.items[0].duration_s = 1;
+            if (front_ == FRONT || front_ == BOTH)
+            {
+                msg.items[0].id = 0;
+                msg.items[0].start_angle = 2.95;
+                msg.items[0].end_angle = 1.95;
+                msg.items[0].duration_s = 1;
 
-            msg.items[1].id = front_ ? 1 : 9;
-            msg.items[1].start_angle = front_ ? 1.9 : 0;
-            msg.items[1].end_angle = front_ ? 0.9 : 0;
-            msg.items[1].duration_s = 1;
+                msg.items[1].id = 1;
+                msg.items[1].start_angle = 0.9;
+                msg.items[1].end_angle = 1.9;
+                msg.items[1].duration_s = 1;
 
-            msg.items[2].id = front_ ? 2 : 10;
-            msg.items[2].start_angle = front_ ? 0.3 : 0;
-            msg.items[2].end_angle = front_ ? 0 : 0;
-            msg.items[2].duration_s = 1;
+                msg.items[2].id = 2;
+                msg.items[2].start_angle = 0;
+                msg.items[2].end_angle = 0.3;
+                msg.items[2].duration_s = 1;
 
-            msg.items[3].id = front_ ? 3 : 11;
-            msg.items[3].start_angle = front_ ? 2.7 : 0;
-            msg.items[3].end_angle = front_ ? 3 : 0;
-            msg.items[3].duration_s = 1;
+                msg.items[3].id = 3;
+                msg.items[3].start_angle = 3;
+                msg.items[3].end_angle = 2.7;
+                msg.items[3].duration_s = 1;
+            }
+
+            if (front_ == BACK || front_ == BOTH)
+            {
+                int i = front_ == BOTH ? 4 : 0;
+                msg.items[i].id = 8;
+                msg.items[i].start_angle = 0;
+                msg.items[i].end_angle = 0;
+                msg.items[i].duration_s = 1;
+
+                msg.items[i+1].id = 9;
+                msg.items[i+1].start_angle = 0;
+                msg.items[i+1].end_angle = 0;
+                msg.items[i+1].duration_s = 1;
+
+                msg.items[i+2].id = 10;
+                msg.items[i+2].start_angle = 0;
+                msg.items[i+2].end_angle = 0;
+                msg.items[i+2].duration_s = 1;
+
+                msg.items[i+3].id = 11;
+                msg.items[i+3].start_angle = 0;
+                msg.items[i+3].end_angle = 0;
+                msg.items[i+3].duration_s = 1;
+            }
 
             action_executor_->MoveServoTimed(msg);
         }
@@ -68,11 +95,11 @@ void Modelec::DownAction::Init(const std::vector<std::string>& params)
 {
     if (!params.empty())
     {
-        SetFront(params[1] == "1" || params[1] == "true" || params[1] == "front");
+        SetFront(static_cast<Front>(std::stoi(params[1])));
     }
 }
 
-void Modelec::DownAction::SetFront(bool front)
+void Modelec::DownAction::SetFront(Front front)
 {
     front_ = front;
 }

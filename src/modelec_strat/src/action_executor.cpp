@@ -149,7 +149,7 @@ namespace Modelec
         action_ = nullptr;
     }
 
-    void ActionExecutor::Down(bool front) {
+    void ActionExecutor::Down(BaseAction::front front) {
         if (action_done_)
         {
             action_ = std::make_shared<DownAction>(shared_from_this(), front);
@@ -160,7 +160,7 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::Up(bool front) {
+    void ActionExecutor::Up(BaseAction::front front) {
         if (action_done_)
         {
             action_ = std::make_shared<UPAction>(shared_from_this(), front);

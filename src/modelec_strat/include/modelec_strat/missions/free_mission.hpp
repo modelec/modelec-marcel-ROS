@@ -20,7 +20,9 @@ namespace Modelec {
         enum Step
         {
             GO_TO_FREE,
+            DOWN,
             FREE,
+            UP,
             DONE,
         } step_;
 

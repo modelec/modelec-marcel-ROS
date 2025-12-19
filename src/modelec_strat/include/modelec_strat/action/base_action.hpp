@@ -25,6 +25,13 @@ namespace Modelec
     class BaseAction
     {
     public:
+        enum Front
+        {
+            FRONT = 1,
+            BACK = 0,
+            BOTH = -1,
+        };
+
         using Ptr = std::shared_ptr<BaseAction>;
         using FactoryFn =
             std::function<Ptr(const std::shared_ptr<ActionExecutor>&)>;

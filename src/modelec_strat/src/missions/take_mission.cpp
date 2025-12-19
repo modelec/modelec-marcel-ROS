@@ -1,5 +1,7 @@
 #include <modelec_strat/missions/take_mission.hpp>
 
+#include "modelec_strat/action/base_action.hpp"
+
 namespace Modelec {
     TakeMission::TakeMission(const std::shared_ptr<NavigationHelper>& nav, const std::shared_ptr<ActionExecutor>& action_executor)
      : step_(GO_TO_TAKE), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)  {
@@ -24,9 +26,9 @@ namespace Modelec {
 
         if (!nav_->HasArrived())
         {
-            if ((node_->now() - go_timeout_).seconds() < 2)
+            if ((node_->now() - go_timeout_).seconds() < 5)
             {
-                // nav_->AskWaypoint();
+                nav_->AskWaypoint();
                 return;
             }
             if ((node_->now() - go_timeout_).seconds() < 10)
@@ -51,11 +53,27 @@ namespace Modelec {
                 go_timeout_ = node_->now();
             }
 
+            step_ = DOWN;
+            break;
+        case DOWN:
+            {
+                action_executor_->Up(BaseAction::FRONT);
+                deploy_time_ = node_->now();
+            }
+
             step_ = TAKE;
             break;
         case TAKE:
             {
-                action_executor_->Up();
+                action_executor_->Take();
+                deploy_time_ = node_->now();
+            }
+
+            step_ = UP;
+            break;
+        case UP:
+            {
+                action_executor_->Up(BaseAction::FRONT);
                 deploy_time_ = node_->now();
             }
 

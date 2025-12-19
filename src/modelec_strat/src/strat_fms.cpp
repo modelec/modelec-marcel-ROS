@@ -7,6 +7,8 @@
 #include <modelec_strat/missions/take_mission.hpp>
 #include <modelec_strat/missions/free_mission.hpp>
 
+#include "modelec_strat/action/base_action.hpp"
+
 namespace Modelec
 {
 
@@ -156,6 +158,8 @@ namespace Modelec
                     std::chrono::system_clock::now().time_since_epoch())
                                .count();
                 start_time_pub_->publish(msg);
+
+                action_executor_->Up(BaseAction::Front::BOTH);
 
                 Transition(State::SELECT_MISSION, "Match started");
             }

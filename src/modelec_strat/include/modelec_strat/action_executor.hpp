@@ -16,16 +16,6 @@ namespace Modelec
     class ActionExecutor : public std::enable_shared_from_this<ActionExecutor>
     {
     public:
-        enum Action
-        {
-            NONE,
-            UP,
-            DOWN,
-
-            TAKE,
-            FREE
-        };
-
         ActionExecutor();
 
         ActionExecutor(const rclcpp::Node::SharedPtr& node);
@@ -38,9 +28,9 @@ namespace Modelec
 
         void ReInit();
 
-        void Down(bool front = true);
+        void Down(BaseAction::Front front);
 
-        void Up(bool front = true);
+        void Up(BaseAction::Front front);
 
         void Take(bool front = true, int n = 0);
 

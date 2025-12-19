@@ -1,5 +1,7 @@
 #include <modelec_strat/missions/free_mission.hpp>
 
+#include "modelec_strat/action/base_action.hpp"
+
 namespace Modelec {
     FreeMission::FreeMission(const std::shared_ptr<NavigationHelper>& nav, const std::shared_ptr<ActionExecutor>& action_executor)
      : step_(GO_TO_FREE), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)  {
@@ -24,9 +26,9 @@ namespace Modelec {
 
         if (!nav_->HasArrived())
         {
-            if ((node_->now() - go_timeout_).seconds() < 2)
+            if ((node_->now() - go_timeout_).seconds() < 5)
             {
-                // nav_->AskWaypoint();
+                nav_->AskWaypoint();
                 return;
             }
             if ((node_->now() - go_timeout_).seconds() < 10)
@@ -55,17 +57,33 @@ namespace Modelec {
                     angle + M_PI), true, Pathfinding::FREE);
 
                 go_timeout_ = node_->now();
-
-                step_ = FREE;
             }
+
+            step_ = FREE;
+            break;
+        case DOWN:
+            {
+                action_executor_->Down(BaseAction::FRONT);
+                deploy_time_ = node_->now();
+            }
+
+            step_ = FREE;
             break;
         case FREE:
             {
-                action_executor_->Down();
+                action_executor_->Free();
                 deploy_time_ = node_->now();
-
-                step_ = DONE;
             }
+
+            step_ = UP;
+            break;
+        case UP:
+            {
+                action_executor_->Up(BaseAction::FRONT);
+                deploy_time_ = node_->now();
+            }
+
+            step_ = DONE;
             break;
         case DONE:
             {

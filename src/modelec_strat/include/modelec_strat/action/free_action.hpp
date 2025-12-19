@@ -10,17 +10,19 @@ namespace Modelec
     public:
         FreeAction(const std::shared_ptr<ActionExecutor>& action_executor);
         FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, bool front, int n);
+        FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, bool> servo);
+        FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, bool>> servos);
 
         void Next() override;
         void Init(const std::vector<std::string>& params) override;
-        void SetFront(bool front);
-        void SetN(int n);
+        void AddServo(int id, bool front);
+        void AddServo(std::pair<int, bool> servo);
+        void AddServos(const std::vector<std::pair<int, bool>>& servos);
 
         inline static const std::string Name = ActionExec::FREE;
 
     private:
-        bool front_;
-        int n_;
+        std::vector<std::pair<int, bool>> servos_;
 
         std::queue<int> steps_;
 

@@ -65,7 +65,7 @@ namespace Modelec {
             break;
         case TAKE:
             {
-                action_executor_->Take();
+                action_executor_->Take({{0, true}, {1, true}, {2, true}, {3, true}});
                 deploy_time_ = node_->now();
             }
 

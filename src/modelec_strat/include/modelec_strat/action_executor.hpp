@@ -9,6 +9,8 @@
 
 #include <sensor_msgs/msg/joy.hpp>
 
+#include "action/base_action.hpp"
+
 namespace Modelec
 {
     class BaseAction;
@@ -28,14 +30,13 @@ namespace Modelec
 
         void ReInit();
 
-        void Down(BaseAction::Front front);
+        void Down(BaseAction::Front front, bool force = false);
 
-        void Up(BaseAction::Front front);
+        void Up(BaseAction::Front front, bool force = false);
 
-        void Take(bool front = true, int n = 0);
+        void Take(std::vector<std::pair<int, bool>> servos, bool force = false);
 
-        void Free(bool front = true, int n = 0);
-
+        void Free(std::vector<std::pair<int, bool>> servos, bool force = false);
 
         void MoveServoTimed(const modelec_interfaces::msg::ActionServoTimedArray& msg);
 

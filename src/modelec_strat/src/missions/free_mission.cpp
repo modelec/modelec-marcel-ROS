@@ -71,7 +71,7 @@ namespace Modelec {
             break;
         case FREE:
             {
-                action_executor_->Free();
+                action_executor_->Free({{0, true}, {1, true}, {2, true}, {3, true}});
                 deploy_time_ = node_->now();
             }
 

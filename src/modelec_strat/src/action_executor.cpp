@@ -88,19 +88,19 @@ namespace Modelec
                 {
                     if (msg->buttons[0] == 1) // A button
                     {
-                        Down(true);
+                        Down(BaseAction::BOTH);
                     }
                     else if (msg->buttons[1] == 1) // B button
                     {
-                        Up(true);
+                        Up(BaseAction::BOTH);
                     }
                     else if (msg->buttons[3] == 1) // X button
                     {
-                        Down(false);
+                        Take({{0, true}, {1, true}, {2, true}, {3, true}});
                     }
                     else if (msg->buttons[4] == 1) // Y button
                     {
-                        Up(false);
+                        Free({{0, true}, {1, true}, {2, true}, {3, true}});
                     }
                 }
             });
@@ -149,45 +149,57 @@ namespace Modelec
         action_ = nullptr;
     }
 
-    void ActionExecutor::Down(BaseAction::front front) {
-        if (action_done_)
+    void ActionExecutor::Down(BaseAction::Front front, bool force) {
+        if (action_done_ || force)
         {
             action_ = std::make_shared<DownAction>(shared_from_this(), front);
+            if (action_done_)
+            {
+                step_running_ = 0;
+            }
             action_done_ = false;
-            step_running_ = 0;
 
             Update();
         }
     }
 
-    void ActionExecutor::Up(BaseAction::front front) {
-        if (action_done_)
+    void ActionExecutor::Up(BaseAction::Front front, bool force) {
+        if (action_done_ || force)
         {
             action_ = std::make_shared<UPAction>(shared_from_this(), front);
+            if (action_done_)
+            {
+                step_running_ = 0;
+            }
             action_done_ = false;
-            step_running_ = 0;
 
             Update();
         }
     }
 
-    void ActionExecutor::Take(bool front, int n) {
-        if (action_done_)
+    void ActionExecutor::Take(std::vector<std::pair<int, bool>> servos, bool force) {
+        if (action_done_ || force)
         {
-            action_ = std::make_shared<TakeAction>(shared_from_this(), front, n);
+            action_ = std::make_shared<TakeAction>(shared_from_this(), servos);
+            if (action_done_)
+            {
+                step_running_ = 0;
+            }
             action_done_ = false;
-            step_running_ = 0;
 
             Update();
         }
     }
 
-    void ActionExecutor::Free(bool front, int n) {
-        if (action_done_)
+    void ActionExecutor::Free(std::vector<std::pair<int, bool>> servos, bool force) {
+        if (action_done_ || force)
         {
-            action_ = std::make_shared<FreeAction>(shared_from_this(), front, n);
+            action_ = std::make_shared<FreeAction>(shared_from_this(), servos);
+            if (action_done_)
+            {
+                step_running_ = 0;
+            }
             action_done_ = false;
-            step_running_ = 0;
 
             Update();
         }

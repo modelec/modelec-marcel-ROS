@@ -8,7 +8,7 @@ Modelec::UPAction::UPAction(const std::shared_ptr<ActionExecutor>& action_execut
     steps_.push(ActionExec::DONE_STEP);
 }
 
-Modelec::UPAction::UPAction(const std::shared_ptr<ActionExecutor>& action_executor, front front) : UPAction(action_executor)
+Modelec::UPAction::UPAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front) : UPAction(action_executor)
 {
     front_ = front;
 }
@@ -95,11 +95,11 @@ void Modelec::UPAction::Init(const std::vector<std::string>& params)
 {
     if (!params.empty())
     {
-        SetFront(static_cast<front>(std::stoi(params[1])));
+        SetFront(static_cast<Front>(std::stoi(params[1])));
     }
 }
 
-void Modelec::UPAction::SetFront(front front)
+void Modelec::UPAction::SetFront(Front front)
 {
     front_ = front;
 }

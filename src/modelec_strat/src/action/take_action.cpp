@@ -8,8 +8,17 @@ Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_ex
 
 Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, bool front, int n) : TakeAction(action_executor)
 {
-    front_ = front;
-    n_ = n;
+    AddServo(n, front);
+}
+
+Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, bool> servo) : TakeAction(action_executor)
+{
+    AddServo(servo);
+}
+
+Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, bool>> servos) : TakeAction(action_executor)
+{
+    AddServos(servos);
 }
 
 void Modelec::TakeAction::Next()
@@ -29,12 +38,16 @@ void Modelec::TakeAction::Next()
         {
             modelec_interfaces::msg::ActionServoTimedArray msg;
 
-            msg.items.resize(1);
+            msg.items.resize(servos_.size());
 
-            msg.items[0].id = n_ + (front_ ? 3 : 11);
-            msg.items[0].start_angle = front_ ? 0.8 : 0;
-            msg.items[0].end_angle = front_ ? 2.7 : 0;
-            msg.items[0].duration_s = 0.5;
+            for (size_t i = 0; i < servos_.size(); i++)
+            {
+                msg.items[i].id = servos_[i].first + (servos_[i].second ? 3 : 11);
+                msg.items[i].start_angle = servos_[i].second ? 0.8 : 0;
+                msg.items[i].end_angle = servos_[i].second ? 2.7 : 0;
+                msg.items[i].duration_s = 0.5;
+            }
+
             action_executor_->MoveServoTimed(msg);
         }
         break;
@@ -52,21 +65,26 @@ void Modelec::TakeAction::Init(const std::vector<std::string>& params)
 {
     if (params.size() >= 2)
     {
-        SetFront(params[1] == "1" || params[1] == "true" || params[1] == "front");
-        SetN(std::stoi(params[2]));
+        for (size_t i = 1; i < params.size(); i += 2)
+        {
+            int id = std::stoi(params[i]);
+            bool front = (i + 1 < params.size()) ? (params[i + 1] == "1" || params[i + 1] == "true" || params[i + 1] == "front") : true;
+            AddServo(id, front);
+        }
     }
 }
 
-void Modelec::TakeAction::Init(bool front, int n)
+void Modelec::TakeAction::AddServo(int id, bool front)
 {
+    servos_.emplace_back(id, front);
 }
 
-void Modelec::TakeAction::SetFront(bool front)
+void Modelec::TakeAction::AddServo(std::pair<int, bool> servo)
 {
-    front_ = front;
+    servos_.emplace_back(servo);
 }
 
-void Modelec::TakeAction::SetN(int n)
+void Modelec::TakeAction::AddServos(const std::vector<std::pair<int, bool>>& servos)
 {
-    n_ = n;
+    servos_.insert(servos_.end(), servos.begin(), servos.end());
 }

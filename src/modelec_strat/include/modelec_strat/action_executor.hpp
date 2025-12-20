@@ -10,6 +10,7 @@
 #include <sensor_msgs/msg/joy.hpp>
 
 #include "action/base_action.hpp"
+#include "obstacle/box.hpp"
 
 namespace Modelec
 {
@@ -41,6 +42,9 @@ namespace Modelec
         void MoveServoTimed(const modelec_interfaces::msg::ActionServoTimedArray& msg);
 
         void MoveServo(const modelec_interfaces::msg::ActionServoPosArray& msg);
+
+        std::array<std::shared_ptr<BoxObstacle>, 2> box_obstacles_;
+
     protected:
         rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::ActionServoPosArray>::SharedPtr servo_move_pub_;

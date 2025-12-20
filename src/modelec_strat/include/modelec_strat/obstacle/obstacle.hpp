@@ -26,46 +26,37 @@ namespace Modelec
 
         virtual modelec_interfaces::msg::Obstacle toMsg() const;
 
-        int GetId() const { return id_; }
-        int GetX() const { return x_; }
-        int GetY() const { return y_; }
-        double GetTheta() const { return theta_; }
-        int GetWidth() const { return w_; }
-        int GetHeight() const { return h_; }
-        const std::string& Type() const { return type_; }
-        Point GetPosition() const { return Point(x_, y_, theta_); }
+        int GetId() const;
+        int GetX() const;
+        int GetY() const;
+        double GetTheta() const;
+        int GetWidth() const;
+        int GetHeight() const;
+        const std::string& Type() const;
+        Point GetPosition() const;
 
-        void SetId(int id) { id_ = id; }
-        void SetX(int x) { x_ = x; }
-        void SetY(int y) { y_ = y; }
-        void SetTheta(double theta) { theta_ = theta; }
-        void SetWidth(int w) { w_ = w; }
-        void SetHeight(int h) { h_ = h; }
-        void SetType(const std::string& type) { type_ = type; }
+        void SetId(int id);
+        void SetX(int x);
+        void SetY(int y);
+        void SetTheta(double theta);
+        void SetWidth(int w);
+        void SetHeight(int h);
+        void SetType(const std::string& type);
 
-        void SetPosition(int x, int y, double theta)
-        {
-            x_ = x;
-            y_ = y;
-            theta_ = theta;
-        }
+        void SetPosition(int x, int y, double theta);
 
-        void SetPosition(const Point& p)
-        {
-            x_ = p.x;
-            y_ = p.y;
-            theta_ = p.theta;
-        }
+        void SetPosition(const Point& p);
 
-        void SetSize(int w, int h)
-        {
-            w_ = w;
-            h_ = h;
-        }
+        void SetSize(int w, int h);
+
+        bool IsAtObjective() const;
+        void SetAtObjective(bool atObjective);
 
     protected:
         int id_, x_, y_, w_, h_;
         double theta_;
         std::string type_;
+
+        bool isAtObjective = false;
     };
 }

@@ -35,7 +35,7 @@ namespace Modelec
         int score_free_zone_ = 0;
 
         rclcpp::TimerBase::SharedPtr timer_add_;
-        rclcpp::TimerBase::SharedPtr timer_remove_;
+        // rclcpp::TimerBase::SharedPtr timer_remove_;
 
         rclcpp::Subscription<std_msgs::msg::Int64>::SharedPtr start_time_sub_;
         rclcpp::Publisher<modelec_interfaces::msg::Obstacle>::SharedPtr add_obs_pub_;

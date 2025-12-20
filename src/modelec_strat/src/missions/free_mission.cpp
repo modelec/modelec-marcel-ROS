@@ -28,8 +28,8 @@ namespace Modelec {
         {
             if ((node_->now() - go_timeout_).seconds() < 5)
             {
-                nav_->AskWaypoint();
-                return;
+                // nav_->AskWaypoint();
+                // return;
             }
             if ((node_->now() - go_timeout_).seconds() < 10)
             {
@@ -50,11 +50,11 @@ namespace Modelec {
 
                 auto depoPoint = target_deposite_zone_->GetPosition();
 
-                auto angle = atan2(depoPoint.y - currPos->y,
+                angle_ = atan2(depoPoint.y - currPos->y,
                     depoPoint.x - currPos->x);
 
                 nav_->GoToRotateFirst(depoPoint.GetTakePosition(dist,
-                    angle + M_PI), true, Pathfinding::FREE);
+                    angle_ + M_PI), true, Pathfinding::FREE);
 
                 go_timeout_ = node_->now();
             }
@@ -73,6 +73,20 @@ namespace Modelec {
             {
                 action_executor_->Free({{0, true}, {1, true}, {2, true}, {3, true}});
                 deploy_time_ = node_->now();
+
+                auto obs = action_executor_->box_obstacles_[0];
+                action_executor_->box_obstacles_[0] = nullptr;
+
+                auto pos = nav_->GetCurrentPos();
+
+                obs->SetPosition(
+                    pos->x + 250 * cos(pos->theta),
+                    pos->y + 250 * sin(pos->theta),
+                    pos->theta);
+
+                obs->SetAtObjective(true);
+
+                nav_->GetPathfinding()->AddObstacle(obs);
             }
 
             step_ = UP;
@@ -81,6 +95,16 @@ namespace Modelec {
             {
                 action_executor_->Up(BaseAction::FRONT);
                 deploy_time_ = node_->now();
+            }
+
+            step_ = GO_BACK;
+            break;
+        case GO_BACK:
+            {
+                nav_->GoToRotateFirst(target_deposite_zone_->GetPosition().GetTakePosition(350,
+                    angle_ + M_PI), true, Pathfinding::FREE | Pathfinding::OBSTACLE);
+
+                go_timeout_ = node_->now();
             }
 
             step_ = DONE;

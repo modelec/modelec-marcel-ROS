@@ -188,11 +188,14 @@ namespace Modelec
         {
             if (auto obs = std::dynamic_pointer_cast<T>(obstacle.second))
             {
-                auto dist = Point::distance(robotPos, obs->GetPosition());
-                if (dist < distance)
+                if (!obs->IsAtObjective())
                 {
-                    distance = dist;
-                    closest_obstacle = obs;
+                    auto dist = Point::distance(robotPos, obs->GetPosition());
+                    if (dist < distance)
+                    {
+                        distance = dist;
+                        closest_obstacle = obs;
+                    }
                 }
             }
         }

@@ -23,6 +23,7 @@ namespace Modelec {
             DOWN,
             FREE,
             UP,
+            GO_BACK,
             DONE,
         } step_;
 
@@ -32,6 +33,8 @@ namespace Modelec {
         rclcpp::Node::SharedPtr node_;
 
         std::shared_ptr<DepositeZone> target_deposite_zone_;
+
+        double angle_;
 
         rclcpp::Time go_timeout_;
         rclcpp::Time deploy_time_;

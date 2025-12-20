@@ -37,21 +37,6 @@ namespace Modelec
                 auto goal = std::chrono::nanoseconds(msg->data) + std::chrono::seconds(time_to_remove_top_pot_);
                 auto second_goal = std::chrono::nanoseconds(msg->data) + std::chrono::seconds(time_to_put_zone_);
 
-                timer_remove_ = create_wall_timer(
-                    goal - now,
-                    [this]()
-                    {
-                        modelec_interfaces::msg::Obstacle topLeft;
-                        topLeft.id = 10;
-                        remove_obs_pub_->publish(topLeft);
-
-                        modelec_interfaces::msg::Obstacle topRight;
-                        topRight.id = 20;
-                        remove_obs_pub_->publish(topRight);
-
-                        timer_remove_->cancel();
-                    });
-
                 timer_add_ = create_wall_timer(
                     second_goal - now,
                     [this]()
@@ -84,10 +69,10 @@ namespace Modelec
                 {
                     timer_add_->cancel();
                 }
-                if (timer_remove_)
+                /*if (timer_remove_)
                 {
                     timer_remove_->cancel();
-                }
+                }*/
             });
     }
 

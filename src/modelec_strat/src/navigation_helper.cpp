@@ -761,34 +761,10 @@ namespace Modelec
             Config::get<double>("config.spawn.yellow.top@theta")
         );
 
-        spawn_yellow_["side"] = Point(
-            Config::get<int>("config.spawn.yellow.side@x"),
-            Config::get<int>("config.spawn.yellow.side@y"),
-            Config::get<double>("config.spawn.yellow.side@theta")
-        );
-
-        spawn_yellow_["bottom"] = Point(
-            Config::get<int>("config.spawn.yellow.bottom@x"),
-            Config::get<int>("config.spawn.yellow.bottom@y"),
-            Config::get<double>("config.spawn.yellow.bottom@theta")
-        );
-
         spawn_blue_["top"] = Point(
             Config::get<int>("config.spawn.blue.top@x"),
             Config::get<int>("config.spawn.blue.top@y"),
             Config::get<double>("config.spawn.blue.top@theta")
-        );
-
-        spawn_blue_["side"] = Point(
-            Config::get<int>("config.spawn.blue.side@x"),
-            Config::get<int>("config.spawn.blue.side@y"),
-            Config::get<double>("config.spawn.blue.side@theta")
-        );
-
-        spawn_blue_["bottom"] = Point(
-            Config::get<int>("config.spawn.blue.bottom@x"),
-            Config::get<int>("config.spawn.blue.bottom@y"),
-            Config::get<double>("config.spawn.blue.bottom@theta")
         );
     }
 }

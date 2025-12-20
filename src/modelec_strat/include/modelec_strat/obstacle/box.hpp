@@ -15,16 +15,12 @@ namespace Modelec
         BoxObstacle(tinyxml2::XMLElement* obstacleElem);
         BoxObstacle(const modelec_interfaces::msg::Obstacle& msg);
 
-        bool IsAtObjective() const;
-        void SetAtObjective(bool atObjective);
-
         Point GetOptimizedGetPos(const modelec_interfaces::msg::OdometryPos::SharedPtr& msg) const;
         Point GetOptimizedGetPos(const Point& currentPos) const;
 
         std::vector<Point> GetAllPossiblePositions() const;
 
     protected:
-        bool isAtObjective = false;
 
         std::vector<double> possible_angles_;
     };

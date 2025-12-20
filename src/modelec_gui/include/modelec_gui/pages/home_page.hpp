@@ -40,6 +40,7 @@ namespace ModelecGUI
 
         QSvgRenderer* renderer_;
 
-        std::vector<QPushButton*> spawn_buttons_;
+        QPushButton* yellow_spawn_buttons_;
+        QPushButton* blue_spawn_buttons_;
     };
 }

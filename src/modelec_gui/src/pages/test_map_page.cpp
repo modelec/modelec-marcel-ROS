@@ -118,7 +118,6 @@ namespace ModelecGUI
         {
             if (auto res = result.get())
             {
-                RCLCPP_INFO(node_->get_logger(), "Map received: %d x %d", res->width, res->height);
                 map_width_ = res->width;
                 map_height_ = res->height;
             }

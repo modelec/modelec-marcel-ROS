@@ -20,12 +20,14 @@ namespace Modelec {
         enum Step
         {
             GO_TO_TAKE,
+            GO_TO_TAKE_CLOSE,
             DOWN,
             TAKE,
             UP,
             DONE,
         } step_;
 
+        std::shared_ptr<BoxObstacle> closestBox;
         MissionStatus status_;
         std::shared_ptr<NavigationHelper> nav_;
         std::shared_ptr<ActionExecutor> action_executor_;

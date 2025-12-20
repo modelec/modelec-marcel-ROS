@@ -28,8 +28,8 @@ namespace Modelec {
         {
             if ((node_->now() - go_timeout_).seconds() < 5)
             {
-                nav_->AskWaypoint();
-                return;
+                // nav_->AskWaypoint();
+                // return;
             }
             if ((node_->now() - go_timeout_).seconds() < 10)
             {
@@ -42,13 +42,24 @@ namespace Modelec {
         case GO_TO_TAKE:
             {
 
-                auto closestBox = nav_->GetClosestObstacle<BoxObstacle>(nav_->GetCurrentPos());
+                closestBox = nav_->GetClosestObstacle<BoxObstacle>(nav_->GetCurrentPos());
+
+                action_executor_->box_obstacles_[0] = closestBox;
 
                 auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
 
-                nav_->GetPathfinding()->RemoveObstacle(closestBox->GetId());
-
                 nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL);
+
+                go_timeout_ = node_->now();
+            }
+
+            step_ = GO_TO_TAKE_CLOSE;
+            break;
+        case GO_TO_TAKE_CLOSE:
+            {
+                auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
+
+                nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
                 go_timeout_ = node_->now();
             }
@@ -80,6 +91,7 @@ namespace Modelec {
             step_ = DONE;
             break;
         case DONE:
+            nav_->GetPathfinding()->RemoveObstacle(closestBox->GetId());
             status_ = MissionStatus::DONE;
             break;
         default:

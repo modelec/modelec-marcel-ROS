@@ -1,0 +1,6 @@
+ros_env="AMENT_PREFIX_PATH CMAKE_PREFIX_PATH COLCON_PREFIX_PATH PKG_CONFIG_PATH PYTHONPATH LD_LIBRARY_PATH PATH ROS_DISTRO ROS_PYTHON_VERSION ROS_LOCALHOST_ONLY ROS_VERSION"
+
+for e in ${=ros_env}; do
+    # In Zsh, ${(P)e} performs the indirect expansion
+    echo "$e=${(P)e}"
+done

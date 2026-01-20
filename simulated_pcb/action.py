@@ -210,7 +210,7 @@ if __name__ == "__main__":
             sim.stop()
         print("Stopped.")
 
-# socat -d -d pty,raw,echo=0,link=/tmp/ACTION_SIM pty,raw,echo=0,link=/tmp/ACTION_USB
-# python3 simulated_pcb/action.py --port /tmp/ACTION_SIM
-# socat -d -d pty,raw,echo=0,link=/tmp/ODO_SIM pty,raw,echo=0,link=/tmp/ODO_USB
-# python3 simulated_pcb/action.py --port /tmp/ODO_SIM
+# socat -d -d pty,raw,echo=0,link=/tmp/SIM_ACTION pty,raw,echo=0,link=/tmp/USB_ACTION
+# python3 simulated_pcb/action.py --port /tmp/SIM_ACTION
+# socat -d -d pty,raw,echo=0,link=/tmp/SIM_ODO pty,raw,echo=0,link=/tmp/USB_ODO
+# python3 simulated_pcb/action.py --port /tmp/SIM_ODO

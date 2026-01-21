@@ -48,7 +48,13 @@ namespace Modelec {
 
                 auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
 
-                nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL);
+                if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL))
+                {
+                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL))
+                    {
+                        nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+                    }
+                }
 
                 go_timeout_ = node_->now();
             }

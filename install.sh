@@ -27,9 +27,9 @@ git submodule init
 git submodule update
 
 echo "source /opt/ros/jazzy/setup.bash
-source ~/modelec-marcel-ROS/install/setup.bash
+source ~/Modelec-ROS/install/setup.bash
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-export FASTRTPS_DEFAULT_PROFILES_FILE=~/modelec-marcel-ROS/fastdds_setup.xml
+export FASTRTPS_DEFAULT_PROFILES_FILE=~/Modelec-ROS/fastdds_setup.xml
 export ROS_DOMAIN_ID=128" >> ~/.bashrc
 
 source ~/.bashrc

@@ -48,16 +48,11 @@ namespace Modelec {
 
                 target_deposite_zone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), {}, true);
 
-                auto depoPoint = target_deposite_zone_->GetPosition();
+                auto depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
 
-                angle_ = atan2(depoPoint.y - currPos->y,
-                    depoPoint.x - currPos->x);
-
-                if (nav_->GoToRotateFirst(depoPoint.GetTakePosition(dist,
-                    angle_ + M_PI), true, Pathfinding::FREE))
+                if (nav_->GoToRotateFirst(depoPoint.GetTakePosition(dist), true, Pathfinding::FREE))
                 {
-                    nav_->GoToRotateFirst(depoPoint.GetTakePosition(dist,
-                        angle_ + M_PI), true, Pathfinding::FREE | Pathfinding::OBSTACLE);
+                    nav_->GoToRotateFirst(depoPoint.GetTakePosition(dist), true, Pathfinding::FREE | Pathfinding::OBSTACLE);
                 }
 
                 go_timeout_ = node_->now();
@@ -105,8 +100,7 @@ namespace Modelec {
             break;
         case GO_BACK:
             {
-                nav_->GoTo(target_deposite_zone_->GetPosition().GetTakePosition(500,
-                    angle_ + M_PI), true, Pathfinding::FREE | Pathfinding::OBSTACLE);
+                nav_->GoTo(target_deposite_zone_->GetPosition().GetTakePosition(500), true, Pathfinding::FREE | Pathfinding::OBSTACLE);
 
                 go_timeout_ = node_->now();
             }

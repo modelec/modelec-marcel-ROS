@@ -14,6 +14,8 @@ namespace Modelec
 
         Point GetPosition() const;
 
+        Point GetBestTakePosition(const Point& currentPos) const;
+
         void Validate(bool valid);
 
         bool Validate() const;
@@ -28,6 +30,8 @@ namespace Modelec
         int id_, max_pot_;
         int w_, h_;
         Point position_;
+
+        std::vector<double> take_angle_;
 
         bool has_box_ = false;
     };

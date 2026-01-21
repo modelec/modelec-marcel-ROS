@@ -106,7 +106,7 @@ namespace Modelec {
         case GO_BACK:
             {
                 nav_->GoTo(target_deposite_zone_->GetPosition().GetTakePosition(500,
-                    nav_->GetCurrentPos()->theta), true, Pathfinding::FREE | Pathfinding::OBSTACLE);
+                    angle_ + M_PI), true, Pathfinding::FREE | Pathfinding::OBSTACLE);
 
                 go_timeout_ = node_->now();
             }

@@ -34,23 +34,23 @@ void Modelec::DownAction::Next()
             if (front_ == FRONT || front_ == BOTH)
             {
                 msg.items[0].id = 0;
-                msg.items[0].start_angle = 2.95;
-                msg.items[0].end_angle = 1.95;
+                msg.items[0].start_angle = 1.95;
+                msg.items[0].end_angle = 2.95;
                 msg.items[0].duration_s = 1;
 
                 msg.items[1].id = 1;
-                msg.items[1].start_angle = 0.9;
-                msg.items[1].end_angle = 1.9;
+                msg.items[1].start_angle = 1.9;
+                msg.items[1].end_angle = 0.9;
                 msg.items[1].duration_s = 1;
 
                 msg.items[2].id = 2;
-                msg.items[2].start_angle = 0;
-                msg.items[2].end_angle = 0.3;
+                msg.items[2].start_angle = 0.3;
+                msg.items[2].end_angle = 0;
                 msg.items[2].duration_s = 1;
 
                 msg.items[3].id = 3;
-                msg.items[3].start_angle = 3;
-                msg.items[3].end_angle = 2.7;
+                msg.items[3].start_angle = 2.7;
+                msg.items[3].end_angle = 3;
                 msg.items[3].duration_s = 1;
             }
 

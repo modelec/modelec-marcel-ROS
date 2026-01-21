@@ -143,6 +143,12 @@ namespace Modelec
                 arm_msg.data = true;
                 tir_arm_set_pub_->publish(arm_msg);
 
+                action_executor_->Up(BaseAction::Front::BOTH, true);
+                action_executor_->Free({
+                    {0, true}, {1, true}, {2, true}, {3, true},
+                    {0, false}, {1, false}, {2, false}, {3, false},
+                }, true);
+
                 Transition(State::WAIT_START, "System ready");
             }
             break;
@@ -158,12 +164,6 @@ namespace Modelec
                     std::chrono::system_clock::now().time_since_epoch())
                                .count();
                 start_time_pub_->publish(msg);
-
-                action_executor_->Up(BaseAction::Front::BOTH, true);
-                action_executor_->Free({
-                    {0, true}, {1, true}, {2, true}, {3, true},
-                    {0, false}, {1, false}, {2, false}, {3, false},
-                }, true);
 
                 Transition(State::SELECT_MISSION, "Match started");
             }

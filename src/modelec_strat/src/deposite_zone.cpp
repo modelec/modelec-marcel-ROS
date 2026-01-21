@@ -34,7 +34,7 @@ namespace Modelec
         return position_;
     }
 
-    Point DepositeZone::GetBestTakePosition(const Point& currentPos) const
+    Point DepositeZone::GetBestTakePosition(const Point& currentPos, int dist) const
     {
         if (take_angle_.empty())
         {
@@ -47,10 +47,12 @@ namespace Modelec
 
         for (const auto& angle : take_angle_)
         {
-            double dx = currentPos.x - position_.x;
-            double dy = currentPos.y - position_.y;
-            double angle_to_zone = std::atan2(dy, dx);
-            double distance = std::fabs(angle_to_zone - angle);
+            Point p = Point(
+                static_cast<int>(position_.x + dist * std::cos(angle)),
+                static_cast<int>(position_.y + dist * std::sin(angle)),
+                angle);
+
+            double distance = p.distance(currentPos);
 
             if (distance < min_distance)
             {

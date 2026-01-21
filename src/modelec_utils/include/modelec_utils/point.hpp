@@ -1,5 +1,8 @@
 #pragma once
 
+#define CLOSE_DISTANCE 150
+#define BASE_DISTANCE 290
+
 namespace Modelec
 {
     struct Point {
@@ -12,6 +15,9 @@ namespace Modelec
 
         static double distance(const Point& p1, const Point& p2);
         static double angleDiff(const Point& p1, const Point& p2);
+
+        double distance(const Point& p2) const;
+        double angleDiff(const Point& p2) const;
 
         [[nodiscard]] Point GetTakePosition(int distance, double angle) const;
         [[nodiscard]] Point GetTakePosition(int distance) const;

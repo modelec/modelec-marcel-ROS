@@ -1,6 +1,5 @@
 #pragma once
 
-#include <limits>
 #include <queue>
 #include <tinyxml2.h>
 #include <modelec_utils/point.hpp>
@@ -14,7 +13,7 @@ namespace Modelec
 
         Point GetPosition() const;
 
-        Point GetBestTakePosition(const Point& currentPos) const;
+        Point GetBestTakePosition(const Point& currentPos, int dist = CLOSE_DISTANCE) const;
 
         void Validate(bool valid);
 

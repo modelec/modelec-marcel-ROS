@@ -79,6 +79,31 @@ namespace Modelec
                 step_running_ -= msg->items.size();
                 Update();
             });
+
+        joy_sub_ = node_->create_subscription<sensor_msgs::msg::Joy>(
+            "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg)
+            {
+                // use game controller to manually control all the action. make it carefully
+                if (msg->buttons.size() >= 5)
+                {
+                    if (msg->buttons[0] == 1) // A button
+                    {
+                        Down(BaseAction::BOTH);
+                    }
+                    else if (msg->buttons[1] == 1) // B button
+                    {
+                        Up(BaseAction::BOTH);
+                    }
+                    else if (msg->buttons[3] == 1) // X button
+                    {
+                        Take({{0, true}, {1, true}, {2, true}, {3, true}});
+                    }
+                    else if (msg->buttons[4] == 1) // Y button
+                    {
+                        Free({{0, true}, {1, true}, {2, true}, {3, true}});
+                    }
+                }
+            });
     }
 
     rclcpp::Node::SharedPtr ActionExecutor::GetNode() const
@@ -124,45 +149,57 @@ namespace Modelec
         action_ = nullptr;
     }
 
-    void ActionExecutor::Down(bool front) {
-        if (action_done_)
+    void ActionExecutor::Down(BaseAction::Front front, bool force) {
+        if (action_done_ || force)
         {
             action_ = std::make_shared<DownAction>(shared_from_this(), front);
+            if (action_done_)
+            {
+                step_running_ = 0;
+            }
             action_done_ = false;
-            step_running_ = 0;
 
             Update();
         }
     }
 
-    void ActionExecutor::Up(bool front) {
-        if (action_done_)
+    void ActionExecutor::Up(BaseAction::Front front, bool force) {
+        if (action_done_ || force)
         {
             action_ = std::make_shared<UPAction>(shared_from_this(), front);
+            if (action_done_)
+            {
+                step_running_ = 0;
+            }
             action_done_ = false;
-            step_running_ = 0;
 
             Update();
         }
     }
 
-    void ActionExecutor::Take(bool front, int n) {
-        if (action_done_)
+    void ActionExecutor::Take(std::vector<std::pair<int, bool>> servos, bool force) {
+        if (action_done_ || force)
         {
-            action_ = std::make_shared<TakeAction>(shared_from_this(), front, n);
+            action_ = std::make_shared<TakeAction>(shared_from_this(), servos);
+            if (action_done_)
+            {
+                step_running_ = 0;
+            }
             action_done_ = false;
-            step_running_ = 0;
 
             Update();
         }
     }
 
-    void ActionExecutor::Free(bool front, int n) {
-        if (action_done_)
+    void ActionExecutor::Free(std::vector<std::pair<int, bool>> servos, bool force) {
+        if (action_done_ || force)
         {
-            action_ = std::make_shared<FreeAction>(shared_from_this(), front, n);
+            action_ = std::make_shared<FreeAction>(shared_from_this(), servos);
+            if (action_done_)
+            {
+                step_running_ = 0;
+            }
             action_done_ = false;
-            step_running_ = 0;
 
             Update();
         }

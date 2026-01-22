@@ -113,6 +113,8 @@ namespace Modelec
 
         Point GetSpawn() const;
 
+        void AskWaypoint();
+
     protected:
         void OnWaypointReach(const WaypointMsg::SharedPtr msg);
 
@@ -171,8 +173,7 @@ namespace Modelec
         rclcpp::Publisher<modelec_interfaces::msg::Spawn>::SharedPtr spawn_pub_;
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr ask_spawn_srv_;
 
-        rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr odo_get_pos_pub_;
-        rclcpp::Time last_odo_get_pos_time_;
+        rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr odo_ask_waypoint_pub_;
 
     };
 
@@ -187,11 +188,14 @@ namespace Modelec
         {
             if (auto obs = std::dynamic_pointer_cast<T>(obstacle.second))
             {
-                auto dist = Point::distance(robotPos, obs->GetPosition());
-                if (dist < distance)
+                if (!obs->IsAtObjective())
                 {
-                    distance = dist;
-                    closest_obstacle = obs;
+                    auto dist = Point::distance(robotPos, obs->GetPosition());
+                    if (dist < distance)
+                    {
+                        distance = dist;
+                        closest_obstacle = obs;
+                    }
                 }
             }
         }

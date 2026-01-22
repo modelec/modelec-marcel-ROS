@@ -15,6 +15,16 @@ namespace Modelec
         return diff - M_PI;
     }
 
+    double Point::distance(const Point& p2) const
+    {
+        return distance(*this, p2);
+    }
+
+    double Point::angleDiff(const Point& p2) const
+    {
+        return angleDiff(*this, p2);
+    }
+
     Point Point::GetTakePosition(int distance, double angle) const
     {
         Point pos;
@@ -31,11 +41,11 @@ namespace Modelec
 
     Point Point::GetTakeBasePosition() const
     {
-        return GetTakePosition(290, theta);
+        return GetTakePosition(BASE_DISTANCE, theta);
     }
 
     Point Point::GetTakeClosePosition() const
     {
-        return GetTakePosition(150, theta);
+        return GetTakePosition(CLOSE_DISTANCE, theta);
     }
 }

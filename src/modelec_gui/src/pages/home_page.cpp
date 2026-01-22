@@ -12,52 +12,64 @@ namespace ModelecGUI
     {
         spawn_pub_ = node_->create_publisher<modelec_interfaces::msg::Spawn>("strat/spawn", 10);
 
-        auto w = Modelec::Config::get<int>("config.spawn.width_mm");
-        auto h = Modelec::Config::get<int>("config.spawn.height_mm");
+        auto* layout = new QHBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
 
-        spawn_sub_ = node_->create_subscription<modelec_interfaces::msg::Spawn>("nav/spawn", 10,
-            [this, w, h](const modelec_interfaces::msg::Spawn::SharedPtr msg)
-            {
-                auto ratioX = 1200 / 3000.0f;
-                auto ratioY = 800 / 2000.0f;
+        yellow_spawn_buttons_ = new QPushButton("Yellow", this);
+        blue_spawn_buttons_   = new QPushButton("Blue", this);
 
-                auto* button = new QPushButton(this);
-                spawn_buttons_.push_back(button);
+        yellow_spawn_buttons_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        blue_spawn_buttons_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-                button->setText(msg->team_id == 0 ? "Yellow" : "Blue");
-                button->setStyleSheet(
-                    msg->team_id == 0
-                        ? "background-color: rgba(255, 255, 0, 128); border: none; color: black; font-size: 24px;"
-                        : "background-color: rgba(0, 0, 255, 128); border: none; color: white; font-size: 24px;"
-                );
+        yellow_spawn_buttons_->setStyleSheet(
+            "QPushButton {"
+            "  background-color: rgba(255, 215, 0, 140);"
+            "  border: none;"
+            "  font-size: 32px;"
+            "  font-weight: bold;"
+            "  color: black;"
+            "}"
+            "QPushButton:hover {"
+            "  background-color: rgba(255, 215, 0, 180);"
+            "}"
+        );
 
-                button->move(
-                    static_cast<int>(msg->x * ratioX - (w * ratioX) / 2),
-                    static_cast<int>(800 - msg->y * ratioY - (h * ratioY) / 2)
-                );
+        blue_spawn_buttons_->setStyleSheet(
+            "QPushButton {"
+            "  background-color: rgba(0, 90, 200, 140);"
+            "  border: none;"
+            "  font-size: 32px;"
+            "  font-weight: bold;"
+            "  color: white;"
+            "}"
+            "QPushButton:hover {"
+            "  background-color: rgba(0, 90, 200, 180);"
+            "}"
+        );
 
-                button->setFixedSize(w * ratioX, h * ratioY);
+        layout->addWidget(yellow_spawn_buttons_, 1);
+        layout->addWidget(blue_spawn_buttons_, 1);
 
-                button->show();
+        connect(yellow_spawn_buttons_, &QPushButton::clicked, this, [this]()
+        {
+            modelec_interfaces::msg::Spawn msg;
+            msg.team_id = 0;
+            msg.name = modelec_interfaces::msg::Spawn::TOP;
+            spawn_pub_->publish(msg);
+            emit TeamChoose();
+        });
 
-                connect(button, &QPushButton::clicked, this, [this, msg]()
-                {
-                    modelec_interfaces::msg::Spawn team_msg;
-                    team_msg.team_id = msg->team_id;
-                    team_msg.name = modelec_interfaces::msg::Spawn::TOP;
-                    spawn_pub_->publish(team_msg);
-
-                    emit TeamChoose();
-                });
-            });
+        connect(blue_spawn_buttons_, &QPushButton::clicked, this, [this]()
+        {
+            modelec_interfaces::msg::Spawn msg;
+            msg.team_id = 1;
+            msg.name = modelec_interfaces::msg::Spawn::TOP;
+            spawn_pub_->publish(msg);
+            emit TeamChoose();
+        });
 
         reset_strat_pub_ = node_->create_publisher<std_msgs::msg::Empty>("strat/reset", 10);
-
-        ask_spawn_client_ = node_->create_client<std_srvs::srv::Empty>("nav/ask_spawn");
-        ask_spawn_client_->wait_for_service();
-        auto ask_spawn_request_ = std::make_shared<std_srvs::srv::Empty::Request>();
-        auto res = ask_spawn_client_->async_send_request(ask_spawn_request_);
-        rclcpp::spin_until_future_complete(node_->get_node_base_interface(), res);
     }
 
     void HomePage::Init()

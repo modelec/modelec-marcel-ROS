@@ -7,6 +7,8 @@
 #include <modelec_strat/missions/take_mission.hpp>
 #include <modelec_strat/missions/free_mission.hpp>
 
+#include "modelec_strat/action/base_action.hpp"
+
 namespace Modelec
 {
 
@@ -140,6 +142,12 @@ namespace Modelec
                 std_msgs::msg::Bool arm_msg;
                 arm_msg.data = true;
                 tir_arm_set_pub_->publish(arm_msg);
+
+                action_executor_->Up(BaseAction::Front::BOTH, true);
+                action_executor_->Free({
+                    {0, true}, {1, true}, {2, true}, {3, true},
+                    {0, false}, {1, false}, {2, false}, {3, false},
+                }, true);
 
                 Transition(State::WAIT_START, "System ready");
             }

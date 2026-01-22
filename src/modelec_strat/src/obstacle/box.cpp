@@ -24,16 +24,6 @@ namespace Modelec
     {
     }
 
-    bool BoxObstacle::IsAtObjective() const
-    {
-        return isAtObjective;
-    }
-
-    void BoxObstacle::SetAtObjective(bool atObjective)
-    {
-        isAtObjective = atObjective;
-    }
-
     Point BoxObstacle::GetOptimizedGetPos(const modelec_interfaces::msg::OdometryPos::SharedPtr& msg) const
     {
         Point p = Point(msg->x, msg->y, msg->theta);

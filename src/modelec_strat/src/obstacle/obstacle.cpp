@@ -43,4 +43,79 @@ namespace Modelec
 
         return msg;
     }
+
+    int Obstacle::GetId() const
+    { return id_; }
+
+    int Obstacle::GetX() const
+    { return x_; }
+
+    int Obstacle::GetY() const
+    { return y_; }
+
+    double Obstacle::GetTheta() const
+    { return theta_; }
+
+    int Obstacle::GetWidth() const
+    { return w_; }
+
+    int Obstacle::GetHeight() const
+    { return h_; }
+
+    const std::string& Obstacle::Type() const
+    { return type_; }
+
+    Point Obstacle::GetPosition() const
+    { return Point(x_, y_, theta_); }
+
+    void Obstacle::SetId(int id)
+    { id_ = id; }
+
+    void Obstacle::SetX(int x)
+    { x_ = x; }
+
+    void Obstacle::SetY(int y)
+    { y_ = y; }
+
+    void Obstacle::SetTheta(double theta)
+    { theta_ = theta; }
+
+    void Obstacle::SetWidth(int w)
+    { w_ = w; }
+
+    void Obstacle::SetHeight(int h)
+    { h_ = h; }
+
+    void Obstacle::SetType(const std::string& type)
+    { type_ = type; }
+
+    void Obstacle::SetPosition(int x, int y, double theta)
+    {
+        x_ = x;
+        y_ = y;
+        theta_ = theta;
+    }
+
+    void Obstacle::SetPosition(const Point& p)
+    {
+        x_ = p.x;
+        y_ = p.y;
+        theta_ = p.theta;
+    }
+
+    void Obstacle::SetSize(int w, int h)
+    {
+        w_ = w;
+        h_ = h;
+    }
+
+    bool Obstacle::IsAtObjective() const
+    {
+        return isAtObjective;
+    }
+
+    void Obstacle::SetAtObjective(bool atObjective)
+    {
+        isAtObjective = atObjective;
+    }
 }

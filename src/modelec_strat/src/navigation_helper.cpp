@@ -97,10 +97,8 @@ namespace Modelec
                 }
             });
 
-        odo_get_pos_pub_ = node_->create_publisher<std_msgs::msg::Empty>(
-            "odometry/get/pos", 30);
-
-        last_odo_get_pos_time_ = node_->now();
+        odo_ask_waypoint_pub_ = node_->create_publisher<std_msgs::msg::Empty>(
+            "odometry/ask_active_waypoint", 30);
     }
 
     void NavigationHelper::ReInit()
@@ -720,6 +718,12 @@ namespace Modelec
         return spawn_;
     }
 
+    void NavigationHelper::AskWaypoint()
+    {
+        std_msgs::msg::Empty msg;
+        odo_ask_waypoint_pub_->publish(msg);
+    }
+
     void NavigationHelper::OnWaypointReach(const WaypointMsg::SharedPtr msg)
     {
         for (auto& waypoint : waypoints_)
@@ -757,34 +761,10 @@ namespace Modelec
             Config::get<double>("config.spawn.yellow.top@theta")
         );
 
-        spawn_yellow_["side"] = Point(
-            Config::get<int>("config.spawn.yellow.side@x"),
-            Config::get<int>("config.spawn.yellow.side@y"),
-            Config::get<double>("config.spawn.yellow.side@theta")
-        );
-
-        spawn_yellow_["bottom"] = Point(
-            Config::get<int>("config.spawn.yellow.bottom@x"),
-            Config::get<int>("config.spawn.yellow.bottom@y"),
-            Config::get<double>("config.spawn.yellow.bottom@theta")
-        );
-
         spawn_blue_["top"] = Point(
             Config::get<int>("config.spawn.blue.top@x"),
             Config::get<int>("config.spawn.blue.top@y"),
             Config::get<double>("config.spawn.blue.top@theta")
-        );
-
-        spawn_blue_["side"] = Point(
-            Config::get<int>("config.spawn.blue.side@x"),
-            Config::get<int>("config.spawn.blue.side@y"),
-            Config::get<double>("config.spawn.blue.side@theta")
-        );
-
-        spawn_blue_["bottom"] = Point(
-            Config::get<int>("config.spawn.blue.bottom@x"),
-            Config::get<int>("config.spawn.blue.bottom@y"),
-            Config::get<double>("config.spawn.blue.bottom@theta")
         );
     }
 }

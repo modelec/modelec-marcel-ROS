@@ -25,6 +25,13 @@ namespace Modelec
     class BaseAction
     {
     public:
+        enum Front
+        {
+            FRONT = 1,
+            BACK = 0,
+            BOTH = -1,
+        };
+
         using Ptr = std::shared_ptr<BaseAction>;
         using FactoryFn =
             std::function<Ptr(const std::shared_ptr<ActionExecutor>&)>;
@@ -41,13 +48,9 @@ namespace Modelec
         {
         }
         virtual ~BaseAction() = default;
-        virtual void Execute() = 0;
         virtual void Next() = 0;
         virtual bool IsDone() const { return done_; }
         virtual void Init(const std::vector<std::string>& params) = 0;
-
-        // static constexpr std::string_view Name = "BaseAction";
-
         static Ptr CreateAction(
             const std::string& action_name,
             const std::shared_ptr<ActionExecutor>& action_executor);

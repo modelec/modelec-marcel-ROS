@@ -69,6 +69,13 @@ namespace Modelec
                 SetPIDCallback(msg);
             });
 
+        odo_ask_active_waypoint_subscriber_ = this->create_subscription<std_msgs::msg::Empty>(
+            "odometry/ask_active_waypoint", 10,
+            [this](const std_msgs::msg::Empty::SharedPtr)
+            {
+                GetData("WAYPOINT", {"ACTIVE"});
+            });
+
         joy_subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
             "joy", 30,
             [this](const sensor_msgs::msg::Joy::SharedPtr msg)
@@ -170,12 +177,38 @@ namespace Modelec
             }
             else if (tokens[1] == "WAYPOINT")
             {
-                int id = std::stoi(tokens[2]);
+                if (tokens[2] == "REACH")
+                {
+                    // RCLCPP_INFO(this->get_logger(), "Waypoint reached: ID %s", tokens[3].c_str());
 
-                auto message = modelec_interfaces::msg::OdometryWaypoint();
-                message.id = id;
+                    int id = std::stoi(tokens[3]);
 
-                odo_waypoint_reach_publisher_->publish(message);
+                    auto message = modelec_interfaces::msg::OdometryWaypoint();
+                    message.id = id;
+
+                    odo_waypoint_reach_publisher_->publish(message);
+                }
+                else if (tokens.size() >= 7)
+                {
+                    int id = std::stoi(tokens[3]);
+                    bool is_end = tokens[4] == "1";
+                    long x = std::stol(tokens[5]);
+                    long y = std::stol(tokens[6]);
+                    double theta = std::stod(tokens[7]);
+                    bool reach = tokens.size() > 7 ? tokens[8] == "1" : false;
+
+                    if (reach)
+                    {
+                        auto message = modelec_interfaces::msg::OdometryWaypoint();
+                        message.id = id;
+                        message.is_end = is_end;
+                        message.x = x;
+                        message.y = y;
+                        message.theta = theta;
+
+                        odo_waypoint_reach_publisher_->publish(message);
+                    }
+                }
             }
             else if (tokens[1] == "PID")
             {
@@ -201,6 +234,7 @@ namespace Modelec
             }
             else if (tokens[1] == "WAYPOINT")
             {
+                // RCLCPP_INFO(this->get_logger(), "Waypoint added successfully.");
             }
             else if (tokens[1] == "PID")
             {

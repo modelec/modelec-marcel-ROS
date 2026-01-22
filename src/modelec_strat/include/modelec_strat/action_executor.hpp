@@ -45,6 +45,16 @@ namespace Modelec
 
         std::array<std::shared_ptr<BoxObstacle>, 2> box_obstacles_;
 
+        bool IsEmpty() const;
+
+        bool HasBox(BaseAction::Front front) const;
+
+        bool HasFrontBox() const;
+
+        bool HasBackBox() const;
+
+        bool HasOneBox() const;
+
     protected:
         rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::ActionServoPosArray>::SharedPtr servo_move_pub_;

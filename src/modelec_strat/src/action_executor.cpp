@@ -222,4 +222,29 @@ namespace Modelec
         servo_move_pub_->publish(msg);
         step_running_ += msg.items.size();
     }
+
+    bool ActionExecutor::IsEmpty() const
+    {
+        return box_obstacles_[0] == nullptr && box_obstacles_[1] == nullptr;
+    }
+
+    bool ActionExecutor::HasBox(BaseAction::Front front) const
+    {
+        return box_obstacles_[front] != nullptr;
+    }
+
+    bool ActionExecutor::HasFrontBox() const
+    {
+        return HasBox(BaseAction::FRONT);
+    }
+
+    bool ActionExecutor::HasBackBox() const
+    {
+        return HasBox(BaseAction::BACK);
+    }
+
+    bool ActionExecutor::HasOneBox() const
+    {
+        return HasFrontBox() != HasBackBox();
+    }
 }

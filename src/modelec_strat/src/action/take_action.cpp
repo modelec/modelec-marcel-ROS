@@ -6,17 +6,17 @@ Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_ex
 {
 }
 
-Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, bool front, int n) : TakeAction(action_executor)
+Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front, int n) : TakeAction(action_executor)
 {
     AddServo(n, front);
 }
 
-Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, bool> servo) : TakeAction(action_executor)
+Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, Front> servo) : TakeAction(action_executor)
 {
     AddServo(servo);
 }
 
-Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, bool>> servos) : TakeAction(action_executor)
+Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, Front>> servos) : TakeAction(action_executor)
 {
     AddServos(servos);
 }
@@ -69,22 +69,22 @@ void Modelec::TakeAction::Init(const std::vector<std::string>& params)
         {
             int id = std::stoi(params[i]);
             bool front = (i + 1 < params.size()) ? (params[i + 1] == "1" || params[i + 1] == "true" || params[i + 1] == "front") : true;
-            AddServo(id, front);
+            AddServo(id, front ? FRONT : BACK);
         }
     }
 }
 
-void Modelec::TakeAction::AddServo(int id, bool front)
+void Modelec::TakeAction::AddServo(int id, Front front)
 {
     servos_.emplace_back(id, front);
 }
 
-void Modelec::TakeAction::AddServo(std::pair<int, bool> servo)
+void Modelec::TakeAction::AddServo(std::pair<int, Front> servo)
 {
     servos_.emplace_back(servo);
 }
 
-void Modelec::TakeAction::AddServos(const std::vector<std::pair<int, bool>>& servos)
+void Modelec::TakeAction::AddServos(const std::vector<std::pair<int, Front>>& servos)
 {
     servos_.insert(servos_.end(), servos.begin(), servos.end());
 }

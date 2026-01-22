@@ -3,8 +3,11 @@
 #include "modelec_strat/action/base_action.hpp"
 
 namespace Modelec {
-    TakeMission::TakeMission(const std::shared_ptr<NavigationHelper>& nav, const std::shared_ptr<ActionExecutor>& action_executor)
-     : step_(GO_TO_TAKE), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)  {
+    TakeMission::TakeMission(const std::shared_ptr<NavigationHelper>& nav,
+        const std::shared_ptr<ActionExecutor>& action_executor,
+        BaseAction::Front front)
+     : step_(GO_TO_TAKE), front_(front), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
+    {
     }
 
     void TakeMission::Start(rclcpp::Node::SharedPtr node)
@@ -42,9 +45,9 @@ namespace Modelec {
         case GO_TO_TAKE:
             {
 
-                closestBox = nav_->GetClosestObstacle<BoxObstacle>(nav_->GetCurrentPos());
+                auto closestBox = nav_->GetClosestObstacle<BoxObstacle>(nav_->GetCurrentPos());
 
-                action_executor_->box_obstacles_[0] = closestBox;
+                action_executor_->box_obstacles_[front_] = closestBox;
 
                 auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
 
@@ -63,7 +66,13 @@ namespace Modelec {
             break;
         case GO_TO_TAKE_CLOSE:
             {
-                auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
+                if (action_executor_->box_obstacles_[front_] == nullptr)
+                {
+                    status_ = MissionStatus::FAILED;
+                    break;
+                }
+
+                auto pos = action_executor_->box_obstacles_[0]->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
 
                 nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
 
@@ -74,7 +83,7 @@ namespace Modelec {
             break;
         case DOWN:
             {
-                action_executor_->Down(BaseAction::FRONT);
+                action_executor_->Down(front_);
                 deploy_time_ = node_->now();
             }
 
@@ -82,7 +91,7 @@ namespace Modelec {
             break;
         case TAKE:
             {
-                action_executor_->Take({{0, true}, {1, true}, {2, true}, {3, true}});
+                action_executor_->Take({{0, front_}, {1, front_}, {2, front_}, {3, front_}});
                 deploy_time_ = node_->now();
             }
 
@@ -90,14 +99,23 @@ namespace Modelec {
             break;
         case UP:
             {
-                action_executor_->Up(BaseAction::FRONT);
+                action_executor_->Up(front_);
                 deploy_time_ = node_->now();
             }
 
             step_ = DONE;
             break;
         case DONE:
-            nav_->GetPathfinding()->RemoveObstacle(closestBox->GetId());
+            {
+                if (action_executor_->box_obstacles_[front_] == nullptr)
+                {
+                    status_ = MissionStatus::FAILED;
+                    break;
+                }
+
+                nav_->GetPathfinding()->RemoveObstacle(action_executor_->box_obstacles_[front_]->GetId());
+            }
+
             status_ = MissionStatus::DONE;
             break;
         default:

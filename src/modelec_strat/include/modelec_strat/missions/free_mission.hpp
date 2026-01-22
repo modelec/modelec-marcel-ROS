@@ -8,7 +8,8 @@ namespace Modelec {
     class FreeMission : public Mission {
     public:
         FreeMission(const std::shared_ptr<NavigationHelper>& nav,
-                      const std::shared_ptr<ActionExecutor>& action_executor);
+                      const std::shared_ptr<ActionExecutor>& action_executor,
+                      BaseAction::Front front = BaseAction::FRONT);
 
         void Start(rclcpp::Node::SharedPtr node) override;
         void Update() override;
@@ -26,6 +27,8 @@ namespace Modelec {
             GO_BACK,
             DONE,
         } step_;
+
+        BaseAction::Front front_;
 
         MissionStatus status_;
         std::shared_ptr<NavigationHelper> nav_;

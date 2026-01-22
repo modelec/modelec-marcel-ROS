@@ -145,8 +145,8 @@ namespace Modelec
 
                 action_executor_->Up(BaseAction::Front::BOTH, true);
                 action_executor_->Free({
-                    {0, true}, {1, true}, {2, true}, {3, true},
-                    {0, false}, {1, false}, {2, false}, {3, false},
+                    {0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT},
+                    {0, BaseAction::BACK}, {1, BaseAction::BACK}, {2, BaseAction::BACK}, {3, BaseAction::BACK},
                 }, true);
 
                 Transition(State::WAIT_START, "System ready");
@@ -207,7 +207,23 @@ namespace Modelec
         case State::TAKE_MISSION:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<TakeMission>(nav_, action_executor_);
+                if (action_executor_->box_obstacles_[BaseAction::FRONT] != nullptr)
+                {
+                    if (action_executor_->box_obstacles_[BaseAction::BACK] != nullptr)
+                    {
+                        RCLCPP_WARN(get_logger(), "Both front and back box obstacles are occupied!");
+                        current_mission_.reset();
+                        Transition(State::SELECT_MISSION, "Cannot take box, both sides occupied");
+                        break;
+                    }
+
+                    RCLCPP_INFO(get_logger(), "Front box obstacle is occupied, taking from back");
+                    current_mission_ = std::make_unique<TakeMission>(nav_, action_executor_, BaseAction::BACK);
+                    current_mission_->Start(shared_from_this());
+                    break;
+                }
+
+                current_mission_ = std::make_unique<TakeMission>(nav_, action_executor_, BaseAction::FRONT);
                 current_mission_->Start(shared_from_this());
             }
             current_mission_->Update();
@@ -221,7 +237,22 @@ namespace Modelec
         case State::FREE_MISSION:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<FreeMission>(nav_, action_executor_);
+                if (action_executor_->box_obstacles_[BaseAction::FRONT] == nullptr)
+                {
+                    if (action_executor_->box_obstacles_[BaseAction::BACK] == nullptr)
+                    {
+                        RCLCPP_WARN(get_logger(), "Both front and back box obstacles are free!");
+                        Transition(State::SELECT_MISSION, "Cannot free box, both sides empty");
+                        break;
+                    }
+
+                    RCLCPP_INFO(get_logger(), "Front box obstacle is occupied, taking from back");
+                    current_mission_ = std::make_unique<FreeMission>(nav_, action_executor_, BaseAction::BACK);
+                    current_mission_->Start(shared_from_this());
+                    break;
+                }
+
+                current_mission_ = std::make_unique<FreeMission>(nav_, action_executor_, BaseAction::FRONT);
                 current_mission_->Start(shared_from_this());
             }
             current_mission_->Update();

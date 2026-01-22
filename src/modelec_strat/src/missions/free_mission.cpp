@@ -3,8 +3,11 @@
 #include "modelec_strat/action/base_action.hpp"
 
 namespace Modelec {
-    FreeMission::FreeMission(const std::shared_ptr<NavigationHelper>& nav, const std::shared_ptr<ActionExecutor>& action_executor)
-     : step_(GO_TO_FREE), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)  {
+    FreeMission::FreeMission(const std::shared_ptr<NavigationHelper>& nav,
+        const std::shared_ptr<ActionExecutor>& action_executor,
+        BaseAction::Front front)
+     : step_(GO_TO_FREE), front_(front), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
+    {
     }
 
     void FreeMission::Start(rclcpp::Node::SharedPtr node)
@@ -70,11 +73,11 @@ namespace Modelec {
             break;
         case FREE:
             {
-                action_executor_->Free({{0, true}, {1, true}, {2, true}, {3, true}});
+                action_executor_->Free({{0, front_}, {1, front_}, {2, front_}, {3, front_}});
                 deploy_time_ = node_->now();
 
                 auto obs = action_executor_->box_obstacles_[0];
-                action_executor_->box_obstacles_[0] = nullptr;
+                action_executor_->box_obstacles_[front_] = nullptr;
 
                 auto pos = nav_->GetCurrentPos();
 

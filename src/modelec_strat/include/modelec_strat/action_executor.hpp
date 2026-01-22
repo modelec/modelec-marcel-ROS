@@ -35,9 +35,9 @@ namespace Modelec
 
         void Up(BaseAction::Front front, bool force = false);
 
-        void Take(std::vector<std::pair<int, bool>> servos, bool force = false);
+        void Take(std::vector<std::pair<int, BaseAction::Front>> servos, bool force = false);
 
-        void Free(std::vector<std::pair<int, bool>> servos, bool force = false);
+        void Free(std::vector<std::pair<int, BaseAction::Front>> servos, bool force = false);
 
         void MoveServoTimed(const modelec_interfaces::msg::ActionServoTimedArray& msg);
 

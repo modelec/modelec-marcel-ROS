@@ -178,7 +178,11 @@ namespace Modelec
                     Transition(State::STOP, "All missions done");
                 }
 
-                else if (elapsed.seconds() < 70)
+                else if (elapsed.seconds() < 60 && !action_executor_->IsEmpty())
+                {
+                    Transition(State::FREE_MISSION, "Selecting a game action");
+                }
+                else if (elapsed.seconds() < 80)
                 {
                     Transition(State::SELECT_GAME_ACTION, "Selecting a game action");
                 }
@@ -191,15 +195,57 @@ namespace Modelec
             }
         case State::SELECT_GAME_ACTION:
             {
-                if (action_executor_->IsEmpty())
+                if (action_executor_->IsFull())
                 {
-                    RCLCPP_INFO(get_logger(), "Missing box on robot, selecting TAKE mission");
+                    RCLCPP_INFO(get_logger(), "All box are present on robot, selecting FREE mission");
+                    Transition(State::FREE_MISSION, "Selecting FREE mission");
+                }
+                else if (action_executor_->IsEmpty())
+                {
+                    RCLCPP_INFO(get_logger(), "No box present on robot, selecting TAKE mission");
                     Transition(State::TAKE_MISSION, "Selecting TAKE mission");
                 }
                 else
                 {
-                    RCLCPP_INFO(get_logger(), "All box are present on robot, selecting FREE mission");
-                    Transition(State::FREE_MISSION, "Selecting FREE mission");
+                    auto pos = nav_->GetCurrentPos();
+                    auto closestBox = nav_->GetClosestObstacle<BoxObstacle>(pos);
+                    auto closestDeposite = nav_->GetClosestDepositeZone(pos);
+
+                    if (closestBox && closestDeposite)
+                    {
+                        double distToBox = Point::distance(Point(pos->x, pos->y, pos->theta),
+                                                          closestBox->GetPosition());
+                        double distToDeposite = Point::distance(Point(pos->x, pos->y, pos->theta),
+                                                               closestDeposite->GetPosition());
+
+                        if (distToBox < distToDeposite)
+                        {
+                            RCLCPP_INFO(get_logger(), "Choosing TAKE mission (dist to box: %.2f < dist to deposite: %.2f)",
+                                        distToBox, distToDeposite);
+                            Transition(State::TAKE_MISSION, "Selecting TAKE mission");
+                        }
+                        else
+                        {
+                            RCLCPP_INFO(get_logger(), "Choosing FREE mission (dist to deposite: %.2f < dist to box: %.2f)",
+                                        distToDeposite, distToBox);
+                            Transition(State::FREE_MISSION, "Selecting FREE mission");
+                        }
+                    }
+                    else if (closestBox)
+                    {
+                        RCLCPP_INFO(get_logger(), "Only box available, selecting TAKE mission");
+                        Transition(State::TAKE_MISSION, "Selecting TAKE mission");
+                    }
+                    else if (closestDeposite)
+                    {
+                        RCLCPP_INFO(get_logger(), "Only deposite available, selecting FREE mission");
+                        Transition(State::FREE_MISSION, "Selecting FREE mission");
+                    }
+                    else
+                    {
+                        RCLCPP_WARN(get_logger(), "No box or deposite available, cannot select mission!");
+                        Transition(State::STOP, "No missions available");
+                    }
                 }
             }
 

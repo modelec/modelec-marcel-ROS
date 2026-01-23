@@ -191,14 +191,14 @@ namespace Modelec
             }
         case State::SELECT_GAME_ACTION:
             {
-                if (action_executor_->IsEmpty() || action_executor_->HasOneBox())
+                if (!action_executor_->IsFull())
                 {
-                    RCLCPP_INFO(get_logger(), "No box on robot, selecting TAKE mission");
+                    RCLCPP_INFO(get_logger(), "Missing box on robot, selecting TAKE mission");
                     Transition(State::TAKE_MISSION, "Selecting TAKE mission");
                 }
                 else
                 {
-                    RCLCPP_INFO(get_logger(), "Box present on robot, selecting FREE mission");
+                    RCLCPP_INFO(get_logger(), "All box are present on robot, selecting FREE mission");
                     Transition(State::FREE_MISSION, "Selecting FREE mission");
                 }
             }

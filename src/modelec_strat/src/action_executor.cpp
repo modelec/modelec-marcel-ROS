@@ -228,6 +228,11 @@ namespace Modelec
         return box_obstacles_[0] == nullptr && box_obstacles_[1] == nullptr;
     }
 
+    bool ActionExecutor::IsFull() const
+    {
+        return box_obstacles_[0] != nullptr && box_obstacles_[1] != nullptr;
+    }
+
     bool ActionExecutor::HasBox(BaseAction::Front front) const
     {
         return box_obstacles_[front] != nullptr;

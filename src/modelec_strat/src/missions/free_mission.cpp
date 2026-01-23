@@ -53,9 +53,12 @@ namespace Modelec {
 
                 auto depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
 
-                if (nav_->GoToRotateFirst(depoPoint.GetTakePosition(dist), true, Pathfinding::FREE))
+                auto pos = depoPoint.GetTakePosition(dist);
+                pos.theta += front_ == BaseAction::FRONT ? M_PI : 0;
+
+                if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, front_ == BaseAction::FRONT))
                 {
-                    nav_->GoToRotateFirst(depoPoint.GetTakePosition(dist), true, Pathfinding::FREE | Pathfinding::OBSTACLE);
+                    nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT);
                 }
 
                 go_timeout_ = node_->now();
@@ -103,7 +106,10 @@ namespace Modelec {
             break;
         case GO_BACK:
             {
-                nav_->GoTo(target_deposite_zone_->GetPosition().GetTakePosition(500), true, Pathfinding::FREE | Pathfinding::OBSTACLE);
+                auto pos = target_deposite_zone_->GetPosition().GetTakePosition(500);
+                pos.theta += front_ == BaseAction::FRONT ? M_PI : 0;
+
+                nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE);
 
                 go_timeout_ = node_->now();
             }

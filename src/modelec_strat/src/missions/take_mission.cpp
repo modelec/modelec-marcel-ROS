@@ -50,12 +50,13 @@ namespace Modelec {
                 action_executor_->box_obstacles_[front_] = closestBox;
 
                 auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
+                pos.theta += (front_ == BaseAction::FRONT ? M_PI : 0);
 
-                if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL))
+                if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL, front_ == BaseAction::FRONT))
                 {
-                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL))
+                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL, front_ == BaseAction::FRONT))
                     {
-                        nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+                        nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT);
                     }
                 }
 
@@ -73,8 +74,9 @@ namespace Modelec {
                 }
 
                 auto pos = action_executor_->box_obstacles_[0]->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
+                pos.theta += (front_ == BaseAction::FRONT ? M_PI : 0);
 
-                nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE);
+                nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT);
 
                 go_timeout_ = node_->now();
             }

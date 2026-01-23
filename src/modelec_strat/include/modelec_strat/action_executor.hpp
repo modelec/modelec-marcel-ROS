@@ -47,6 +47,8 @@ namespace Modelec
 
         bool IsEmpty() const;
 
+        bool IsFull() const;
+
         bool HasBox(BaseAction::Front front) const;
 
         bool HasFrontBox() const;

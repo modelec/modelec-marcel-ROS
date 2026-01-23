@@ -47,16 +47,22 @@ namespace Modelec {
                 auto currPos = nav_->GetCurrentPos();
 
                 auto dist = std::clamp(Point::distance(Point(currPos->x, currPos->y, currPos->theta),
-                    nav_->GetClosestDepositeZone(nav_->GetCurrentPos())->GetPosition()), 0.0, 300.0);
+                    nav_->GetClosestDepositeZone(nav_->GetCurrentPos())->GetPosition()), 0.0, 200.0);
 
                 target_deposite_zone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), {}, true);
 
                 auto depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
 
                 auto pos = depoPoint.GetTakePosition(dist);
+
+                RCLCPP_INFO(
+                    node_->get_logger(),
+                    "FreeMission: position (%.2d, %.2d) with distance %.2f",
+                    pos.x, pos.y, dist);
+
                 pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
 
-                if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, front_ == BaseAction::FRONT))
+                if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, front_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {
                     nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT);
                 }
@@ -106,7 +112,11 @@ namespace Modelec {
             break;
         case GO_BACK:
             {
-                auto pos = target_deposite_zone_->GetPosition().GetTakePosition(500);
+                auto currPos = nav_->GetCurrentPos();
+
+                auto depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
+
+                auto pos = depoPoint.GetTakePosition(300);
                 pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
 
                 nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE);

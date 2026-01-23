@@ -52,9 +52,9 @@ namespace Modelec {
                 auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
                 pos.theta += (front_ == BaseAction::FRONT ? 0 : M_PI);
 
-                if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL, front_ == BaseAction::FRONT))
+                if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL, front_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {
-                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL, front_ == BaseAction::FRONT))
+                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL, front_ == BaseAction::FRONT) != Pathfinding::FREE)
                     {
                         nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT);
                     }

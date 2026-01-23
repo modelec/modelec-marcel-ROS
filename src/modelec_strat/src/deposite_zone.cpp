@@ -21,8 +21,7 @@ namespace Modelec
             {
                 for (auto takePos = TakeAngleElem->FirstChildElement("Angle"); takePos; takePos = takePos->NextSiblingElement("Angle"))
                 {
-                    double angle;
-                    takePos->QueryDoubleAttribute("value", &angle);
+                    double angle = takePos->DoubleText(0);
                     take_angle_.push_back(angle);
                 }
             }
@@ -48,8 +47,8 @@ namespace Modelec
         for (const auto& angle : take_angle_)
         {
             Point p = Point(
-                static_cast<int>(position_.x + dist * std::cos(angle)),
-                static_cast<int>(position_.y + dist * std::sin(angle)),
+                position_.x + dist * std::cos(angle),
+                position_.y + dist * std::sin(angle),
                 angle);
 
             double distance = p.distance(currentPos);

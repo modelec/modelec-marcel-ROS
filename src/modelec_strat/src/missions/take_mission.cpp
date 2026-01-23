@@ -50,7 +50,7 @@ namespace Modelec {
                 action_executor_->box_obstacles_[front_] = closestBox;
 
                 auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
-                pos.theta += (front_ == BaseAction::FRONT ? M_PI : 0);
+                pos.theta += (front_ == BaseAction::FRONT ? 0 : M_PI);
 
                 if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL, front_ == BaseAction::FRONT))
                 {
@@ -73,7 +73,7 @@ namespace Modelec {
                     break;
                 }
 
-                auto pos = action_executor_->box_obstacles_[0]->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
+                auto pos = action_executor_->box_obstacles_[front_]->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
                 pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
 
                 nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT);

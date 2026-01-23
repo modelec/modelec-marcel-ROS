@@ -79,7 +79,7 @@ namespace Modelec {
                 action_executor_->Free({{0, front_}, {1, front_}, {2, front_}, {3, front_}});
                 deploy_time_ = node_->now();
 
-                auto obs = action_executor_->box_obstacles_[0];
+                auto obs = action_executor_->box_obstacles_[front_];
                 action_executor_->box_obstacles_[front_] = nullptr;
 
                 auto pos = nav_->GetCurrentPos();

@@ -191,7 +191,7 @@ namespace Modelec
             }
         case State::SELECT_GAME_ACTION:
             {
-                if (!action_executor_->IsFull())
+                if (action_executor_->IsEmpty())
                 {
                     RCLCPP_INFO(get_logger(), "Missing box on robot, selecting TAKE mission");
                     Transition(State::TAKE_MISSION, "Selecting TAKE mission");

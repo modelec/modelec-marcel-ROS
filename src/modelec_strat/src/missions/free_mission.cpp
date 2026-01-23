@@ -54,7 +54,7 @@ namespace Modelec {
                 auto depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
 
                 auto pos = depoPoint.GetTakePosition(dist);
-                pos.theta += front_ == BaseAction::FRONT ? M_PI : 0;
+                pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
 
                 if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, front_ == BaseAction::FRONT))
                 {
@@ -107,7 +107,7 @@ namespace Modelec {
         case GO_BACK:
             {
                 auto pos = target_deposite_zone_->GetPosition().GetTakePosition(500);
-                pos.theta += front_ == BaseAction::FRONT ? M_PI : 0;
+                pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
 
                 nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE);
 

@@ -74,7 +74,7 @@ namespace Modelec {
                 }
 
                 auto pos = action_executor_->box_obstacles_[0]->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
-                pos.theta += (front_ == BaseAction::FRONT ? M_PI : 0);
+                pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
 
                 nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT);
 

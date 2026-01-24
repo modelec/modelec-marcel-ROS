@@ -74,7 +74,7 @@ namespace Modelec {
             break;
         case DOWN:
             {
-                action_executor_->Down(BaseAction::FRONT);
+                action_executor_->Down(front_);
                 deploy_time_ = node_->now();
             }
 
@@ -104,7 +104,7 @@ namespace Modelec {
             break;
         case UP:
             {
-                action_executor_->Up(BaseAction::FRONT);
+                action_executor_->Up(front_);
                 deploy_time_ = node_->now();
             }
 

@@ -49,7 +49,7 @@ namespace Modelec
 
         if (min_time_.has_value())
         {
-            if ((node_->now() - min_time_.value()).seconds() > 0.0)
+            if ((node_->now() - min_time_.value()).seconds() < 0.1)
             {
                 return;
             }

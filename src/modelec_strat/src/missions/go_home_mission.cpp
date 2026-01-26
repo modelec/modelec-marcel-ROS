@@ -18,6 +18,7 @@ namespace Modelec
         score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
 
         go_timeout_ = node_->now();
+        last_ask_waypoint_time_ = node_->now();
 
         status_ = MissionStatus::RUNNING;
 
@@ -34,14 +35,27 @@ namespace Modelec
     {
         if (!nav_->HasArrived())
         {
-            if ((node_->now() - go_timeout_).seconds() < 2)
+            if ((node_->now() - go_timeout_).seconds() < 2 && (node_->now() - last_ask_waypoint_time_).seconds() > 1)
             {
-                // nav_->AskWaypoint();
+                nav_->AskWaypoint();
+                last_ask_waypoint_time_ = node_->now();
                 return;
             }
             if ((node_->now() - go_timeout_).seconds() < 10)
             {
                 return;
+            }
+        }
+
+        if (min_time_.has_value())
+        {
+            if ((node_->now() - min_time_.value()).seconds() > 0.0)
+            {
+                return;
+            }
+            else
+            {
+                min_time_.reset();
             }
         }
 

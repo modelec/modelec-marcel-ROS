@@ -15,6 +15,8 @@ namespace Modelec {
         node_ = node;
 
         go_timeout_ = node_->now();
+        deploy_time_ = node_->now();
+        last_ask_waypoint_time_ = node_->now();
 
         status_ = MissionStatus::RUNNING;
 
@@ -38,14 +40,27 @@ namespace Modelec {
 
         if (!nav_->HasArrived())
         {
-            if ((node_->now() - go_timeout_).seconds() < 5)
+            if ((node_->now() - go_timeout_).seconds() < 2 && (node_->now() - last_ask_waypoint_time_).seconds() > 1)
             {
-                // nav_->AskWaypoint();
-                // return;
+                nav_->AskWaypoint();
+                last_ask_waypoint_time_ = node_->now();
+                return;
             }
             if ((node_->now() - go_timeout_).seconds() < 10)
             {
                 return;
+            }
+        }
+
+        if (min_time_.has_value())
+        {
+            if ((node_->now() - min_time_.value()).seconds() < 0.1)
+            {
+                return;
+            }
+            else
+            {
+                min_time_.reset();
             }
         }
 
@@ -68,7 +83,11 @@ namespace Modelec {
                 {
                     if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL, front_ == BaseAction::FRONT) != Pathfinding::FREE)
                     {
-                        nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT);
+                        if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT) != Pathfinding::FREE)
+                        {
+                            status_ = MissionStatus::FAILED;
+                            break;
+                        }
                     }
                 }
 
@@ -86,7 +105,11 @@ namespace Modelec {
                 auto pos = action_executor_->box_obstacles_[front_]->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
                 pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
 
-                nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT);
+                if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT) != Pathfinding::FREE)
+                {
+                    status_ = MissionStatus::FAILED;
+                    break;
+                }
 
                 go_timeout_ = node_->now();
             }
@@ -101,6 +124,7 @@ namespace Modelec {
             {
                 action_executor_->Take({{0, front_}, {1, front_}, {2, front_}, {3, front_}});
                 deploy_time_ = node_->now();
+                min_time_ = node_->now() + rclcpp::Duration::from_seconds(0.5);
             }
             break;
         case UP:

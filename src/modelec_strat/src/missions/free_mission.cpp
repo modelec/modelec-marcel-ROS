@@ -15,6 +15,8 @@ namespace Modelec {
         node_ = node;
 
         go_timeout_ = node_->now();
+        deploy_time_ = node_->now();
+        last_ask_waypoint_time_ = node_->now();
 
         status_ = MissionStatus::RUNNING;
 
@@ -38,16 +40,30 @@ namespace Modelec {
 
         if (!nav_->HasArrived())
         {
-            if ((node_->now() - go_timeout_).seconds() < 5)
+            if ((node_->now() - go_timeout_).seconds() < 2 && (node_->now() - last_ask_waypoint_time_).seconds() > 1)
             {
-                // nav_->AskWaypoint();
-                // return;
+                nav_->AskWaypoint();
+                last_ask_waypoint_time_ = node_->now();
+                return;
             }
             if ((node_->now() - go_timeout_).seconds() < 10)
             {
                 return;
             }
         }
+
+        if (min_time_.has_value())
+        {
+            if ((node_->now() - min_time_.value()).seconds() < 0.1)
+            {
+                return;
+            }
+            else
+            {
+                min_time_.reset();
+            }
+        }
+
 
 		auto step_ = steps_.front();
 		steps_.pop();
@@ -110,6 +126,8 @@ namespace Modelec {
                 obs->SetAtObjective(true);
 
                 nav_->GetPathfinding()->AddObstacle(obs);
+
+                min_time_ = node_->now() + rclcpp::Duration::from_seconds(0.5);
             }
             break;
         case UP:

@@ -41,5 +41,9 @@ namespace Modelec {
 
         rclcpp::Time go_timeout_;
         rclcpp::Time deploy_time_;
+
+        std::optional<rclcpp::Time> min_time_;
+
+        rclcpp::Time last_ask_waypoint_time_;
     };
 }

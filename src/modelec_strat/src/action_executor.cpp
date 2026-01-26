@@ -177,7 +177,7 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::Take(std::vector<std::pair<int, BaseAction::Front>> servos, bool force) {
+    void ActionExecutor::Take(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force) {
         if (action_done_ || force)
         {
             action_ = std::make_shared<TakeAction>(shared_from_this(), servos);
@@ -191,7 +191,7 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::Free(std::vector<std::pair<int, BaseAction::Front>> servos, bool force) {
+    void ActionExecutor::Free(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force) {
         if (action_done_ || force)
         {
             action_ = std::make_shared<FreeAction>(shared_from_this(), servos);

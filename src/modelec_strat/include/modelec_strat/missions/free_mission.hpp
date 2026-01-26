@@ -26,7 +26,7 @@ namespace Modelec {
             UP,
             GO_BACK,
             DONE,
-        } step_;
+        };
 
         BaseAction::Front front_;
 

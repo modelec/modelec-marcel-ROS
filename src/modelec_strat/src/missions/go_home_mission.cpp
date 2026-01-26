@@ -5,7 +5,7 @@
 namespace Modelec
 {
     GoHomeMission::GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const rclcpp::Time& start_time) :
-        step_(ROTATE_TO_HOME), status_(MissionStatus::READY), nav_(nav), start_time_(start_time)
+        status_(MissionStatus::READY), nav_(nav), start_time_(start_time)
     {
     }
 
@@ -20,7 +20,14 @@ namespace Modelec
         go_timeout_ = node_->now();
 
         status_ = MissionStatus::RUNNING;
-        step_ = ROTATE_TO_HOME;
+
+        std::queue<int> empty;
+        std::swap(steps_, empty);
+
+        steps_.push(ROTATE_TO_HOME);
+        steps_.push(GO_HOME);
+        steps_.push(GO_CLOSE);
+        steps_.push(DONE);
     }
 
     void GoHomeMission::Update()
@@ -37,6 +44,9 @@ namespace Modelec
                 return;
             }
         }
+
+        auto step_ = steps_.front();
+        steps_.pop();
 
         switch (step_)
         {
@@ -55,8 +65,6 @@ namespace Modelec
                 nav_->RotateTo(home_point_);
 
                 go_timeout_ = node_->now();
-
-                step_ = GO_HOME;
             }
             break;
         case GO_HOME:
@@ -71,23 +79,18 @@ namespace Modelec
                 }
 
                 go_timeout_ = node_->now();
-
-                step_ = GO_CLOSE;
             }
             break;
         case GO_CLOSE:
             {
-                if ((node_->now() - start_time_).seconds() < 94)
+                /*if ((node_->now() - start_time_).seconds() < 94)
                 {
                     break;
-                }
+                }*/
 
                 nav_->GoTo(home_point_, true);
 
                 go_timeout_ = node_->now();
-
-                step_ = DONE;
-
             }
             break;
         case DONE:

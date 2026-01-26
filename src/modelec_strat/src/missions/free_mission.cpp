@@ -6,7 +6,7 @@ namespace Modelec {
     FreeMission::FreeMission(const std::shared_ptr<NavigationHelper>& nav,
         const std::shared_ptr<ActionExecutor>& action_executor,
         BaseAction::Front front)
-     : step_(GO_TO_FREE), front_(front), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
+     : front_(front), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
     {
     }
 
@@ -17,7 +17,16 @@ namespace Modelec {
         go_timeout_ = node_->now();
 
         status_ = MissionStatus::RUNNING;
-        step_ = GO_TO_FREE;
+
+        std::queue<int> empty;
+        std::swap(steps_, empty);
+
+        steps_.push(GO_TO_FREE);
+        steps_.push(DOWN);
+        steps_.push(FREE);
+        steps_.push(UP);
+        steps_.push(GO_BACK);
+        steps_.push(DONE);
     }
 
     void FreeMission::Update()
@@ -39,6 +48,9 @@ namespace Modelec {
                 return;
             }
         }
+
+		auto step_ = steps_.front();
+		steps_.pop();
 
         switch (step_)
         {
@@ -69,16 +81,12 @@ namespace Modelec {
 
                 go_timeout_ = node_->now();
             }
-
-            step_ = FREE;
             break;
         case DOWN:
             {
                 action_executor_->Down(front_);
                 deploy_time_ = node_->now();
             }
-
-            step_ = FREE;
             break;
         case FREE:
             {
@@ -99,16 +107,12 @@ namespace Modelec {
 
                 nav_->GetPathfinding()->AddObstacle(obs);
             }
-
-            step_ = UP;
             break;
         case UP:
             {
                 action_executor_->Up(front_);
                 deploy_time_ = node_->now();
             }
-
-            step_ = GO_BACK;
             break;
         case GO_BACK:
             {
@@ -123,8 +127,6 @@ namespace Modelec {
 
                 go_timeout_ = node_->now();
             }
-
-            step_ = DONE;
             break;
         case DONE:
             {

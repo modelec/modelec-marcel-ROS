@@ -26,7 +26,7 @@ namespace Modelec {
             TAKE,
             UP,
             DONE,
-        } step_;
+        };
 
         BaseAction::Front front_;
 

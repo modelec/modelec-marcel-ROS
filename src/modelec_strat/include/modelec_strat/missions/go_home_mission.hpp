@@ -20,14 +20,11 @@ namespace Modelec
     private:
         enum Step
         {
-            GO_FRONT,
-            AWAIT_95S,
-            GO_HOME,
-            DONE,
-
             ROTATE_TO_HOME,
+            GO_HOME,
             GO_CLOSE,
-        } step_;
+            DONE,
+        };
 
         MissionStatus status_;
         std::shared_ptr<NavigationHelper> nav_;

@@ -6,7 +6,7 @@ namespace Modelec {
     TakeMission::TakeMission(const std::shared_ptr<NavigationHelper>& nav,
         const std::shared_ptr<ActionExecutor>& action_executor,
         BaseAction::Front front)
-     : step_(GO_TO_TAKE), front_(front), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
+     : front_(front), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
     {
     }
 
@@ -17,7 +17,16 @@ namespace Modelec {
         go_timeout_ = node_->now();
 
         status_ = MissionStatus::RUNNING;
-        step_ = GO_TO_TAKE;
+
+        std::queue<int> empty;
+        std::swap(steps_, empty);
+
+        steps_.push(GO_TO_TAKE);
+        steps_.push(GO_TO_TAKE_CLOSE);
+        steps_.push(DOWN);
+        steps_.push(TAKE);
+        steps_.push(UP);
+        steps_.push(DONE);
     }
 
     void TakeMission::Update()
@@ -39,6 +48,9 @@ namespace Modelec {
                 return;
             }
         }
+
+        auto step_ = steps_.front();
+        steps_.pop();
 
         switch (step_)
         {
@@ -62,8 +74,6 @@ namespace Modelec {
 
                 go_timeout_ = node_->now();
             }
-
-            step_ = GO_TO_TAKE_CLOSE;
             break;
         case GO_TO_TAKE_CLOSE:
             {
@@ -80,32 +90,24 @@ namespace Modelec {
 
                 go_timeout_ = node_->now();
             }
-
-            step_ = DOWN;
             break;
         case DOWN:
             {
                 action_executor_->Down(front_);
                 deploy_time_ = node_->now();
             }
-
-            step_ = TAKE;
             break;
         case TAKE:
             {
                 action_executor_->Take({{0, front_}, {1, front_}, {2, front_}, {3, front_}});
                 deploy_time_ = node_->now();
             }
-
-            step_ = UP;
             break;
         case UP:
             {
                 action_executor_->Up(front_);
                 deploy_time_ = node_->now();
             }
-
-            step_ = DONE;
             break;
         case DONE:
             {

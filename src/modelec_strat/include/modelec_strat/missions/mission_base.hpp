@@ -24,5 +24,8 @@ namespace Modelec
         virtual void Clear() = 0;
         virtual MissionStatus GetStatus() const = 0;
         virtual std::string GetName() const = 0;
+
+    protected:
+        std::queue<int> steps_;
     };
 }

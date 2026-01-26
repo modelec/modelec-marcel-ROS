@@ -76,7 +76,11 @@ namespace Modelec {
 
                 if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, front_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {
-                    nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT);
+                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT) != Pathfinding::FREE)
+                    {
+                        status_ = MissionStatus::FAILED;
+                        return;
+                    }
                 }
 
                 go_timeout_ = node_->now();
@@ -123,7 +127,11 @@ namespace Modelec {
                 auto pos = depoPoint.GetTakePosition(300);
                 pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
 
-                nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE);
+                if (nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE) != Pathfinding::FREE)
+                {
+                    status_ = MissionStatus::FAILED;
+                    return;
+                }
 
                 go_timeout_ = node_->now();
             }

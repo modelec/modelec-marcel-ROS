@@ -67,6 +67,7 @@ namespace Modelec
         }
 
         game_action_sequence_.push(State::TAKE_MISSION);
+		static_strat_ = true;
     }
 
     void StratFMS::Init()
@@ -193,13 +194,11 @@ namespace Modelec
         case State::SELECT_GAME_ACTION:
             {
 
-				if (!game_action_sequence_.empty() || static_strat_) {
+				if (static_strat_) {
 					if (game_action_sequence_.empty()) {
 						Transition(State::STOP, "No more game actions in sequence");
 						return;
 					}
-
-					static_strat_ = true;
 
 					auto next_action = game_action_sequence_.front();
 					game_action_sequence_.pop();

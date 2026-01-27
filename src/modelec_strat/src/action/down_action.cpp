@@ -50,7 +50,7 @@ void Modelec::DownAction::Next()
 
                 msg.items[3].id = 3;
                 msg.items[3].start_angle = 2.7;
-                msg.items[3].end_angle = 3;
+                msg.items[3].end_angle = 2.9;
                 msg.items[3].duration_s = 1;
             }
 

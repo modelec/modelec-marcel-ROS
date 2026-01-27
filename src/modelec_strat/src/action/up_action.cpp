@@ -49,8 +49,8 @@ void Modelec::UPAction::Next()
                 msg.items[2].duration_s = 1;
 
                 msg.items[3].id = 3;
-                msg.items[3].start_angle = 3;
-                msg.items[3].end_angle = 2.5;
+                msg.items[3].start_angle = 2.9;
+                msg.items[3].end_angle = 2.7;
                 msg.items[3].duration_s = 1;
             }
 

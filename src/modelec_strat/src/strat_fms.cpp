@@ -196,7 +196,7 @@ namespace Modelec
 
 				if (static_strat_) {
 					if (game_action_sequence_.empty()) {
-						Transition(State::STOP, "No more game actions in sequence");
+						Transition(State::DO_GO_HOME, "No more game actions in sequence");
 						return;
 					}
 

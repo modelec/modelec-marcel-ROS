@@ -45,8 +45,8 @@ void Modelec::FreeAction::Next()
             for (size_t i = 0; i < servos_.size(); i++)
             {
                 msg.items[i].id = servos_[i].first + (servos_[i].second ? 4 : 12);
-                msg.items[i].start_angle = servos_[i].second ? 0.8 : 0;
-                msg.items[i].end_angle = servos_[i].second ? 2.5 : 0;
+                msg.items[i].start_angle = servos_[i].second ? 2.7 : 0;
+                msg.items[i].end_angle = servos_[i].second ? 0.8 : 0;
                 msg.items[i].duration_s = 0.5;
             }
 

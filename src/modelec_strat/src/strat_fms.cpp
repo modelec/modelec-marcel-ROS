@@ -279,6 +279,12 @@ namespace Modelec
                 current_mission_.reset();
                 Transition(State::SELECT_MISSION, "Take done");
             }
+			else if (current_mission_->GetStatus() == MissionStatus::FAILED)
+            {
+                current_mission_.reset();
+                RCLCPP_ERROR(get_logger(), "Take mission failed!");
+                Transition(State::SELECT_MISSION, "Take mission failed");
+            }
             break;
 
         case State::FREE_MISSION:
@@ -309,6 +315,12 @@ namespace Modelec
                 current_mission_.reset();
                 Transition(State::SELECT_MISSION, "Free done");
             }
+			else if (current_mission_->GetStatus() == MissionStatus::FAILED)
+            {
+                current_mission_.reset();
+                RCLCPP_ERROR(get_logger(), "Free mission failed!");
+                Transition(State::SELECT_MISSION, "Free mission failed");
+            }
             break;
 
         case State::DO_GO_HOME:
@@ -322,6 +334,12 @@ namespace Modelec
             {
                 current_mission_.reset();
                 Transition(State::STOP, "Cleanup done");
+            }
+			else if (current_mission_->GetStatus() == MissionStatus::FAILED)
+            {
+                current_mission_.reset();
+                RCLCPP_ERROR(get_logger(), "Go Home mission failed!");
+                Transition(State::STOP, "Go Home mission failed");
             }
             break;
 

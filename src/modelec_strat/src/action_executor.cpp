@@ -96,12 +96,10 @@ namespace Modelec
                     }
                     else if (msg->buttons[3] == 1) // X button
                     {
-						RCLCPP_WARN(node_->get_logger(), "Manual Take action triggered");
                         Take({{0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT}});
                     }
                     else if (msg->buttons[4] == 1) // Y button
                     {
-						RCLCPP_WARN(node_->get_logger(), "Manual Free action triggered");
                         Free({{0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT}});
                     }
                 }

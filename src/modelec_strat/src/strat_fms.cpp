@@ -177,7 +177,7 @@ namespace Modelec
 
                 else if (elapsed.seconds() < 60 && !action_executor_->IsEmpty())
                 {
-                    Transition(State::FREE_MISSION, "Selecting a game action");
+                    Transition(State::FREE_MISSION, "No Time left, freeing boxes");
                 }
                 else if (elapsed.seconds() < 80)
                 {

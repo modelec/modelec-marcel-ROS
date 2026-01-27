@@ -67,9 +67,6 @@ namespace Modelec
         }
 
         game_action_sequence_.push(State::TAKE_MISSION);
-        game_action_sequence_.push(State::FREE_MISSION);
-        game_action_sequence_.push(State::TAKE_MISSION);
-        game_action_sequence_.push(State::FREE_MISSION);
     }
 
     void StratFMS::Init()
@@ -195,6 +192,22 @@ namespace Modelec
             }
         case State::SELECT_GAME_ACTION:
             {
+
+				if (!game_action_sequence_.empty() || static_strat_) {
+					if (!game_action_sequence_.empty()) {
+						Transition(State::STOP, "No more game actions in sequence");
+						return;
+					}
+
+					static_strat_ = true;
+
+					auto next_action = game_action_sequence_.front();
+					game_action_sequence_.pop();
+
+					Transition(next_action, "Selecting next game action from sequence");
+					return;
+				}
+
                 if (action_executor_->IsFull())
                 {
                     RCLCPP_INFO(get_logger(), "All box are present on robot, selecting FREE mission");

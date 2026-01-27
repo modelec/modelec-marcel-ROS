@@ -62,6 +62,7 @@ namespace Modelec
         int team_id_ = 0;
 
         std::queue<State> game_action_sequence_;
+        bool static_strat_ = false;
 
         std::shared_ptr<NavigationHelper> nav_;
         std::shared_ptr<ActionExecutor> action_executor_;

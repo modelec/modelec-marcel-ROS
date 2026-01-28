@@ -260,7 +260,7 @@ namespace Modelec
 
     void ActionExecutor::RotateArm(BaseAction::Front front, bool force, bool rotated)
     {
-        if (action_done_ || force)
+        if ((action_done_ && arm_pos_[front].rotated != rotated) || force)
         {
             action_ = std::make_shared<RotateArmAction>(shared_from_this(), front, rotated);
             if (action_done_)

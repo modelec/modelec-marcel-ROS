@@ -262,7 +262,7 @@ namespace Modelec
             {5, 0}
         };*/
 
-        servo_value_ = {
+        /*servo_value_ = {
             {0, 2.95},
             {1, 0.93},
             {2, 0},
@@ -282,7 +282,7 @@ namespace Modelec
 
 		data += "\n";
 
-        SendToPCB(data);
+        SendToPCB(data);*/
 
         /*relay_value_ = {
             {1, false},

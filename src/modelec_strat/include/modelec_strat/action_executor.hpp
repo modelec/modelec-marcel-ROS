@@ -37,6 +37,8 @@ namespace Modelec
 
         void ToggleArm(BaseAction::Front front, bool force = false);
 
+        void RotateArm(BaseAction::Front front, bool force = false, bool rotated = false);
+
         void Take(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force = false);
 
         void Free(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force = false);

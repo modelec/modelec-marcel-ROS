@@ -5,6 +5,7 @@
 #include "modelec_strat/action/free_action.hpp"
 #include "modelec_strat/action/take_action.hpp"
 #include "modelec_strat/action/toggle_servo_action.hpp"
+#include "modelec_strat/action/rotate_arm_action.hpp"
 #include "modelec_utils/utils.hpp"
 
 namespace Modelec
@@ -105,17 +106,17 @@ namespace Modelec
                     }
                     else if (msg->buttons[6] == 1) // L1 button
                     {
-                        // ROTATE BACK
+                        RotateArm(BaseAction::BACK, false, !arm_pos_[BaseAction::BACK].rotated);
                     }
                     else if (msg->buttons[7] == 1) // R1 button
                     {
-                        // ROTATE FRONT
+                        RotateArm(BaseAction::FRONT, false, !arm_pos_[BaseAction::FRONT].rotated);
                     }
                     else if (msg->buttons[14] == 1) // LT button
                     {
                         // IDK
                     }
-                    else if (msg->buttons[15] == 1) // LT button
+                    else if (msg->buttons[15] == 1) // LR button
                     {
                         // IDK
                     }
@@ -254,6 +255,23 @@ namespace Modelec
             {
                 Down(front, force);
             }
+        }
+    }
+
+    void ActionExecutor::RotateArm(BaseAction::Front front, bool force, bool rotated)
+    {
+        if (action_done_ || force)
+        {
+            action_ = std::make_shared<RotateArmAction>(shared_from_this(), front, rotated);
+            if (action_done_)
+            {
+                step_running_ = 0;
+            }
+            action_done_ = false;
+
+            arm_pos_[front].rotated = rotated;
+
+            Update();
         }
     }
 

@@ -4,6 +4,7 @@ string DELIMITER = ";"
 string UP = "UP"
 string DOWN = "DOWN"
 string TOGGLE_ARM = "TOGGLE_ARM"
+string ROTATE_ARM = "ROTATE_ARM"
 string TAKE = "TAKE"
 string FREE = "FREE"
 string TOGGLE_SERVO = "TOGGLE_SERVO"
@@ -21,6 +22,7 @@ int32 THERMO_DEPLOY_STEP = 5
 int32 THERMO_UNDEPLOY_STEP = 6
 int32 TOGGLE_SERVO_STEP = 7
 int32 TOGGLE_ARM_STEP = 8
+int32 ROTATE_ARM_STEP = 9
 int32 MAX_DEPLOY_STEP = 99
 
 int32[] steps

@@ -60,17 +60,17 @@ namespace Modelec
 
         bool HasArrived() const;
 
-        bool RotateTo(const PosMsg::SharedPtr& pos);
-        bool RotateTo(const Point& pos);
+        bool RotateTo(const PosMsg::SharedPtr& pos, bool front = true);
+        bool RotateTo(const Point& pos, bool front = true);
         void Rotate(double angle);
 
         int GoTo(const PosMsg::SharedPtr& goal, bool isClose = false, int collisionMask = Pathfinding::FREE);
         int GoTo(int x, int y, double theta, bool isClose = false, int collisionMask = Pathfinding::FREE);
         int GoTo(const Point& goal, bool isClose = false, int collisionMask = Pathfinding::FREE);
 
-        int GoToRotateFirst(const PosMsg::SharedPtr& goal, bool isClose = false, int collisionMask = Pathfinding::FREE);
-        int GoToRotateFirst(int x, int y, double theta, bool isClose = false, int collisionMask = Pathfinding::FREE);
-        int GoToRotateFirst(const Point& goal, bool isClose = false, int collisionMask = Pathfinding::FREE);
+        int GoToRotateFirst(const PosMsg::SharedPtr& goal, bool isClose = false, int collisionMask = Pathfinding::FREE, bool front = true);
+        int GoToRotateFirst(int x, int y, double theta, bool isClose = false, int collisionMask = Pathfinding::FREE, bool front = true);
+        int GoToRotateFirst(const Point& goal, bool isClose = false, int collisionMask = Pathfinding::FREE, bool front = true);
 
         int CanGoTo(const PosMsg::SharedPtr& goal, bool isClose = false, int collisionMask = Pathfinding::FREE);
         int CanGoTo(int x, int y, double theta, bool isClose = false, int collisionMask = Pathfinding::FREE);

@@ -45,7 +45,7 @@ namespace Modelec
             }
         }
 
-        return Point(x_, y_, optimizedAngle);
+        return {x_, y_, optimizedAngle};
     }
 
     std::vector<Point> BoxObstacle::GetAllPossiblePositions() const

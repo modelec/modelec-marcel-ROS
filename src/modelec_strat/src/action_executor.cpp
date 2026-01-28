@@ -96,11 +96,11 @@ namespace Modelec
                     }
                     else if (msg->buttons[3] == 1) // X button
                     {
-                        Take({{0, true}, {1, true}, {2, true}, {3, true}});
+                        Take({{0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT}});
                     }
                     else if (msg->buttons[4] == 1) // Y button
                     {
-                        Free({{0, true}, {1, true}, {2, true}, {3, true}});
+                        Free({{0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT}});
                     }
                 }
             });
@@ -177,7 +177,7 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::Take(std::vector<std::pair<int, bool>> servos, bool force) {
+    void ActionExecutor::Take(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force) {
         if (action_done_ || force)
         {
             action_ = std::make_shared<TakeAction>(shared_from_this(), servos);
@@ -191,7 +191,7 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::Free(std::vector<std::pair<int, bool>> servos, bool force) {
+    void ActionExecutor::Free(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force) {
         if (action_done_ || force)
         {
             action_ = std::make_shared<FreeAction>(shared_from_this(), servos);
@@ -221,5 +221,35 @@ namespace Modelec
     {
         servo_move_pub_->publish(msg);
         step_running_ += msg.items.size();
+    }
+
+    bool ActionExecutor::IsEmpty() const
+    {
+        return box_obstacles_[0] == nullptr && box_obstacles_[1] == nullptr;
+    }
+
+    bool ActionExecutor::IsFull() const
+    {
+        return box_obstacles_[0] != nullptr && box_obstacles_[1] != nullptr;
+    }
+
+    bool ActionExecutor::HasBox(BaseAction::Front front) const
+    {
+        return box_obstacles_[front] != nullptr;
+    }
+
+    bool ActionExecutor::HasFrontBox() const
+    {
+        return HasBox(BaseAction::FRONT);
+    }
+
+    bool ActionExecutor::HasBackBox() const
+    {
+        return HasBox(BaseAction::BACK);
+    }
+
+    bool ActionExecutor::HasOneBox() const
+    {
+        return HasFrontBox() != HasBackBox();
     }
 }

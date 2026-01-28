@@ -446,6 +446,10 @@ namespace Modelec
 
                 relay_move_res_pub_->publish(relay_msg);
             }
+            else if (tokens[1] == "TIR")
+            {
+                // Do nothing for now
+            }
             else
             {
                 RCLCPP_WARN(this->get_logger(), "Unknown message format for OK response: '%s'", trim(msg).c_str());

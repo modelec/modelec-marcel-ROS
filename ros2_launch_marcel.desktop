@@ -2,7 +2,7 @@
 Type=Application
 Name=Lancer ROS 2
 Comment=Lance le système ROS 2 avec GUI
-Exec=/home/modelec/modelec-marcel-ROS/start_ros2.sh with_joy:=false
+Exec=/home/modelec/Modelec-ROS2/start_ros2.sh with_joy:=false
 Icon=utilities-terminal
 Terminal=true
 Categories=Utility;

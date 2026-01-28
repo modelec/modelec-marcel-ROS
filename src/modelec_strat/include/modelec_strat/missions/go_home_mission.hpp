@@ -20,14 +20,11 @@ namespace Modelec
     private:
         enum Step
         {
-            GO_FRONT,
-            AWAIT_95S,
-            GO_HOME,
-            DONE,
-
             ROTATE_TO_HOME,
+            GO_HOME,
             GO_CLOSE,
-        } step_;
+            DONE,
+        };
 
         MissionStatus status_;
         std::shared_ptr<NavigationHelper> nav_;
@@ -38,5 +35,9 @@ namespace Modelec
         rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr score_pub_;
         int mission_score_ = 0;
         rclcpp::Time go_timeout_;
+
+        std::optional<rclcpp::Time> min_time_;
+
+        rclcpp::Time last_ask_waypoint_time_;
     };
 }

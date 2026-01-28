@@ -67,9 +67,10 @@ namespace Modelec
         }
 
         game_action_sequence_.push(State::TAKE_MISSION);
-        game_action_sequence_.push(State::FREE_MISSION);
         game_action_sequence_.push(State::TAKE_MISSION);
         game_action_sequence_.push(State::FREE_MISSION);
+        game_action_sequence_.push(State::FREE_MISSION);
+		static_strat_ = true;
     }
 
     void StratFMS::Init()
@@ -145,8 +146,8 @@ namespace Modelec
 
                 action_executor_->Up(BaseAction::Front::BOTH, true);
                 action_executor_->Free({
-                    {0, true}, {1, true}, {2, true}, {3, true},
-                    {0, false}, {1, false}, {2, false}, {3, false},
+                    {0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT},
+                    {0, BaseAction::BACK}, {1, BaseAction::BACK}, {2, BaseAction::BACK}, {3, BaseAction::BACK},
                 }, true);
 
                 Transition(State::WAIT_START, "System ready");
@@ -178,7 +179,11 @@ namespace Modelec
                     Transition(State::STOP, "All missions done");
                 }
 
-                else if (elapsed.seconds() < 70)
+                else if (elapsed.seconds() > 60 && !action_executor_->IsEmpty())
+                {
+                    Transition(State::FREE_MISSION, "No Time left, freeing boxes");
+                }
+                else if (elapsed.seconds() < 80)
                 {
                     Transition(State::SELECT_GAME_ACTION, "Selecting a game action");
                 }
@@ -191,15 +196,74 @@ namespace Modelec
             }
         case State::SELECT_GAME_ACTION:
             {
-                if (game_action_sequence_.empty())
+
+				if (static_strat_) {
+					if (game_action_sequence_.empty()) {
+						Transition(State::DO_GO_HOME, "No more game actions in sequence");
+						return;
+					}
+
+					auto next_action = game_action_sequence_.front();
+					game_action_sequence_.pop();
+
+					Transition(next_action, "Selecting next game action from sequence");
+					return;
+				}
+
+
+                // TODO : If close to border, do the side mission (thermometre)
+
+                if (action_executor_->IsFull())
                 {
-                    Transition(State::DO_GO_HOME, "No more game actions");
+                    RCLCPP_INFO(get_logger(), "All box are present on robot, selecting FREE mission");
+                    Transition(State::FREE_MISSION, "Selecting FREE mission");
+                }
+                else if (action_executor_->IsEmpty())
+                {
+                    RCLCPP_INFO(get_logger(), "No box present on robot, selecting TAKE mission");
+                    Transition(State::TAKE_MISSION, "Selecting TAKE mission");
                 }
                 else
                 {
-                    auto action = game_action_sequence_.front();
-                    game_action_sequence_.pop();
-                    Transition(action, "Selected game action");
+                    auto pos = nav_->GetCurrentPos();
+                    auto closestBox = nav_->GetClosestObstacle<BoxObstacle>(pos);
+                    auto closestDeposite = nav_->GetClosestDepositeZone(pos);
+
+                    if (closestBox && closestDeposite)
+                    {
+                        double distToBox = Point::distance(Point(pos->x, pos->y, pos->theta),
+                                                          closestBox->GetPosition());
+                        double distToDeposite = Point::distance(Point(pos->x, pos->y, pos->theta),
+                                                               closestDeposite->GetPosition());
+
+                        if (distToBox < distToDeposite)
+                        {
+                            RCLCPP_INFO(get_logger(), "Choosing TAKE mission (dist to box: %.2f < dist to deposite: %.2f)",
+                                        distToBox, distToDeposite);
+                            Transition(State::TAKE_MISSION, "Selecting TAKE mission");
+                        }
+                        else
+                        {
+                            RCLCPP_INFO(get_logger(), "Choosing FREE mission (dist to deposite: %.2f < dist to box: %.2f)",
+                                        distToDeposite, distToBox);
+                            Transition(State::FREE_MISSION, "Selecting FREE mission");
+                        }
+                    }
+                    else if (closestBox)
+                    {
+                        RCLCPP_INFO(get_logger(), "Only box available, selecting TAKE mission");
+                        Transition(State::TAKE_MISSION, "Selecting TAKE mission");
+                    }
+                    else if (closestDeposite)
+                    {
+                        RCLCPP_INFO(get_logger(), "Only deposite available, selecting FREE mission");
+                        Transition(State::FREE_MISSION, "Selecting FREE mission");
+                    }
+                    else
+                    {
+                        RCLCPP_WARN(get_logger(), "No box or deposite available, cannot select mission!");
+                        Transition(State::STOP, "No missions available");
+                    }
                 }
             }
 
@@ -207,8 +271,25 @@ namespace Modelec
         case State::TAKE_MISSION:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<TakeMission>(nav_, action_executor_);
-                current_mission_->Start(shared_from_this());
+                if (action_executor_->HasFrontBox())
+                {
+                    if (action_executor_->HasBackBox())
+                    {
+                        RCLCPP_WARN(get_logger(), "Both front and back box obstacles are occupied!");
+                        current_mission_.reset();
+                        Transition(State::SELECT_MISSION, "Cannot take box, both sides occupied");
+                        break;
+                    }
+
+                    RCLCPP_INFO(get_logger(), "Front box obstacle is occupied, taking from back");
+                    current_mission_ = std::make_unique<TakeMission>(nav_, action_executor_, BaseAction::BACK);
+                    current_mission_->Start(shared_from_this());
+                }
+                else
+                {
+                    current_mission_ = std::make_unique<TakeMission>(nav_, action_executor_, BaseAction::FRONT);
+                    current_mission_->Start(shared_from_this());
+                }
             }
             current_mission_->Update();
             if (current_mission_->GetStatus() == MissionStatus::DONE)
@@ -216,19 +297,47 @@ namespace Modelec
                 current_mission_.reset();
                 Transition(State::SELECT_MISSION, "Take done");
             }
+			else if (current_mission_->GetStatus() == MissionStatus::FAILED)
+            {
+                current_mission_.reset();
+                RCLCPP_ERROR(get_logger(), "Take mission failed!");
+                Transition(State::SELECT_MISSION, "Take mission failed");
+            }
             break;
 
         case State::FREE_MISSION:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<FreeMission>(nav_, action_executor_);
-                current_mission_->Start(shared_from_this());
+                if (!action_executor_->HasFrontBox())
+                {
+                    if (!action_executor_->HasBackBox())
+                    {
+                        RCLCPP_WARN(get_logger(), "Both front and back box obstacles are free!");
+                        Transition(State::SELECT_MISSION, "Cannot free box, both sides empty");
+                        break;
+                    }
+
+                    RCLCPP_INFO(get_logger(), "Front box obstacle is occupied, taking from back");
+                    current_mission_ = std::make_unique<FreeMission>(nav_, action_executor_, BaseAction::BACK);
+                    current_mission_->Start(shared_from_this());
+                }
+                else
+                {
+                    current_mission_ = std::make_unique<FreeMission>(nav_, action_executor_, BaseAction::FRONT);
+                    current_mission_->Start(shared_from_this());
+                }
             }
             current_mission_->Update();
             if (current_mission_->GetStatus() == MissionStatus::DONE)
             {
                 current_mission_.reset();
                 Transition(State::SELECT_MISSION, "Free done");
+            }
+			else if (current_mission_->GetStatus() == MissionStatus::FAILED)
+            {
+                current_mission_.reset();
+                RCLCPP_ERROR(get_logger(), "Free mission failed!");
+                Transition(State::SELECT_MISSION, "Free mission failed");
             }
             break;
 
@@ -243,6 +352,12 @@ namespace Modelec
             {
                 current_mission_.reset();
                 Transition(State::STOP, "Cleanup done");
+            }
+			else if (current_mission_->GetStatus() == MissionStatus::FAILED)
+            {
+                current_mission_.reset();
+                RCLCPP_ERROR(get_logger(), "Go Home mission failed!");
+                Transition(State::STOP, "Go Home mission failed");
             }
             break;
 

@@ -35,15 +35,27 @@ namespace Modelec
 
         void Up(BaseAction::Front front, bool force = false);
 
-        void Take(std::vector<std::pair<int, bool>> servos, bool force = false);
+        void Take(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force = false);
 
-        void Free(std::vector<std::pair<int, bool>> servos, bool force = false);
+        void Free(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force = false);
 
         void MoveServoTimed(const modelec_interfaces::msg::ActionServoTimedArray& msg);
 
         void MoveServo(const modelec_interfaces::msg::ActionServoPosArray& msg);
 
         std::array<std::shared_ptr<BoxObstacle>, 2> box_obstacles_;
+
+        bool IsEmpty() const;
+
+        bool IsFull() const;
+
+        bool HasBox(BaseAction::Front front) const;
+
+        bool HasFrontBox() const;
+
+        bool HasBackBox() const;
+
+        bool HasOneBox() const;
 
     protected:
         rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_pub_;

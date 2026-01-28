@@ -5,7 +5,7 @@
 namespace Modelec
 {
     GoHomeMission::GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const rclcpp::Time& start_time) :
-        step_(ROTATE_TO_HOME), status_(MissionStatus::READY), nav_(nav), start_time_(start_time)
+        status_(MissionStatus::READY), nav_(nav), start_time_(start_time)
     {
     }
 
@@ -18,18 +18,27 @@ namespace Modelec
         score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
 
         go_timeout_ = node_->now();
+        last_ask_waypoint_time_ = node_->now();
 
         status_ = MissionStatus::RUNNING;
-        step_ = ROTATE_TO_HOME;
+
+        std::queue<int> empty;
+        std::swap(steps_, empty);
+
+        steps_.push(ROTATE_TO_HOME);
+        steps_.push(GO_HOME);
+        steps_.push(GO_CLOSE);
+        steps_.push(DONE);
     }
 
     void GoHomeMission::Update()
     {
         if (!nav_->HasArrived())
         {
-            if ((node_->now() - go_timeout_).seconds() < 2)
+            if ((node_->now() - go_timeout_).seconds() < 2 && (node_->now() - last_ask_waypoint_time_).seconds() > 1)
             {
-                // nav_->AskWaypoint();
+                nav_->AskWaypoint();
+                last_ask_waypoint_time_ = node_->now();
                 return;
             }
             if ((node_->now() - go_timeout_).seconds() < 10)
@@ -37,6 +46,21 @@ namespace Modelec
                 return;
             }
         }
+
+        if (min_time_.has_value())
+        {
+            if ((node_->now() - min_time_.value()).seconds() < 0.1)
+            {
+                return;
+            }
+            else
+            {
+                min_time_.reset();
+            }
+        }
+
+        auto step_ = steps_.front();
+        steps_.pop();
 
         switch (step_)
         {
@@ -55,8 +79,6 @@ namespace Modelec
                 nav_->RotateTo(home_point_);
 
                 go_timeout_ = node_->now();
-
-                step_ = GO_HOME;
             }
             break;
         case GO_HOME:
@@ -71,23 +93,18 @@ namespace Modelec
                 }
 
                 go_timeout_ = node_->now();
-
-                step_ = GO_CLOSE;
             }
             break;
         case GO_CLOSE:
             {
-                if ((node_->now() - start_time_).seconds() < 94)
+                /*if ((node_->now() - start_time_).seconds() < 94)
                 {
                     break;
-                }
+                }*/
 
                 nav_->GoTo(home_point_, true);
 
                 go_timeout_ = node_->now();
-
-                step_ = DONE;
-
             }
             break;
         case DONE:

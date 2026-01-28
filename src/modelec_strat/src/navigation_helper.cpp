@@ -286,11 +286,11 @@ namespace Modelec
         return waypoint_queue_.empty() && waypoints_.back().reached;
     }
 
-    bool NavigationHelper::RotateTo(const PosMsg::SharedPtr& pos)
+    bool NavigationHelper::RotateTo(const PosMsg::SharedPtr& pos, bool front)
     {
         double angle = std::atan2(pos->y - current_pos_->y, pos->x - current_pos_->x);
 
-        if (std::abs(angle - current_pos_->theta) > M_PI / 3)
+        if (std::abs(angle - (current_pos_->theta + (front ? 0 : M_PI))) > M_PI / 4)
         {
             Rotate(angle);
             return true;
@@ -298,11 +298,11 @@ namespace Modelec
         return false;
     }
 
-    bool NavigationHelper::RotateTo(const Point& pos)
+    bool NavigationHelper::RotateTo(const Point& pos, bool front)
     {
         double angle = std::atan2(pos.y - current_pos_->y, pos.x - current_pos_->x);
 
-        if (std::abs(angle - current_pos_->theta) > M_PI / 4)
+        if (std::abs(angle - (current_pos_->theta + (front ? 0 : M_PI))) > M_PI / 4)
         {
             Rotate(angle);
             return true;
@@ -364,7 +364,7 @@ namespace Modelec
         return GoTo(goal.x, goal.y, goal.theta, isClose, collisionMask);
     }
 
-    int NavigationHelper::GoToRotateFirst(const PosMsg::SharedPtr& goal, bool isClose, int collisionMask)
+    int NavigationHelper::GoToRotateFirst(const PosMsg::SharedPtr& goal, bool isClose, int collisionMask, bool front)
     {
         last_go_to_ = {goal, isClose, collisionMask};
 
@@ -376,7 +376,7 @@ namespace Modelec
         }
 
         auto p = Point(wl[0].x, wl[0].y, wl[0].theta);
-        if (RotateTo(p))
+        if (RotateTo(p, front))
         {
             await_rotate_ = true;
 
@@ -403,18 +403,18 @@ namespace Modelec
         return res;
     }
 
-    int NavigationHelper::GoToRotateFirst(int x, int y, double theta, bool isClose, int collisionMask)
+    int NavigationHelper::GoToRotateFirst(int x, int y, double theta, bool isClose, int collisionMask, bool front)
     {
         PosMsg::SharedPtr goal = std::make_shared<PosMsg>();
         goal->x = x;
         goal->y = y;
         goal->theta = theta;
-        return GoToRotateFirst(goal, isClose, collisionMask);
+        return GoToRotateFirst(goal, isClose, collisionMask, front);
     }
 
-    int NavigationHelper::GoToRotateFirst(const Point& goal, bool isClose, int collisionMask)
+    int NavigationHelper::GoToRotateFirst(const Point& goal, bool isClose, int collisionMask, bool front)
     {
-        return GoToRotateFirst(goal.x, goal.y, goal.theta, isClose, collisionMask);
+        return GoToRotateFirst(goal.x, goal.y, goal.theta, isClose, collisionMask, front);
     }
 
     int NavigationHelper::CanGoTo(const PosMsg::SharedPtr& goal, bool isClose, int collisionMask)

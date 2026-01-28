@@ -21,16 +21,16 @@ namespace Modelec
 {
     enum class State
     {
-        INIT,
-        WAIT_START,
-        SELECT_MISSION,
-        SELECT_GAME_ACTION,
+        INIT = 0,
+        WAIT_START = 1,
+        SELECT_MISSION = 2,
+        SELECT_GAME_ACTION = 3,
 
-        TAKE_MISSION,
-        FREE_MISSION,
+        TAKE_MISSION = 10,
+        FREE_MISSION = 11,
 
-        DO_GO_HOME,
-        STOP
+        DO_GO_HOME = 20,
+        STOP = 21
     };
 
     class StratFMS : public rclcpp::Node

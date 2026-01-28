@@ -70,7 +70,7 @@ namespace Modelec
         game_action_sequence_.push(State::TAKE_MISSION);
         game_action_sequence_.push(State::FREE_MISSION);
         game_action_sequence_.push(State::FREE_MISSION);
-		static_strat_ = true;
+		static_strat_ = false;
     }
 
     void StratFMS::Init()

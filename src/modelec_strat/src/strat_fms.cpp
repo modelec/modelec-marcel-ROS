@@ -67,6 +67,9 @@ namespace Modelec
         }
 
         game_action_sequence_.push(State::TAKE_MISSION);
+        game_action_sequence_.push(State::TAKE_MISSION);
+        game_action_sequence_.push(State::FREE_MISSION);
+        game_action_sequence_.push(State::FREE_MISSION);
 		static_strat_ = true;
     }
 
@@ -206,6 +209,9 @@ namespace Modelec
 					Transition(next_action, "Selecting next game action from sequence");
 					return;
 				}
+
+
+                // TODO : If close to border, do the side mission (thermometre)
 
                 if (action_executor_->IsFull())
                 {

@@ -119,8 +119,8 @@ namespace Modelec {
                 auto pos = nav_->GetCurrentPos();
 
                 obs->SetPosition(
-                    pos->x + 200 * cos(pos->theta),
-                    pos->y + 200 * sin(pos->theta),
+                    pos->x + 200 * cos(pos->theta + (front_ == BaseAction::FRONT ? 0 : M_PI)),
+                    pos->y + 200 * sin(pos->theta + (front_ == BaseAction::FRONT ? 0 : M_PI)),
                     pos->theta);
 
                 obs->SetAtObjective(true);

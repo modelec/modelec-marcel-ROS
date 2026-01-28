@@ -156,24 +156,6 @@ namespace Modelec {
                 go_timeout_ = node_->now();
             }
 
-            step_ = UP;
-            break;
-        case UP:
-            {
-                action_executor_->Up(BaseAction::FRONT);
-                deploy_time_ = node_->now();
-            }
-
-            step_ = GO_BACK;
-            break;
-        case GO_BACK:
-            {
-                nav_->GoTo(target_deposite_zone_->GetPosition().GetTakePosition(500), true, Pathfinding::FREE | Pathfinding::OBSTACLE);
-
-                go_timeout_ = node_->now();
-            }
-
-            step_ = DONE;
             break;
         case DONE:
             {

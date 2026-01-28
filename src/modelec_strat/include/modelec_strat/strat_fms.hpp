@@ -21,16 +21,16 @@ namespace Modelec
 {
     enum class State
     {
-        INIT = 0,
-        WAIT_START = 1,
-        SELECT_MISSION = 2,
-        SELECT_GAME_ACTION = 3,
+        INIT = modelec_interfaces::msg::StratState::INIT,
+        WAIT_START = modelec_interfaces::msg::StratState::WAIT_START,
+        SELECT_MISSION = modelec_interfaces::msg::StratState::SELECT_MISSION,
+        SELECT_GAME_ACTION = modelec_interfaces::msg::StratState::SELECT_GAME_ACTION,
 
-        TAKE_MISSION = 10,
-        FREE_MISSION = 11,
+        TAKE_MISSION = modelec_interfaces::msg::StratState::TAKE_MISSION,
+        FREE_MISSION = modelec_interfaces::msg::StratState::FREE_MISSION,
 
-        DO_GO_HOME = 20,
-        STOP = 21
+        DO_GO_HOME = modelec_interfaces::msg::StratState::DO_GO_HOME,
+        STOP = modelec_interfaces::msg::StratState::STOP,
     };
 
     class StratFMS : public rclcpp::Node

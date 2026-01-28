@@ -1,29 +1,29 @@
-#include <modelec_strat/action/free_action.hpp>
+#include <modelec_strat/action/toggle_servo_action.hpp>
 
 #include "modelec_strat/action_executor.hpp"
 
-Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor)
+Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor)
 {
-    steps_.push(ActionExec::FREE_STEP);
+    steps_.push(ActionExec::TOGGLE_SERVO_STEP);
     steps_.push(ActionExec::DONE_STEP);
 }
 
-Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front, int n) : FreeAction(action_executor)
+Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front, int n) : ToggleServoAction(action_executor)
 {
     AddServo(n, front);
 }
 
-Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, Front> servo) : FreeAction(action_executor)
+Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, Front> servo) : ToggleServoAction(action_executor)
 {
     AddServo(servo.first, servo.second);
 }
 
-Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, Front>> servos) : FreeAction(action_executor)
+Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, Front>> servos) : ToggleServoAction(action_executor)
 {
     AddServos(servos);
 }
 
-void Modelec::FreeAction::Next()
+void Modelec::ToggleServoAction::Next()
 {
     if (steps_.empty())
     {
@@ -36,7 +36,7 @@ void Modelec::FreeAction::Next()
 
     switch (step)
     {
-    case ActionExec::FREE_STEP:
+    case ActionExec::TOGGLE_SERVO_STEP:
         {
             modelec_interfaces::msg::ActionServoTimedArray msg;
 
@@ -45,8 +45,8 @@ void Modelec::FreeAction::Next()
             for (size_t i = 0; i < servos_.size(); i++)
             {
                 msg.items[i].id = servos_[i].first + (servos_[i].second ? 4 : 12);
-                msg.items[i].start_angle = 3;
-                msg.items[i].end_angle = 1;
+                msg.items[i].start_angle = action_executor_->servo_pos_[servos_[i].first + (servos_[i].second ? 0 : 4)] ? 1 : 3;
+                msg.items[i].end_angle = action_executor_->servo_pos_[servos_[i].first + (servos_[i].second ? 0 : 4)] ? 3 : 1;
                 msg.items[i].duration_s = 0.5;
             }
 
@@ -63,7 +63,7 @@ void Modelec::FreeAction::Next()
     }
 }
 
-void Modelec::FreeAction::Init(const std::vector<std::string>& params)
+void Modelec::ToggleServoAction::Init(const std::vector<std::string>& params)
 {
     if (params.size() >= 2)
     {
@@ -76,17 +76,17 @@ void Modelec::FreeAction::Init(const std::vector<std::string>& params)
     }
 }
 
-void Modelec::FreeAction::AddServo(int id, Front front)
+void Modelec::ToggleServoAction::AddServo(int id, Front front)
 {
     servos_.emplace_back(id, front);
 }
 
-void Modelec::FreeAction::AddServo(std::pair<int, Front> servo)
+void Modelec::ToggleServoAction::AddServo(std::pair<int, Front> servo)
 {
     servos_.emplace_back(servo);
 }
 
-void Modelec::FreeAction::AddServos(const std::vector<std::pair<int, Front>>& servos)
+void Modelec::ToggleServoAction::AddServos(const std::vector<std::pair<int, Front>>& servos)
 {
     servos_.insert(servos_.end(), servos.begin(), servos.end());
 }

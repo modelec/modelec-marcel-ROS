@@ -4,6 +4,7 @@
 #include "modelec_strat/action/up_action.hpp"
 #include "modelec_strat/action/free_action.hpp"
 #include "modelec_strat/action/take_action.hpp"
+#include "modelec_strat/action/toggle_servo_action.hpp"
 #include "modelec_utils/utils.hpp"
 
 namespace Modelec
@@ -84,23 +85,83 @@ namespace Modelec
             "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg)
             {
                 // use game controller to manually control all the action. make it carefully
-                if (msg->buttons.size() >= 5)
+                if (msg->buttons.size() >= 15)
                 {
                     if (msg->buttons[0] == 1) // A button
                     {
-                        Down(BaseAction::BOTH);
+                        ToggleServo({{0, BaseAction::FRONT}});
                     }
                     else if (msg->buttons[1] == 1) // B button
                     {
-                        Up(BaseAction::BOTH);
+                        ToggleServo({{1, BaseAction::FRONT}});
                     }
                     else if (msg->buttons[3] == 1) // X button
                     {
-                        Take({{0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT}});
+                        ToggleServo({{2, BaseAction::FRONT}});
                     }
                     else if (msg->buttons[4] == 1) // Y button
                     {
-                        Free({{0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT}});
+                        ToggleServo({{3, BaseAction::FRONT}});
+                    }
+                    else if (msg->buttons[6] == 1) // L1 button
+                    {
+                        // ROTATE BACK
+                    }
+                    else if (msg->buttons[7] == 1) // R1 button
+                    {
+                        // ROTATE FRONT
+                    }
+                    else if (msg->buttons[14] == 1) // LT button
+                    {
+                        // IDK
+                    }
+                    else if (msg->buttons[15] == 1) // LT button
+                    {
+                        // IDK
+                    }
+                }
+                if (msg->axes.size() == 8)
+                {
+                    auto left_trig = msg->axes[4];
+                    auto right_trig = msg->axes[5];
+
+                    if (left_trig == 1 && last_left_trig == -1) // left trigger pressed
+                    {
+                        ToggleArm(BaseAction::BACK);
+                        last_left_trig = left_trig;
+                    } else if (left_trig == -1 && last_left_trig == 1) // left trigger released
+                    {
+                        last_left_trig = left_trig;
+                    }
+
+                    if (right_trig == 1 && last_left_trig == -1) // right trigger pressed
+                    {
+                        ToggleArm(BaseAction::FRONT);
+                        last_right_trig = right_trig;
+                    } else if (right_trig == -1 && last_right_trig == 1) // right trigger released
+                    {
+                        last_right_trig = right_trig;
+                    }
+
+                    auto btn_horizontal = msg->axes[6];
+                    auto btn_vertical = msg->axes[7];
+
+                    if (btn_horizontal == 1.0) // left
+                    {
+                        ToggleServo({{3, BaseAction::BACK}});
+                    }
+                    else if (btn_horizontal == -1.0) // right
+                    {
+                        ToggleServo({{1, BaseAction::BACK}});
+                    }
+
+                    if (btn_vertical == 1.0) // up
+                    {
+                        ToggleServo({{0, BaseAction::BACK}});
+                    }
+                    else if (btn_vertical == -1.0) // down
+                    {
+                        ToggleServo({{2, BaseAction::BACK}});
                     }
                 }
             });
@@ -150,7 +211,7 @@ namespace Modelec
     }
 
     void ActionExecutor::Down(BaseAction::Front front, bool force) {
-        if (action_done_ || force)
+        if ((action_done_ && !arm_pos_[front].down) || force)
         {
             action_ = std::make_shared<DownAction>(shared_from_this(), front);
             if (action_done_)
@@ -159,12 +220,14 @@ namespace Modelec
             }
             action_done_ = false;
 
+            arm_pos_[front].down = true;
+
             Update();
         }
     }
 
     void ActionExecutor::Up(BaseAction::Front front, bool force) {
-        if (action_done_ || force)
+        if ((action_done_ && arm_pos_[front].down) || force)
         {
             action_ = std::make_shared<UPAction>(shared_from_this(), front);
             if (action_done_)
@@ -173,7 +236,24 @@ namespace Modelec
             }
             action_done_ = false;
 
+            arm_pos_[front].down = false;
+
             Update();
+        }
+    }
+
+    void ActionExecutor::ToggleArm(BaseAction::Front front, bool force)
+    {
+        if (action_done_ || force)
+        {
+            if (arm_pos_[front].down)
+            {
+                Up(front, force);
+            }
+            else
+            {
+                Down(front, force);
+            }
         }
     }
 
@@ -186,6 +266,12 @@ namespace Modelec
                 step_running_ = 0;
             }
             action_done_ = false;
+
+
+            for (auto servo : servos)
+            {
+                servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)] = true;
+            }
 
             Update();
         }
@@ -200,6 +286,31 @@ namespace Modelec
                 step_running_ = 0;
             }
             action_done_ = false;
+
+            for (auto servo : servos)
+            {
+                servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)] = false;
+            }
+
+            Update();
+        }
+    }
+
+    void ActionExecutor::ToggleServo(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force)
+    {
+        if (action_done_ || force)
+        {
+            action_ = std::make_shared<ToggleServoAction>(shared_from_this(), servos);
+            if (action_done_)
+            {
+                step_running_ = 0;
+            }
+            action_done_ = false;
+
+            for (auto servo : servos)
+            {
+                servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)] = !servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)];
+            }
 
             Update();
         }

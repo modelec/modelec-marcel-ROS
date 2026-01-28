@@ -35,15 +35,28 @@ namespace Modelec
 
         void Up(BaseAction::Front front, bool force = false);
 
+        void ToggleArm(BaseAction::Front front, bool force = false);
+
         void Take(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force = false);
 
         void Free(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force = false);
+
+        void ToggleServo(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force = false);
 
         void MoveServoTimed(const modelec_interfaces::msg::ActionServoTimedArray& msg);
 
         void MoveServo(const modelec_interfaces::msg::ActionServoPosArray& msg);
 
         std::array<std::shared_ptr<BoxObstacle>, 2> box_obstacles_;
+
+        std::array<bool, 8> servo_pos_;
+
+        struct ArmState
+        {
+            bool down;
+            bool rotated;
+        };
+        std::array<ArmState, 2> arm_pos_;
 
         bool IsEmpty() const;
 
@@ -83,6 +96,9 @@ namespace Modelec
         int goal_value_;
 
         int current_step_;
+
+        float last_left_trig = 1.0f;
+        float last_right_trig = 1.0f;
 
     private:
         rclcpp::Node::SharedPtr node_;

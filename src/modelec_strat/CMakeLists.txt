@@ -25,6 +25,7 @@ set(strat_fsm_sources
         src/action/down_action.cpp
         src/action/free_action.cpp
         src/action/take_action.cpp
+        src/action/toggle_servo_action.cpp
 
         src/missions/go_home_mission.cpp
         src/missions/take_mission.cpp

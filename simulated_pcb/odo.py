@@ -54,10 +54,10 @@ class SimulatedPCB:
 
             # --- motion ---
             if wp['type'] == 1:  # precise waypoint
-                speed = min(120.0, distance * 1)
-                self.vtheta = max(-6.0, min(6.0, theta_error * 2))
+                speed = min(250.0, distance * 2.0)
+                self.vtheta = max(-10.0, min(10.0, theta_error * 4.0))
             else:  # transit waypoint
-                speed = min(180.0, distance * 2)
+                speed = min(400.0, distance * 3.0)
                 self.vtheta = 0.0
 
             self.vx = speed * math.cos(target_angle)

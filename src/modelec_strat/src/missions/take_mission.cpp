@@ -74,6 +74,12 @@ namespace Modelec {
 
                 closestBox = nav_->GetClosestObstacle<BoxObstacle>(nav_->GetCurrentPos());
 
+                if (closestBox == nullptr)
+                {
+                    status_ = MissionStatus::FAILED;
+                    break;
+                }
+
                 action_executor_->box_obstacles_[front_] = closestBox;
 
                 auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();

@@ -74,10 +74,16 @@ namespace Modelec {
             {
                 auto currPos = nav_->GetCurrentPos();
 
+                target_deposite_zone_ = nav_->GetClosestDepositeZone(currPos, {}, true);
+
+                if (target_deposite_zone_ == nullptr)
+                {
+                    status_ = MissionStatus::FAILED;
+                    return;
+                }
+
                 auto dist = std::clamp(Point::distance(Point(currPos->x, currPos->y, currPos->theta),
                     nav_->GetClosestDepositeZone(nav_->GetCurrentPos())->GetPosition()), 0.0, 200.0);
-
-                target_deposite_zone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), {}, true);
 
                 auto depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
 

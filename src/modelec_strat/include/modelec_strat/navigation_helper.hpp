@@ -166,6 +166,7 @@ namespace Modelec
         rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr start_odo_pub_;
 
         modelec_interfaces::msg::OdometryPos last_enemy_pos_;
+        bool has_enemy_ = false;
 
         bool await_rotate_ = false;
         std::vector<Waypoint> send_back_waypoints_;
@@ -182,6 +183,7 @@ namespace Modelec
     {
         std::shared_ptr<T> closest_obstacle = nullptr;
         auto robotPos = Point(pos->x, pos->y, pos->theta);
+        auto enemyPos = Point(last_enemy_pos_.x, last_enemy_pos_.y, last_enemy_pos_.theta);
         float distance = std::numeric_limits<float>::max();
 
         for (const auto& obstacle : GetPathfinding()->GetObstacles())
@@ -191,6 +193,13 @@ namespace Modelec
                 if (!obs->IsAtObjective())
                 {
                     auto dist = Point::distance(robotPos, obs->GetPosition());
+
+                    if (has_enemy_)
+                    {
+                        auto enemyDist = Point::distance(enemyPos, obs->GetPosition());
+                        dist *= (1.0f + factor_close_enemy_ * std::exp(-enemyDist / enemy_emergency_distance_));
+                    }
+
                     if (dist < distance)
                     {
                         distance = dist;

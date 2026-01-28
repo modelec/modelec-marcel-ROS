@@ -552,6 +552,8 @@ namespace Modelec
 
     void NavigationHelper::OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
+        if (!has_enemy_) has_enemy_ = true;
+
         pathfinding_->OnEnemyPosition(msg);
         last_enemy_pos_ = *msg;
 

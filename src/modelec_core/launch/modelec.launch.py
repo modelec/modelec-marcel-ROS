@@ -39,7 +39,8 @@ def generate_launch_description():
                 'angle_compensate': angle_compensate,
                 'scan_mode': scan_mode,
             }],
-            output='screen'
+            output='screen',
+            prefix = ['xterm -e gdb -ex run --args']
         )
 
         # Instead of recursion at definition time, we delay the re-creation using a lambda
@@ -49,7 +50,7 @@ def generate_launch_description():
                 on_exit=[
                     LogInfo(msg='[Launch] RPLIDAR crashed — restarting in 2s...'),
                     TimerAction(
-                        period=0.3,
+                        period=10,
                         actions=[OpaqueFunction(function=lambda *_: create_lidar_with_restart())]
                     )
                 ]

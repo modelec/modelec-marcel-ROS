@@ -19,7 +19,7 @@ def generate_launch_description():
     frame_id = LaunchConfiguration('frame_id', default='laser')
     inverted = LaunchConfiguration('inverted', default='false')
     angle_compensate = LaunchConfiguration('angle_compensate', default='true')
-    scan_mode = LaunchConfiguration('scan_mode', default='Sensitivity')
+    scan_mode = LaunchConfiguration('scan_mode', default='Standard')
 
     # ----------------------------
     # Infinite LIDAR restart logic
@@ -99,7 +99,7 @@ def generate_launch_description():
                     executable='pcb_odo_interface',
                     name='pcb_odo_interface',
                     parameters=[{
-                        'serial_port': "/tmp/USB_ODO",
+                        'serial_port': "/dev/USB_ODO",
                         'baudrate': 115200,
                         'name': "pcb_odo",
                     }]
@@ -109,7 +109,7 @@ def generate_launch_description():
                     executable='pcb_action_interface',
                     name='pcb_action_interface',
                     parameters=[{
-                        'serial_port': "/tmp/USB_ACTION",
+                        'serial_port': "/dev/USB_ACTION",
                         'baudrate': 115200,
                         'name': "pcb_action",
                     }]

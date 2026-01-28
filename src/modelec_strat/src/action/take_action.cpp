@@ -4,8 +4,6 @@
 
 Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor)
 {
-    steps_.push(ActionExec::TAKE_STEP);
-    steps_.push(ActionExec::DONE_STEP);
 }
 
 Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front, int n) : TakeAction(action_executor)

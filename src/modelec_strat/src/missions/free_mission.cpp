@@ -75,7 +75,7 @@ namespace Modelec {
                 auto currPos = nav_->GetCurrentPos();
 
                 auto dist = std::clamp(Point::distance(Point(currPos->x, currPos->y, currPos->theta),
-                    nav_->GetClosestDepositeZone(nav_->GetCurrentPos())->GetPosition()), 0.0, 200.0);
+                    nav_->GetClosestDepositeZone(nav_->GetCurrentPos())->GetPosition()), 0.0, 300.0);
 
                 target_deposite_zone_ = nav_->GetClosestDepositeZone(nav_->GetCurrentPos(), {}, true);
 
@@ -107,6 +107,8 @@ namespace Modelec {
                 action_executor_->Down(front_);
                 deploy_time_ = node_->now();
             }
+
+            step_ = FREE;
             break;
         case FREE:
             {
@@ -153,6 +155,25 @@ namespace Modelec {
 
                 go_timeout_ = node_->now();
             }
+
+            step_ = UP;
+            break;
+        case UP:
+            {
+                action_executor_->Up(BaseAction::FRONT);
+                deploy_time_ = node_->now();
+            }
+
+            step_ = GO_BACK;
+            break;
+        case GO_BACK:
+            {
+                nav_->GoTo(target_deposite_zone_->GetPosition().GetTakePosition(500), true, Pathfinding::FREE | Pathfinding::OBSTACLE);
+
+                go_timeout_ = node_->now();
+            }
+
+            step_ = DONE;
             break;
         case DONE:
             {

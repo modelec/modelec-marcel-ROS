@@ -30,6 +30,7 @@ namespace Modelec {
 
         BaseAction::Front front_;
 
+        std::shared_ptr<BoxObstacle> closestBox;
         MissionStatus status_;
         std::shared_ptr<NavigationHelper> nav_;
         std::shared_ptr<ActionExecutor> action_executor_;

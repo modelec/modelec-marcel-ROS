@@ -72,7 +72,9 @@ namespace Modelec {
         case GO_TO_TAKE:
             {
 
-                auto closestBox = nav_->GetClosestObstacle<BoxObstacle>(nav_->GetCurrentPos());
+                closestBox = nav_->GetClosestObstacle<BoxObstacle>(nav_->GetCurrentPos());
+
+                action_executor_->box_obstacles_[0] = closestBox;
 
                 action_executor_->box_obstacles_[front_] = closestBox;
 

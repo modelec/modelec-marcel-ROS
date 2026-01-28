@@ -71,5 +71,5 @@
         <time_to_put_zone>77</time_to_put_zone>
         <time_to_remove_top_pot>65</time_to_remove_top_pot>
     </pami>
-    <static_strat>false</static_strat>
+    <static_strat>true</static_strat>
 </config>

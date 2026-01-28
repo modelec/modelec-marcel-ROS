@@ -97,11 +97,11 @@ namespace Modelec
                     }
                     else if (msg->buttons[3] == 1) // X button
                     {
-                        ToggleServo({{2, BaseAction::FRONT}});
+                        ToggleServo({{3, BaseAction::FRONT}});
                     }
                     else if (msg->buttons[4] == 1) // Y button
                     {
-                        ToggleServo({{3, BaseAction::FRONT}});
+                        ToggleServo({{2, BaseAction::FRONT}});
                     }
                     else if (msg->buttons[6] == 1) // L1 button
                     {

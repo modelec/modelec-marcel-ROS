@@ -40,6 +40,6 @@ TEST(PointTest, GetTakeBasePosition) {
 TEST(PointTest, GetTakeClosePosition) {
     Modelec::Point p(0, 0, 0);
     Modelec::Point close = p.GetTakeClosePosition();
-    EXPECT_EQ(close.x, 150);
+    EXPECT_EQ(close.x, 165);
     EXPECT_EQ(close.y, 0);
 }

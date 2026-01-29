@@ -91,27 +91,45 @@ namespace Modelec
                 {
                     if (msg->buttons[0] == 1) // A button
                     {
-                        ToggleServo({{0, BaseAction::FRONT}});
+                        if (action_done_)
+                        {
+                            ToggleServo({{0, BaseAction::FRONT}});
+                        }
                     }
                     else if (msg->buttons[1] == 1) // B button
                     {
-                        ToggleServo({{1, BaseAction::FRONT}});
+                        if (action_done_)
+                        {
+                            ToggleServo({{1, BaseAction::FRONT}});
+                        }
                     }
                     else if (msg->buttons[3] == 1) // X button
                     {
-                        ToggleServo({{3, BaseAction::FRONT}});
+                        if (action_done_)
+                        {
+                            ToggleServo({{3, BaseAction::FRONT}});
+                        }
                     }
                     else if (msg->buttons[4] == 1) // Y button
                     {
-                        ToggleServo({{2, BaseAction::FRONT}});
+                        if (action_done_)
+                        {
+                            ToggleServo({{2, BaseAction::FRONT}});
+                        }
                     }
                     else if (msg->buttons[6] == 1) // L1 button
                     {
-                        RotateArm(BaseAction::BACK, false, !arm_pos_[BaseAction::BACK].rotated);
+                        if (action_done_)
+                        {
+                            RotateArm(BaseAction::BACK, false, !arm_pos_[BaseAction::BACK].rotated);
+                        }
                     }
                     else if (msg->buttons[7] == 1) // R1 button
                     {
-                        RotateArm(BaseAction::FRONT, false, !arm_pos_[BaseAction::FRONT].rotated);
+                        if (action_done_)
+                        {
+                            RotateArm(BaseAction::FRONT, false, !arm_pos_[BaseAction::FRONT].rotated);
+                        }
                     }
                     else if (msg->buttons[14] == 1) // LT button
                     {
@@ -156,20 +174,31 @@ namespace Modelec
 
                     if (btn_horizontal == 1.0) // left
                     {
-                        ToggleServo({{3, BaseAction::BACK}});
+                        if (action_done_)
+                        {
+                            ToggleServo({{3, BaseAction::BACK}});
+                        }
                     }
                     else if (btn_horizontal == -1.0) // right
                     {
-                        ToggleServo({{1, BaseAction::BACK}});
+                        if (action_done_)
+                        {
+                            ToggleServo({{1, BaseAction::BACK}});
+                        }
                     }
-
                     if (btn_vertical == 1.0) // up
                     {
-                        ToggleServo({{0, BaseAction::BACK}});
+                        if (action_done_)
+                        {
+                            ToggleServo({{0, BaseAction::BACK}});
+                        }
                     }
                     else if (btn_vertical == -1.0) // down
                     {
-                        ToggleServo({{2, BaseAction::BACK}});
+                        if (action_done_)
+                        {
+                            ToggleServo({{2, BaseAction::BACK}});
+                        }
                     }
                 }
             });

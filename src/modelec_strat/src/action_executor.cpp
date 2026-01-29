@@ -48,7 +48,7 @@ namespace Modelec
             {
                 auto token = split(msg->action, ActionExec::DELIMITER[0]);
 
-                if (token.size() == 0)
+                if (token.empty())
                 {
                     RCLCPP_WARN(
                         node_->get_logger(),
@@ -56,10 +56,10 @@ namespace Modelec
                     return;
                 }
 
-                action_ = BaseAction::CreateAction(
+                auto action = BaseAction::CreateAction(
                     token[0],
                     shared_from_this());
-                if (action_ == nullptr)
+                if (action == nullptr)
                 {
                     RCLCPP_WARN(
                         node_->get_logger(),
@@ -67,7 +67,8 @@ namespace Modelec
                         msg->action.c_str());
                     return;
                 }
-                action_->Init(token);
+                action->Init(token);
+                action_.push(action);
                 action_done_ = false;
                 step_running_ = 0;
                 Update();
@@ -180,27 +181,39 @@ namespace Modelec
 
     void ActionExecutor::Update()
     {
-        if (action_ != nullptr && !action_->IsDone() && step_running_ <= 0)
+        auto action = action_.front();
+        if (action != nullptr && !action->IsDone() && step_running_ <= 0)
         {
             RCLCPP_DEBUG(
                 node_->get_logger(),
                 "ActionExecutor Update: Executing next step of action, step_running_=%d", step_running_);
 
-            action_->Next();
-            if (action_->IsDone())
+            action->Next();
+            if (action->IsDone())
             {
-                action_done_ = true;
-                action_ = nullptr;
+                action_.pop();
+                if (action_.empty())
+                {
+                    action_done_ = true;
+                } else
+                {
+                    Update();
+                }
             }
         }
-        else if (action_ != nullptr && action_->IsDone())
+        else if (action != nullptr && action->IsDone())
         {
             RCLCPP_DEBUG(
                 node_->get_logger(),
                 "ActionExecutor Update: Action is done, step_running_=%d", step_running_);
 
-            action_done_ = true;
-            action_ = nullptr;
+            action_.pop();
+            if (action_.empty())
+            {
+                action_done_ = true;
+            } else {
+                Update();
+            }
         }
     }
 
@@ -208,13 +221,16 @@ namespace Modelec
     {
         action_done_ = true;
         step_running_ = 0;
-        action_ = nullptr;
+
+        std::queue<std::shared_ptr<BaseAction>> empty;
+        std::swap(action_, empty);
     }
 
     void ActionExecutor::Down(BaseAction::Front front, bool force) {
-        if ((action_done_ && !arm_pos_[front].down) || force)
+        if ((!arm_pos_[front].down) || force)
         {
-            action_ = std::make_shared<DownAction>(shared_from_this(), front);
+            auto action = std::make_shared<DownAction>(shared_from_this(), front);
+            action_.push(action);
             if (action_done_)
             {
                 step_running_ = 0;
@@ -228,9 +244,10 @@ namespace Modelec
     }
 
     void ActionExecutor::Up(BaseAction::Front front, bool force) {
-        if ((action_done_ && arm_pos_[front].down) || force)
+        if ((arm_pos_[front].down) || force)
         {
-            action_ = std::make_shared<UPAction>(shared_from_this(), front);
+            auto action = std::make_shared<UPAction>(shared_from_this(), front);
+            action_.push(action);
             if (action_done_)
             {
                 step_running_ = 0;
@@ -245,24 +262,22 @@ namespace Modelec
 
     void ActionExecutor::ToggleArm(BaseAction::Front front, bool force)
     {
-        if (action_done_ || force)
+        if (arm_pos_[front].down)
         {
-            if (arm_pos_[front].down)
-            {
-                Up(front, force);
-            }
-            else
-            {
-                Down(front, force);
-            }
+            Up(front, force);
+        }
+        else
+        {
+            Down(front, force);
         }
     }
 
     void ActionExecutor::RotateArm(BaseAction::Front front, bool force, bool rotated)
     {
-        if ((action_done_ && arm_pos_[front].rotated != rotated) || force)
+        if (arm_pos_[front].rotated != rotated || force)
         {
-            action_ = std::make_shared<RotateArmAction>(shared_from_this(), front, rotated);
+            auto action = std::make_shared<RotateArmAction>(shared_from_this(), front, rotated);
+            action_.push(action);
             if (action_done_)
             {
                 step_running_ = 0;
@@ -275,63 +290,57 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::Take(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force) {
-        if (action_done_ || force)
+    void ActionExecutor::Take(const std::vector<std::pair<int, BaseAction::Front>>& servos) {
+        auto action = std::make_shared<TakeAction>(shared_from_this(), servos);
+        action_.push(action);
+        if (action_done_)
         {
-            action_ = std::make_shared<TakeAction>(shared_from_this(), servos);
-            if (action_done_)
-            {
-                step_running_ = 0;
-            }
-            action_done_ = false;
-
-
-            for (auto servo : servos)
-            {
-                servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)] = true;
-            }
-
-            Update();
+            step_running_ = 0;
         }
+        action_done_ = false;
+
+
+        for (auto servo : servos)
+        {
+            servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)] = true;
+        }
+
+        Update();
     }
 
-    void ActionExecutor::Free(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force) {
-        if (action_done_ || force)
+    void ActionExecutor::Free(const std::vector<std::pair<int, BaseAction::Front>>& servos) {
+        auto action = std::make_shared<FreeAction>(shared_from_this(), servos);
+        action_.push(action);
+        if (action_done_)
         {
-            action_ = std::make_shared<FreeAction>(shared_from_this(), servos);
-            if (action_done_)
-            {
-                step_running_ = 0;
-            }
-            action_done_ = false;
-
-            for (auto servo : servos)
-            {
-                servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)] = false;
-            }
-
-            Update();
+            step_running_ = 0;
         }
+        action_done_ = false;
+
+        for (auto servo : servos)
+        {
+            servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)] = false;
+        }
+
+        Update();
     }
 
-    void ActionExecutor::ToggleServo(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force)
+    void ActionExecutor::ToggleServo(const std::vector<std::pair<int, BaseAction::Front>>& servos)
     {
-        if (action_done_ || force)
+        auto action  = std::make_shared<ToggleServoAction>(shared_from_this(), servos);
+        action_.push(action);
+        if (action_done_)
         {
-            action_ = std::make_shared<ToggleServoAction>(shared_from_this(), servos);
-            if (action_done_)
-            {
-                step_running_ = 0;
-            }
-            action_done_ = false;
-
-            for (auto servo : servos)
-            {
-                servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)] = !servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)];
-            }
-
-            Update();
+            step_running_ = 0;
         }
+        action_done_ = false;
+
+        for (auto servo : servos)
+        {
+            servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)] = !servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)];
+        }
+
+        Update();
     }
 
     void ActionExecutor::MoveServoTimed(const modelec_interfaces::msg::ActionServoTimedArray& msg)

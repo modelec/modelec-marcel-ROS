@@ -146,7 +146,7 @@ namespace Modelec
                 action_executor_->Free({
                     {0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT},
                     {0, BaseAction::BACK}, {1, BaseAction::BACK}, {2, BaseAction::BACK}, {3, BaseAction::BACK},
-                }, true);
+                });
 
                 Transition(State::WAIT_START, "System ready");
             }

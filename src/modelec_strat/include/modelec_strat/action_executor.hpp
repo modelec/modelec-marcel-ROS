@@ -39,11 +39,11 @@ namespace Modelec
 
         void RotateArm(BaseAction::Front front, bool force = false, bool rotated = false);
 
-        void Take(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force = false);
+        void Take(const std::vector<std::pair<int, BaseAction::Front>>& servos);
 
-        void Free(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force = false);
+        void Free(const std::vector<std::pair<int, BaseAction::Front>>& servos);
 
-        void ToggleServo(const std::vector<std::pair<int, BaseAction::Front>>& servos, bool force = false);
+        void ToggleServo(const std::vector<std::pair<int, BaseAction::Front>>& servos);
 
         void MoveServoTimed(const modelec_interfaces::msg::ActionServoTimedArray& msg);
 
@@ -86,7 +86,7 @@ namespace Modelec
         rclcpp::Subscription<modelec_interfaces::msg::ActionExec>::SharedPtr action_exec_sub_;
         rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
 
-        std::shared_ptr<BaseAction> action_;
+        std::queue<std::shared_ptr<BaseAction>> action_;
 
         bool action_done_ = true;
         int step_running_ = 0;

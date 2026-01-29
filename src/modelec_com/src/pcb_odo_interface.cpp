@@ -179,7 +179,7 @@ namespace Modelec
             {
                 if (tokens[2] == "REACH")
                 {
-                    // RCLCPP_INFO(this->get_logger(), "Waypoint reached: ID %s", tokens[3].c_str());
+                    RCLCPP_INFO(this->get_logger(), "Waypoint reached: ID %s", tokens[3].c_str());
 
                     int id = std::stoi(tokens[3]);
 

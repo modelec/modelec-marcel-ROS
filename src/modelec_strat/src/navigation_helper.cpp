@@ -722,6 +722,7 @@ namespace Modelec
 
     void NavigationHelper::AskWaypoint()
     {
+        RCLCPP_INFO(node_->get_logger(), "Asking for active waypoint...");
         std_msgs::msg::Empty msg;
         odo_ask_waypoint_pub_->publish(msg);
     }

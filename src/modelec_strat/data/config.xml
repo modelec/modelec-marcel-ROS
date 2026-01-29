@@ -41,10 +41,10 @@
     </home>
     <spawn>
         <yellow>
-            <top x="350" y="1700" theta="-1.5708" />
+            <top x="350" y="1750" theta="-1.5708" />
         </yellow>
         <blue>
-            <top x="2650" y="1700" theta="-1.5708" />
+            <top x="2650" y="1750" theta="-1.5708" />
         </blue>
         <width_mm>450</width_mm>
         <height_mm>450</height_mm>

@@ -66,8 +66,6 @@ namespace Modelec
             RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
         }
 
-        game_action_sequence_.push(State::TAKE_MISSION);
-        game_action_sequence_.push(State::FREE_MISSION);
 		static_strat_ = Config::get<bool>("config.static_strat", false);
     }
 
@@ -147,6 +145,11 @@ namespace Modelec
                     {0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT},
                     {0, BaseAction::BACK}, {1, BaseAction::BACK}, {2, BaseAction::BACK}, {3, BaseAction::BACK},
                 });
+
+                auto empty_queue_ = std::queue<State>();
+                std::swap(game_action_sequence_, empty_queue_);
+                game_action_sequence_.push(State::TAKE_MISSION);
+                game_action_sequence_.push(State::FREE_MISSION);
 
                 Transition(State::WAIT_START, "System ready");
             }

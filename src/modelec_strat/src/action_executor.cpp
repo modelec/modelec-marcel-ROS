@@ -129,7 +129,10 @@ namespace Modelec
 
                     if (left_trig == 1 && last_left_trig == -1) // left trigger pressed
                     {
-                        ToggleArm(BaseAction::BACK);
+                        if (action_done_)
+                        {
+                            ToggleArm(BaseAction::BACK);
+                        }
                         last_left_trig = left_trig;
                     } else if (left_trig == -1 && last_left_trig == 1) // left trigger released
                     {
@@ -138,7 +141,10 @@ namespace Modelec
 
                     if (right_trig == 1 && last_left_trig == -1) // right trigger pressed
                     {
-                        ToggleArm(BaseAction::FRONT);
+                        if (action_done_)
+                        {
+                            ToggleArm(BaseAction::FRONT);
+                        }
                         last_right_trig = right_trig;
                     } else if (right_trig == -1 && last_right_trig == 1) // right trigger released
                     {

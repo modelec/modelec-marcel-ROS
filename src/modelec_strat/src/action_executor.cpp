@@ -264,7 +264,7 @@ namespace Modelec
     void ActionExecutor::Down(BaseAction::Front front, bool force) {
         if (!arm_pos_[front].down || force)
         {
-            RCLCPP_INFO(
+            RCLCPP_DEBUG(
                 node_->get_logger(),
                 "ActionExecutor Down called for front=%d, force=%d",
                 static_cast<int>(front),
@@ -295,7 +295,7 @@ namespace Modelec
     void ActionExecutor::Up(BaseAction::Front front, bool force) {
         if ((arm_pos_[front].down) || force)
         {
-            RCLCPP_INFO(
+            RCLCPP_DEBUG(
                 node_->get_logger(),
                 "ActionExecutor Up called for front=%d, force=%d",
                 static_cast<int>(front),
@@ -325,7 +325,7 @@ namespace Modelec
 
     void ActionExecutor::ToggleArm(BaseAction::Front front, bool force)
     {
-        RCLCPP_INFO(
+        RCLCPP_DEBUG(
             node_->get_logger(),
             "ActionExecutor ToggleArm called for front=%d, force=%d",
             static_cast<int>(front),
@@ -352,7 +352,7 @@ namespace Modelec
     {
         if (arm_pos_[front].rotated != rotated || force)
         {
-            RCLCPP_INFO(
+            RCLCPP_DEBUG(
                 node_->get_logger(),
                 "ActionExecutor RotateArm called for front=%d, force=%d, rotated=%d",
                 static_cast<int>(front),
@@ -382,7 +382,7 @@ namespace Modelec
     }
 
     void ActionExecutor::Take(const std::vector<std::pair<int, BaseAction::Front>>& servos) {
-        RCLCPP_INFO(
+        RCLCPP_DEBUG(
             node_->get_logger(),
             "ActionExecutor Take called for %d servos",
             static_cast<int>(servos.size()));
@@ -405,7 +405,7 @@ namespace Modelec
     }
 
     void ActionExecutor::Free(const std::vector<std::pair<int, BaseAction::Front>>& servos) {
-        RCLCPP_INFO(
+        RCLCPP_DEBUG(
             node_->get_logger(),
             "ActionExecutor Free called for %d servos",
             static_cast<int>(servos.size()));
@@ -428,10 +428,11 @@ namespace Modelec
 
     void ActionExecutor::ToggleServo(const std::vector<std::pair<int, BaseAction::Front>>& servos)
     {
-        RCLCPP_INFO(
+        RCLCPP_DEBUG(
             node_->get_logger(),
             "ActionExecutor ToggleServo called for %d servos",
             static_cast<int>(servos.size()));
+
         auto action  = std::make_shared<ToggleServoAction>(shared_from_this(), servos);
         action_.push(action);
         if (action_done_)
@@ -453,7 +454,7 @@ namespace Modelec
         servo_timed_move_pub_->publish(msg);
         step_running_ += msg.items.size();
 
-        RCLCPP_INFO(
+        RCLCPP_DEBUG(
             node_->get_logger(),
             "ActionExecutor MoveServoTimed called with %d items, step_running_=%d",
             static_cast<int>(msg.items.size()),

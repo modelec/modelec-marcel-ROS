@@ -262,6 +262,11 @@ namespace Modelec
     }
 
     void ActionExecutor::Down(BaseAction::Front front, bool force) {
+        RCLCPP_INFO(
+            node_->get_logger(),
+            "ActionExecutor Down called for front=%d, force=%d",
+            static_cast<int>(front),
+            static_cast<int>(force));
         if ((!arm_pos_[front].down) || force)
         {
             auto action = std::make_shared<DownAction>(shared_from_this(), front);
@@ -279,6 +284,11 @@ namespace Modelec
     }
 
     void ActionExecutor::Up(BaseAction::Front front, bool force) {
+        RCLCPP_INFO(
+            node_->get_logger(),
+            "ActionExecutor Up called for front=%d, force=%d",
+            static_cast<int>(front),
+            static_cast<int>(force));
         if ((arm_pos_[front].down) || force)
         {
             auto action = std::make_shared<UPAction>(shared_from_this(), front);
@@ -297,6 +307,11 @@ namespace Modelec
 
     void ActionExecutor::ToggleArm(BaseAction::Front front, bool force)
     {
+        RCLCPP_INFO(
+            node_->get_logger(),
+            "ActionExecutor ToggleArm called for front=%d, force=%d",
+            static_cast<int>(front),
+            static_cast<int>(force));
         if (arm_pos_[front].down)
         {
             Up(front, force);
@@ -309,6 +324,12 @@ namespace Modelec
 
     void ActionExecutor::RotateArm(BaseAction::Front front, bool force, bool rotated)
     {
+        RCLCPP_INFO(
+            node_->get_logger(),
+            "ActionExecutor RotateArm called for front=%d, force=%d, rotated=%d",
+            static_cast<int>(front),
+            static_cast<int>(force),
+            static_cast<int>(rotated));
         if (arm_pos_[front].rotated != rotated || force)
         {
             auto action = std::make_shared<RotateArmAction>(shared_from_this(), front, rotated);
@@ -326,6 +347,10 @@ namespace Modelec
     }
 
     void ActionExecutor::Take(const std::vector<std::pair<int, BaseAction::Front>>& servos) {
+        RCLCPP_INFO(
+            node_->get_logger(),
+            "ActionExecutor Take called for %d servos",
+            static_cast<int>(servos.size()));
         auto action = std::make_shared<TakeAction>(shared_from_this(), servos);
         action_.push(action);
         if (action_done_)
@@ -344,6 +369,10 @@ namespace Modelec
     }
 
     void ActionExecutor::Free(const std::vector<std::pair<int, BaseAction::Front>>& servos) {
+        RCLCPP_INFO(
+            node_->get_logger(),
+            "ActionExecutor Free called for %d servos",
+            static_cast<int>(servos.size()));
         auto action = std::make_shared<FreeAction>(shared_from_this(), servos);
         action_.push(action);
         if (action_done_)
@@ -362,6 +391,10 @@ namespace Modelec
 
     void ActionExecutor::ToggleServo(const std::vector<std::pair<int, BaseAction::Front>>& servos)
     {
+        RCLCPP_INFO(
+            node_->get_logger(),
+            "ActionExecutor ToggleServo called for %d servos",
+            static_cast<int>(servos.size()));
         auto action  = std::make_shared<ToggleServoAction>(shared_from_this(), servos);
         action_.push(action);
         if (action_done_)
@@ -383,7 +416,7 @@ namespace Modelec
         servo_timed_move_pub_->publish(msg);
         step_running_ += msg.items.size();
 
-        RCLCPP_DEBUG(
+        RCLCPP_INFO(
             node_->get_logger(),
             "ActionExecutor MoveServoTimed called with %d items, step_running_=%d",
             static_cast<int>(msg.items.size()),

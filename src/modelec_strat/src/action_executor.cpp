@@ -262,13 +262,14 @@ namespace Modelec
     }
 
     void ActionExecutor::Down(BaseAction::Front front, bool force) {
-        RCLCPP_INFO(
-            node_->get_logger(),
-            "ActionExecutor Down called for front=%d, force=%d",
-            static_cast<int>(front),
-            static_cast<int>(force));
-        if ((!arm_pos_[front].down) || force)
+        if (!arm_pos_[front].down || force)
         {
+            RCLCPP_INFO(
+                node_->get_logger(),
+                "ActionExecutor Down called for front=%d, force=%d",
+                static_cast<int>(front),
+                static_cast<int>(force));
+
             auto action = std::make_shared<DownAction>(shared_from_this(), front);
             action_.push(action);
             if (action_done_)
@@ -284,13 +285,14 @@ namespace Modelec
     }
 
     void ActionExecutor::Up(BaseAction::Front front, bool force) {
-        RCLCPP_INFO(
-            node_->get_logger(),
-            "ActionExecutor Up called for front=%d, force=%d",
-            static_cast<int>(front),
-            static_cast<int>(force));
         if ((arm_pos_[front].down) || force)
         {
+            RCLCPP_INFO(
+                node_->get_logger(),
+                "ActionExecutor Up called for front=%d, force=%d",
+                static_cast<int>(front),
+                static_cast<int>(force));
+
             auto action = std::make_shared<UPAction>(shared_from_this(), front);
             action_.push(action);
             if (action_done_)
@@ -324,14 +326,15 @@ namespace Modelec
 
     void ActionExecutor::RotateArm(BaseAction::Front front, bool force, bool rotated)
     {
-        RCLCPP_INFO(
-            node_->get_logger(),
-            "ActionExecutor RotateArm called for front=%d, force=%d, rotated=%d",
-            static_cast<int>(front),
-            static_cast<int>(force),
-            static_cast<int>(rotated));
         if (arm_pos_[front].rotated != rotated || force)
         {
+            RCLCPP_INFO(
+                node_->get_logger(),
+                "ActionExecutor RotateArm called for front=%d, force=%d, rotated=%d",
+                static_cast<int>(front),
+                static_cast<int>(force),
+                static_cast<int>(rotated));
+
             auto action = std::make_shared<RotateArmAction>(shared_from_this(), front, rotated);
             action_.push(action);
             if (action_done_)
@@ -351,6 +354,7 @@ namespace Modelec
             node_->get_logger(),
             "ActionExecutor Take called for %d servos",
             static_cast<int>(servos.size()));
+
         auto action = std::make_shared<TakeAction>(shared_from_this(), servos);
         action_.push(action);
         if (action_done_)
@@ -373,6 +377,7 @@ namespace Modelec
             node_->get_logger(),
             "ActionExecutor Free called for %d servos",
             static_cast<int>(servos.size()));
+
         auto action = std::make_shared<FreeAction>(shared_from_this(), servos);
         action_.push(action);
         if (action_done_)

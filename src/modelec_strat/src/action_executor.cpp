@@ -278,7 +278,15 @@ namespace Modelec
             }
             action_done_ = false;
 
-            arm_pos_[front].down = true;
+            if (front == BaseAction::BOTH)
+            {
+                arm_pos_[BaseAction::FRONT].down = true;
+                arm_pos_[BaseAction::BACK].down = true;
+            }
+            else
+            {
+                arm_pos_[front].down = true;
+            }
 
             Update();
         }
@@ -301,7 +309,15 @@ namespace Modelec
             }
             action_done_ = false;
 
-            arm_pos_[front].down = false;
+            if (front == BaseAction::BOTH)
+            {
+                arm_pos_[BaseAction::FRONT].down = false;
+                arm_pos_[BaseAction::BACK].down = false;
+            }
+            else
+            {
+                arm_pos_[front].down = false;
+            }
 
             Update();
         }
@@ -314,6 +330,14 @@ namespace Modelec
             "ActionExecutor ToggleArm called for front=%d, force=%d",
             static_cast<int>(front),
             static_cast<int>(force));
+
+        if (front == BaseAction::BOTH)
+        {
+            ToggleArm(BaseAction::FRONT, force);
+            ToggleArm(BaseAction::BACK, force);
+            return;
+        }
+
         if (arm_pos_[front].down)
         {
             Up(front, force);
@@ -343,7 +367,15 @@ namespace Modelec
             }
             action_done_ = false;
 
-            arm_pos_[front].rotated = rotated;
+            if (front == BaseAction::BOTH)
+            {
+                arm_pos_[BaseAction::FRONT].rotated = rotated;
+                arm_pos_[BaseAction::BACK].rotated = rotated;
+            }
+            else
+            {
+                arm_pos_[front].rotated = rotated;
+            }
 
             Update();
         }

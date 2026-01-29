@@ -2,7 +2,7 @@
 Type=Application
 Name=Joy no Lidar
 Comment=Lance le système ROS 2 avec GUI
-Exec=/home/modelec/Modelec-ROS2/start_ros2.sh with_rplidar:=false
+Exec=/home/modelec/Modelec-ROS2/start_ros2.sh with_rplidar:=false with_enemy_manager:=false
 Icon=utilities-terminal
 Terminal=true
 Categories=Utility;

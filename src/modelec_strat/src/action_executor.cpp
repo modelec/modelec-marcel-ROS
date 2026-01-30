@@ -260,7 +260,7 @@ namespace Modelec
         std::swap(action_, empty);
     }
 
-    void ActionExecutor::Down(BaseAction::Front front, bool force) {
+    void ActionExecutor::Down(BaseAction::Front front, bool force, bool inverted) {
         if (!arm_pos_[front].down || force)
         {
             RCLCPP_DEBUG(
@@ -269,7 +269,7 @@ namespace Modelec
                 static_cast<int>(front),
                 static_cast<int>(force));
 
-            auto action = std::make_shared<DownAction>(shared_from_this(), front);
+            auto action = std::make_shared<DownAction>(shared_from_this(), front, inverted);
             action_.push(action);
             if (action_done_)
             {
@@ -281,10 +281,15 @@ namespace Modelec
             {
                 arm_pos_[BaseAction::FRONT].down = true;
                 arm_pos_[BaseAction::BACK].down = true;
+
+                arm_pos_[BaseAction::FRONT].rotated = inverted;
+                arm_pos_[BaseAction::BACK].rotated = inverted;
             }
             else
             {
                 arm_pos_[front].down = true;
+
+                arm_pos_[front].rotated = inverted;
             }
 
             Update();
@@ -343,7 +348,7 @@ namespace Modelec
         }
         else
         {
-            Down(front, force);
+            Down(front, force, arm_pos_[front].rotated);
         }
     }
 
@@ -376,10 +381,15 @@ namespace Modelec
             {
                 arm_pos_[BaseAction::FRONT].rotated = rotated;
                 arm_pos_[BaseAction::BACK].rotated = rotated;
+
+                arm_pos_[BaseAction::FRONT].down = true;
+                arm_pos_[BaseAction::BACK].down = true;
             }
             else
             {
                 arm_pos_[front].rotated = rotated;
+
+                arm_pos_[front].down = true;
             }
 
             Update();

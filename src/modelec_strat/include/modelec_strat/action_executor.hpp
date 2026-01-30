@@ -31,7 +31,7 @@ namespace Modelec
 
         void ReInit();
 
-        void Down(BaseAction::Front front, bool force = false);
+        void Down(BaseAction::Front front, bool force = false, bool inverted = false);
 
         void Up(BaseAction::Front front, bool force = false);
 

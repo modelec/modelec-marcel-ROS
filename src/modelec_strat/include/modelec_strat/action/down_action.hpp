@@ -9,7 +9,7 @@ namespace Modelec
     {
     public:
         DownAction(const std::shared_ptr<ActionExecutor>& action_executor);
-        DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front, bool inverted);
+        DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front, bool inverted = false);
 
         void Next() override;
         void Init(const std::vector<std::string>& params) override;

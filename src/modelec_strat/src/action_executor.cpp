@@ -359,7 +359,13 @@ namespace Modelec
                 static_cast<int>(force),
                 static_cast<int>(rotated));
 
-            auto action = std::make_shared<RotateArmAction>(shared_from_this(), front, rotated);
+            if (arm_pos_[front].down)
+            {
+                auto action = std::make_shared<UPAction>(shared_from_this(), front);
+                action_.push(action);
+            }
+
+            auto action = std::make_shared<DownAction>(shared_from_this(), front, rotated);
             action_.push(action);
             if (action_done_)
             {

@@ -2,15 +2,16 @@
 
 #include "modelec_strat/action_executor.hpp"
 
-Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor)
+Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor), front_(BOTH), inverted_(false)
 {
     steps_.push(ActionExec::DOWN_STEP);
     steps_.push(ActionExec::DONE_STEP);
 }
 
-Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front) : DownAction(action_executor)
+Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front, bool inverted) : DownAction(action_executor)
 {
     front_ = front;
+    inverted_ = inverted;
 }
 
 void Modelec::DownAction::Next()

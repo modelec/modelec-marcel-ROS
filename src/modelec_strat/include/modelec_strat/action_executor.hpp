@@ -60,6 +60,8 @@ namespace Modelec
         };
         std::array<ArmState, 2> arm_pos_;
 
+        std::array<float, 16> servo_value_;
+
         bool IsEmpty() const;
 
         bool IsFull() const;

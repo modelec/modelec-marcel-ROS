@@ -262,15 +262,15 @@ namespace Modelec
             {5, 0}
         };*/
 
-        /*servo_value_ = {
-            {0, 2.95},
-            {1, 0.93},
-            {2, 0},
-            {3, 3},
-            {4, 0.8},
-            {5, 0.8},
-            {6, 0.8},
-            {7, 0.8},
+        servo_value_ = {
+            {0, 2.91},
+            {1, 0.95},
+            {2, 3.2},
+            {3, 0},
+            {4, 1},
+            {5, 1},
+            {6, 1},
+            {7, 1},
         };
 
         std::string data = "MOV;SERVO;" + std::to_string(servo_value_.size()) + ";";
@@ -282,7 +282,7 @@ namespace Modelec
 
 		data += "\n";
 
-        SendToPCB(data);*/
+        SendToPCB(data);
 
         /*relay_value_ = {
             {1, false},

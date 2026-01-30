@@ -9,16 +9,19 @@ namespace Modelec
     {
     public:
         DownAction(const std::shared_ptr<ActionExecutor>& action_executor);
-        DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front);
+        DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front, bool inverted);
 
         void Next() override;
         void Init(const std::vector<std::string>& params) override;
         void SetFront(Front front);
+        void SetInverted(bool inverted);
 
         inline static const std::string Name = ActionExec::DOWN;
 
     private:
         Front front_;
+
+        bool inverted_;
 
         std::queue<int> steps_;
 

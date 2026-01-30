@@ -33,6 +33,19 @@ void Modelec::UPAction::Next()
 
             if (front_ == FRONT || front_ == BOTH)
             {
+                // log base servo value and next
+                RCLCPP_INFO(
+                    action_executor_->GetNode()->get_logger(),
+                    "UPAction: FRONT servo values: 0=%.2f, 1=%.2f, 2=%.2f, 3=%.2f",
+                    action_executor_->servo_value_[0],
+                    action_executor_->servo_value_[1],
+                    action_executor_->servo_value_[2],
+                    action_executor_->servo_value_[3]);
+
+                RCLCPP_INFO(
+                    action_executor_->GetNode()->get_logger(),
+                    "UPAction: Moving FRONT servos to positions: 0=1.76, 1=2.06, 2=0.5, 3=2.6");
+
                 msg.items[0].id = 0;
                 msg.items[0].start_angle = action_executor_->servo_value_[0];
                 msg.items[0].end_angle = 1.76;

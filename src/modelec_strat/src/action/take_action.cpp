@@ -45,7 +45,7 @@ void Modelec::TakeAction::Next()
             for (size_t i = 0; i < servos_.size(); i++)
             {
                 msg.items[i].id = servos_[i].first + (servos_[i].second ? 4 : 12);
-                msg.items[i].start_angle = action_executor_->servo_value_[msg.items[i].id];
+                msg.items[i].start_angle = 0;
                 msg.items[i].end_angle = 3;
                 msg.items[i].duration_s = 0.5;
             }

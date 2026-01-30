@@ -64,6 +64,9 @@ namespace Modelec
         std::queue<State> game_action_sequence_;
         bool static_strat_ = false;
 
+        float factor_obs_;
+        int timer_period_ms_ = 100;
+
         std::shared_ptr<NavigationHelper> nav_;
         std::shared_ptr<ActionExecutor> action_executor_;
 

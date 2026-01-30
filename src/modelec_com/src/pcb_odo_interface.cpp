@@ -102,11 +102,8 @@ namespace Modelec
             "odometry/start", 10,
             [this](const std_msgs::msg::Bool::SharedPtr msg)
             {
-                if (msg->data != start_odo_)
-                {
-                    start_odo_ = msg->data;
-                    SendOrder("START", {std::to_string(msg->data)});
-                }
+                start_odo_ = msg->data;
+                SendOrder("START", {std::to_string(msg->data)});
             });
 
         this->open(request->name, request->bauds, request->serial_port, MAX_MESSAGE_LEN);
@@ -179,7 +176,7 @@ namespace Modelec
             {
                 if (tokens[2] == "REACH")
                 {
-                    RCLCPP_INFO(this->get_logger(), "Waypoint reached: ID %s", tokens[3].c_str());
+                    RCLCPP_DEBUG(this->get_logger(), "Waypoint reached: ID %s", tokens[3].c_str());
 
                     int id = std::stoi(tokens[3]);
 

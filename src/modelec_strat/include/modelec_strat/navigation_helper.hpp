@@ -140,6 +140,7 @@ namespace Modelec
         Point spawn_;
 
         float factor_close_enemy_ = 0;
+        float factor_theta_ = 0;
 
         int enemy_emergency_distance_ = 0;
 
@@ -184,7 +185,7 @@ namespace Modelec
         std::shared_ptr<T> closest_obstacle = nullptr;
         auto robotPos = Point(pos->x, pos->y, pos->theta);
         auto enemyPos = Point(last_enemy_pos_.x, last_enemy_pos_.y, last_enemy_pos_.theta);
-        float distance = std::numeric_limits<float>::max();
+        double score = std::numeric_limits<double>::max();
 
         for (const auto& obstacle : GetPathfinding()->GetObstacles())
         {
@@ -192,17 +193,15 @@ namespace Modelec
             {
                 if (!obs->IsAtObjective())
                 {
-                    auto dist = Point::distance(robotPos, obs->GetPosition());
+                    auto obsPoint = obs->GetPosition();
+                    double distance = Point::distance(robotPos, obsPoint);
+                    double enemy_distance = Point::distance(enemyPos, obsPoint);
+                    double theta = std::abs(Point::angleDiff(robotPos, obsPoint));
 
-                    if (has_enemy_)
+                    double s = distance + (enemy_distance * factor_close_enemy_ * has_enemy_) + theta * factor_theta_;
+                    if (s < score)
                     {
-                        auto enemyDist = Point::distance(enemyPos, obs->GetPosition());
-                        dist *= (1.0f + factor_close_enemy_ * std::exp(-enemyDist / enemy_emergency_distance_));
-                    }
-
-                    if (dist < distance)
-                    {
-                        distance = dist;
+                        score = s;
                         closest_obstacle = obs;
                     }
                 }

@@ -67,6 +67,8 @@ namespace Modelec
         }
 
 		static_strat_ = Config::get<bool>("config.static_strat", false);
+        factor_obs_ = Config::get<double>("config.factor.obs", 1.0);
+        timer_period_ms_ = Config::get<int>("config.timer_period_ms", 100);
     }
 
     void StratFMS::Init()
@@ -104,7 +106,7 @@ namespace Modelec
         current_mission_.reset();
         match_start_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
-        timer_ = create_wall_timer(std::chrono::milliseconds(100), [this]
+        timer_ = create_wall_timer(std::chrono::milliseconds(timer_period_ms_), [this]
         {
             Update();
         });
@@ -233,7 +235,7 @@ namespace Modelec
                     if (closestBox && closestDeposite)
                     {
                         double distToBox = Point::distance(Point(pos->x, pos->y, pos->theta),
-                                                          closestBox->GetPosition());
+                                                          closestBox->GetPosition()) * factor_obs_;
                         double distToDeposite = Point::distance(Point(pos->x, pos->y, pos->theta),
                                                                closestDeposite->GetPosition());
 

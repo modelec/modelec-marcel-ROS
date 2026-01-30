@@ -262,7 +262,7 @@ namespace Modelec {
         const int goal_y = (grid_height_ - 1) - (goal->y / cell_size_mm_y);
 
         // log the x and y in the real format
-        RCLCPP_INFO(node_->get_logger(), "Start: (%d, %d), Goal: (%d, %d)", start_x * (int) cell_size_mm_x,
+        RCLCPP_DEBUG(node_->get_logger(), "Start: (%d, %d), Goal: (%d, %d)", start_x * (int) cell_size_mm_x,
                     (grid_height_ - 1 - start_y) * (int) cell_size_mm_y,
                     goal_x * (int) cell_size_mm_x,
                     (grid_height_ - 1 - goal_y) * (int) cell_size_mm_y);

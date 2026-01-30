@@ -71,5 +71,10 @@
         <time_to_put_zone>77</time_to_put_zone>
         <time_to_remove_top_pot>65</time_to_remove_top_pot>
     </pami>
-    <static_strat>true</static_strat>
+    <static_strat>false</static_strat>
+    <factor>
+        <theta>20</theta>
+        <obs>0.6</obs>
+    </factor>
+    <timer_period_ms>20</timer_period_ms>
 </config>

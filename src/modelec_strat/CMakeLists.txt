@@ -30,6 +30,7 @@ set(strat_fsm_sources
         src/missions/go_home_mission.cpp
         src/missions/take_mission.cpp
         src/missions/free_mission.cpp
+        src/missions/thermo_mission.cpp
 
         src/obstacle/obstacle.cpp
         src/obstacle/box.cpp

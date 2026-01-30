@@ -13,6 +13,7 @@ namespace Modelec
         pathfinding_ = std::make_shared<Pathfinding>(node);
 
         factor_close_enemy_ = Config::get<float>("config.enemy.factor_close_enemy", -0.5f);
+        factor_theta_ = Config::get<float>("config.factor.theta", 20.f);
 
         enemy_emergency_distance_ = Config::get<int>("config.enemy.detection.min_emergency_distance_mm", 390);
 
@@ -518,9 +519,9 @@ namespace Modelec
             {
                 auto zonePoint = zone->GetPosition();
                 double distance = Point::distance(posPoint, zonePoint);
-                double enemy_distance = Point::distance(enemyPos, zone->GetPosition());
+                double enemy_distance = Point::distance(enemyPos, zonePoint);
                 double theta = std::abs(Point::angleDiff(posPoint, zonePoint));
-                double s = distance + enemy_distance * factor_close_enemy_ + theta * 2;
+                double s = distance + (enemy_distance * factor_close_enemy_ * has_enemy_) + theta * factor_theta_;
                 if (s < score)
                 {
                     score = s;
@@ -722,7 +723,7 @@ namespace Modelec
 
     void NavigationHelper::AskWaypoint()
     {
-        RCLCPP_INFO(node_->get_logger(), "Asking for active waypoint...");
+        RCLCPP_DEBUG(node_->get_logger(), "Asking for active waypoint...");
         std_msgs::msg::Empty msg;
         odo_ask_waypoint_pub_->publish(msg);
     }

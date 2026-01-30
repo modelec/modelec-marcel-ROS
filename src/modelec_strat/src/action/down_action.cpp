@@ -46,12 +46,12 @@ void Modelec::DownAction::Next()
                 msg.items[2].id = 2;
                 msg.items[2].start_angle = 2.9;
                 msg.items[2].end_angle = 0;
-                msg.items[2].duration_s = 0.5;
+                msg.items[2].duration_s = 1;
 
                 msg.items[3].id = 3;
                 msg.items[3].start_angle = 0;
                 msg.items[3].end_angle = 2.9;
-                msg.items[3].duration_s = 0.5;
+                msg.items[3].duration_s = 1;
             }
 
             if (front_ == BACK || front_ == BOTH)

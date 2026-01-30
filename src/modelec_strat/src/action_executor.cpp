@@ -5,7 +5,6 @@
 #include "modelec_strat/action/free_action.hpp"
 #include "modelec_strat/action/take_action.hpp"
 #include "modelec_strat/action/toggle_servo_action.hpp"
-#include "modelec_strat/action/rotate_arm_action.hpp"
 #include "modelec_utils/utils.hpp"
 
 namespace Modelec

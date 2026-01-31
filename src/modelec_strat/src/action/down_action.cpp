@@ -110,3 +110,21 @@ void Modelec::DownAction::SetInverted(bool inverted)
 {
     inverted_ = inverted;
 }
+
+void Modelec::DownAction::End()
+{
+    if (front_ == BOTH)
+    {
+        action_executor_->arm_pos_[FRONT].down = true;
+        action_executor_->arm_pos_[BACK].down = true;
+
+        action_executor_->arm_pos_[FRONT].rotated = inverted_;
+        action_executor_->arm_pos_[BACK].rotated = inverted_;
+    }
+    else
+    {
+        action_executor_->arm_pos_[front_].down = true;
+
+        action_executor_->arm_pos_[front_].rotated = inverted_;
+    }
+}

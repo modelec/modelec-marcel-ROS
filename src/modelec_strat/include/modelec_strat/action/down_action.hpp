@@ -16,6 +16,8 @@ namespace Modelec
         void SetFront(Front front);
         void SetInverted(bool inverted);
 
+        void End() override;
+
         inline static const std::string Name = ActionExec::DOWN;
 
     private:

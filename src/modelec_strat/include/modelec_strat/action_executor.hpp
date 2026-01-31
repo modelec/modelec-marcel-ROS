@@ -49,6 +49,8 @@ namespace Modelec
 
         void MoveServo(const modelec_interfaces::msg::ActionServoPosArray& msg);
 
+        void ActionFinished(const std::shared_ptr<BaseAction>& action);
+
         std::array<std::shared_ptr<BoxObstacle>, 2> box_obstacles_;
 
         std::array<bool, 8> servo_pos_;

@@ -19,6 +19,8 @@ namespace Modelec
         void AddServo(std::pair<int, Front> servo);
         void AddServos(const std::vector<std::pair<int, Front>>& servos);
 
+        void End() override;
+
         inline static const std::string Name = ActionExec::FREE;
 
     private:

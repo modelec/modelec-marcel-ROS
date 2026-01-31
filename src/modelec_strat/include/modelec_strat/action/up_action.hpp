@@ -15,6 +15,8 @@ namespace Modelec
         void Init(const std::vector<std::string>& params) override;
         void SetFront(Front front);
 
+        void End() override;
+
         inline static const std::string Name = ActionExec::UP;
 
     private:

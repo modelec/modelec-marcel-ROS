@@ -55,6 +55,8 @@ namespace Modelec
             const std::string& action_name,
             const std::shared_ptr<ActionExecutor>& action_executor);
 
+        virtual void End() = 0;
+
     protected:
         std::shared_ptr<ActionExecutor> action_executor_;
 

@@ -103,3 +103,16 @@ void Modelec::UPAction::SetFront(Front front)
 {
     front_ = front;
 }
+
+void Modelec::UPAction::End()
+{
+    if (front_ == BOTH)
+    {
+        action_executor_->arm_pos_[FRONT].down = false;
+        action_executor_->arm_pos_[BACK].down = false;
+    }
+    else
+    {
+        action_executor_->arm_pos_[front_].down = false;
+    }
+}

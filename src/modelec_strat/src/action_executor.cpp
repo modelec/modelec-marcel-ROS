@@ -225,6 +225,7 @@ namespace Modelec
             action->Next();
             if (action->IsDone())
             {
+                ActionFinished(action);
                 action_.pop();
                 if (action_.empty())
                 {
@@ -240,6 +241,8 @@ namespace Modelec
             RCLCPP_DEBUG(
                 node_->get_logger(),
                 "ActionExecutor Update: Action is done, step_running_=%d", step_running_);
+
+            ActionFinished(action);
 
             action_.pop();
             if (action_.empty())
@@ -277,21 +280,6 @@ namespace Modelec
             }
             action_done_ = false;
 
-            if (front == BaseAction::BOTH)
-            {
-                arm_pos_[BaseAction::FRONT].down = true;
-                arm_pos_[BaseAction::BACK].down = true;
-
-                arm_pos_[BaseAction::FRONT].rotated = inverted;
-                arm_pos_[BaseAction::BACK].rotated = inverted;
-            }
-            else
-            {
-                arm_pos_[front].down = true;
-
-                arm_pos_[front].rotated = inverted;
-            }
-
             Update();
         }
     }
@@ -312,16 +300,6 @@ namespace Modelec
                 step_running_ = 0;
             }
             action_done_ = false;
-
-            if (front == BaseAction::BOTH)
-            {
-                arm_pos_[BaseAction::FRONT].down = false;
-                arm_pos_[BaseAction::BACK].down = false;
-            }
-            else
-            {
-                arm_pos_[front].down = false;
-            }
 
             Update();
         }
@@ -377,21 +355,6 @@ namespace Modelec
             }
             action_done_ = false;
 
-            if (front == BaseAction::BOTH)
-            {
-                arm_pos_[BaseAction::FRONT].rotated = rotated;
-                arm_pos_[BaseAction::BACK].rotated = rotated;
-
-                arm_pos_[BaseAction::FRONT].down = true;
-                arm_pos_[BaseAction::BACK].down = true;
-            }
-            else
-            {
-                arm_pos_[front].rotated = rotated;
-
-                arm_pos_[front].down = true;
-            }
-
             Update();
         }
     }
@@ -410,12 +373,6 @@ namespace Modelec
         }
         action_done_ = false;
 
-
-        for (auto servo : servos)
-        {
-            servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)] = true;
-        }
-
         Update();
     }
 
@@ -432,11 +389,6 @@ namespace Modelec
             step_running_ = 0;
         }
         action_done_ = false;
-
-        for (auto servo : servos)
-        {
-            servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)] = false;
-        }
 
         Update();
     }
@@ -455,11 +407,6 @@ namespace Modelec
             step_running_ = 0;
         }
         action_done_ = false;
-
-        for (auto servo : servos)
-        {
-            servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)] = !servo_pos_[servo.first + (servo.second == BaseAction::FRONT ? 0 : 4)];
-        }
 
         Update();
     }
@@ -480,6 +427,11 @@ namespace Modelec
     {
         servo_move_pub_->publish(msg);
         step_running_ += msg.items.size();
+    }
+
+    void ActionExecutor::ActionFinished(const std::shared_ptr<BaseAction>& action)
+    {
+        action->End();
     }
 
     bool ActionExecutor::IsEmpty() const

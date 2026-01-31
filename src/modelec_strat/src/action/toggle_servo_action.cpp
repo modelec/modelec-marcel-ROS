@@ -90,3 +90,12 @@ void Modelec::ToggleServoAction::AddServos(const std::vector<std::pair<int, Fron
 {
     servos_.insert(servos_.end(), servos.begin(), servos.end());
 }
+
+void Modelec::ToggleServoAction::End()
+{
+    for (auto servo : servos_)
+    {
+        auto index = servo.first + (servo.second == FRONT ? 0 : 4);
+        action_executor_->servo_pos_[index] = !action_executor_->servo_pos_[index];
+    }
+}

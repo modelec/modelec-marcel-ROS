@@ -8,8 +8,7 @@ namespace Modelec {
     class ThermoMission : public Mission {
     public:
         ThermoMission(const std::shared_ptr<NavigationHelper>& nav,
-                      const std::shared_ptr<ActionExecutor>& action_executor,
-                      BaseAction::Front front = BaseAction::FRONT);
+                      const std::shared_ptr<ActionExecutor>& action_executor);
 
         void Start(rclcpp::Node::SharedPtr node) override;
         void Update() override;
@@ -17,12 +16,20 @@ namespace Modelec {
         MissionStatus GetStatus() const override;
         std::string GetName() const override { return "Thermo"; }
 
+        static bool IsThermoDone;
+
     private:
         enum Step
         {
+            GO_TO_THERMO,
+            GO_TO_THERMO_CLOSE,
+            ACTIVATE_THERMO,
+            GO_TO_10,
+            DEACTIVATE_THERMO,
+            DONE,
         };
 
-        BaseAction::Front front_;
+        std::array<Point, 2> thermo_positions_;
 
         std::shared_ptr<BoxObstacle> closestBox;
         MissionStatus status_;

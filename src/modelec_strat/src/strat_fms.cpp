@@ -6,6 +6,7 @@
 #include <modelec_strat/missions/go_home_mission.hpp>
 #include <modelec_strat/missions/take_mission.hpp>
 #include <modelec_strat/missions/free_mission.hpp>
+#include <modelec_strat/missions/thermo_mission.hpp>
 
 #include "modelec_strat/action/base_action.hpp"
 
@@ -68,6 +69,7 @@ namespace Modelec
 
 		static_strat_ = Config::get<bool>("config.static_strat", false);
         factor_obs_ = Config::get<double>("config.factor.obs", 1.0);
+        factor_thermo_ = Config::get<double>("config.factor.thermo", 0.5);
         timer_period_ms_ = Config::get<int>("config.timer_period_ms", 100);
     }
 
@@ -215,57 +217,69 @@ namespace Modelec
 
 
                 // TODO : If close to border, do the side mission (thermometre)
+                auto pos = nav_->GetCurrentPos();
+                auto closestBox = nav_->GetClosestObstacle<BoxObstacle>(pos);
+                auto closestDeposite = nav_->GetClosestDepositeZone(pos);
 
-                if (action_executor_->IsFull())
-                {
-                    RCLCPP_INFO(get_logger(), "All box are present on robot, selecting FREE mission");
-                    Transition(State::FREE_MISSION, "Selecting FREE mission");
-                }
-                else if (action_executor_->IsEmpty())
-                {
-                    RCLCPP_INFO(get_logger(), "No box present on robot, selecting TAKE mission");
-                    Transition(State::TAKE_MISSION, "Selecting TAKE mission");
-                }
-                else
-                {
-                    auto pos = nav_->GetCurrentPos();
-                    auto closestBox = nav_->GetClosestObstacle<BoxObstacle>(pos);
-                    auto closestDeposite = nav_->GetClosestDepositeZone(pos);
+                auto thermoPos = nav_->GetThermoPositions()[0];
 
-                    if (closestBox && closestDeposite)
-                    {
-                        double distToBox = Point::distance(Point(pos->x, pos->y, pos->theta),
-                                                          closestBox->GetPosition()) * factor_obs_;
-                        double distToDeposite = Point::distance(Point(pos->x, pos->y, pos->theta),
-                                                               closestDeposite->GetPosition());
+                double distToBox = Point::distance(Point(pos->x, pos->y, pos->theta),
+                                            closestBox->GetPosition()) * factor_obs_;
+                double distToDeposite = Point::distance(Point(pos->x, pos->y, pos->theta),
+                                            closestDeposite->GetPosition());
+                double distToThermo = Point::distance(Point(pos->x, pos->y, pos->theta),
+                                            thermoPos) * factor_thermo_;
 
-                        if (distToBox < distToDeposite)
-                        {
-                            RCLCPP_INFO(get_logger(), "Choosing TAKE mission (dist to box: %.2f < dist to deposite: %.2f)",
-                                        distToBox, distToDeposite);
-                            Transition(State::TAKE_MISSION, "Selecting TAKE mission");
-                        }
-                        else
-                        {
-                            RCLCPP_INFO(get_logger(), "Choosing FREE mission (dist to deposite: %.2f < dist to box: %.2f)",
-                                        distToDeposite, distToBox);
-                            Transition(State::FREE_MISSION, "Selecting FREE mission");
-                        }
-                    }
-                    else if (closestBox)
+                if (distToThermo < distToBox && distToThermo < distToDeposite && !ThermoMission::IsThermoDone)
+                {
+                    RCLCPP_INFO(get_logger(), "Choosing THERMO mission (dist to thermo: %.2f < dist to box: %.2f, dist to deposite: %.2f)",
+                                distToThermo, distToBox, distToDeposite);
+                    Transition(State::THERMO_MISSION, "Selecting THERMO mission");
+                } else
+                {
+                    if (action_executor_->IsFull())
                     {
-                        RCLCPP_INFO(get_logger(), "Only box available, selecting TAKE mission");
-                        Transition(State::TAKE_MISSION, "Selecting TAKE mission");
-                    }
-                    else if (closestDeposite)
-                    {
-                        RCLCPP_INFO(get_logger(), "Only deposite available, selecting FREE mission");
+                        RCLCPP_INFO(get_logger(), "All box are present on robot, selecting FREE mission");
                         Transition(State::FREE_MISSION, "Selecting FREE mission");
+                    }
+                    else if (action_executor_->IsEmpty())
+                    {
+                        RCLCPP_INFO(get_logger(), "No box present on robot, selecting TAKE mission");
+                        Transition(State::TAKE_MISSION, "Selecting TAKE mission");
                     }
                     else
                     {
-                        RCLCPP_WARN(get_logger(), "No box or deposite available, cannot select mission!");
-                        Transition(State::STOP, "No missions available");
+
+                        if (closestBox && closestDeposite)
+                        {
+                            if (distToBox < distToDeposite)
+                            {
+                                RCLCPP_INFO(get_logger(), "Choosing TAKE mission (dist to box: %.2f < dist to deposite: %.2f)",
+                                            distToBox, distToDeposite);
+                                Transition(State::TAKE_MISSION, "Selecting TAKE mission");
+                            }
+                            else
+                            {
+                                RCLCPP_INFO(get_logger(), "Choosing FREE mission (dist to deposite: %.2f < dist to box: %.2f)",
+                                            distToDeposite, distToBox);
+                                Transition(State::FREE_MISSION, "Selecting FREE mission");
+                            }
+                        }
+                        else if (closestBox)
+                        {
+                            RCLCPP_INFO(get_logger(), "Only box available, selecting TAKE mission");
+                            Transition(State::TAKE_MISSION, "Selecting TAKE mission");
+                        }
+                        else if (closestDeposite)
+                        {
+                            RCLCPP_INFO(get_logger(), "Only deposite available, selecting FREE mission");
+                            Transition(State::FREE_MISSION, "Selecting FREE mission");
+                        }
+                        else
+                        {
+                            RCLCPP_WARN(get_logger(), "No box or deposite available, cannot select mission!");
+                            Transition(State::STOP, "No missions available");
+                        }
                     }
                 }
             }
@@ -344,6 +358,27 @@ namespace Modelec
             }
             break;
 
+        case State::THERMO_MISSION:
+            {
+                if (!current_mission_)
+                {
+                    current_mission_ = std::make_unique<ThermoMission>(nav_, action_executor_);
+                    current_mission_->Start(shared_from_this());
+                }
+                current_mission_->Update();
+                if (current_mission_->GetStatus() == MissionStatus::DONE)
+                {
+                    current_mission_.reset();
+                    Transition(State::SELECT_MISSION, "Thermo done");
+                }
+                else if (current_mission_->GetStatus() == MissionStatus::FAILED)
+                {
+                    current_mission_.reset();
+                    RCLCPP_ERROR(get_logger(), "Thermo mission failed!");
+                    Transition(State::SELECT_MISSION, "Thermo mission failed");
+                }
+            }
+            break;
         case State::DO_GO_HOME:
             if (!current_mission_)
             {

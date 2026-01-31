@@ -1,8 +1,6 @@
 <Obstacles>
     <!-- TOP -->
-    <Obstacle id="1" x="1500" y="1800" theta="1.5708" width="1800" height="400" type="estrade"/>
-    <Obstacle id="2" x="1500" y="1775" theta="1.5708" width="900" height="450" type="estrade"/>
-    <Obstacle id="3" x="2150" y="1900" theta="1.5708" width="400" height="200" type="estrade"/>
+    <Obstacle id="2" x="1500" y="1775" theta="1.5708" width="1800" height="450" type="estrade"/>
 
     <!-- Box TOP TO BOTTOM    LEFT -->
     <Box id="10" x="175" y="1200" theta="0" width="200" height="150" type="box" />

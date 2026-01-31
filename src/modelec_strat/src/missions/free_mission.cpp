@@ -82,17 +82,9 @@ namespace Modelec {
                     return;
                 }
 
-                auto dist = std::clamp(Point::distance(Point(currPos->x, currPos->y, currPos->theta),
-                    nav_->GetClosestDepositeZone(nav_->GetCurrentPos())->GetPosition()), 0.0, 200.0);
-
                 auto depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
 
-                auto pos = depoPoint.GetTakePosition(dist);
-
-                RCLCPP_INFO(
-                    node_->get_logger(),
-                    "FreeMission: position (%.2d, %.2d) with distance %.2f",
-                    pos.x, pos.y, dist);
+                auto pos = depoPoint.GetTakePosition(200.0);
 
                 pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
 

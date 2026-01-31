@@ -28,6 +28,7 @@ namespace Modelec
 
         TAKE_MISSION = modelec_interfaces::msg::StratState::TAKE_MISSION,
         FREE_MISSION = modelec_interfaces::msg::StratState::FREE_MISSION,
+        THERMO_MISSION = modelec_interfaces::msg::StratState::THERMO_MISSION,
 
         DO_GO_HOME = modelec_interfaces::msg::StratState::DO_GO_HOME,
         STOP = modelec_interfaces::msg::StratState::STOP,
@@ -65,6 +66,7 @@ namespace Modelec
         bool static_strat_ = false;
 
         float factor_obs_;
+        float factor_thermo_;
         int timer_period_ms_ = 100;
 
         std::shared_ptr<NavigationHelper> nav_;

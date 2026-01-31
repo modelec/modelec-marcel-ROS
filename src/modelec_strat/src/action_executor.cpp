@@ -201,6 +201,8 @@ namespace Modelec
                     }
                 }
             });
+
+        score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
     }
 
     rclcpp::Node::SharedPtr ActionExecutor::GetNode() const
@@ -429,6 +431,16 @@ namespace Modelec
         step_running_ += msg.items.size();
     }
 
+    void ActionExecutor::ActivateThermo(int)
+    {
+        // TODO : do something
+    }
+
+    void ActionExecutor::DeactivateThermo(int)
+    {
+        // TODO : do something
+    }
+
     void ActionExecutor::ActionFinished(const std::shared_ptr<BaseAction>& action)
     {
         action->End();
@@ -462,5 +474,12 @@ namespace Modelec
     bool ActionExecutor::HasOneBox() const
     {
         return HasFrontBox() != HasBackBox();
+    }
+
+    void ActionExecutor::SendPoint(const int point) const
+    {
+        std_msgs::msg::Int64 msg;
+        msg.data = point;
+        score_pub_->publish(msg);
     }
 }

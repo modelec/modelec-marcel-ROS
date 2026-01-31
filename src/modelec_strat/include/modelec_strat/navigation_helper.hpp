@@ -95,6 +95,7 @@ namespace Modelec
         std::shared_ptr<T> GetClosestObstacle(const PosMsg::SharedPtr& pos) const;
 
         PosMsg::SharedPtr GetHomePosition();
+        std::array<Point, 2> GetThermoPositions();
 
         void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 

@@ -8,8 +8,10 @@
 #include <modelec_interfaces/msg/action_exec.hpp>
 
 #include <sensor_msgs/msg/joy.hpp>
+#include <std_msgs/msg/int64.hpp>
 
 #include "action/base_action.hpp"
+#include "missions/thermo_mission.hpp"
 #include "obstacle/box.hpp"
 
 namespace Modelec
@@ -49,6 +51,10 @@ namespace Modelec
 
         void MoveServo(const modelec_interfaces::msg::ActionServoPosArray& msg);
 
+        void ActivateThermo(int teamId);
+
+        void DeactivateThermo(int teamId);
+
         void ActionFinished(const std::shared_ptr<BaseAction>& action);
 
         std::array<std::shared_ptr<BoxObstacle>, 2> box_obstacles_;
@@ -85,6 +91,8 @@ namespace Modelec
 
         bool HasOneBox() const;
 
+        void SendPoint(int point) const;
+
     protected:
         rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::ActionServoPosArray>::SharedPtr servo_move_pub_;
@@ -98,6 +106,8 @@ namespace Modelec
 
         rclcpp::Subscription<modelec_interfaces::msg::ActionExec>::SharedPtr action_exec_sub_;
         rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
+
+        rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr score_pub_;
 
         std::queue<std::shared_ptr<BaseAction>> action_;
 

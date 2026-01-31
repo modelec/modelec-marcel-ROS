@@ -551,6 +551,33 @@ namespace Modelec
         return home;
     }
 
+    std::array<Point, 2> NavigationHelper::GetThermoPositions()
+    {
+        Point thermoPosStart = Point();
+        Point thermoPosFinish = Point();
+        if (team_id_ == YELLOW)
+        {
+            thermoPosStart.x = Config::get<int>("config.thermo.yellow.start@x", 0);
+            thermoPosStart.y = Config::get<int>("config.thermo.yellow.start@y", 0);
+            thermoPosStart.theta = Config::get<double>("config.thermo.yellow.start@theta", 0);
+
+            thermoPosFinish.x = Config::get<int>("config.thermo.yellow.finish@x", 0);
+            thermoPosFinish.y = Config::get<int>("config.thermo.yellow.finish@y", 0);
+            thermoPosFinish.theta = Config::get<double>("config.thermo.yellow.finish@theta", 0);
+        }
+        else
+        {
+            thermoPosStart.x = Config::get<int>("config.thermo.blue.start@x", 0);
+            thermoPosStart.y = Config::get<int>("config.thermo.blue.start@y", 0);
+            thermoPosStart.theta = Config::get<double>("config.thermo.blue.start@theta", 0);
+
+            thermoPosFinish.x = Config::get<int>("config.thermo.blue.finish@x", 0);
+            thermoPosFinish.y = Config::get<int>("config.thermo.blue.finish@y", 0);
+            thermoPosFinish.theta = Config::get<double>("config.thermo.blue.finish@theta", 0);
+        }
+        return {thermoPosStart, thermoPosFinish};
+    }
+
     void NavigationHelper::OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg)
     {
         if (!has_enemy_) has_enemy_ = true;

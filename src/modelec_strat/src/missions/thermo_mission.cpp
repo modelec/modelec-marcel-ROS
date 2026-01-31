@@ -3,10 +3,12 @@
 #include "modelec_strat/action/base_action.hpp"
 
 namespace Modelec {
+
+    bool ThermoMission::IsThermoDone = false;
+
     ThermoMission::ThermoMission(const std::shared_ptr<NavigationHelper>& nav,
-        const std::shared_ptr<ActionExecutor>& action_executor,
-        BaseAction::Front front)
-     : front_(front), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
+        const std::shared_ptr<ActionExecutor>& action_executor)
+     : status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
     {
     }
 
@@ -20,15 +22,17 @@ namespace Modelec {
 
         status_ = MissionStatus::RUNNING;
 
+        thermo_positions_ = nav_->GetThermoPositions();
+
         std::queue<int> empty;
         std::swap(steps_, empty);
 
-        /*steps_.push(GO_TO_TAKE);
-        steps_.push(GO_TO_TAKE_CLOSE);
-        steps_.push(DOWN);
-        steps_.push(TAKE);
-        steps_.push(UP);
-        steps_.push(DONE);*/
+        steps_.push(GO_TO_THERMO);
+        steps_.push(GO_TO_THERMO_CLOSE);
+        steps_.push(ACTIVATE_THERMO);
+        steps_.push(GO_TO_10);
+        steps_.push(DEACTIVATE_THERMO);
+        steps_.push(DONE);
     }
 
     void ThermoMission::Update()
@@ -67,51 +71,13 @@ namespace Modelec {
         auto step_ = steps_.front();
         steps_.pop();
 
-        /*switch (step_)
+        switch (step_)
         {
-        case GO_TO_TAKE:
+        case GO_TO_THERMO:
             {
+                auto start = thermo_positions_[0].GetTakePosition(CLOSE_DISTANCE, M_PI_2);
 
-                closestBox = nav_->GetClosestObstacle<BoxObstacle>(nav_->GetCurrentPos());
-
-                if (closestBox == nullptr)
-                {
-                    status_ = MissionStatus::FAILED;
-                    break;
-                }
-
-                action_executor_->box_obstacles_[front_] = closestBox;
-
-                auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
-                pos.theta += (front_ == BaseAction::FRONT ? 0 : M_PI);
-
-                if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL, front_ == BaseAction::FRONT) != Pathfinding::FREE)
-                {
-                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL, front_ == BaseAction::FRONT) != Pathfinding::FREE)
-                    {
-                        if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT) != Pathfinding::FREE)
-                        {
-                            status_ = MissionStatus::FAILED;
-                            break;
-                        }
-                    }
-                }
-
-                go_timeout_ = node_->now();
-            }
-            break;
-        case GO_TO_TAKE_CLOSE:
-            {
-                if (action_executor_->box_obstacles_[front_] == nullptr)
-                {
-                    status_ = MissionStatus::FAILED;
-                    break;
-                }
-
-                auto pos = action_executor_->box_obstacles_[front_]->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
-                pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
-
-                if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT) != Pathfinding::FREE)
+                if (nav_->GoToRotateFirst(start, true, Pathfinding::FREE | Pathfinding::WALL, true) != Pathfinding::FREE)
                 {
                     status_ = MissionStatus::FAILED;
                     break;
@@ -120,41 +86,53 @@ namespace Modelec {
                 go_timeout_ = node_->now();
             }
             break;
-        case DOWN:
+        case GO_TO_THERMO_CLOSE:
             {
-                action_executor_->Down(front_);
+                auto start = thermo_positions_[0];
+
+                if (nav_->GoToRotateFirst(start, true, Pathfinding::FREE | Pathfinding::WALL, true) != Pathfinding::FREE)
+                {
+                    status_ = MissionStatus::FAILED;
+                    break;
+                }
+
+                go_timeout_ = node_->now();
+            }
+            break;
+        case ACTIVATE_THERMO:
+            {
+                action_executor_->ActivateThermo(nav_->GetTeamId());
                 deploy_time_ = node_->now();
             }
             break;
-        case TAKE:
+        case GO_TO_10:
             {
-                action_executor_->Take({{0, front_}, {1, front_}, {2, front_}, {3, front_}});
-                deploy_time_ = node_->now();
-                min_time_ = node_->now() + rclcpp::Duration::from_seconds(0.5);
+                auto pos = thermo_positions_[1];
+
+                if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL, true) != Pathfinding::FREE)
+                {
+                    status_ = MissionStatus::FAILED;
+                    break;
+                }
             }
             break;
-        case UP:
+        case DEACTIVATE_THERMO:
             {
-                action_executor_->Up(front_);
+                action_executor_->DeactivateThermo(nav_->GetTeamId());
                 deploy_time_ = node_->now();
             }
             break;
         case DONE:
             {
-                if (action_executor_->box_obstacles_[front_] == nullptr)
-                {
-                    status_ = MissionStatus::FAILED;
-                    break;
-                }
-
-                nav_->GetPathfinding()->RemoveObstacle(action_executor_->box_obstacles_[front_]->GetId());
+                action_executor_->SendPoint(10);
+                IsThermoDone = true;
             }
 
             status_ = MissionStatus::DONE;
             break;
         default:
             break;
-        }*/
+        }
     }
 
     void ThermoMission::Clear()

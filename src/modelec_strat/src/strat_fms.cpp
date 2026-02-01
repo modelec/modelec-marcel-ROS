@@ -218,8 +218,6 @@ namespace Modelec
 					return;
 				}
 
-
-                // TODO : If close to border, do the side mission (thermometre)
                 auto pos = nav_->GetCurrentPos();
                 auto closestBox = nav_->GetClosestObstacle<BoxObstacle>(pos);
                 auto closestDeposite = nav_->GetClosestDepositeZone(pos);

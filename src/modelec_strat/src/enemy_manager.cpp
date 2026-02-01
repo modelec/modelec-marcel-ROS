@@ -80,7 +80,7 @@ namespace Modelec
             });
 
         timer_ = this->create_wall_timer(
-            std::chrono::nanoseconds(static_cast<int>(refresh_rate_s_ )),
+            std::chrono::seconds(static_cast<int>(refresh_rate_s_)),
             [this]()
             {
                 TimerCallback();

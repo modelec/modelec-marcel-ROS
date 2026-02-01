@@ -267,8 +267,8 @@ namespace ModelecGUI
                           height() - robotPos.y * ratioBetweenMapAndWidgetY_);
         painter.rotate(90 - robotPos.theta * 180.0 / M_PI);
 
-        QRect r(-robot_width_/2, -robot_length_/2,
-                robot_width_, robot_length_);
+        QRect r(-(robot_width_*ratioBetweenMapAndWidgetX_)/2, -(robot_length_*ratioBetweenMapAndWidgetY_)/2,
+                (robot_width_*ratioBetweenMapAndWidgetX_), (robot_length_*ratioBetweenMapAndWidgetY_));
 
         painter.drawPixmap(r, robot_texture_);
         painter.restore();

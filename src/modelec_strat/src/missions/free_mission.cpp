@@ -5,8 +5,8 @@
 namespace Modelec {
     FreeMission::FreeMission(const std::shared_ptr<NavigationHelper>& nav,
         const std::shared_ptr<ActionExecutor>& action_executor,
-        BaseAction::Front front)
-     : front_(front), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
+        BaseAction::Side side)
+     : side_(side), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
     {
     }
 
@@ -25,7 +25,9 @@ namespace Modelec {
 
         steps_.push(GO_TO_FREE);
         steps_.push(DOWN);
-        steps_.push(FREE);
+        steps_.push(FREE_FIRST);
+        steps_.push(ROTATE_ARM);
+        steps_.push(FREE_OTHER);
         steps_.push(UP);
         steps_.push(GO_BACK);
         steps_.push(DONE);
@@ -86,40 +88,77 @@ namespace Modelec {
 
                 auto pos = depoPoint.GetTakePosition(200.0);
 
-                pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
+                pos.theta += side_ == BaseAction::FRONT ? 0 : M_PI;
 
-                if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, front_ == BaseAction::FRONT) != Pathfinding::FREE)
+                if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {
-                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT) != Pathfinding::FREE)
+                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                     {
                         status_ = MissionStatus::FAILED;
                         return;
                     }
                 }
 
+                action_executor_->LookOn(BaseAction::Side::CENTER);
+
                 go_timeout_ = node_->now();
             }
             break;
         case DOWN:
             {
-                action_executor_->Down(front_);
+                action_executor_->Down(side_);
                 deploy_time_ = node_->now();
             }
 
             break;
-        case FREE:
+        case FREE_FIRST:
             {
-                action_executor_->Free({{0, front_}, {1, front_}, {2, front_}, {3, front_}});
+                auto obs = action_executor_->box_obstacles_[side_];
+
+                auto vect = obs->GetSide(nav_->GetTeamId() == NavigationHelper::BLUE ? BoxObstacle::YELLOW : BoxObstacle::BLUE);
+
+                auto servo = std::vector<std::pair<int, BaseAction::Side>>();
+                for (auto s : vect)
+                {
+                    servo.push_back({s, side_});
+                }
+
+                action_executor_->Free(servo);
+
                 deploy_time_ = node_->now();
 
-                auto obs = action_executor_->box_obstacles_[front_];
-                action_executor_->box_obstacles_[front_] = nullptr;
+                min_time_ = node_->now() + rclcpp::Duration::from_seconds(1);
+
+                if (vect.size() >= 4)
+                {
+                    std::queue<int> empty;
+                    std::swap(steps_, empty);
+
+                    steps_.push(UP);
+                    steps_.push(GO_BACK);
+                    steps_.push(DONE);
+                }
+            }
+            break;
+        case ROTATE_ARM:
+            {
+                action_executor_->RotateArm(side_, false, true);
+                deploy_time_ = node_->now();
+            }
+            break;
+        case FREE_OTHER:
+            {
+                action_executor_->Free({{0, side_}, {1, side_}, {2, side_}, {3, side_}});
+                deploy_time_ = node_->now();
+
+                auto obs = action_executor_->box_obstacles_[side_];
+                action_executor_->box_obstacles_[side_] = nullptr;
 
                 auto pos = nav_->GetCurrentPos();
 
                 obs->SetPosition(
-                    pos->x + 200 * cos(pos->theta + (front_ == BaseAction::FRONT ? 0 : M_PI)),
-                    pos->y + 200 * sin(pos->theta + (front_ == BaseAction::FRONT ? 0 : M_PI)),
+                    pos->x + 200 * cos(pos->theta + (side_ == BaseAction::FRONT ? 0 : M_PI)),
+                    pos->y + 200 * sin(pos->theta + (side_ == BaseAction::FRONT ? 0 : M_PI)),
                     pos->theta);
 
                 obs->SetAtObjective(true);
@@ -131,7 +170,7 @@ namespace Modelec {
             break;
         case UP:
             {
-                action_executor_->Up(front_);
+                action_executor_->Up(side_);
                 deploy_time_ = node_->now();
             }
             break;
@@ -142,7 +181,7 @@ namespace Modelec {
                 auto depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
 
                 auto pos = depoPoint.GetTakePosition(300);
-                pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
+                pos.theta += side_ == BaseAction::FRONT ? 0 : M_PI;
 
                 if (nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE) != Pathfinding::FREE)
                 {

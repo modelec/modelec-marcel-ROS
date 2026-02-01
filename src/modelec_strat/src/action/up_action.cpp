@@ -8,9 +8,9 @@ Modelec::UPAction::UPAction(const std::shared_ptr<ActionExecutor>& action_execut
     steps_.push(ActionExec::DONE_STEP);
 }
 
-Modelec::UPAction::UPAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front) : UPAction(action_executor)
+Modelec::UPAction::UPAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side) : UPAction(action_executor)
 {
-    front_ = front;
+    side_ = side;
 }
 
 void Modelec::UPAction::Next()
@@ -29,9 +29,9 @@ void Modelec::UPAction::Next()
     case ActionExec::UP_STEP:
         {
             ActionServoTimedArray msg;
-            msg.items.resize(front_ == BOTH ? 8 : 4);
+            msg.items.resize(side_ == BOTH ? 8 : 4);
 
-            if (front_ == FRONT || front_ == BOTH)
+            if (side_ == FRONT || side_ == BOTH)
             {
                 msg.items[0].id = 0;
                 msg.items[0].start_angle = 2.91;
@@ -54,8 +54,8 @@ void Modelec::UPAction::Next()
                 msg.items[3].duration_s = 0.5;
             }
 
-            if (front_ == BACK || front_ == BOTH) {
-                int i = front_ == BOTH ? 4 : 0;
+            if (side_ == BACK || side_ == BOTH) {
+                int i = side_ == BOTH ? 4 : 0;
 
                 msg.items[i].id = 8;
                 msg.items[i].start_angle = 0;
@@ -95,24 +95,24 @@ void Modelec::UPAction::Init(const std::vector<std::string>& params)
 {
     if (!params.empty())
     {
-        SetFront(static_cast<Front>(std::stoi(params[1])));
+        SetSide(static_cast<Side>(std::stoi(params[1])));
     }
 }
 
-void Modelec::UPAction::SetFront(Front front)
+void Modelec::UPAction::SetSide(Side side)
 {
-    front_ = front;
+    side_ = side;
 }
 
 void Modelec::UPAction::End()
 {
-    if (front_ == BOTH)
+    if (side_ == BOTH)
     {
         action_executor_->arm_pos_[FRONT].down = false;
         action_executor_->arm_pos_[BACK].down = false;
     }
     else
     {
-        action_executor_->arm_pos_[front_].down = false;
+        action_executor_->arm_pos_[side_].down = false;
     }
 }

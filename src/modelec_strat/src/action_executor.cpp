@@ -5,6 +5,8 @@
 #include "modelec_strat/action/free_action.hpp"
 #include "modelec_strat/action/take_action.hpp"
 #include "modelec_strat/action/toggle_servo_action.hpp"
+#include "modelec_strat/action/look_on_action.hpp"
+#include "modelec_strat/action/thermo_action.hpp"
 #include "modelec_utils/utils.hpp"
 
 namespace Modelec
@@ -132,11 +134,11 @@ namespace Modelec
                     }
                     else if (msg->buttons[14] == 1) // LT button
                     {
-                        // IDK
+                        ActivateThermo(BaseAction::Side::LEFT, !thermo_state_[BaseAction::Side::LEFT]);
                     }
                     else if (msg->buttons[15] == 1) // LR button
                     {
-                        // IDK
+                        ActivateThermo(BaseAction::Side::RIGHT, !thermo_state_[BaseAction::Side::RIGHT]);
                     }
                 }
                 if (msg->axes.size() == 8)
@@ -265,7 +267,7 @@ namespace Modelec
         std::swap(action_, empty);
     }
 
-    void ActionExecutor::Down(BaseAction::Front front, bool force, bool inverted) {
+    void ActionExecutor::Down(BaseAction::Side front, bool force, bool inverted) {
         if (!arm_pos_[front].down || force)
         {
             RCLCPP_DEBUG(
@@ -286,16 +288,16 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::Up(BaseAction::Front front, bool force) {
-        if ((arm_pos_[front].down) || force)
+    void ActionExecutor::Up(BaseAction::Side side, bool force) {
+        if ((arm_pos_[side].down) || force)
         {
             RCLCPP_DEBUG(
                 node_->get_logger(),
-                "ActionExecutor Up called for front=%d, force=%d",
-                static_cast<int>(front),
+                "ActionExecutor Up called for side=%d, force=%d",
+                static_cast<int>(side),
                 static_cast<int>(force));
 
-            auto action = std::make_shared<UPAction>(shared_from_this(), front);
+            auto action = std::make_shared<UPAction>(shared_from_this(), side);
             action_.push(action);
             if (action_done_)
             {
@@ -307,49 +309,49 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::ToggleArm(BaseAction::Front front, bool force)
+    void ActionExecutor::ToggleArm(BaseAction::Side side, bool force)
     {
         RCLCPP_DEBUG(
             node_->get_logger(),
-            "ActionExecutor ToggleArm called for front=%d, force=%d",
-            static_cast<int>(front),
+            "ActionExecutor ToggleArm called for side=%d, force=%d",
+            static_cast<int>(side),
             static_cast<int>(force));
 
-        if (front == BaseAction::BOTH)
+        if (side == BaseAction::BOTH)
         {
             ToggleArm(BaseAction::FRONT, force);
             ToggleArm(BaseAction::BACK, force);
             return;
         }
 
-        if (arm_pos_[front].down)
+        if (arm_pos_[side].down)
         {
-            Up(front, force);
+            Up(side, force);
         }
         else
         {
-            Down(front, force, arm_pos_[front].rotated);
+            Down(side, force, arm_pos_[side].rotated);
         }
     }
 
-    void ActionExecutor::RotateArm(BaseAction::Front front, bool force, bool rotated)
+    void ActionExecutor::RotateArm(BaseAction::Side side, bool force, bool rotated)
     {
-        if (arm_pos_[front].rotated != rotated || force)
+        if (arm_pos_[side].rotated != rotated || force)
         {
             RCLCPP_DEBUG(
                 node_->get_logger(),
-                "ActionExecutor RotateArm called for front=%d, force=%d, rotated=%d",
-                static_cast<int>(front),
+                "ActionExecutor RotateArm called for side=%d, force=%d, rotated=%d",
+                static_cast<int>(side),
                 static_cast<int>(force),
                 static_cast<int>(rotated));
 
-            if (arm_pos_[front].down)
+            if (arm_pos_[side].down)
             {
-                auto action = std::make_shared<UPAction>(shared_from_this(), front);
+                auto action = std::make_shared<UPAction>(shared_from_this(), side);
                 action_.push(action);
             }
 
-            auto action = std::make_shared<DownAction>(shared_from_this(), front, rotated);
+            auto action = std::make_shared<DownAction>(shared_from_this(), side, rotated);
             action_.push(action);
             if (action_done_)
             {
@@ -361,7 +363,7 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::Take(const std::vector<std::pair<int, BaseAction::Front>>& servos) {
+    void ActionExecutor::Take(const std::vector<std::pair<int, BaseAction::Side>>& servos) {
         RCLCPP_DEBUG(
             node_->get_logger(),
             "ActionExecutor Take called for %d servos",
@@ -378,7 +380,7 @@ namespace Modelec
         Update();
     }
 
-    void ActionExecutor::Free(const std::vector<std::pair<int, BaseAction::Front>>& servos) {
+    void ActionExecutor::Free(const std::vector<std::pair<int, BaseAction::Side>>& servos) {
         RCLCPP_DEBUG(
             node_->get_logger(),
             "ActionExecutor Free called for %d servos",
@@ -395,7 +397,7 @@ namespace Modelec
         Update();
     }
 
-    void ActionExecutor::ToggleServo(const std::vector<std::pair<int, BaseAction::Front>>& servos)
+    void ActionExecutor::ToggleServo(const std::vector<std::pair<int, BaseAction::Side>>& servos)
     {
         RCLCPP_DEBUG(
             node_->get_logger(),
@@ -431,14 +433,36 @@ namespace Modelec
         step_running_ += msg.items.size();
     }
 
-    void ActionExecutor::ActivateThermo(int)
+    void ActionExecutor::ActivateThermo(BaseAction::Side side, bool deploy, bool force)
     {
-        // TODO : do something
+        if (thermo_state_[side] != deploy || force)
+        {
+            auto action = std::make_shared<ThermoAction>(shared_from_this(), side, deploy);
+            action_.push(action);
+            if (action_done_)
+            {
+                step_running_ = 0;
+            }
+            action_done_ = false;
+
+            Update();
+        }
     }
 
-    void ActionExecutor::DeactivateThermo(int)
+    void ActionExecutor::LookOn(BaseAction::Side side, bool force)
     {
-        // TODO : do something
+        if (cam_side_ != side || force)
+        {
+            auto action = std::make_shared<LookOnAction>(shared_from_this(), side);
+            action_.push(action);
+            if (action_done_)
+            {
+                step_running_ = 0;
+            }
+            action_done_ = false;
+
+            Update();
+        }
     }
 
     void ActionExecutor::ActionFinished(const std::shared_ptr<BaseAction>& action)
@@ -456,9 +480,9 @@ namespace Modelec
         return box_obstacles_[0] != nullptr && box_obstacles_[1] != nullptr;
     }
 
-    bool ActionExecutor::HasBox(BaseAction::Front front) const
+    bool ActionExecutor::HasBox(BaseAction::Side side) const
     {
-        return box_obstacles_[front] != nullptr;
+        return box_obstacles_[side] != nullptr;
     }
 
     bool ActionExecutor::HasFrontBox() const

@@ -5,25 +5,22 @@
 
 namespace Modelec
 {
-    class DownAction : public BaseAction
+    class LookOnAction : public BaseAction
     {
     public:
-        DownAction(const std::shared_ptr<ActionExecutor>& action_executor);
-        DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, bool inverted = false);
+        LookOnAction(const std::shared_ptr<ActionExecutor>& action_executor);
+        LookOnAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side);
 
         void Next() override;
         void Init(const std::vector<std::string>& params) override;
         void SetSide(Side side);
-        void SetInverted(bool inverted);
 
         void End() override;
 
-        inline static const std::string Name = ActionExec::DOWN;
+        inline static const std::string Name = ActionExec::LOOK_ON;
 
     private:
-        Side side_;
-
-        bool inverted_;
+        Side side_ = CENTER;
 
         std::queue<int> steps_;
 
@@ -33,7 +30,7 @@ namespace Modelec
             BaseAction::Registry()[Name] =
                 [](const std::shared_ptr<ActionExecutor>& exec)
                 {
-                    return std::make_shared<DownAction>(exec);
+                    return std::make_shared<LookOnAction>(exec);
                 };
             return true;
         }();

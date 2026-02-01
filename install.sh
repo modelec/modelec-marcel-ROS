@@ -27,9 +27,9 @@ git submodule init
 git submodule update
 
 echo "source /opt/ros/jazzy/setup.bash
-source ~/Modelec-ROS/install/setup.bash
+source ~/Modelec-ROS2/install/setup.bash
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-export FASTRTPS_DEFAULT_PROFILES_FILE=~/Modelec-ROS/fastdds_setup.xml
+export FASTRTPS_DEFAULT_PROFILES_FILE=~/Modelec-ROS2/fastdds_setup.xml
 export ROS_DOMAIN_ID=128" >> ~/.bashrc
 
 source ~/.bashrc
@@ -39,7 +39,7 @@ source src/rplidar_ros/scripts/create_udev_rules.sh
 
 cd ../..
 
-cp ./*.desktop ~/Desktop
+cp ./Desktop/*.desktop ~/Desktop
 chmod +x ~/Desktop/*.desktop
 gio set ~/Desktop/no_lidar.joy.ros2_launch_marcel.desktop "metadata::trusted" true
 gio set ~/Desktop/no_lidar.ros2_launch_marcel.desktop "metadata::trusted" true

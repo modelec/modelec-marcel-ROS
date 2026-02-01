@@ -2,15 +2,15 @@
 
 #include "modelec_strat/action_executor.hpp"
 
-Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor), front_(BOTH), inverted_(false)
+Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor), side_(BOTH), inverted_(false)
 {
     steps_.push(ActionExec::DOWN_STEP);
     steps_.push(ActionExec::DONE_STEP);
 }
 
-Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front, bool inverted) : DownAction(action_executor)
+Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, bool inverted) : DownAction(action_executor)
 {
-    front_ = front;
+    side_ = side;
     inverted_ = inverted;
 }
 
@@ -30,9 +30,9 @@ void Modelec::DownAction::Next()
     case ActionExec::DOWN_STEP:
         {
             ActionServoTimedArray msg;
-            msg.items.resize(front_ == BOTH ? 8 : 4);
+            msg.items.resize(side_ == BOTH ? 8 : 4);
 
-            if (front_ == FRONT || front_ == BOTH)
+            if (side_ == FRONT || side_ == BOTH)
             {
                 msg.items[0].id = 0;
                 msg.items[0].start_angle = 1.76;
@@ -55,9 +55,9 @@ void Modelec::DownAction::Next()
                 msg.items[3].duration_s = 0.5;
             }
 
-            if (front_ == BACK || front_ == BOTH)
+            if (side_ == BACK || side_ == BOTH)
             {
-                int i = front_ == BOTH ? 4 : 0;
+                int i = side_ == BOTH ? 4 : 0;
                 msg.items[i].id = 8;
                 msg.items[i].start_angle = 0;
                 msg.items[i].end_angle = 0;
@@ -96,14 +96,14 @@ void Modelec::DownAction::Init(const std::vector<std::string>& params)
 {
     if (!params.empty())
     {
-        SetFront(static_cast<Front>(std::stoi(params[1])));
+        SetSide(static_cast<Side>(std::stoi(params[1])));
         SetInverted(params.size() >= 3 ? (params[2] == "1" || params[2] == "true") : false);
     }
 }
 
-void Modelec::DownAction::SetFront(Front front)
+void Modelec::DownAction::SetSide(Side side)
 {
-    front_ = front;
+    side_ = side;
 }
 
 void Modelec::DownAction::SetInverted(bool inverted)
@@ -113,7 +113,7 @@ void Modelec::DownAction::SetInverted(bool inverted)
 
 void Modelec::DownAction::End()
 {
-    if (front_ == BOTH)
+    if (side_ == BOTH)
     {
         action_executor_->arm_pos_[FRONT].down = true;
         action_executor_->arm_pos_[BACK].down = true;
@@ -123,8 +123,8 @@ void Modelec::DownAction::End()
     }
     else
     {
-        action_executor_->arm_pos_[front_].down = true;
+        action_executor_->arm_pos_[side_].down = true;
 
-        action_executor_->arm_pos_[front_].rotated = inverted_;
+        action_executor_->arm_pos_[side_].rotated = inverted_;
     }
 }

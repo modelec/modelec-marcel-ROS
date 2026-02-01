@@ -8,17 +8,17 @@ Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecut
     steps_.push(ActionExec::DONE_STEP);
 }
 
-Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front, int n) : ToggleServoAction(action_executor)
+Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, int n) : ToggleServoAction(action_executor)
 {
-    AddServo(n, front);
+    AddServo(n, side);
 }
 
-Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, Front> servo) : ToggleServoAction(action_executor)
+Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, Side> servo) : ToggleServoAction(action_executor)
 {
     AddServo(servo.first, servo.second);
 }
 
-Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, Front>> servos) : ToggleServoAction(action_executor)
+Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, Side>> servos) : ToggleServoAction(action_executor)
 {
     AddServos(servos);
 }
@@ -70,23 +70,23 @@ void Modelec::ToggleServoAction::Init(const std::vector<std::string>& params)
         for (size_t i = 1; i < params.size(); i += 2)
         {
             int id = std::stoi(params[i]);
-            bool front = (i + 1 < params.size()) ? (params[i + 1] == "1" || params[i + 1] == "true" || params[i + 1] == "front") : true;
-            AddServo(id, front ? FRONT : BACK);
+            bool side = (i + 1 < params.size()) ? (params[i + 1] == "1" || params[i + 1] == "true" || params[i + 1] == "side") : true;
+            AddServo(id, side ? FRONT : BACK);
         }
     }
 }
 
-void Modelec::ToggleServoAction::AddServo(int id, Front front)
+void Modelec::ToggleServoAction::AddServo(int id, Side side)
 {
-    servos_.emplace_back(id, front);
+    servos_.emplace_back(id, side);
 }
 
-void Modelec::ToggleServoAction::AddServo(std::pair<int, Front> servo)
+void Modelec::ToggleServoAction::AddServo(std::pair<int, Side> servo)
 {
     servos_.emplace_back(servo);
 }
 
-void Modelec::ToggleServoAction::AddServos(const std::vector<std::pair<int, Front>>& servos)
+void Modelec::ToggleServoAction::AddServos(const std::vector<std::pair<int, Side>>& servos)
 {
     servos_.insert(servos_.end(), servos.begin(), servos.end());
 }

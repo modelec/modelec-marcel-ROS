@@ -19,7 +19,7 @@ namespace Modelec
     class NavigationHelper
     {
     public:
-        enum
+        enum Team
         {
             YELLOW = 0,
             BLUE = 1,
@@ -35,7 +35,7 @@ namespace Modelec
 
         std::shared_ptr<Pathfinding> GetPathfinding() const;
 
-        int GetTeamId() const;
+        Team GetTeamId() const;
 
         void Update();
 
@@ -108,7 +108,7 @@ namespace Modelec
 
         bool Replan(bool force = false);
 
-        void SetTeamId(int id);
+        void SetTeamId(Team id);
 
         void SetSpawn(const std::string& name);
 
@@ -135,7 +135,7 @@ namespace Modelec
 
         std::shared_ptr<Pathfinding> pathfinding_;
 
-        int team_id_ = YELLOW;
+        Team team_id_ = YELLOW;
         std::map<std::string, Point> spawn_yellow_;
         std::map<std::string, Point> spawn_blue_;
         Point spawn_;

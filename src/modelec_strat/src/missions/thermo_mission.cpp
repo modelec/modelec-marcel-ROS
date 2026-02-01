@@ -101,7 +101,8 @@ namespace Modelec {
             break;
         case ACTIVATE_THERMO:
             {
-                action_executor_->ActivateThermo(nav_->GetTeamId());
+                RCLCPP_INFO(node_->get_logger(), "Activating thermo");
+                action_executor_->ActivateThermo(nav_->GetTeamId() == NavigationHelper::YELLOW ? BaseAction::RIGHT : BaseAction::LEFT, true);
                 deploy_time_ = node_->now();
             }
             break;
@@ -118,7 +119,8 @@ namespace Modelec {
             break;
         case DEACTIVATE_THERMO:
             {
-                action_executor_->DeactivateThermo(nav_->GetTeamId());
+                RCLCPP_INFO(node_->get_logger(), "Deactivating thermo");
+                action_executor_->ActivateThermo(nav_->GetTeamId() == NavigationHelper::YELLOW ? BaseAction::RIGHT : BaseAction::LEFT, false);
                 deploy_time_ = node_->now();
             }
             break;

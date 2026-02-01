@@ -57,4 +57,39 @@ namespace Modelec
         }
         return positions;
     }
+
+    void BoxObstacle::SetColor(int index, Team team)
+    {
+        if (index >= 0 && index < colors_.size())
+        {
+            colors_[index] = team;
+        }
+    }
+
+    BoxObstacle::Team BoxObstacle::GetColor(int index) const
+    {
+        if (index >= 0 && index < colors_.size())
+        {
+            return colors_[index];
+        }
+        return YELLOW;
+    }
+
+    std::array<BoxObstacle::Team, 4> BoxObstacle::GetColors() const
+    {
+        return colors_;
+    }
+
+    std::vector<int> BoxObstacle::GetSide(Team team) const
+    {
+        std::vector<int> sideColors;
+        for (int i = 0; i < colors_.size(); ++i)
+        {
+            if (colors_[i] == team)
+            {
+                sideColors.push_back(i);
+            }
+        }
+        return sideColors;
+    }
 }

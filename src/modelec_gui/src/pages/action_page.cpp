@@ -238,7 +238,7 @@ namespace ModelecGUI
             [this]()
             {
                 ActionExec action_exec;
-                action_exec.action = ActionExec::THERMO_DEPLOY;
+                action_exec.action = ActionExec::THERMO + ActionExec::DELIMITER + "-1" + ActionExec::DELIMITER + "1";
                 action_exec_pub_->publish(action_exec);
             });
 
@@ -246,7 +246,7 @@ namespace ModelecGUI
             [this]()
             {
                 ActionExec action_exec;
-                action_exec.action = ActionExec::THERMO_UNDEPLOY;
+                action_exec.action = ActionExec::THERMO + ActionExec::DELIMITER + "-1" + ActionExec::DELIMITER + "0";
                 action_exec_pub_->publish(action_exec);
             });
 

@@ -117,7 +117,7 @@ namespace Modelec
         return pathfinding_;
     }
 
-    int NavigationHelper::GetTeamId() const
+    NavigationHelper::Team NavigationHelper::GetTeamId() const
     {
         return team_id_;
     }
@@ -719,7 +719,7 @@ namespace Modelec
         return true;
     }
 
-    void NavigationHelper::SetTeamId(int id)
+    void NavigationHelper::SetTeamId(Team id)
     {
         team_id_ = id;
     }

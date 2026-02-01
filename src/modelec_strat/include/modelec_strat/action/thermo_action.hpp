@@ -5,25 +5,24 @@
 
 namespace Modelec
 {
-    class DownAction : public BaseAction
+    class ThermoAction : public BaseAction
     {
     public:
-        DownAction(const std::shared_ptr<ActionExecutor>& action_executor);
-        DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, bool inverted = false);
+        ThermoAction(const std::shared_ptr<ActionExecutor>& action_executor);
+        ThermoAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, bool deploy);
 
         void Next() override;
         void Init(const std::vector<std::string>& params) override;
         void SetSide(Side side);
-        void SetInverted(bool inverted);
+        void SetDeploy(bool deploy);
 
         void End() override;
 
-        inline static const std::string Name = ActionExec::DOWN;
+        inline static const std::string Name = ActionExec::THERMO;
 
     private:
-        Side side_;
-
-        bool inverted_;
+        Side side_ = BOTH;
+        bool deploy_ = true;
 
         std::queue<int> steps_;
 
@@ -33,7 +32,7 @@ namespace Modelec
             BaseAction::Registry()[Name] =
                 [](const std::shared_ptr<ActionExecutor>& exec)
                 {
-                    return std::make_shared<DownAction>(exec);
+                    return std::make_shared<ThermoAction>(exec);
                 };
             return true;
         }();

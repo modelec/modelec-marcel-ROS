@@ -31,8 +31,7 @@ namespace Modelec
         team_id_sub_ = create_subscription<std_msgs::msg::Int8>(
             "/strat/team", 10, [this](const std_msgs::msg::Int8::SharedPtr msg)
             {
-                team_id_ = static_cast<int>(msg->data);
-                nav_->SetTeamId(team_id_);
+                nav_->SetTeamId(static_cast<NavigationHelper::Team>(msg->data));
             });
 
         spawn_id_sub_ = create_subscription<modelec_interfaces::msg::Spawn>(
@@ -40,7 +39,7 @@ namespace Modelec
             {
                 team_selected_ = true;
                 team_id_ = msg->team_id;
-                nav_->SetTeamId(team_id_);
+                nav_->SetTeamId(static_cast<NavigationHelper::Team>(team_id_));
                 nav_->SetSpawn(msg->name);
             });
 
@@ -144,7 +143,7 @@ namespace Modelec
                 arm_msg.data = true;
                 tir_arm_set_pub_->publish(arm_msg);
 
-                action_executor_->Up(BaseAction::Front::BOTH, true);
+                action_executor_->Up(BaseAction::Side::BOTH, true);
                 action_executor_->Free({
                     {0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT},
                     {0, BaseAction::BACK}, {1, BaseAction::BACK}, {2, BaseAction::BACK}, {3, BaseAction::BACK},

@@ -7,6 +7,7 @@
 #include <QSvgRenderer>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QTimer>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -40,15 +41,19 @@ namespace ModelecGUI {
     protected:
         void paintEvent(QPaintEvent*) override;
 
-        void onOdometryReceived(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
-
         void OnObstacleReceived(const modelec_interfaces::msg::Obstacle::SharedPtr msg);
 
         void resizeEvent(QResizeEvent* event) override;
 
+        void updateBackgroundCache();
+
+        void updateObstaclesCache();
+
+        void updateWaypointsCache();
+
         rclcpp::TimerBase::SharedPtr reset_timer_;
 
-        QSvgRenderer* renderer;
+        QSvgRenderer* renderer_;
 
         QVBoxLayout* v_layout;
         QHBoxLayout* h_layout;
@@ -97,5 +102,17 @@ namespace ModelecGUI {
         long int start_time_ = 0;
 
         rclcpp::Subscription<modelec_interfaces::msg::StratState>::SharedPtr strat_state_sub_;
+
+        QPixmap background_cache_;
+        QPixmap obstacles_cache_;
+        QPixmap waypoints_cache_;
+
+        bool bg_dirty_ = true;
+        bool obstacles_dirty_ = true;
+        bool waypoints_dirty_ = true;
+
+        QPixmap robot_texture_;
+        QPixmap top_texture_;
+        QPixmap obs_texture_;
     };
 }

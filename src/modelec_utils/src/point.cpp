@@ -45,6 +45,11 @@ namespace Modelec
         return angleDiff(theta, p2);
     }
 
+    void Point::normalizeAngle()
+    {
+        theta = normalizeAngle(theta);
+    }
+
     Point Point::GetTakePosition(int distance, double angle) const
     {
         Point pos;

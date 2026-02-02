@@ -21,6 +21,8 @@ namespace Modelec
         double angleDiff(const Point& p2) const;
         double angleDiff(const double& p2) const;
 
+        void normalizeAngle();
+
         static double normalizeAngle(double angle);
 
         [[nodiscard]] Point GetTakePosition(int distance, double angle) const;

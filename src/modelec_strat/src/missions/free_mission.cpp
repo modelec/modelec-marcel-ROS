@@ -99,6 +99,32 @@ namespace Modelec {
                     }
                 }
 
+                auto obs = action_executor_->box_obstacles_[side_];
+
+                auto vect = obs->GetSide(nav_->GetTeamId() == NavigationHelper::BLUE ? BoxObstacle::BLUE : BoxObstacle::YELLOW);
+
+                if (vect.size() == 4)
+                {
+                    std::queue<int> empty;
+                    std::swap(steps_, empty);
+
+                    steps_.push(DOWN);
+                    steps_.push(FREE_FIRST);
+                    steps_.push(UP);
+                    steps_.push(GO_BACK);
+                    steps_.push(DONE);
+                } else if (vect.empty())
+                {
+                    std::queue<int> empty;
+                    std::swap(steps_, empty);
+
+                    steps_.push(ROTATE_ARM);
+                    steps_.push(FREE_OTHER);
+                    steps_.push(UP);
+                    steps_.push(GO_BACK);
+                    steps_.push(DONE);
+                }
+
                 action_executor_->LookOn(BaseAction::Side::CENTER);
 
                 go_timeout_ = node_->now();
@@ -128,16 +154,6 @@ namespace Modelec {
                 deploy_time_ = node_->now();
 
                 min_time_ = node_->now() + rclcpp::Duration::from_seconds(1);
-
-                if (vect.size() >= 4)
-                {
-                    std::queue<int> empty;
-                    std::swap(steps_, empty);
-
-                    steps_.push(UP);
-                    steps_.push(GO_BACK);
-                    steps_.push(DONE);
-                }
             }
             break;
         case ROTATE_ARM:

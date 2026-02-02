@@ -336,7 +336,7 @@ namespace Modelec
 
     void ActionExecutor::RotateArm(BaseAction::Side side, bool force, bool rotated)
     {
-        if (arm_pos_[side].rotated != rotated || force)
+        if ((arm_pos_[side].rotated != rotated || !arm_pos_[side].down) || force)
         {
             RCLCPP_DEBUG(
                 node_->get_logger(),

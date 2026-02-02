@@ -122,12 +122,7 @@ namespace Modelec {
             break;
         case DOWN:
             {
-                if (action_executor_->arm_pos_[side_].rotated) {
-                    action_executor_->RotateArm(side_, false, false);
-                } else
-                {
-                    action_executor_->Down(side_);
-                }
+                action_executor_->RotateArm(side_, false, false);
 
                 deploy_time_ = node_->now();
             }

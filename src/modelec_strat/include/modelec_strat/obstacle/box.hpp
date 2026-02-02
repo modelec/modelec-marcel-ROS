@@ -26,8 +26,8 @@ namespace Modelec
 
         std::vector<Point> GetAllPossiblePositions() const;
 
-        void SetColor(int index, Team team);
-        Team GetColor(int index) const;
+        void SetColor(size_t index, Team team);
+        Team GetColor(size_t index) const;
         std::array<Team, 4> GetColors() const;
 
         std::vector<int> GetSide(Team team) const;

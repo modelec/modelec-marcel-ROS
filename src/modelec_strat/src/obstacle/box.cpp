@@ -58,17 +58,17 @@ namespace Modelec
         return positions;
     }
 
-    void BoxObstacle::SetColor(int index, Team team)
+    void BoxObstacle::SetColor(size_t index, Team team)
     {
-        if (index >= 0 && index < colors_.size())
+        if (index < colors_.size())
         {
             colors_[index] = team;
         }
     }
 
-    BoxObstacle::Team BoxObstacle::GetColor(int index) const
+    BoxObstacle::Team BoxObstacle::GetColor(size_t index) const
     {
-        if (index >= 0 && index < colors_.size())
+        if (index < colors_.size())
         {
             return colors_[index];
         }
@@ -83,7 +83,7 @@ namespace Modelec
     std::vector<int> BoxObstacle::GetSide(Team team) const
     {
         std::vector<int> sideColors;
-        for (int i = 0; i < colors_.size(); ++i)
+        for (size_t i = 0; i < colors_.size(); ++i)
         {
             if (colors_[i] == team)
             {

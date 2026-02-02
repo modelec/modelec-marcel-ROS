@@ -303,7 +303,7 @@ namespace Modelec
     {
         double angle = std::atan2(pos.y - current_pos_->y, pos.x - current_pos_->x);
 
-        if (std::abs(angle - (current_pos_->theta + (front ? 0 : M_PI))) > M_PI / 4)
+        if (Point::angleDiff(angle, (current_pos_->theta + (front ? 0 : M_PI))) > M_PI / 4)
         {
             Rotate(angle);
             return true;

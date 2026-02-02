@@ -9,10 +9,25 @@ namespace Modelec
     }
 
     double Point::angleDiff(const Point &p1, const Point &p2) {
-        double diff = std::fmod(p1.theta - p2.theta + M_PI, 2 * M_PI);
+        return angleDiff(p1.theta, p2.theta);
+    }
+
+    double Point::angleDiff(const double& p1, const double& p2)
+    {
+        double diff = std::fmod(p1 - p2 + M_PI, 2 * M_PI);
         if (diff < 0)
             diff += 2 * M_PI;
         return diff - M_PI;
+    }
+
+    double Point::normalizeAngle(double angle)
+    {
+        double newAngle = std::fmod(angle + M_PI, 2.0 * M_PI);
+        if (newAngle < 0) {
+            newAngle += 2.0 * M_PI;
+        }
+
+        return newAngle - M_PI;
     }
 
     double Point::distance(const Point& p2) const
@@ -23,6 +38,11 @@ namespace Modelec
     double Point::angleDiff(const Point& p2) const
     {
         return angleDiff(*this, p2);
+    }
+
+    double Point::angleDiff(const double& p2) const
+    {
+        return angleDiff(theta, p2);
     }
 
     Point Point::GetTakePosition(int distance, double angle) const

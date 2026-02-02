@@ -83,13 +83,13 @@ namespace Modelec {
                 action_executor_->box_obstacles_[side_] = closestBox;
 
                 auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
-                pos.theta += (side_ == BaseAction::FRONT ? 0 : M_PI);
+                pos.theta = Point::normalizeAngle(pos.theta + (side_ == BaseAction::FRONT ? 0 : M_PI));
 
-                if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL, side_ == BaseAction::FRONT) != Pathfinding::FREE)
+                if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {
-                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL, side_ == BaseAction::FRONT) != Pathfinding::FREE)
+                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                     {
-                        if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
+                        if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                         {
                             status_ = MissionStatus::FAILED;
                             break;
@@ -109,7 +109,7 @@ namespace Modelec {
                 }
 
                 auto pos = action_executor_->box_obstacles_[side_]->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
-                pos.theta += side_ == BaseAction::FRONT ? 0 : M_PI;
+                pos.theta = Point::normalizeAngle(pos.theta + (side_ == BaseAction::FRONT ? 0 : M_PI));
 
                 if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {

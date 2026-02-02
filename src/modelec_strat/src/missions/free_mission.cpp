@@ -88,7 +88,7 @@ namespace Modelec {
 
                 auto pos = depoPoint.GetTakePosition(200.0);
 
-                pos.theta += side_ == BaseAction::FRONT ? 0 : M_PI;
+                pos.theta = Point::normalizeAngle(pos.theta + (side_ == BaseAction::FRONT ? 0 : M_PI));
 
                 if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {
@@ -197,7 +197,7 @@ namespace Modelec {
                 auto depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
 
                 auto pos = depoPoint.GetTakePosition(300);
-                pos.theta += side_ == BaseAction::FRONT ? 0 : M_PI;
+                pos.theta = Point::normalizeAngle(pos.theta + (side_ == BaseAction::FRONT ? 0 : M_PI));
 
                 if (nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE) != Pathfinding::FREE)
                 {

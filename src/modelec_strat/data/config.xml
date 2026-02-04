@@ -12,7 +12,7 @@
             <min_emergency_distance_mm>300</min_emergency_distance_mm>
             <margin_detection_table_mm>50</margin_detection_table_mm>
         </detection>
-        <factor_close_enemy>-0.3</factor_close_enemy>
+        <factor_close_enemy>-2</factor_close_enemy>
     </enemy>
 
     <robot>
@@ -49,29 +49,13 @@
         <width_mm>450</width_mm>
         <height_mm>450</height_mm>
     </spawn>
-    <usb>
-        <timeout_ms>300</timeout_ms>
-        <attempt>5</attempt>
-    </usb>
     <mission_score>
-        <banner>20</banner>
-        <go_home>10</go_home>
-        <concert>
-            <niv_1>4</niv_1>
-            <niv_2>8</niv_2>
-            <niv_3>16</niv_3>
-        </concert>
-        <pami>
-            <goupie>5</goupie>
-            <superstar>5</superstar>
-            <all_party>10</all_party>
-        </pami>
     </mission_score>
     <pami>
         <time_to_put_zone>77</time_to_put_zone>
         <time_to_remove_top_pot>65</time_to_remove_top_pot>
     </pami>
-    <static_strat>true</static_strat>
+    <static_strat>false</static_strat>
     <factor>
         <theta>20</theta>
         <obs>0.6</obs>

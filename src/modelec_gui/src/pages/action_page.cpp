@@ -49,6 +49,7 @@ namespace ModelecGUI
 
         deploy_action1_front_up_button_ = new QPushButton("Up");
         deploy_action1_front_down_button_ = new QPushButton("Down");
+        deploy_action1_front_rotate_button_ = new QPushButton("DownRota");
 
         connect(deploy_action1_front_up_button_, &QPushButton::clicked, this,
             [this]()
@@ -62,7 +63,15 @@ namespace ModelecGUI
             [this]()
             {
                 ActionExec action_exec;
-                action_exec.action = ActionExec::DOWN + ActionExec::DELIMITER + "1";
+                action_exec.action = ActionExec::DOWN + ActionExec::DELIMITER + "1" + ActionExec::DELIMITER + "0";
+                action_exec_pub_->publish(action_exec);
+            });
+
+        connect(deploy_action1_front_rotate_button_, &QPushButton::clicked, this,
+            [this]()
+            {
+                ActionExec action_exec;
+                action_exec.action = ActionExec::DOWN + ActionExec::DELIMITER + "1" + ActionExec::DELIMITER + "1";
                 action_exec_pub_->publish(action_exec);
             });
 
@@ -140,6 +149,7 @@ namespace ModelecGUI
 
         deploy_action1_back_up_button_ = new QPushButton("Up");
         deploy_action1_back_down_button_ = new QPushButton("Down");
+        deploy_action1_back_rotate_button_ = new QPushButton("DownRota");
 
         connect(deploy_action1_back_up_button_, &QPushButton::clicked, this,
             [this]()
@@ -153,7 +163,15 @@ namespace ModelecGUI
             [this]()
             {
                 ActionExec action_exec;
-                action_exec.action = ActionExec::DOWN + ActionExec::DELIMITER + "0";
+                action_exec.action = ActionExec::DOWN + ActionExec::DELIMITER + "0" + ActionExec::DELIMITER + "0";
+                action_exec_pub_->publish(action_exec);
+            });
+
+        connect(deploy_action1_back_rotate_button_, &QPushButton::clicked, this,
+            [this]()
+            {
+                ActionExec action_exec;
+                action_exec.action = ActionExec::DOWN + ActionExec::DELIMITER + "0" + ActionExec::DELIMITER + "1";
                 action_exec_pub_->publish(action_exec);
             });
 

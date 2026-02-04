@@ -61,6 +61,7 @@ namespace ModelecGUI
             deploy_action1_front_servo4_state_;
 
         QPushButton* deploy_action1_front_down_button_;
+        QPushButton* deploy_action1_front_rotate_button_;
 
         // ---- Action1 back ----
         QVBoxLayout* deploy_action1_back_layout_;
@@ -79,6 +80,7 @@ namespace ModelecGUI
             deploy_action1_back_servo4_state_;
 
         QPushButton* deploy_action1_back_down_button_;
+        QPushButton* deploy_action1_back_rotate_button_;
 
         // ---- Action2 ----
         QVBoxLayout* deploy_action2_layout_;

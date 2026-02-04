@@ -85,12 +85,9 @@ namespace ModelecGUI
         connect(deploy_action1_front_servo1_button_, &QPushButton::clicked, this,
             [this]()
             {
-                deploy_action1_front_servo1_state_ = !deploy_action1_front_servo1_state_;
-
                 ActionExec action_exec;
 
-                action_exec.action = (deploy_action1_front_servo1_state_
-                    ? ActionExec::TAKE : ActionExec::FREE) + ActionExec::DELIMITER + "1" + ActionExec::DELIMITER + "1";
+                action_exec.action = ActionExec::TOGGLE_SERVO + ActionExec::DELIMITER + "0" + ActionExec::DELIMITER + "1";
 
                 action_exec_pub_->publish(action_exec);
             });
@@ -98,12 +95,9 @@ namespace ModelecGUI
         connect(deploy_action1_front_servo2_button_, &QPushButton::clicked, this,
             [this]()
             {
-                deploy_action1_front_servo2_state_ = !deploy_action1_front_servo2_state_;
-
                 ActionExec action_exec;
 
-                action_exec.action = (deploy_action1_front_servo2_state_
-                    ? ActionExec::TAKE : ActionExec::FREE) + ActionExec::DELIMITER + "1" + ActionExec::DELIMITER + "2";
+                action_exec.action = ActionExec::TOGGLE_SERVO + ActionExec::DELIMITER + "1" + ActionExec::DELIMITER + "1";
 
                 action_exec_pub_->publish(action_exec);
             });
@@ -111,12 +105,9 @@ namespace ModelecGUI
         connect(deploy_action1_front_servo3_button_, &QPushButton::clicked, this,
             [this]()
             {
-                deploy_action1_front_servo3_state_ = !deploy_action1_front_servo3_state_;
-
                 ActionExec action_exec;
 
-                action_exec.action = (deploy_action1_front_servo3_state_
-                    ? ActionExec::TAKE : ActionExec::FREE) + ActionExec::DELIMITER + "1" + ActionExec::DELIMITER + "3";
+                action_exec.action = ActionExec::TOGGLE_SERVO + ActionExec::DELIMITER + "3" + ActionExec::DELIMITER + "1";
 
                 action_exec_pub_->publish(action_exec);
             });
@@ -124,12 +115,9 @@ namespace ModelecGUI
         connect(deploy_action1_front_servo4_button_, &QPushButton::clicked, this,
             [this]()
             {
-                deploy_action1_front_servo4_state_ = !deploy_action1_front_servo4_state_;
-
                 ActionExec action_exec;
 
-                action_exec.action = (deploy_action1_front_servo4_state_
-                    ? ActionExec::TAKE : ActionExec::FREE) + ActionExec::DELIMITER + "1" + ActionExec::DELIMITER + "4";
+                action_exec.action = ActionExec::TOGGLE_SERVO + ActionExec::DELIMITER + "4" + ActionExec::DELIMITER + "1";
 
                 action_exec_pub_->publish(action_exec);
             });
@@ -186,12 +174,9 @@ namespace ModelecGUI
         connect(deploy_action1_back_servo1_button_, &QPushButton::clicked, this,
             [this]()
             {
-                deploy_action1_back_servo1_state_ = !deploy_action1_back_servo1_state_;
-
                 ActionExec action_exec;
 
-                action_exec.action = (deploy_action1_back_servo1_state_
-                    ? ActionExec::TAKE : ActionExec::FREE) + ActionExec::DELIMITER + "0" + ActionExec::DELIMITER + "1";
+                action_exec.action = ActionExec::TOGGLE_SERVO + ActionExec::DELIMITER + "0" + ActionExec::DELIMITER + "0";
 
                 action_exec_pub_->publish(action_exec);
             });
@@ -199,12 +184,9 @@ namespace ModelecGUI
         connect(deploy_action1_back_servo2_button_, &QPushButton::clicked, this,
             [this]()
             {
-                deploy_action1_back_servo2_state_ = !deploy_action1_back_servo2_state_;
-
                 ActionExec action_exec;
 
-                action_exec.action = (deploy_action1_back_servo2_state_
-                    ? ActionExec::TAKE : ActionExec::FREE) + ActionExec::DELIMITER + "0" + ActionExec::DELIMITER + "2";
+                action_exec.action = ActionExec::TOGGLE_SERVO + ActionExec::DELIMITER + "1" + ActionExec::DELIMITER + "0";
 
                 action_exec_pub_->publish(action_exec);
             });
@@ -212,12 +194,9 @@ namespace ModelecGUI
         connect(deploy_action1_back_servo3_button_, &QPushButton::clicked, this,
             [this]()
             {
-                deploy_action1_back_servo3_state_ = !deploy_action1_back_servo3_state_;
-
                 ActionExec action_exec;
 
-                action_exec.action = (deploy_action1_back_servo3_state_
-                    ? ActionExec::TAKE : ActionExec::FREE) + ActionExec::DELIMITER + "0" + ActionExec::DELIMITER + "3";
+                action_exec.action = ActionExec::TOGGLE_SERVO + ActionExec::DELIMITER + "2" + ActionExec::DELIMITER + "0";
 
                 action_exec_pub_->publish(action_exec);
             });
@@ -225,12 +204,9 @@ namespace ModelecGUI
         connect(deploy_action1_back_servo4_button_, &QPushButton::clicked, this,
             [this]()
             {
-                deploy_action1_back_servo4_state_ = !deploy_action1_back_servo4_state_;
-
                 ActionExec action_exec;
 
-                action_exec.action = (deploy_action1_back_servo4_state_
-                    ? ActionExec::TAKE : ActionExec::FREE) + ActionExec::DELIMITER + "0" + ActionExec::DELIMITER + "4";
+                action_exec.action = ActionExec::TOGGLE_SERVO + ActionExec::DELIMITER + "3" + ActionExec::DELIMITER + "0";
 
                 action_exec_pub_->publish(action_exec);
             });

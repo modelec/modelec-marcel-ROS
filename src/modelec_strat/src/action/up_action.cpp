@@ -34,12 +34,12 @@ void Modelec::UPAction::Next()
             if (side_ == FRONT || side_ == BOTH)
             {
                 msg.items[0].id = 0;
-                msg.items[0].start_angle = 2.91;
+                msg.items[0].start_angle = 2.93;
                 msg.items[0].end_angle = 1.76;
                 msg.items[0].duration_s = 2;
 
                 msg.items[1].id = 1;
-                msg.items[1].start_angle = 0.95;
+                msg.items[1].start_angle = 0.91;
                 msg.items[1].end_angle = 2.06;
                 msg.items[1].duration_s = 2;
 

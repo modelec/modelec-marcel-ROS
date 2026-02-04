@@ -107,7 +107,7 @@ namespace ModelecGUI
             {
                 ActionExec action_exec;
 
-                action_exec.action = ActionExec::TOGGLE_SERVO + ActionExec::DELIMITER + "3" + ActionExec::DELIMITER + "1";
+                action_exec.action = ActionExec::TOGGLE_SERVO + ActionExec::DELIMITER + "2" + ActionExec::DELIMITER + "1";
 
                 action_exec_pub_->publish(action_exec);
             });
@@ -117,7 +117,7 @@ namespace ModelecGUI
             {
                 ActionExec action_exec;
 
-                action_exec.action = ActionExec::TOGGLE_SERVO + ActionExec::DELIMITER + "4" + ActionExec::DELIMITER + "1";
+                action_exec.action = ActionExec::TOGGLE_SERVO + ActionExec::DELIMITER + "3" + ActionExec::DELIMITER + "1";
 
                 action_exec_pub_->publish(action_exec);
             });

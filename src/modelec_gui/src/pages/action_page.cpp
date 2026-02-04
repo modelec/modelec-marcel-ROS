@@ -143,6 +143,7 @@ namespace ModelecGUI
         deploy_action1_front_layout_->addWidget(deploy_action1_front_up_button_);
         deploy_action1_front_layout_->addLayout(deploy_action1_front_servos_layout_);
         deploy_action1_front_layout_->addWidget(deploy_action1_front_down_button_);
+        deploy_action1_front_layout_->addWidget(deploy_action1_front_rotate_button_);
 
         deploy_action1_back_layout_ = new QVBoxLayout;
         deploy_action1_back_label_ = new QLabel("Back Action 1");
@@ -243,6 +244,7 @@ namespace ModelecGUI
         deploy_action1_back_layout_->addWidget(deploy_action1_back_up_button_);
         deploy_action1_back_layout_->addLayout(deploy_action1_back_servos_layout_);
         deploy_action1_back_layout_->addWidget(deploy_action1_back_down_button_);
+        deploy_action1_back_layout_->addWidget(deploy_action1_back_rotate_button_);
 
         deploy_action1_layout_->addLayout(deploy_action1_front_layout_);
         deploy_action1_layout_->addLayout(deploy_action1_back_layout_);

@@ -45,3 +45,4 @@ gio set ~/Desktop/no_lidar.joy.ros2_launch_marcel.desktop "metadata::trusted" tr
 gio set ~/Desktop/no_lidar.ros2_launch_marcel.desktop "metadata::trusted" true
 gio set ~/Desktop/joy.ros2_launch_marcel.desktop "metadata::trusted" true
 gio set ~/Desktop/ros2_launch_marcel.desktop "metadata::trusted" true
+gio set ~/Desktop/no-gui.ros2_launch_marcel.desktop "metadata::trusted" true

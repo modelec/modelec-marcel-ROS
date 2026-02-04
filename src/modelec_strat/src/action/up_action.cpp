@@ -43,6 +43,8 @@ void Modelec::UPAction::Next()
                 msg.items[1].end_angle = 2.06;
                 msg.items[1].duration_s = 2;
 
+                RCLCPP_INFO(rclcpp::get_logger("test"), "Front arm rotated: %d", action_executor_->arm_pos_[FRONT].rotated);
+
                 msg.items[2].id = 2;
                 msg.items[2].start_angle = action_executor_->arm_pos_[FRONT].rotated ? 0 : 3.2;
                 msg.items[2].end_angle = 0.5;

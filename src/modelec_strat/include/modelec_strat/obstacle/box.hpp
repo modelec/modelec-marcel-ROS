@@ -37,10 +37,10 @@ namespace Modelec
         std::vector<double> possible_angles_;
 
         std::array<Team, 4> colors_ = {
-            YELLOW,
-            YELLOW,
-            YELLOW,
-            YELLOW
+            BLUE,
+            BLUE,
+            BLUE,
+            BLUE
         };
     };
 }

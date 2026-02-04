@@ -123,7 +123,6 @@ void Modelec::DownAction::End()
     }
     else
     {
-        RCLCPP_INFO(rclcpp::get_logger("test"), "Setting down state for side %d", side_);
         action_executor_->arm_pos_[side_].down = true;
 
         action_executor_->arm_pos_[side_].rotated = inverted_;

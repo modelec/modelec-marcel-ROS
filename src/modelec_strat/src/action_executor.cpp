@@ -338,7 +338,7 @@ namespace Modelec
     {
         if ((arm_pos_[side].rotated != rotated || !arm_pos_[side].down) || force)
         {
-            RCLCPP_INFO(
+            RCLCPP_DEBUG(
                 node_->get_logger(),
                 "ActionExecutor RotateArm called for side=%d, force=%d, rotated=%d",
                 static_cast<int>(side),
@@ -347,9 +347,6 @@ namespace Modelec
 
             if (arm_pos_[side].down)
             {
-                RCLCPP_INFO(
-                    node_->get_logger(),
-                    "ActionExecutor RotateArm: arm is down, lifting first");
                 auto action = std::make_shared<UPAction>(shared_from_this(), side);
                 action_.push(action);
             }
@@ -470,7 +467,7 @@ namespace Modelec
 
     void ActionExecutor::ActionFinished(const std::shared_ptr<BaseAction>& action)
     {
-        RCLCPP_INFO(
+        RCLCPP_DEBUG(
             node_->get_logger(),
             "ActionExecutor ActionFinished called for action");
         action->End();

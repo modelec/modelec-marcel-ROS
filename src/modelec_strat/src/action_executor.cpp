@@ -205,6 +205,33 @@ namespace Modelec
             });
 
         score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
+
+        ask_color_client_ = node_->create_client<std_srvs::srv::Trigger>("action/detect_color");
+
+        rclcpp::QoS qos(rclcpp::KeepLast(10));
+        qos.reliable();
+
+        color_sub_ = node_->create_subscription<std_msgs::msg::String>(
+            "/action/detect_color/res", qos, [this](const std_msgs::msg::String::SharedPtr msg)
+            {
+                auto res = split(msg->data, ';');
+                if (res.size() < 2 || res[0] != "1")
+                {
+                    RCLCPP_WARN(node_->get_logger(), "Color detection failed: %s", msg->data.c_str());
+                    return;
+                }
+
+                RCLCPP_INFO(node_->get_logger(), "Color detection succeeded: %s", res[1].c_str());
+
+                if (box_obstacles_[cam_side_] != nullptr) {
+                    box_obstacles_[cam_side_]->ParseColor(res[1]);
+                } else {
+                    RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box in the cam side");
+                }
+            });
+
+        ask_pub_ = node_->create_publisher<std_msgs::msg::Empty>(
+            "/action/detect_color/ask", qos);
     }
 
     rclcpp::Node::SharedPtr ActionExecutor::GetNode() const
@@ -508,5 +535,31 @@ namespace Modelec
         std_msgs::msg::Int64 msg;
         msg.data = point;
         score_pub_->publish(msg);
+    }
+
+    void ActionExecutor::AskColor() const
+    {
+        /*if (!ask_color_client_->service_is_ready()) {
+            RCLCPP_ERROR(node_->get_logger(), "Color detection service not ready");
+            return;
+        }
+
+        auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+
+        ask_color_client_->async_send_request(request,
+            [this](rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture future) {
+                auto response = future.get();
+                if (response->success) {
+                    RCLCPP_INFO(node_->get_logger(), "Color detection succeeded: %s", response->message.c_str());
+                    if (box_obstacles_[cam_side_] != nullptr) {
+                        box_obstacles_[cam_side_]->ParseColor(response->message);
+                    } else {
+                        RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box in the cam side");
+                    }
+                } else {
+                    RCLCPP_ERROR(node_->get_logger(), "Color detection failed: %s", response->message.c_str());
+                }
+            });*/
+        ask_pub_->publish(std_msgs::msg::Empty());
     }
 }

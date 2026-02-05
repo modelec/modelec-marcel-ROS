@@ -32,6 +32,8 @@ namespace Modelec
 
         std::vector<int> GetSide(Team team) const;
 
+        void ParseColor(const std::string& colorStr);
+
     protected:
 
         std::vector<double> possible_angles_;

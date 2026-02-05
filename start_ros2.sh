@@ -9,4 +9,4 @@ export RCL_LOG_LEVEL=info
 export FASTRTPS_DEFAULT_PROFILES_FILE=/home/modelec/Modelec-ROS2/fastdds_setup.xml
 #export ROS_DOMAIN_ID=128
 
-exec ros2 launch modelec_core modelec.launch.py "$@"
+exec ros2 launch modelec_core modelec.launch.py with_color_detector:=false "$@"

@@ -9,6 +9,8 @@
 
 #include <sensor_msgs/msg/joy.hpp>
 #include <std_msgs/msg/int64.hpp>
+#include <std_msgs/msg/string.hpp>
+#include <std_srvs/srv/trigger.hpp>
 
 #include "action/base_action.hpp"
 #include "missions/thermo_mission.hpp"
@@ -102,6 +104,8 @@ namespace Modelec
 
         void SendPoint(int point) const;
 
+        void AskColor() const;
+
     protected:
         rclcpp::Publisher<modelec_interfaces::msg::ActionAscPos>::SharedPtr asc_move_pub_;
         rclcpp::Publisher<modelec_interfaces::msg::ActionServoPosArray>::SharedPtr servo_move_pub_;
@@ -113,10 +117,15 @@ namespace Modelec
         rclcpp::Subscription<modelec_interfaces::msg::ActionRelayStateArray>::SharedPtr relay_move_res_sub_;
         rclcpp::Subscription<modelec_interfaces::msg::ActionServoTimedArray>::SharedPtr servo_timed_move_res_sub_;
 
+        rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr ask_color_client_;
+
         rclcpp::Subscription<modelec_interfaces::msg::ActionExec>::SharedPtr action_exec_sub_;
         rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
 
         rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr score_pub_;
+
+        rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr ask_pub_;
+        rclcpp::Subscription<std_msgs::msg::String>::SharedPtr color_sub_;
 
         std::queue<std::shared_ptr<BaseAction>> action_;
 

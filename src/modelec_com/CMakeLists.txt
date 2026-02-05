@@ -10,9 +10,12 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(ament_index_cpp REQUIRED)
 find_package(fmt)
+
+find_package(OpenCV REQUIRED)
 
 find_package(modelec_interfaces REQUIRED)
 find_package(modelec_utils REQUIRED)
@@ -35,10 +38,35 @@ target_include_directories(pcb_action_interface PUBLIC
         $<INSTALL_INTERFACE:include>
 )
 
+# Color Detector Node
+add_executable(color_detector
+  src/color_detector.cpp
+)
+
+ament_target_dependencies(color_detector
+  rclcpp
+  std_msgs
+  std_srvs
+  modelec_interfaces
+  ament_index_cpp
+)
+
+target_link_libraries(color_detector
+  ${OpenCV_LIBS}
+  modelec_utils::utils
+  modelec_utils::config
+)
+
+target_include_directories(color_detector PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
 # Install targets
 install(TARGETS
         pcb_odo_interface
         pcb_action_interface
+        color_detector
         DESTINATION lib/${PROJECT_NAME}
 )
 

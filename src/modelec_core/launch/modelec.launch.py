@@ -36,6 +36,9 @@ def generate_launch_description():
     with_joy_arg = DeclareLaunchArgument(
         'with_joy', default_value='true', description='Launch joystick node?'
     )
+    with_color_detector_arg = DeclareLaunchArgument(
+        'with_color_detector', default_value='true', description='Launch color detector node?'
+    )
 
     channel_type = LaunchConfiguration('channel_type', default='serial')
     serial_port = LaunchConfiguration('serial_port', default='/dev/rplidar')
@@ -153,6 +156,8 @@ def generate_launch_description():
                     package='modelec_strat',
                     executable='strat_fsm',
                     name='strat_fsm',
+                    # prefix=['xterm -e gdb -ex run --args'],
+                    # output='screen',
                 ),
                 Node(
                     package='modelec_strat',
@@ -191,6 +196,18 @@ def generate_launch_description():
             ]
         return []
 
+    def launch_color_detector(context, *args, **kwargs):
+        if context.launch_configurations.get('with_color_detector') == 'true':
+            return [
+                Node(
+                    package='modelec_com',
+                    executable='color_detector',
+                    name='color_detector',
+                    output='screen',
+                )
+            ]
+        return []
+
     # -------------------------------------------------
     # Final LaunchDescription
     # -------------------------------------------------
@@ -209,6 +226,7 @@ def generate_launch_description():
         with_strat_arg,
         with_enemy_manager_arg,
         with_joy_arg,
+        with_color_detector_arg,
 
         OpaqueFunction(function=launch_rplidar_restart_if_needed),
         OpaqueFunction(function=launch_gui),
@@ -216,4 +234,7 @@ def generate_launch_description():
         OpaqueFunction(function=launch_strat),
         OpaqueFunction(function=launch_enemy_manager),
         OpaqueFunction(function=launch_joy),
+        OpaqueFunction(function=launch_color_detector),
     ])
+
+#  prefix = ['xterm -e gdb -ex run --args']

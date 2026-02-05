@@ -1,5 +1,7 @@
 #include <modelec_strat/obstacle/box.hpp>
 
+#include "modelec_utils/utils.hpp"
+
 namespace Modelec
 {
     BoxObstacle::BoxObstacle(int id, int x, int y, double theta, int w, int h, const std::string& type)
@@ -91,5 +93,21 @@ namespace Modelec
             }
         }
         return sideColors;
+    }
+
+    void BoxObstacle::ParseColor(const std::string& colorStr)
+    {
+        std::vector<std::string> tokens = split(colorStr, ';');
+        for (size_t i = 0; i < tokens.size() && i < colors_.size(); ++i)
+        {
+            if (tokens[i] == "yellow")
+            {
+                colors_[i] = YELLOW;
+            }
+            else if (tokens[i] == "blue")
+            {
+                colors_[i] = BLUE;
+            }
+        }
     }
 }

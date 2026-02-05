@@ -137,6 +137,7 @@ namespace Modelec {
         case UP:
             {
                 action_executor_->Up(side_);
+                action_executor_->LookOn(side_);
                 deploy_time_ = node_->now();
             }
             break;
@@ -150,7 +151,7 @@ namespace Modelec {
 
                 nav_->GetPathfinding()->RemoveObstacle(action_executor_->box_obstacles_[side_]->GetId());
 
-                action_executor_->LookOn(side_);
+                action_executor_->AskColor();
             }
 
             status_ = MissionStatus::DONE;

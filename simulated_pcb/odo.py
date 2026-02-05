@@ -125,6 +125,9 @@ class SimulatedPCB:
 
         elif msg.startswith("SET;START;"):
             self.start = msg.split(';')[2] == '1'
+            if not self.start:
+                self.waypoints.clear()
+                self.waypoint_queue.clear()
             self.ser.write(b"OK;START;1\n")
 
         # --- MULTI WAYPOINT (clears previous) ---

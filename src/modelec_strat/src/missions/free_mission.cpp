@@ -37,6 +37,7 @@ namespace Modelec {
     {
         if (!action_executor_->IsActionDone())
         {
+            // RCLCPP_INFO(node_->get_logger(), "FreeMission: Waiting for action to complete");
             return;
         }
 
@@ -141,7 +142,7 @@ namespace Modelec {
             {
                 auto obs = action_executor_->box_obstacles_[side_];
 
-                auto vect = obs->GetSide(nav_->GetTeamId() == NavigationHelper::BLUE ? BoxObstacle::YELLOW : BoxObstacle::BLUE);
+                auto vect = obs->GetSide(nav_->GetTeamId() == NavigationHelper::BLUE ? BoxObstacle::BLUE : BoxObstacle::YELLOW);
 
                 auto servo = std::vector<std::pair<int, BaseAction::Side>>();
                 for (auto s : vect)
@@ -167,21 +168,7 @@ namespace Modelec {
                 action_executor_->Free({{0, side_}, {1, side_}, {2, side_}, {3, side_}});
                 deploy_time_ = node_->now();
 
-                auto obs = action_executor_->box_obstacles_[side_];
-                action_executor_->box_obstacles_[side_] = nullptr;
-
-                auto pos = nav_->GetCurrentPos();
-
-                obs->SetPosition(
-                    pos->x + 200 * cos(pos->theta + (side_ == BaseAction::FRONT ? 0 : M_PI)),
-                    pos->y + 200 * sin(pos->theta + (side_ == BaseAction::FRONT ? 0 : M_PI)),
-                    pos->theta);
-
-                obs->SetAtObjective(true);
-
-                nav_->GetPathfinding()->AddObstacle(obs);
-
-                min_time_ = node_->now() + rclcpp::Duration::from_seconds(0.5);
+                min_time_ = node_->now() + rclcpp::Duration::from_seconds(1);
             }
             break;
         case UP:
@@ -211,6 +198,20 @@ namespace Modelec {
             break;
         case DONE:
             {
+                auto obs = action_executor_->box_obstacles_[side_];
+                action_executor_->box_obstacles_[side_] = nullptr;
+
+                auto pos = nav_->GetCurrentPos();
+
+                obs->SetPosition(
+                    pos->x + 300 * cos(pos->theta + (side_ == BaseAction::FRONT ? 0 : M_PI)),
+                    pos->y + 300 * sin(pos->theta + (side_ == BaseAction::FRONT ? 0 : M_PI)),
+                    pos->theta);
+
+                obs->SetAtObjective(true);
+
+                nav_->GetPathfinding()->AddObstacle(obs);
+
                 target_deposite_zone_->Validate(true);
             }
 

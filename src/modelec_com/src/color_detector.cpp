@@ -1,13 +1,32 @@
 #include <modelec_com/color_detector.hpp>
-
-#include "modelec_utils/utils.hpp"
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <modelec_utils/config.hpp>
+#include <modelec_utils/utils.hpp>
 
 namespace Modelec
 {
     ColorDetector::ColorDetector()
     : Node("color_detector")
     {
-        cap_.open("http://192.168.1.21:8080/video");
+        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
+        if (!Config::load(config_path))
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
+        }
+
+        link_ = Config::get<std::string>("config.cam.link", "/dev/video0");
+        save_to_file_ = Config::get<bool>("config.cam.save_to_file.enabled", false);
+        save_directory_ = Config::get<std::string>("config.cam.save_to_file.path", "./");
+        enable_ = Config::get<bool>("config.cam.enabled", false);
+
+        if (!enable_)
+        {
+            RCLCPP_INFO(get_logger(), "Camera disabled by config");
+            rclcpp::shutdown();
+            return;
+        }
+
+        cap_.open(link_);
         if (!cap_.isOpened()) {
             RCLCPP_FATAL(get_logger(), "Camera not detected");
             rclcpp::shutdown();
@@ -45,7 +64,7 @@ namespace Modelec
 
                 if (save_to_file_)
                 {
-                    std::string path = generateImagePath();
+                    std::string path = save_directory_ + generateImagePath();
                     cv::imwrite(path, frame);
                     RCLCPP_INFO(get_logger(), "Saved snapshot to %s", path.c_str());
                 }
@@ -80,7 +99,7 @@ namespace Modelec
 
         if (save_to_file_)
         {
-            std::string path = generateImagePath();
+            std::string path = save_directory_ + generateImagePath();
             cv::imwrite(path, frame);
             RCLCPP_INFO(get_logger(), "Saved snapshot to %s", path.c_str());
         }

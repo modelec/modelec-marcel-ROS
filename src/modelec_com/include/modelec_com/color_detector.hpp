@@ -29,6 +29,9 @@ namespace Modelec
         rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr ask_sub_;
         rclcpp::Publisher<std_msgs::msg::String>::SharedPtr color_pub_;
 
+        std::string link_;
         bool save_to_file_ = true;
+        std::string save_directory_ = "./";
+        bool enable_ = false;
     };
 }

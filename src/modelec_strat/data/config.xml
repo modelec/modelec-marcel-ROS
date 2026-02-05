@@ -72,4 +72,12 @@
             <finish x="2300" y="175" theta="3.14" />
         </blue>
     </thermo>
+    <cam>
+        <save_to_file>
+            <enabled>true</enabled>
+            <path>./cam/</path>
+        </save_to_file>
+        <enabled>false</enabled>
+        <link>/dev/video0</link>
+    </cam>
 </config>

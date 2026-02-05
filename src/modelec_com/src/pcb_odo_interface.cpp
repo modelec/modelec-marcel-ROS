@@ -1,7 +1,5 @@
 #include <modelec_com/pcb_odo_interface.hpp>
 #include <modelec_utils/utils.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
-#include <modelec_utils/config.hpp>
 
 namespace Modelec
 {

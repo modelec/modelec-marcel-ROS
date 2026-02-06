@@ -18,17 +18,11 @@ namespace Modelec
         save_to_file_ = Config::get<bool>("config.cam.save_to_file.enabled", false);
         save_directory_ = Config::get<std::string>("config.cam.save_to_file.path", "./");
         enable_ = Config::get<bool>("config.cam.enabled", false);
+        headless_ = Config::get<bool>("config.cam.headless", true);
 
         if (!enable_)
         {
             RCLCPP_INFO(get_logger(), "Camera disabled by config");
-            rclcpp::shutdown();
-            return;
-        }
-
-        cap_.open(link_);
-        if (!cap_.isOpened()) {
-            RCLCPP_FATAL(get_logger(), "Camera not detected");
             rclcpp::shutdown();
             return;
         }
@@ -64,19 +58,40 @@ namespace Modelec
 
         color_pub_ = create_publisher<std_msgs::msg::String>("action/detect_color/res", qos);
 
+        SetupRois();
+
+        if (!headless_)
+        {
+            cv::namedWindow("color_detector", cv::WINDOW_NORMAL);
+        }
+
         RCLCPP_INFO(get_logger(), "Color detector service ready");
+    }
+
+    ColorDetector::~ColorDetector()
+    {
+        if (!headless_)
+        {
+            cv::destroyAllWindows();
+        }
     }
 
     bool ColorDetector::processSnapshot(std::vector<std::string>& colors, std::string& error)
     {
-        if (!cap_.isOpened())
+        cv::VideoCapture cap(link_);
+
+        if (!cap.isOpened())
         {
-            error = "Camera not opened";
+            error = "Failed to open camera";
             return false;
         }
 
+        cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
+
         cv::Mat frame;
-        cap_ >> frame;
+
+        for (int i = 0; i < 3; ++i)
+            cap >> frame;
 
         if (frame.empty())
         {
@@ -85,16 +100,24 @@ namespace Modelec
         }
 
         cv::Mat hsv;
+        cv::GaussianBlur(frame, frame, cv::Size(5, 5), 0);
         cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
 
         colors = classifyROIs(hsv, frame);
+
+        if (!headless_)
+        {
+            cv::imshow("color_detector", frame);
+            cv::waitKey(1);
+        }
 
         if (save_to_file_)
         {
             std::string path = save_directory_ + generateImagePath();
             cv::imwrite(path, frame);
-            RCLCPP_INFO(get_logger(), "Saved annotated snapshot: %s", path.c_str());
         }
+
+        cap.release();
 
         return true;
     }
@@ -120,16 +143,9 @@ namespace Modelec
     // 4 independent ROIs
     std::vector<std::string> ColorDetector::classifyROIs(const cv::Mat& hsv, cv::Mat& debug_img) const
     {
-        std::vector<cv::Rect> rois = {
-            { 98,  98, 5, 5},
-            {198,  98, 5, 5},
-            { 98, 198, 5, 5},
-            {198, 198, 5, 5}
-        };
-
         std::vector<std::string> results;
 
-        for (auto r : rois)
+        for (auto r : rois_)
         {
             cv::Rect roi = r & cv::Rect(0, 0, hsv.cols, hsv.rows);
             cv::Scalar mean = cv::mean(hsv(roi));
@@ -154,20 +170,26 @@ namespace Modelec
         return results;
     }
 
-    std::string ColorDetector::classify(const cv::Vec3d& hsv) const
+    std::string ColorDetector::classify(const cv::Vec3d& hsv_roi) const
     {
-        int h = static_cast<int>(hsv[0]);
-        int s = static_cast<int>(hsv[1]);
-        int v = static_cast<int>(hsv[2]);
+        cv::Scalar yellow_low(20, 100, 100), yellow_high(40, 255, 255);
+        cv::Scalar blue_low(100, 100, 100), blue_high(130, 255, 255);
 
-        RCLCPP_DEBUG(get_logger(), "Classifying color with HSV: (%d, %d, %d)", h, s, v);
+        cv::Mat yellow_mask, blue_mask;
+        cv::inRange(hsv_roi, yellow_low, yellow_high, yellow_mask);
+        cv::inRange(hsv_roi, blue_low, blue_high, blue_mask);
 
-        if (s < 50 || v < 50)
-            return "unknown";
+        int yellow_count = cv::countNonZero(yellow_mask);
+        int blue_count = cv::countNonZero(blue_mask);
+        int total_pixels = hsv_roi.rows * hsv_roi.cols;
 
-        if (h >= 60)
-            return "blue";
-        return "yellow";
+        double yellow_ratio = static_cast<double>(yellow_count) / total_pixels;
+        double blue_ratio = static_cast<double>(blue_count) / total_pixels;
+
+        if (yellow_ratio > blue_ratio && yellow_ratio > 0.3) return "yellow";
+        if (blue_ratio > yellow_ratio && blue_ratio > 0.3) return "blue";
+
+        return "unknown";
     }
 
     std::string ColorDetector::generateImagePath() const
@@ -181,6 +203,38 @@ namespace Modelec
         return ss.str();
     }
 
+    void ColorDetector::SetupRois()
+    {
+        rois_.resize(4);
+
+        rois_[0] = {
+            Config::get<int>("config.cam.points.first@x", 0),
+            Config::get<int>("config.cam.points.first@y", 0),
+            Config::get<int>("config.cam.points.first@w", 0),
+            Config::get<int>("config.cam.points.first@h", 0)
+        };
+
+        rois_[1] = {
+            Config::get<int>("config.cam.points.second@x", 0),
+            Config::get<int>("config.cam.points.second@y", 0),
+            Config::get<int>("config.cam.points.second@w", 0),
+            Config::get<int>("config.cam.points.second@h", 0)
+        };
+
+        rois_[2] = {
+            Config::get<int>("config.cam.points.third@x", 0),
+            Config::get<int>("config.cam.points.third@y", 0),
+            Config::get<int>("config.cam.points.third@w", 0),
+            Config::get<int>("config.cam.points.third@h", 0)
+        };
+
+        rois_[3] = {
+            Config::get<int>("config.cam.points.fourth@x", 0),
+            Config::get<int>("config.cam.points.fourth@y", 0),
+            Config::get<int>("config.cam.points.fourth@w", 0),
+            Config::get<int>("config.cam.points.fourth@h", 0)
+        };
+    }
 }
 
 

@@ -12,6 +12,8 @@ namespace Modelec
     {
     public:
         ColorDetector();
+
+        ~ColorDetector() override;
     private:
         bool processSnapshot(std::vector<std::string>& colors, std::string& error);
 
@@ -21,19 +23,23 @@ namespace Modelec
 
         std::vector<std::string> classifyROIs(const cv::Mat& hsv, cv::Mat& debug_img) const;
 
-        std::string classify(const cv::Vec3d& hsv) const;
+        std::string classify(const cv::Vec3d& hsv_roi) const;
 
         std::string generateImagePath() const;
 
-        cv::VideoCapture cap_;
+        void SetupRois();
+
         rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_;
 
         rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr ask_sub_;
         rclcpp::Publisher<std_msgs::msg::String>::SharedPtr color_pub_;
 
+        std::vector<cv::Rect> rois_;
+
         std::string link_;
         bool save_to_file_ = true;
         std::string save_directory_ = "./";
         bool enable_ = false;
+        bool headless_ = true;
     };
 }

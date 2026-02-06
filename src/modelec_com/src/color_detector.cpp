@@ -46,35 +46,18 @@ namespace Modelec
             "action/detect_color/ask", qos,
             [this](const std_msgs::msg::Empty::SharedPtr)
             {
-                auto res = std_msgs::msg::String();
+                std_msgs::msg::String res;
+                std::vector<std::string> colors;
+                std::string error;
 
-                if (!cap_.isOpened())
+                if (!processSnapshot(colors, error))
                 {
-                    res.data = "0;Camera not opened";
-                    return;
+                    res.data = "0;" + error;
                 }
-
-                cv::Mat frame;
-                cap_ >> frame;
-
-                if (frame.empty()) {
-                    res.data = "0;Empty frame";
-                    return;
-                }
-
-                if (save_to_file_)
+                else
                 {
-                    std::string path = save_directory_ + generateImagePath();
-                    cv::imwrite(path, frame);
-                    RCLCPP_INFO(get_logger(), "Saved snapshot to %s", path.c_str());
+                    res.data = "1;" + join(colors, ";");
                 }
-
-                cv::Mat hsv;
-                cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
-
-                auto colors = classifyROIs(hsv);
-
-                res.data = "1;" + join(colors, ";");
 
                 color_pub_->publish(res);
             });
@@ -84,37 +67,58 @@ namespace Modelec
         RCLCPP_INFO(get_logger(), "Color detector service ready");
     }
 
-    void ColorDetector::onRequest(
-        const std::shared_ptr<std_srvs::srv::Trigger::Request>,
-        std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+    bool ColorDetector::processSnapshot(std::vector<std::string>& colors, std::string& error)
     {
+        if (!cap_.isOpened())
+        {
+            error = "Camera not opened";
+            return false;
+        }
+
         cv::Mat frame;
         cap_ >> frame;
 
-        if (frame.empty()) {
-            response->success = false;
-            response->message = "Empty frame";
-            return;
-        }
-
-        if (save_to_file_)
+        if (frame.empty())
         {
-            std::string path = save_directory_ + generateImagePath();
-            cv::imwrite(path, frame);
-            RCLCPP_INFO(get_logger(), "Saved snapshot to %s", path.c_str());
+            error = "Empty frame";
+            return false;
         }
 
         cv::Mat hsv;
         cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
 
-        auto colors = classifyROIs(hsv);
+        colors = classifyROIs(hsv, frame);
+
+        if (save_to_file_)
+        {
+            std::string path = save_directory_ + generateImagePath();
+            cv::imwrite(path, frame);
+            RCLCPP_INFO(get_logger(), "Saved annotated snapshot: %s", path.c_str());
+        }
+
+        return true;
+    }
+
+    void ColorDetector::onRequest(
+        const std::shared_ptr<std_srvs::srv::Trigger::Request>,
+        std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+    {
+        std::vector<std::string> colors;
+        std::string error;
+
+        if (!processSnapshot(colors, error))
+        {
+            response->success = false;
+            response->message = error;
+            return;
+        }
 
         response->success = true;
         response->message = join(colors, ";");
     }
 
     // 4 independent ROIs
-    std::vector<std::string> ColorDetector::classifyROIs(const cv::Mat& hsv) const
+    std::vector<std::string> ColorDetector::classifyROIs(const cv::Mat& hsv, cv::Mat& debug_img) const
     {
         std::vector<cv::Rect> rois = {
             { 98,  98, 5, 5},
@@ -124,11 +128,29 @@ namespace Modelec
         };
 
         std::vector<std::string> results;
-        for (const auto& roi : rois) {
-            cv::Rect safe_roi = roi & cv::Rect(0, 0, hsv.cols, hsv.rows);
-            cv::Scalar mean = cv::mean(hsv(safe_roi));
-            results.push_back(classify(cv::Vec3d(mean[0], mean[1], mean[2])));
+
+        for (auto r : rois)
+        {
+            cv::Rect roi = r & cv::Rect(0, 0, hsv.cols, hsv.rows);
+            cv::Scalar mean = cv::mean(hsv(roi));
+
+            std::string color = classify(cv::Vec3d(mean[0], mean[1], mean[2]));
+            results.push_back(color);
+
+            if (save_to_file_)
+            {
+                cv::rectangle(debug_img, roi, {0, 255, 0}, 1);
+                cv::putText(
+                    debug_img,
+                    color,
+                    roi.tl() + cv::Point(0, -5),
+                    cv::FONT_HERSHEY_SIMPLEX,
+                    0.4,
+                    {0, 255, 0},
+                    1);
+            }
         }
+
         return results;
     }
 
@@ -155,7 +177,7 @@ namespace Modelec
         std::stringstream ss;
         ss << "snapshot_"
            << std::put_time(std::localtime(&in_time_t), "%Y%m%d_%H%M%S")
-           << ".png"; // or .jpg
+           << ".png";
         return ss.str();
     }
 

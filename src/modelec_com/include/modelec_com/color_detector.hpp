@@ -13,11 +13,13 @@ namespace Modelec
     public:
         ColorDetector();
     private:
+        bool processSnapshot(std::vector<std::string>& colors, std::string& error);
+
         void onRequest(
             const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
             std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
-        std::vector<std::string> classifyROIs(const cv::Mat& hsv) const;
+        std::vector<std::string> classifyROIs(const cv::Mat& hsv, cv::Mat& debug_img) const;
 
         std::string classify(const cv::Vec3d& hsv) const;
 

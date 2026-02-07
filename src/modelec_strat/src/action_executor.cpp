@@ -214,17 +214,17 @@ namespace Modelec
         color_sub_ = node_->create_subscription<std_msgs::msg::String>(
             "/action/detect_color/res", qos, [this](const std_msgs::msg::String::SharedPtr msg)
             {
-                auto res = split(msg->data, ';');
+                auto res = split(msg->data, '|');
                 if (res.size() < 2 || res[0] != "1")
                 {
                     RCLCPP_WARN(node_->get_logger(), "Color detection failed: %s", msg->data.c_str());
                     return;
                 }
 
-                RCLCPP_DEBUG(node_->get_logger(), "Color detection succeeded: %s", msg->data.c_str());
+                RCLCPP_DEBUG(node_->get_logger(), "Color detection succeeded: %s", res[1].c_str());
 
                 if (box_obstacles_[cam_side_] != nullptr) {
-                    box_obstacles_[cam_side_]->ParseColor(std::vector(res.begin() + 1, res.end()));
+                    box_obstacles_[cam_side_]->ParseColor(res[1]);
                 } else {
                     RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box in the cam side");
                 }

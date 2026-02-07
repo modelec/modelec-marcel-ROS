@@ -46,11 +46,11 @@ namespace Modelec
 
                 if (!processSnapshot(colors, error))
                 {
-                    res.data = "0;" + error;
+                    res.data = "0|" + error;
                 }
                 else
                 {
-                    res.data = "1;" + join(colors, ";");
+                    res.data = "1|" + join(colors, ";");
                 }
 
                 color_pub_->publish(res);

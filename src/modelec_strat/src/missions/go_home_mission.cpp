@@ -13,7 +13,9 @@ namespace Modelec
     {
         node_ = node;
 
-        mission_score_ = Config::get<int>("config.mission_score.go_home", 0);
+        node->declare_parameter("mission_score.go_home", 0);
+
+        mission_score_ = node->get_parameter("mission_score.go_home").as_int();
 
         score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
 

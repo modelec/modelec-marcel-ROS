@@ -5,19 +5,44 @@
 namespace Modelec
 {
     ColorDetector::ColorDetector()
-    : Node("color_detector")
+        : Node("color_detector")
     {
-        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
-        if (!Config::load(config_path))
+        this->declare_parameter("enabled", true);
+        this->declare_parameter("link", "");
+        this->declare_parameter("headless", true);
+        this->declare_parameter("save_to_file.enabled", true);
+        this->declare_parameter("save_to_file.path", "./");
+        this->declare_parameter("rois", rclcpp::PARAMETER_INTEGER_ARRAY);
+        this->declare_parameter("colors.blue", rclcpp::PARAMETER_INTEGER_ARRAY);
+        this->declare_parameter("colors.yellow", rclcpp::PARAMETER_INTEGER_ARRAY);
+
+        enable_ = this->get_parameter("enabled").as_bool();
+        link_ = this->get_parameter("link").as_string();
+        headless_ = this->get_parameter("headless").as_bool();
+        save_to_file_ = this->get_parameter("save_to_file.enabled").as_bool();
+        save_directory_ = this->get_parameter("save_to_file.path").as_string();
+
+        auto rois_param = this->get_parameter("rois").as_integer_array();
+        for (size_t i = 0; i + 3 < rois_param.size(); i += 4)
         {
-            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
+            rois_.emplace_back(rois_param[i], rois_param[i + 1], rois_param[i + 2], rois_param[i + 3]);
         }
 
-        link_ = Config::get<std::string>("config.cam.link", "/dev/video0");
-        save_to_file_ = Config::get<bool>("config.cam.save_to_file.enabled", false);
-        save_directory_ = Config::get<std::string>("config.cam.save_to_file.path", "./");
-        enable_ = Config::get<bool>("config.cam.enabled", false);
-        headless_ = Config::get<bool>("config.cam.headless", true);
+        auto blue_param = this->get_parameter("colors.blue").as_integer_array();
+        if (blue_param.size() >= 2)
+        {
+            color_configs_.push_back({
+                "blue", static_cast<double>(blue_param[0]), static_cast<double>(blue_param[1])
+            });
+        }
+
+        auto yellow_param = this->get_parameter("colors.yellow").as_integer_array();
+        if (yellow_param.size() >= 2)
+        {
+            color_configs_.push_back({
+                "yellow", static_cast<double>(yellow_param[0]), static_cast<double>(yellow_param[1])
+            });
+        }
 
         if (!enable_)
         {
@@ -56,11 +81,6 @@ namespace Modelec
             });
 
         color_pub_ = create_publisher<std_msgs::msg::String>("action/detect_color/res", qos);
-
-        rois_ = Config::get<std::vector<cv::Rect>>("config.cam.rois.roi", {});
-        color_configs_ = Config::get<std::vector<ColorSetting>>("config.cam.colors.color", {});
-
-        RCLCPP_DEBUG(get_logger(), "Loaded %zu ROIs and %zu color configs", rois_.size(), color_configs_.size());
 
         if (!headless_)
         {
@@ -157,9 +177,9 @@ namespace Modelec
             std::string color = classify(cv::Vec3d(mean[0], mean[1], mean[2]));
 
             RCLCPP_DEBUG(get_logger(), "ROI at (%d, %d, %d, %d) has mean HSV (%.2f, %.2f, %.2f) classified as %s",
-             roi.x, roi.y, roi.width, roi.height,
-             mean[0], mean[1], mean[2],
-             color.c_str());
+                         roi.x, roi.y, roi.width, roi.height,
+                         mean[0], mean[1], mean[2],
+                         color.c_str());
 
             results.push_back(color);
 
@@ -201,8 +221,8 @@ namespace Modelec
         auto in_time_t = std::chrono::system_clock::to_time_t(now);
         std::stringstream ss;
         ss << "snapshot_"
-           << std::put_time(std::localtime(&in_time_t), "%Y%m%d_%H%M%S")
-           << ".png";
+            << std::put_time(std::localtime(&in_time_t), "%Y%m%d_%H%M%S")
+            << ".png";
         return ss.str();
     }
 }

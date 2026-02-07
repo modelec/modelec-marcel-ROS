@@ -5,23 +5,13 @@ namespace Modelec
 {
     PamiManger::PamiManger() : Node("pami_manager")
     {
-        std::string config_file = ament_index_cpp::get_package_share_directory("modelec_strat") +
-            "/data/config.xml";
+        this->declare_parameter("time_to_put_zone", 80);
+        this->declare_parameter("time_to_remove_top_pot", 70);
 
-        if (!Config::load(config_file))
-        {
-            RCLCPP_ERROR(get_logger(), "Failed to load configuration");
-        }
+        time_to_put_zone_ = this->get_parameter("time_to_put_zone").as_int();
+        time_to_remove_top_pot_ = this->get_parameter("time_to_remove_top_pot").as_int();
 
-        time_to_put_zone_ = Config::get<int>("config.pami.time_to_put_zone", 80);
-        time_to_remove_top_pot_ = Config::get<int>("config.pami.time_to_remove_top_pot", 70);
-
-        score_goupie_ = Config::get<int>("config.mission_score.pami.goupie");
-        score_superstar_ = Config::get<int>("config.mission_score.pami.superstar");
-        score_all_party_ = Config::get<int>("config.mission_score.pami.all_party");
-        score_free_zone_ = 0;
-
-        score_to_add_ = 0; //score_goupie_ + score_superstar_ + /*score_all_party_ +*/ score_free_zone_;
+        score_to_add_ = 0;
 
         std::string obstacles_path = ament_index_cpp::get_package_share_directory("modelec_strat") +
             "/data/pami_zone.xml";
@@ -31,9 +21,9 @@ namespace Modelec
         }
 
         start_time_sub_ = create_subscription<std_msgs::msg::Int64>(
-            "/strat/start_time", 10, [this](const std_msgs::msg::Int64::SharedPtr msg)
+            "/strat/start_time", 10, [this](const std_msgs::msg::Int64::SharedPtr)
             {
-                auto now = std::chrono::system_clock::now().time_since_epoch();
+                /*auto now = std::chrono::system_clock::now().time_since_epoch();
                 auto goal = std::chrono::nanoseconds(msg->data) + std::chrono::seconds(time_to_remove_top_pot_);
                 auto second_goal = std::chrono::nanoseconds(msg->data) + std::chrono::seconds(time_to_put_zone_);
 
@@ -51,7 +41,7 @@ namespace Modelec
                         }
 
                         timer_add_->cancel();
-                    });
+                    });*/
             });
 
         add_obs_pub_ = create_publisher<modelec_interfaces::msg::Obstacle>(
@@ -65,10 +55,10 @@ namespace Modelec
         reset_strat_sub_ = create_subscription<std_msgs::msg::Empty>(
             "/strat/reset", 10, [this](const std_msgs::msg::Empty::SharedPtr)
             {
-                if (timer_add_)
+                /*if (timer_add_)
                 {
                     timer_add_->cancel();
-                }
+                }*/
                 /*if (timer_remove_)
                 {
                     timer_remove_->cancel();

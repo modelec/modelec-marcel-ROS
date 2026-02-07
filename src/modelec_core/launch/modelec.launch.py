@@ -1,3 +1,4 @@
+import os
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
@@ -10,9 +11,10 @@ from launch.actions import (
 from launch.event_handlers import OnProcessExit
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-
+from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
+    pkg_name = 'modelec_core'
     # -------------------------------------------------
     # Launch arguments
     # -------------------------------------------------
@@ -48,6 +50,12 @@ def generate_launch_description():
     angle_compensate = LaunchConfiguration('angle_compensate', default='false')
     scan_mode = LaunchConfiguration('scan_mode', default='Standard')
 
+    param_file = os.path.join(
+        get_package_share_directory(pkg_name),
+        'config',
+        'config.yaml'
+    )
+
     # -------------------------------------------------
     # RPLIDAR with auto-restart
     # -------------------------------------------------
@@ -56,7 +64,7 @@ def generate_launch_description():
             package='rplidar_ros',
             executable='rplidar_node',
             name='rplidar_node',
-            parameters=[{
+            parameters=[param_file, {
                 'channel_type': channel_type,
                 'serial_port': serial_port,
                 'serial_baudrate': serial_baudrate,
@@ -65,7 +73,6 @@ def generate_launch_description():
                 'angle_compensate': angle_compensate,
                 'scan_mode': scan_mode,
             }],
-            output='screen',
         )
 
         restart_handler = RegisterEventHandler(
@@ -106,6 +113,7 @@ def generate_launch_description():
                 package='modelec_gui',
                 executable='modelec_gui',
                 name='modelec_gui',
+                parameters=[param_file],
             )
 
             shutdown = RegisterEventHandler(
@@ -127,21 +135,13 @@ def generate_launch_description():
                     package='modelec_com',
                     executable='pcb_odo_interface',
                     name='pcb_odo_interface',
-                    parameters=[{
-                        'serial_port': '/dev/USB_ODO',
-                        'baudrate': 115200,
-                        'name': 'pcb_odo',
-                    }],
+                    parameters=[param_file],
                 ),
                 Node(
                     package='modelec_com',
                     executable='pcb_action_interface',
                     name='pcb_action_interface',
-                    parameters=[{
-                        'serial_port': '/dev/USB_ACTION',
-                        'baudrate': 115200,
-                        'name': 'pcb_action',
-                    }],
+                    parameters=[param_file],
                 ),
             ]
         return []
@@ -156,13 +156,14 @@ def generate_launch_description():
                     package='modelec_strat',
                     executable='strat_fsm',
                     name='strat_fsm',
+                    parameters=[param_file],
                     # prefix=['xterm -e gdb -ex run --args'],
-                    # output='screen',
                 ),
                 Node(
                     package='modelec_strat',
                     executable='pami_manager',
                     name='pami_manager',
+                    parameters=[param_file],
                 ),
             ]
         return []
@@ -177,6 +178,7 @@ def generate_launch_description():
                     package='modelec_strat',
                     executable='enemy_manager',
                     name='enemy_manager',
+                    parameters=[param_file],
                 )
             ]
         return []
@@ -191,7 +193,7 @@ def generate_launch_description():
                     package='joy',
                     executable='joy_node',
                     name='joy_node',
-                    output='screen',
+                    parameters=[param_file],
                 )
             ]
         return []
@@ -203,7 +205,7 @@ def generate_launch_description():
                     package='modelec_com',
                     executable='color_detector',
                     name='color_detector',
-                    output='screen',
+                    parameters=[param_file],
                 )
             ]
         return []

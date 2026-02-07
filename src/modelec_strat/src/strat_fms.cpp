@@ -15,6 +15,16 @@ namespace Modelec
 
     StratFMS::StratFMS() : Node("start_fms")
     {
+        this->declare_parameter<bool>("static_strat", false);
+        this->declare_parameter<double>("factor.obs", 1.0);
+        this->declare_parameter<double>("factor.thermo", 0.5);
+        this->declare_parameter<int>("timer_period_ms", 100);
+
+        static_strat_ = this->get_parameter("static_strat").as_bool();
+        factor_obs_ = this->get_parameter("factor.obs").as_double();
+        factor_thermo_ = this->get_parameter("factor.thermo").as_double();
+        timer_period_ms_ = this->get_parameter("timer_period_ms").as_int();
+
         tir_sub_ = create_subscription<std_msgs::msg::Empty>(
             "/action/tir/start", 10, [this](const std_msgs::msg::Empty::SharedPtr)
             {
@@ -59,17 +69,6 @@ namespace Modelec
             "/action/tir/arm/set", 10);
 
         start_odo_pub_ = create_publisher<std_msgs::msg::Bool>("/odometry/start", 10);
-
-        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
-        if (!Config::load(config_path))
-        {
-            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
-        }
-
-		static_strat_ = Config::get<bool>("config.static_strat", false);
-        factor_obs_ = Config::get<double>("config.factor.obs", 1.0);
-        factor_thermo_ = Config::get<double>("config.factor.thermo", 0.5);
-        timer_period_ms_ = Config::get<int>("config.timer_period_ms", 100);
     }
 
     void StratFMS::Init()

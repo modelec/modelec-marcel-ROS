@@ -2,7 +2,6 @@
 #include <modelec_gui/pages/home_page.hpp>
 
 #include <QVBoxLayout>
-#include <modelec_utils/config.hpp>
 
 namespace ModelecGUI
 {

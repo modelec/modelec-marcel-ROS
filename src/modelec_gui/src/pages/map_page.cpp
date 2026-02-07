@@ -3,7 +3,6 @@
 
 #include <QMouseEvent>
 #include <utility>
-#include <modelec_utils/config.hpp>
 #include <cmath>
 
 namespace ModelecGUI
@@ -49,11 +48,17 @@ namespace ModelecGUI
 
         qpoints = {};
 
-        robot_length_ = Modelec::Config::get<int>("config.robot.size.length_mm", 200);
-        robot_width_ = Modelec::Config::get<int>("config.robot.size.width_mm", 300);
+        node_->declare_parameter("map.size.map_width_mm", 3000);
+        node_->declare_parameter("map.size.map_height_mm", 2000);
 
-        enemy_length_ = Modelec::Config::get<int>("config.enemy.size.length_mm", 300);
-        enemy_width_ = Modelec::Config::get<int>("config.enemy.size.width_mm", 300);
+        node_->declare_parameter("robot.size.length_mm", 200);
+        node_->declare_parameter("robot.size.width_mm", 300);
+
+        robot_length_ = node_->get_parameter("robot.size.length_mm").as_int();
+        robot_width_ = node_->get_parameter("robot.size.width_mm").as_int();
+
+        enemy_length_ = node_->get_parameter("enemy.size.length_mm").as_int();
+        enemy_width_ = node_->get_parameter("enemy.size.width_mm").as_int();
 
         add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryWaypoint>(
             "odometry/add_waypoint", 100,

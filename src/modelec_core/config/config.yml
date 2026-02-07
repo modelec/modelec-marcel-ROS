@@ -1,0 +1,109 @@
+enemy_manager:
+  ros__parameters:
+    size:
+      width_mm: 300
+      length_mm: 300
+      margin_mm: 50
+    detection:
+      min_move_threshold_mm: 50
+      refresh_rate: 3
+      max_stationary_time_s: 0.5
+      min_emergency_distance_mm: 300
+      margin_detection_table_mm: 50
+    factor_close_enemy: -2
+
+pami_manager:
+  ros__parameters:
+    time_to_put_zone: 77
+    time_to_remove_top_pot: 65
+
+strat_fsm:
+  ros__parameters:
+    robot:
+      size:
+        width_mm: 300
+        length_mm: 300
+        margin_mm: 100
+
+    map:
+      size:
+        grid_width: 600
+        grid_height: 400
+        map_width_mm: 3000
+        map_height_mm: 2000
+
+    spawn:
+      yellow_top:
+        x: 350
+        y: 1700
+        theta: -1.5708
+      blue_top:
+        x: 2650
+        y: 1700
+        theta: -1.5708
+      width_mm: 450
+      height_mm: 450
+
+    home:
+      blue:
+        x: 2650
+        y: 1700
+        theta: -1.5708
+      yellow:
+        x: 350
+        y: 1700
+        theta: -1.5708
+
+    static_strat: false
+    factor:
+      theta: 20
+      obs: 0.6
+      thermo: 0.7
+    timer_period_ms: 20
+
+    thermo:
+      yellow:
+        start:
+          x: 200
+          y: 175
+          theta: 0
+        finish:
+          x: 700
+          y: 175
+          theta: 0
+      blue:
+        start:
+          x: 2800
+          y: 175
+          theta: 3.14
+        finish:
+          x: 2300
+          y: 175
+          theta: 3.14
+
+    mission_score:
+      go_home: 10
+
+color_detector:
+  ros__parameters:
+    save_to_file:
+      enabled: true
+      path: "./cam/"
+    enabled: true
+    # link: "/dev/video0"
+    link: "http://192.168.1.21:8080/video"
+    headless: true
+    rois: [300, 700, 50, 50, 700, 700, 50, 50, 1200, 700, 50, 50, 1500, 700, 50, 50]
+    colors:
+      blue: [90, 130]
+      yellow: [20, 40]
+
+pcb_odo_manager:
+  ros__parameters:
+    serial_port: '/dev/USB_ODO'
+    baudrate: 115200
+
+pcb_action_manager:
+  ros__parameters:
+    serial_port: '/dev/USB_ACTION'
+    baudrate: 115200

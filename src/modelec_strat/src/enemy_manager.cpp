@@ -7,28 +7,29 @@ namespace Modelec
 {
     EnemyManager::EnemyManager() : Node("enemy_manager")
     {
-        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
-        if (!Config::load(config_path))
-        {
-            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
-        }
+        this->declare_parameter("enemy.detection.min_move_threshold_mm", 50.0);
+        this->declare_parameter("enemy.detection.refresh_rate", 1.0);
+        this->declare_parameter("enemy.detection.max_stationary_time_s", 10.0);
+        this->declare_parameter("enemy.detection.margin_detection_table_mm", 50.0);
+        this->declare_parameter("enemy.detection.min_emergency_distance_mm", 500.0);
 
-        min_move_threshold_mm_ = Config::get<float>("config.enemy.detection.min_move_threshold_mm", 50);
+        this->declare_parameter("map.size.map_width_mm", 3000.0);
+        this->declare_parameter("map.size.map_height_mm", 2000.0);
 
-        refresh_rate_s_ = Config::get<float>("config.enemy.detection.refresh_rate", 1.0);
+        this->declare_parameter("robot.size.width_mm", 500.0);
+        this->declare_parameter("robot.size.length_mm", 500.0);
 
-        max_stationary_time_s_ = Config::get<float>("config.enemy.detection.max_stationary_time_s", 10.0);
+        min_move_threshold_mm_ = this->get_parameter("enemy.detection.min_move_threshold_mm").as_double();
+        refresh_rate_s_ = this->get_parameter("enemy.detection.refresh_rate").as_double();
+        max_stationary_time_s_ = this->get_parameter("enemy.detection.max_stationary_time_s").as_double();
+        margin_detection_table_ = this->get_parameter("enemy.detection.margin_detection_table_mm").as_double();
+        min_emergency_distance_ = this->get_parameter("enemy.detection.min_emergency_distance_mm").as_double();
 
-        map_width_ = Config::get<float>("config.map.size.map_width_mm", 3000.0);
-        map_height_ = Config::get<float>("config.map.size.map_height_mm", 2000.0);
+        map_width_ = this->get_parameter("map.size.map_width_mm").as_double();
+        map_height_ = this->get_parameter("map.size.map_height_mm").as_double();
 
-        margin_detection_table_ = Config::get<float>("config.enemy.detection.margin_detection_table_mm", 50.0);
-
-        robot_width_ = Config::get<float>("config.robot.size.width_mm", 500.0);
-        robot_length_ = Config::get<float>("config.robot.size.length_mm", 500.0);
-        robot_radius_ = std::max(robot_width_, robot_length_) * 0.4;
-
-        min_emergency_distance_ = Config::get<float>("config.enemy.detection.min_emergency_distance_mm", 500.0f);
+        robot_width_ = this->get_parameter("robot.size.width_mm").as_double();
+        robot_length_ = this->get_parameter("robot.size.length_mm").as_double();
 
         current_pos_sub_ = this->create_subscription<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10,
@@ -50,7 +51,7 @@ namespace Modelec
         close_enemy_pos_pub_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
             "enemy/position/emergency", 10);
 
-        state_sub_ = create_subscription<modelec_interfaces::msg::StratState>("/strat/state", 10,
+        state_sub_ = create_subscription<modelec_interfaces::msg::StratState>("strat/state", 10,
                                                                               [this](
                                                                               const
                                                                               modelec_interfaces::msg::StratState::SharedPtr
@@ -69,7 +70,7 @@ namespace Modelec
                                                                               });
 
         enemy_long_time_pub_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
-            "/enemy/long_time", 10);
+            "enemy/long_time", 10);
 
         start_sub_ = this->create_subscription<std_msgs::msg::Bool>(
             "lidar/start", 10,
@@ -80,7 +81,7 @@ namespace Modelec
             });
 
         timer_ = this->create_wall_timer(
-            std::chrono::seconds(static_cast<int>(refresh_rate_s_)),
+            std::chrono::milliseconds(static_cast<int>(refresh_rate_s_ * 1000.0)),
             [this]()
             {
                 TimerCallback();

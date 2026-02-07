@@ -9,12 +9,11 @@ namespace Modelec
         // Service to create a new serial listener
         declare_parameter<std::string>("serial_port", "/dev/USB_ACTION");
         declare_parameter<int>("baudrate", 115200);
-        declare_parameter<std::string>("name", "pcb_action");
 
-        auto request = std::make_shared<modelec_interfaces::srv::AddSerialListener::Request>();
-        request->name = get_parameter("name").as_string();
-        request->bauds = get_parameter("baudrate").as_int();
-        request->serial_port = get_parameter("serial_port").as_string();
+        auto serial_port = get_parameter("serial_port").as_string();
+        auto baudrate = get_parameter("baudrate").as_int();
+
+        RCLCPP_INFO(this->get_logger(), "Starting PCB Odometry Interface on port %s with baudrate %ld", serial_port.c_str(), baudrate);
 
         asc_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
             "action/get/asc", 10,
@@ -231,7 +230,7 @@ namespace Modelec
 
 			});
 
-        this->open(request->name, request->bauds, request->serial_port, MAX_MESSAGE_LEN);
+        this->open(baudrate, serial_port, MAX_MESSAGE_LEN);
 
         // TODO : check for real value there
         /*asc_value_mapper_ = {

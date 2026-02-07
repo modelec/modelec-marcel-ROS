@@ -53,7 +53,7 @@ def generate_launch_description():
     param_file = os.path.join(
         get_package_share_directory(pkg_name),
         'config',
-        'config.yaml'
+        'config.yml'
     )
 
     # -------------------------------------------------

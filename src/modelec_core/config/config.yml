@@ -17,6 +17,25 @@ pami_manager:
     time_to_put_zone: 77
     time_to_remove_top_pot: 65
 
+modelec_gui:
+  ros__parameters:
+    robot:
+      size:
+        width_mm: 300
+        length_mm: 300
+        margin_mm: 100
+    map:
+      size:
+        grid_width: 600
+        grid_height: 400
+        map_width_mm: 3000
+        map_height_mm: 2000
+    enemy:
+      size:
+        width_mm: 300
+        length_mm: 300
+        margin_mm: 50
+
 strat_fsm:
   ros__parameters:
     robot:
@@ -24,6 +43,12 @@ strat_fsm:
         width_mm: 300
         length_mm: 300
         margin_mm: 100
+
+    enemy:
+      size:
+        width_mm: 300
+        length_mm: 300
+        margin_mm: 50
 
     map:
       size:
@@ -56,7 +81,7 @@ strat_fsm:
 
     static_strat: false
     factor:
-      theta: 20
+      theta: 20.0
       obs: 0.6
       thermo: 0.7
     timer_period_ms: 20
@@ -66,11 +91,11 @@ strat_fsm:
         start:
           x: 200
           y: 175
-          theta: 0
+          theta: 0.0
         finish:
           x: 700
           y: 175
-          theta: 0
+          theta: 0.0
       blue:
         start:
           x: 2800
@@ -98,12 +123,12 @@ color_detector:
       blue: [90, 130]
       yellow: [20, 40]
 
-pcb_odo_manager:
+pcb_odo_interface:
   ros__parameters:
     serial_port: '/dev/USB_ODO'
     baudrate: 115200
 
-pcb_action_manager:
+pcb_action_interface:
   ros__parameters:
     serial_port: '/dev/USB_ACTION'
     baudrate: 115200

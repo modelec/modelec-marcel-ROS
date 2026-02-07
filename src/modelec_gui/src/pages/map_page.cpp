@@ -48,11 +48,8 @@ namespace ModelecGUI
 
         qpoints = {};
 
-        node_->declare_parameter("map.size.map_width_mm", 3000);
-        node_->declare_parameter("map.size.map_height_mm", 2000);
-
-        node_->declare_parameter("robot.size.length_mm", 200);
-        node_->declare_parameter("robot.size.width_mm", 300);
+        map_height_ = node_->get_parameter("map.size.map_height_mm").as_int();
+        map_width_ = node_->get_parameter("map.size.map_width_mm").as_int();
 
         robot_length_ = node_->get_parameter("robot.size.length_mm").as_int();
         robot_width_ = node_->get_parameter("robot.size.width_mm").as_int();

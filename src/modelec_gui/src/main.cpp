@@ -13,6 +13,15 @@ int main(int argc, char **argv)
 
     auto node = rclcpp::Node::make_shared("qt_gui_node");
 
+    node->declare_parameter("map.size.map_width_mm", 3000);
+    node->declare_parameter("map.size.map_height_mm", 2000);
+
+    node->declare_parameter("robot.size.length_mm", 200);
+    node->declare_parameter("robot.size.width_mm", 300);
+
+    node->declare_parameter("enemy.size.length_mm", 200);
+    node->declare_parameter("enemy.size.width_mm", 300);
+
     ModelecGUI::ROS2QtGUI window(node);
     window.show();
 

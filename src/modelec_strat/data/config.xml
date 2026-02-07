@@ -87,5 +87,22 @@
             <roi x="1200" y="700" w="50" h="50" />
             <roi x="1500" y="700" w="50" h="50" />
         </rois>
+        <colors>
+            <!-- Primary -->
+            <color name="red_low"    hue_min="0"   hue_max="10"  />
+            <color name="red_high"   hue_min="170" hue_max="179" />
+            <color name="blue"       hue_min="90"  hue_max="130" />
+            <color name="yellow"     hue_min="20"  hue_max="40"  />
+
+            <!-- Secondary -->
+            <color name="green"      hue_min="40"  hue_max="80"  />
+            <color name="cyan"       hue_min="80"  hue_max="95"  />
+            <color name="magenta"    hue_min="140" hue_max="165" />
+            <color name="orange"     hue_min="10"  hue_max="20"  />
+
+            <!-- Edge / tricky -->
+            <color name="purple"     hue_min="125" hue_max="145" />
+            <color name="lime"       hue_min="50"  hue_max="65"  />
+        </colors>
     </cam>
 </config>

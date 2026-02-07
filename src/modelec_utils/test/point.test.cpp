@@ -33,13 +33,13 @@ TEST(PointTest, GetTakePositionDefaultAngle) {
 TEST(PointTest, GetTakeBasePosition) {
     Modelec::Point p(0, 0, 0);
     Modelec::Point base = p.GetTakeBasePosition();
-    EXPECT_EQ(base.x, 290);
+    EXPECT_EQ(base.x, BASE_DISTANCE);
     EXPECT_EQ(base.y, 0);
 }
 
 TEST(PointTest, GetTakeClosePosition) {
     Modelec::Point p(0, 0, 0);
     Modelec::Point close = p.GetTakeClosePosition();
-    EXPECT_EQ(close.x, 165);
+    EXPECT_EQ(close.x, CLOSE_DISTANCE);
     EXPECT_EQ(close.y, 0);
 }

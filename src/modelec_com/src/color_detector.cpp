@@ -1,6 +1,5 @@
 #include <modelec_com/color_detector.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
-#include <modelec_utils/config.hpp>
 #include <modelec_utils/utils.hpp>
 
 namespace Modelec
@@ -58,7 +57,10 @@ namespace Modelec
 
         color_pub_ = create_publisher<std_msgs::msg::String>("action/detect_color/res", qos);
 
-        SetupRois();
+        rois_ = Config::get<std::vector<cv::Rect>>("config.cam.rois.roi", {});
+        color_configs_ = Config::get<std::vector<ColorSetting>>("config.cam.colors.color", {});
+
+        RCLCPP_DEBUG(get_logger(), "Loaded %zu ROIs and %zu color configs", rois_.size(), color_configs_.size());
 
         if (!headless_)
         {
@@ -182,14 +184,12 @@ namespace Modelec
     {
         double h = hsv_roi[0];
 
-        if (h >= 90 && h <= 130)
+        for (const auto& color_config : color_configs_)
         {
-            return "blue";
-        }
-
-        if (h >= 20 && h <= 40)
-        {
-            return "yellow";
+            if (h >= color_config.h_min && h <= color_config.h_max)
+            {
+                return color_config.name;
+            }
         }
 
         return "unknown";
@@ -204,23 +204,6 @@ namespace Modelec
            << std::put_time(std::localtime(&in_time_t), "%Y%m%d_%H%M%S")
            << ".png";
         return ss.str();
-    }
-
-    void ColorDetector::SetupRois()
-    {
-        auto count = Config::count("config.cam.rois.roi");
-
-        for (size_t i = 0; i < count; ++i)
-        {
-            std::string prefix = "config.cam.rois.roi[" + std::to_string(i) + "]";
-            int x = Config::get<int>(prefix + "@x", 0);
-            int y = Config::get<int>(prefix + "@y", 0);
-            int width = Config::get<int>(prefix + "@w", 100);
-            int height = Config::get<int>(prefix + "@h", 100);
-            rois_.emplace_back(x, y, width, height);
-
-            RCLCPP_DEBUG(get_logger(), "Loaded ROI %zu: x=%d, y=%d, width=%d, height=%d", i, x, y, width, height);
-        }
     }
 }
 

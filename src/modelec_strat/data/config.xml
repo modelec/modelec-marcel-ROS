@@ -12,7 +12,7 @@
             <min_emergency_distance_mm>300</min_emergency_distance_mm>
             <margin_detection_table_mm>50</margin_detection_table_mm>
         </detection>
-        <factor_close_enemy>-0.3</factor_close_enemy>
+        <factor_close_enemy>-2</factor_close_enemy>
     </enemy>
 
     <robot>
@@ -36,8 +36,8 @@
     <home>
         <!--<blue x="2650" y="1600" theta="-1.5708"/>
         <yellow x="350" y="1600" theta="-1.5708"/>-->
-        <blue x="2650" y="1750" theta="-1.5708"/>
-        <yellow x="350" y="1750" theta="-1.5708"/>
+        <blue x="2650" y="1700" theta="-1.5708"/>
+        <yellow x="350" y="1700" theta="-1.5708"/>
     </home>
     <spawn>
         <yellow>
@@ -49,27 +49,47 @@
         <width_mm>450</width_mm>
         <height_mm>450</height_mm>
     </spawn>
-    <usb>
-        <timeout_ms>300</timeout_ms>
-        <attempt>5</attempt>
-    </usb>
     <mission_score>
-        <banner>20</banner>
-        <go_home>10</go_home>
-        <concert>
-            <niv_1>4</niv_1>
-            <niv_2>8</niv_2>
-            <niv_3>16</niv_3>
-        </concert>
-        <pami>
-            <goupie>5</goupie>
-            <superstar>5</superstar>
-            <all_party>10</all_party>
-        </pami>
     </mission_score>
     <pami>
         <time_to_put_zone>77</time_to_put_zone>
         <time_to_remove_top_pot>65</time_to_remove_top_pot>
     </pami>
-    <static_strat>true</static_strat>
+    <static_strat>false</static_strat>
+    <factor>
+        <theta>20</theta>
+        <obs>0.6</obs>
+        <thermo>0.7</thermo>
+    </factor>
+    <timer_period_ms>20</timer_period_ms>
+    <thermo>
+        <yellow>
+            <start x="200" y="175" theta="0" />
+            <finish x="700" y="175" theta="0" />
+        </yellow>
+        <blue>
+            <start x="2800" y="175" theta="3.14" />
+            <finish x="2300" y="175" theta="3.14" />
+        </blue>
+    </thermo>
+    <cam>
+        <save_to_file>
+            <enabled>true</enabled>
+            <path>./cam/</path>
+        </save_to_file>
+        <enabled>true</enabled>
+        <!--<link>/dev/video0</link>-->
+        <link>http://192.168.1.21:8080/video</link>
+        <headless>true</headless>
+        <rois>
+            <roi x="300" y="700" w="50" h="50" />
+            <roi x="700" y="700" w="50" h="50" />
+            <roi x="1200" y="700" w="50" h="50" />
+            <roi x="1500" y="700" w="50" h="50" />
+        </rois>
+        <colors>
+            <color name="blue" hue_min="90" hue_max="130" />
+            <color name="yellow" hue_min="20" hue_max="40" />
+        </colors>
+    </cam>
 </config>

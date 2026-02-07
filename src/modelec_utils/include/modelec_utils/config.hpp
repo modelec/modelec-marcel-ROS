@@ -4,6 +4,8 @@
 #include <tinyxml2.h>
 #include <unordered_map>
 #include <sstream>
+#include <vector>
+#include <functional>
 
 namespace Modelec
 {
@@ -11,13 +13,25 @@ namespace Modelec
     {
 
     public:
+
+        template<typename T>
+        using BuilderFunc = std::function<T(const std::string& base_key)>;
+
         static bool load(const std::string& filepath);
 
         template<typename T>
         static T get(const std::string& key, const T& default_value = T());
 
+        template<typename T>
+        static std::vector<T> getArray(const std::string& prefix,
+                                    BuilderFunc<T> builder = [](const std::string& base) { return get<T>(base); });
+
+        static size_t count(const std::string& prefix);
+
+        static void printAll();
+
     private:
-        static void parseNode(tinyxml2::XMLElement* element, const std::string& prefix);
+        static void parseNode(tinyxml2::XMLElement* element, const std::string& key);
 
         static inline std::unordered_map<std::string, std::string> values_;
     };
@@ -43,5 +57,23 @@ namespace Modelec
     inline bool Config::get<bool>(const std::string& key, const bool& default_value) {
         auto str = get<std::string>(key, default_value ? "true" : "false");
         return str == "true" || str == "1";
+    }
+
+    template<typename T>
+    std::vector<T> Config::getArray(const std::string& prefix,
+                                BuilderFunc<T> builder)
+    {
+        std::vector<T> result;
+
+        size_t n = Config::count(prefix);
+        result.reserve(n);
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            std::string base = prefix + "[" + std::to_string(i) + "]";
+            result.emplace_back(builder(base));
+        }
+
+        return result;
     }
 }

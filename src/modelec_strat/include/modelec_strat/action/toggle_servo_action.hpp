@@ -5,13 +5,13 @@
 
 namespace Modelec
 {
-    class TakeAction : public BaseAction
+    class ToggleServoAction : public BaseAction
     {
     public:
-        TakeAction(const std::shared_ptr<ActionExecutor>& action_executor);
-        TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, int n);
-        TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, Side> servo);
-        TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, Side>> servos);
+        ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor);
+        ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, int n);
+        ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, Side> servo);
+        ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, Side>> servos);
 
         void Next() override;
         void Init(const std::vector<std::string>& params) override;
@@ -21,7 +21,7 @@ namespace Modelec
 
         void End() override;
 
-        inline static const std::string Name = ActionExec::TAKE;
+        inline static const std::string Name = ActionExec::TOGGLE_SERVO;
 
     private:
         std::vector<std::pair<int, Side>> servos_;
@@ -34,7 +34,7 @@ namespace Modelec
             BaseAction::Registry()[Name] =
                 [](const std::shared_ptr<ActionExecutor>& exec)
                 {
-                    return std::make_shared<TakeAction>(exec);
+                    return std::make_shared<ToggleServoAction>(exec);
                 };
             return true;
         }();

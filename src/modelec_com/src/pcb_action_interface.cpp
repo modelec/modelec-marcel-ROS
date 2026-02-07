@@ -1,6 +1,4 @@
 #include <modelec_com/pcb_action_interface.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
-#include <modelec_utils/config.hpp>
 #include <modelec_utils/utils.hpp>
 #include <fmt/core.h>
 
@@ -11,12 +9,11 @@ namespace Modelec
         // Service to create a new serial listener
         declare_parameter<std::string>("serial_port", "/dev/USB_ACTION");
         declare_parameter<int>("baudrate", 115200);
-        declare_parameter<std::string>("name", "pcb_action");
 
-        auto request = std::make_shared<modelec_interfaces::srv::AddSerialListener::Request>();
-        request->name = get_parameter("name").as_string();
-        request->bauds = get_parameter("baudrate").as_int();
-        request->serial_port = get_parameter("serial_port").as_string();
+        auto serial_port = get_parameter("serial_port").as_string();
+        auto baudrate = get_parameter("baudrate").as_int();
+
+        RCLCPP_INFO(this->get_logger(), "Starting PCB Odometry Interface on port %s with baudrate %ld", serial_port.c_str(), baudrate);
 
         asc_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
             "action/get/asc", 10,
@@ -233,7 +230,7 @@ namespace Modelec
 
 			});
 
-        this->open(request->name, request->bauds, request->serial_port, MAX_MESSAGE_LEN);
+        this->open(baudrate, serial_port, MAX_MESSAGE_LEN);
 
         // TODO : check for real value there
         /*asc_value_mapper_ = {
@@ -262,15 +259,15 @@ namespace Modelec
             {5, 0}
         };*/
 
-        /*servo_value_ = {
-            {0, 2.95},
-            {1, 0.93},
-            {2, 0},
-            {3, 3},
-            {4, 0.8},
-            {5, 0.8},
-            {6, 0.8},
-            {7, 0.8},
+        servo_value_ = {
+            {0, 2.93},
+            {1, 0.91},
+            {2, 3.05},
+            {3, 0.3},
+            {4, 1},
+            {5, 1},
+            {6, 1},
+            {7, 1},
         };
 
         std::string data = "MOV;SERVO;" + std::to_string(servo_value_.size()) + ";";
@@ -282,7 +279,7 @@ namespace Modelec
 
 		data += "\n";
 
-        SendToPCB(data);*/
+        SendToPCB(data);
 
         /*relay_value_ = {
             {1, false},

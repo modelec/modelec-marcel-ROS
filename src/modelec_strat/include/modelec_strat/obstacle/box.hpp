@@ -8,6 +8,12 @@ namespace Modelec
     class BoxObstacle : public Obstacle
     {
     public:
+        enum Team
+        {
+            YELLOW = 0,
+            BLUE = 1,
+        };
+
         BoxObstacle() = default;
         BoxObstacle(const BoxObstacle&) = default;
 
@@ -20,8 +26,24 @@ namespace Modelec
 
         std::vector<Point> GetAllPossiblePositions() const;
 
+        void SetColor(size_t index, Team team);
+        Team GetColor(size_t index) const;
+        std::array<Team, 4> GetColors() const;
+
+        std::vector<int> GetSide(Team team) const;
+
+        void ParseColor(const std::string& colorStr);
+        void ParseColor(const std::vector<std::string>& colorVec);
+
     protected:
 
         std::vector<double> possible_angles_;
+
+        std::array<Team, 4> colors_ = {
+            BLUE,
+            BLUE,
+            BLUE,
+            BLUE
+        };
     };
 }

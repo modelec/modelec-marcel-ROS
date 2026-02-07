@@ -8,17 +8,17 @@ Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_ex
     steps_.push(ActionExec::DONE_STEP);
 }
 
-Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front, int n) : FreeAction(action_executor)
+Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, int n) : FreeAction(action_executor)
 {
-    AddServo(n, front);
+    AddServo(n, side);
 }
 
-Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, Front> servo) : FreeAction(action_executor)
+Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, Side> servo) : FreeAction(action_executor)
 {
     AddServo(servo.first, servo.second);
 }
 
-Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, Front>> servos) : FreeAction(action_executor)
+Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, Side>> servos) : FreeAction(action_executor)
 {
     AddServos(servos);
 }
@@ -45,8 +45,8 @@ void Modelec::FreeAction::Next()
             for (size_t i = 0; i < servos_.size(); i++)
             {
                 msg.items[i].id = servos_[i].first + (servos_[i].second ? 4 : 12);
-                msg.items[i].start_angle = servos_[i].second ? 3 : 0;
-                msg.items[i].end_angle = servos_[i].second ? 1 : 0;
+                msg.items[i].start_angle = 3;
+                msg.items[i].end_angle = 1;
                 msg.items[i].duration_s = 0.5;
             }
 
@@ -70,23 +70,32 @@ void Modelec::FreeAction::Init(const std::vector<std::string>& params)
         for (size_t i = 1; i < params.size(); i += 2)
         {
             int id = std::stoi(params[i]);
-            bool front = (i + 1 < params.size()) ? (params[i + 1] == "1" || params[i + 1] == "true" || params[i + 1] == "front") : true;
-            AddServo(id, front ? FRONT : BACK);
+            bool side = (i + 1 < params.size()) ? (params[i + 1] == "1" || params[i + 1] == "true" || params[i + 1] == "side") : true;
+            AddServo(id, side ? FRONT : BACK);
         }
     }
 }
 
-void Modelec::FreeAction::AddServo(int id, Front front)
+void Modelec::FreeAction::AddServo(int id, Side side)
 {
-    servos_.emplace_back(id, front);
+    servos_.emplace_back(id, side);
 }
 
-void Modelec::FreeAction::AddServo(std::pair<int, Front> servo)
+void Modelec::FreeAction::AddServo(std::pair<int, Side> servo)
 {
     servos_.emplace_back(servo);
 }
 
-void Modelec::FreeAction::AddServos(const std::vector<std::pair<int, Front>>& servos)
+void Modelec::FreeAction::AddServos(const std::vector<std::pair<int, Side>>& servos)
 {
     servos_.insert(servos_.end(), servos.begin(), servos.end());
+}
+
+void Modelec::FreeAction::End()
+{
+    for (auto servo : servos_)
+    {
+        auto index = servo.first + (servo.second == FRONT ? 0 : 4);
+        action_executor_->servo_pos_[index] = false;
+    }
 }

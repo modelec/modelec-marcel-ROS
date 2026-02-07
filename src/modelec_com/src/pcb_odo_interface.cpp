@@ -1,7 +1,5 @@
 #include <modelec_com/pcb_odo_interface.hpp>
 #include <modelec_utils/utils.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
-#include <modelec_utils/config.hpp>
 
 namespace Modelec
 {
@@ -9,13 +7,11 @@ namespace Modelec
     {
         declare_parameter<std::string>("serial_port", "/dev/USB_ODO");
         declare_parameter<int>("baudrate", 115200);
-        declare_parameter<std::string>("name", "pcb_odo");
 
-        // Service to create a new serial listener
-        auto request = std::make_shared<modelec_interfaces::srv::AddSerialListener::Request>();
-        request->name = get_parameter("name").as_string();
-        request->bauds = get_parameter("baudrate").as_int();
-        request->serial_port = get_parameter("serial_port").as_string();
+        auto serial_port = get_parameter("serial_port").as_string();
+        auto baudrate = get_parameter("baudrate").as_int();
+
+        RCLCPP_INFO(this->get_logger(), "Starting PCB Odometry Interface on port %s with baudrate %ld", serial_port.c_str(), baudrate);
 
         odo_pos_publisher_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10);
@@ -102,17 +98,14 @@ namespace Modelec
             "odometry/start", 10,
             [this](const std_msgs::msg::Bool::SharedPtr msg)
             {
-                if (msg->data != start_odo_)
-                {
-                    start_odo_ = msg->data;
-                    SendOrder("START", {std::to_string(msg->data)});
-                }
+                start_odo_ = msg->data;
+                SendOrder("START", {std::to_string(msg->data)});
             });
 
-        this->open(request->name, request->bauds, request->serial_port, MAX_MESSAGE_LEN);
+        this->open(baudrate, serial_port, MAX_MESSAGE_LEN);
 
         SetPID("THETA", 14, 0, 0);
-        SetPID("POS", 10, 0, 0);
+        SetPID("POS", 5, 0, 0);
         SetPID("LEFT", 5, 0, 0);
         SetPID("RIGHT", 5, 0, 0);
     }
@@ -179,7 +172,7 @@ namespace Modelec
             {
                 if (tokens[2] == "REACH")
                 {
-                    // RCLCPP_INFO(this->get_logger(), "Waypoint reached: ID %s", tokens[3].c_str());
+                    RCLCPP_DEBUG(this->get_logger(), "Waypoint reached: ID %s", tokens[3].c_str());
 
                     int id = std::stoi(tokens[3]);
 

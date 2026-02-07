@@ -6,6 +6,7 @@
 #include <modelec_strat/missions/go_home_mission.hpp>
 #include <modelec_strat/missions/take_mission.hpp>
 #include <modelec_strat/missions/free_mission.hpp>
+#include <modelec_strat/missions/thermo_mission.hpp>
 
 #include "modelec_strat/action/base_action.hpp"
 
@@ -14,6 +15,16 @@ namespace Modelec
 
     StratFMS::StratFMS() : Node("start_fms")
     {
+        this->declare_parameter<bool>("static_strat", false);
+        this->declare_parameter<double>("factor.obs", 1.0);
+        this->declare_parameter<double>("factor.thermo", 0.5);
+        this->declare_parameter<int>("timer_period_ms", 100);
+
+        static_strat_ = this->get_parameter("static_strat").as_bool();
+        factor_obs_ = this->get_parameter("factor.obs").as_double();
+        factor_thermo_ = this->get_parameter("factor.thermo").as_double();
+        timer_period_ms_ = this->get_parameter("timer_period_ms").as_int();
+
         tir_sub_ = create_subscription<std_msgs::msg::Empty>(
             "/action/tir/start", 10, [this](const std_msgs::msg::Empty::SharedPtr)
             {
@@ -30,8 +41,7 @@ namespace Modelec
         team_id_sub_ = create_subscription<std_msgs::msg::Int8>(
             "/strat/team", 10, [this](const std_msgs::msg::Int8::SharedPtr msg)
             {
-                team_id_ = static_cast<int>(msg->data);
-                nav_->SetTeamId(team_id_);
+                nav_->SetTeamId(static_cast<NavigationHelper::Team>(msg->data));
             });
 
         spawn_id_sub_ = create_subscription<modelec_interfaces::msg::Spawn>(
@@ -39,7 +49,7 @@ namespace Modelec
             {
                 team_selected_ = true;
                 team_id_ = msg->team_id;
-                nav_->SetTeamId(team_id_);
+                nav_->SetTeamId(static_cast<NavigationHelper::Team>(team_id_));
                 nav_->SetSpawn(msg->name);
             });
 
@@ -59,16 +69,6 @@ namespace Modelec
             "/action/tir/arm/set", 10);
 
         start_odo_pub_ = create_publisher<std_msgs::msg::Bool>("/odometry/start", 10);
-
-        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
-        if (!Config::load(config_path))
-        {
-            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
-        }
-
-        game_action_sequence_.push(State::TAKE_MISSION);
-        game_action_sequence_.push(State::FREE_MISSION);
-		static_strat_ = Config::get<bool>("config.static_strat", false);
     }
 
     void StratFMS::Init()
@@ -106,7 +106,7 @@ namespace Modelec
         current_mission_.reset();
         match_start_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
-        timer_ = create_wall_timer(std::chrono::milliseconds(100), [this]
+        timer_ = create_wall_timer(std::chrono::milliseconds(timer_period_ms_), [this]
         {
             Update();
         });
@@ -142,11 +142,19 @@ namespace Modelec
                 arm_msg.data = true;
                 tir_arm_set_pub_->publish(arm_msg);
 
-                action_executor_->Up(BaseAction::Front::BOTH, true);
+                action_executor_->Up(BaseAction::Side::BOTH, true);
                 action_executor_->Free({
                     {0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT},
                     {0, BaseAction::BACK}, {1, BaseAction::BACK}, {2, BaseAction::BACK}, {3, BaseAction::BACK},
-                }, true);
+                });
+
+                auto empty_queue_ = std::queue<State>();
+                std::swap(game_action_sequence_, empty_queue_);
+                game_action_sequence_.push(State::TAKE_MISSION);
+                game_action_sequence_.push(State::TAKE_MISSION);
+                game_action_sequence_.push(State::FREE_MISSION);
+                game_action_sequence_.push(State::FREE_MISSION);
+                game_action_sequence_.push(State::THERMO_MISSION);
 
                 Transition(State::WAIT_START, "System ready");
             }
@@ -170,18 +178,18 @@ namespace Modelec
 
         case State::SELECT_MISSION:
             {
-                auto elapsed = now - match_start_time_;
+                auto duration = (now - match_start_time_).seconds();
 
-                if (elapsed.seconds() >= 100)
+                if (duration >= 100)
                 {
                     Transition(State::STOP, "All missions done");
                 }
 
-                else if (elapsed.seconds() > 60 && !action_executor_->IsEmpty())
+                else if (duration > 60 && !action_executor_->IsEmpty() && duration < 90)
                 {
                     Transition(State::FREE_MISSION, "No Time left, freeing boxes");
                 }
-                else if (elapsed.seconds() < 80)
+                else if (duration < 80)
                 {
                     Transition(State::SELECT_GAME_ACTION, "Selecting a game action");
                 }
@@ -208,59 +216,69 @@ namespace Modelec
 					return;
 				}
 
+                auto pos = nav_->GetCurrentPos();
+                auto closestBox = nav_->GetClosestObstacle<BoxObstacle>(pos);
+                auto closestDeposite = nav_->GetClosestDepositeZone(pos);
 
-                // TODO : If close to border, do the side mission (thermometre)
+                auto thermoPos = nav_->GetThermoPositions()[0];
 
-                if (action_executor_->IsFull())
+                double distToBox = Point::distance(Point(pos->x, pos->y, pos->theta),
+                                            closestBox->GetPosition()) * factor_obs_;
+                double distToDeposite = Point::distance(Point(pos->x, pos->y, pos->theta),
+                                            closestDeposite->GetPosition());
+                double distToThermo = Point::distance(Point(pos->x, pos->y, pos->theta),
+                                            thermoPos) * factor_thermo_;
+
+                if (distToThermo < distToBox && distToThermo < distToDeposite && !ThermoMission::IsThermoDone)
                 {
-                    RCLCPP_INFO(get_logger(), "All box are present on robot, selecting FREE mission");
-                    Transition(State::FREE_MISSION, "Selecting FREE mission");
-                }
-                else if (action_executor_->IsEmpty())
+                    RCLCPP_INFO(get_logger(), "Choosing THERMO mission (dist to thermo: %.2f < dist to box: %.2f, dist to deposite: %.2f)",
+                                distToThermo, distToBox, distToDeposite);
+                    Transition(State::THERMO_MISSION, "Selecting THERMO mission");
+                } else
                 {
-                    RCLCPP_INFO(get_logger(), "No box present on robot, selecting TAKE mission");
-                    Transition(State::TAKE_MISSION, "Selecting TAKE mission");
-                }
-                else
-                {
-                    auto pos = nav_->GetCurrentPos();
-                    auto closestBox = nav_->GetClosestObstacle<BoxObstacle>(pos);
-                    auto closestDeposite = nav_->GetClosestDepositeZone(pos);
-
-                    if (closestBox && closestDeposite)
+                    if (action_executor_->IsFull())
                     {
-                        double distToBox = Point::distance(Point(pos->x, pos->y, pos->theta),
-                                                          closestBox->GetPosition());
-                        double distToDeposite = Point::distance(Point(pos->x, pos->y, pos->theta),
-                                                               closestDeposite->GetPosition());
-
-                        if (distToBox < distToDeposite)
-                        {
-                            RCLCPP_INFO(get_logger(), "Choosing TAKE mission (dist to box: %.2f < dist to deposite: %.2f)",
-                                        distToBox, distToDeposite);
-                            Transition(State::TAKE_MISSION, "Selecting TAKE mission");
-                        }
-                        else
-                        {
-                            RCLCPP_INFO(get_logger(), "Choosing FREE mission (dist to deposite: %.2f < dist to box: %.2f)",
-                                        distToDeposite, distToBox);
-                            Transition(State::FREE_MISSION, "Selecting FREE mission");
-                        }
-                    }
-                    else if (closestBox)
-                    {
-                        RCLCPP_INFO(get_logger(), "Only box available, selecting TAKE mission");
-                        Transition(State::TAKE_MISSION, "Selecting TAKE mission");
-                    }
-                    else if (closestDeposite)
-                    {
-                        RCLCPP_INFO(get_logger(), "Only deposite available, selecting FREE mission");
+                        RCLCPP_INFO(get_logger(), "All box are present on robot, selecting FREE mission");
                         Transition(State::FREE_MISSION, "Selecting FREE mission");
+                    }
+                    else if (action_executor_->IsEmpty())
+                    {
+                        RCLCPP_INFO(get_logger(), "No box present on robot, selecting TAKE mission");
+                        Transition(State::TAKE_MISSION, "Selecting TAKE mission");
                     }
                     else
                     {
-                        RCLCPP_WARN(get_logger(), "No box or deposite available, cannot select mission!");
-                        Transition(State::STOP, "No missions available");
+
+                        if (closestBox && closestDeposite)
+                        {
+                            if (distToBox < distToDeposite)
+                            {
+                                RCLCPP_INFO(get_logger(), "Choosing TAKE mission (dist to box: %.2f < dist to deposite: %.2f)",
+                                            distToBox, distToDeposite);
+                                Transition(State::TAKE_MISSION, "Selecting TAKE mission");
+                            }
+                            else
+                            {
+                                RCLCPP_INFO(get_logger(), "Choosing FREE mission (dist to deposite: %.2f < dist to box: %.2f)",
+                                            distToDeposite, distToBox);
+                                Transition(State::FREE_MISSION, "Selecting FREE mission");
+                            }
+                        }
+                        else if (closestBox)
+                        {
+                            RCLCPP_INFO(get_logger(), "Only box available, selecting TAKE mission");
+                            Transition(State::TAKE_MISSION, "Selecting TAKE mission");
+                        }
+                        else if (closestDeposite)
+                        {
+                            RCLCPP_INFO(get_logger(), "Only deposite available, selecting FREE mission");
+                            Transition(State::FREE_MISSION, "Selecting FREE mission");
+                        }
+                        else
+                        {
+                            RCLCPP_WARN(get_logger(), "No box or deposite available, cannot select mission!");
+                            Transition(State::STOP, "No missions available");
+                        }
                     }
                 }
             }
@@ -339,6 +357,27 @@ namespace Modelec
             }
             break;
 
+        case State::THERMO_MISSION:
+            {
+                if (!current_mission_)
+                {
+                    current_mission_ = std::make_unique<ThermoMission>(nav_, action_executor_);
+                    current_mission_->Start(shared_from_this());
+                }
+                current_mission_->Update();
+                if (current_mission_->GetStatus() == MissionStatus::DONE)
+                {
+                    current_mission_.reset();
+                    Transition(State::SELECT_MISSION, "Thermo done");
+                }
+                else if (current_mission_->GetStatus() == MissionStatus::FAILED)
+                {
+                    current_mission_.reset();
+                    RCLCPP_ERROR(get_logger(), "Thermo mission failed!");
+                    Transition(State::SELECT_MISSION, "Thermo mission failed");
+                }
+            }
+            break;
         case State::DO_GO_HOME:
             if (!current_mission_)
             {

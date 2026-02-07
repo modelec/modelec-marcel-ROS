@@ -19,7 +19,7 @@ namespace Modelec
     class NavigationHelper
     {
     public:
-        enum
+        enum Team
         {
             YELLOW = 0,
             BLUE = 1,
@@ -35,7 +35,7 @@ namespace Modelec
 
         std::shared_ptr<Pathfinding> GetPathfinding() const;
 
-        int GetTeamId() const;
+        Team GetTeamId() const;
 
         void Update();
 
@@ -95,6 +95,7 @@ namespace Modelec
         std::shared_ptr<T> GetClosestObstacle(const PosMsg::SharedPtr& pos) const;
 
         PosMsg::SharedPtr GetHomePosition();
+        std::array<Point, 2> GetThermoPositions();
 
         void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
@@ -107,7 +108,7 @@ namespace Modelec
 
         bool Replan(bool force = false);
 
-        void SetTeamId(int id);
+        void SetTeamId(Team id);
 
         void SetSpawn(const std::string& name);
 
@@ -134,12 +135,13 @@ namespace Modelec
 
         std::shared_ptr<Pathfinding> pathfinding_;
 
-        int team_id_ = YELLOW;
+        Team team_id_ = YELLOW;
         std::map<std::string, Point> spawn_yellow_;
         std::map<std::string, Point> spawn_blue_;
         Point spawn_;
 
         float factor_close_enemy_ = 0;
+        float factor_theta_ = 0;
 
         int enemy_emergency_distance_ = 0;
 
@@ -184,7 +186,7 @@ namespace Modelec
         std::shared_ptr<T> closest_obstacle = nullptr;
         auto robotPos = Point(pos->x, pos->y, pos->theta);
         auto enemyPos = Point(last_enemy_pos_.x, last_enemy_pos_.y, last_enemy_pos_.theta);
-        float distance = std::numeric_limits<float>::max();
+        double score = std::numeric_limits<double>::max();
 
         for (const auto& obstacle : GetPathfinding()->GetObstacles())
         {
@@ -192,17 +194,15 @@ namespace Modelec
             {
                 if (!obs->IsAtObjective())
                 {
-                    auto dist = Point::distance(robotPos, obs->GetPosition());
+                    auto obsPoint = obs->GetPosition();
+                    double distance = Point::distance(robotPos, obsPoint);
+                    double enemy_distance = Point::distance(enemyPos, obsPoint);
+                    double theta = std::abs(Point::angleDiff(robotPos, obsPoint));
 
-                    if (has_enemy_)
+                    double s = distance + (enemy_distance * factor_close_enemy_ * has_enemy_) + theta * factor_theta_;
+                    if (s < score)
                     {
-                        auto enemyDist = Point::distance(enemyPos, obs->GetPosition());
-                        dist *= (1.0f + factor_close_enemy_ * std::exp(-enemyDist / enemy_emergency_distance_));
-                    }
-
-                    if (dist < distance)
-                    {
-                        distance = dist;
+                        score = s;
                         closest_obstacle = obs;
                     }
                 }

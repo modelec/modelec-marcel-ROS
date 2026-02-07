@@ -1,0 +1,238 @@
+#include <modelec_com/color_detector.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <modelec_utils/utils.hpp>
+
+namespace Modelec
+{
+    ColorDetector::ColorDetector()
+        : Node("color_detector")
+    {
+        this->declare_parameter("enabled", true);
+        this->declare_parameter("link", "");
+        this->declare_parameter("headless", true);
+        this->declare_parameter("save_to_file.enabled", true);
+        this->declare_parameter("save_to_file.path", "./");
+        this->declare_parameter("rois", rclcpp::PARAMETER_INTEGER_ARRAY);
+        this->declare_parameter("colors.blue", rclcpp::PARAMETER_INTEGER_ARRAY);
+        this->declare_parameter("colors.yellow", rclcpp::PARAMETER_INTEGER_ARRAY);
+
+        enable_ = this->get_parameter("enabled").as_bool();
+        link_ = this->get_parameter("link").as_string();
+        headless_ = this->get_parameter("headless").as_bool();
+        save_to_file_ = this->get_parameter("save_to_file.enabled").as_bool();
+        save_directory_ = this->get_parameter("save_to_file.path").as_string();
+
+        auto rois_param = this->get_parameter("rois").as_integer_array();
+        for (size_t i = 0; i + 3 < rois_param.size(); i += 4)
+        {
+            rois_.emplace_back(rois_param[i], rois_param[i + 1], rois_param[i + 2], rois_param[i + 3]);
+        }
+
+        auto blue_param = this->get_parameter("colors.blue").as_integer_array();
+        if (blue_param.size() >= 2)
+        {
+            color_configs_.push_back({
+                "blue", static_cast<double>(blue_param[0]), static_cast<double>(blue_param[1])
+            });
+        }
+
+        auto yellow_param = this->get_parameter("colors.yellow").as_integer_array();
+        if (yellow_param.size() >= 2)
+        {
+            color_configs_.push_back({
+                "yellow", static_cast<double>(yellow_param[0]), static_cast<double>(yellow_param[1])
+            });
+        }
+
+        if (!enable_)
+        {
+            RCLCPP_INFO(get_logger(), "Camera disabled by config");
+            rclcpp::shutdown();
+            return;
+        }
+
+        service_ = create_service<std_srvs::srv::Trigger>(
+            "action/detect_color",
+            std::bind(&ColorDetector::onRequest, this,
+                      std::placeholders::_1,
+                      std::placeholders::_2));
+
+        rclcpp::QoS qos(rclcpp::KeepLast(10));
+        qos.reliable();
+
+        ask_sub_ = create_subscription<std_msgs::msg::Empty>(
+            "action/detect_color/ask", qos,
+            [this](const std_msgs::msg::Empty::SharedPtr)
+            {
+                std_msgs::msg::String res;
+                std::vector<std::string> colors;
+                std::string error;
+
+                if (!processSnapshot(colors, error))
+                {
+                    res.data = "0|" + error;
+                }
+                else
+                {
+                    res.data = "1|" + join(colors, ";");
+                }
+
+                color_pub_->publish(res);
+            });
+
+        color_pub_ = create_publisher<std_msgs::msg::String>("action/detect_color/res", qos);
+
+        if (!headless_)
+        {
+            cv::namedWindow("color_detector", cv::WINDOW_NORMAL);
+        }
+
+        RCLCPP_INFO(get_logger(), "Color detector service ready");
+    }
+
+    ColorDetector::~ColorDetector()
+    {
+        if (!headless_)
+        {
+            cv::destroyAllWindows();
+        }
+    }
+
+    bool ColorDetector::processSnapshot(std::vector<std::string>& colors, std::string& error)
+    {
+        cv::VideoCapture cap(link_);
+
+        if (!cap.isOpened())
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to open camera at %s", link_.c_str());
+            error = "Failed to open camera";
+            return false;
+        }
+
+        cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
+
+        cv::Mat frame;
+
+        for (int i = 0; i < 3; ++i)
+            cap >> frame;
+
+        if (frame.empty())
+        {
+            RCLCPP_WARN(get_logger(), "Captured empty frame from camera");
+            error = "Empty frame";
+            return false;
+        }
+
+        cv::Mat hsv;
+        cv::GaussianBlur(frame, frame, cv::Size(5, 5), 0);
+        cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
+
+        colors = classifyROIs(hsv, frame);
+
+        if (!headless_)
+        {
+            cv::imshow("color_detector", frame);
+            cv::waitKey(1);
+        }
+
+        if (save_to_file_)
+        {
+            std::string path = save_directory_ + generateImagePath();
+            cv::imwrite(path, frame);
+            RCLCPP_DEBUG(get_logger(), "Saved snapshot to %s", path.c_str());
+        }
+
+        cap.release();
+
+        return true;
+    }
+
+    void ColorDetector::onRequest(
+        const std::shared_ptr<std_srvs::srv::Trigger::Request>,
+        std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+    {
+        std::vector<std::string> colors;
+        std::string error;
+
+        if (!processSnapshot(colors, error))
+        {
+            response->success = false;
+            response->message = error;
+            return;
+        }
+
+        response->success = true;
+        response->message = join(colors, ";");
+    }
+
+    std::vector<std::string> ColorDetector::classifyROIs(const cv::Mat& hsv, cv::Mat& debug_img) const
+    {
+        std::vector<std::string> results;
+
+        for (auto r : rois_)
+        {
+            cv::Rect roi = r & cv::Rect(0, 0, hsv.cols, hsv.rows);
+            cv::Scalar mean = cv::mean(hsv(roi));
+
+            std::string color = classify(cv::Vec3d(mean[0], mean[1], mean[2]));
+
+            RCLCPP_DEBUG(get_logger(), "ROI at (%d, %d, %d, %d) has mean HSV (%.2f, %.2f, %.2f) classified as %s",
+                         roi.x, roi.y, roi.width, roi.height,
+                         mean[0], mean[1], mean[2],
+                         color.c_str());
+
+            results.push_back(color);
+
+            if (save_to_file_)
+            {
+                cv::rectangle(debug_img, roi, {0, 255, 0}, 1);
+                cv::putText(
+                    debug_img,
+                    color,
+                    roi.tl() + cv::Point(0, -5),
+                    cv::FONT_HERSHEY_SIMPLEX,
+                    0.4,
+                    {0, 255, 0},
+                    1);
+            }
+        }
+
+        return results;
+    }
+
+    std::string ColorDetector::classify(const cv::Vec3d& hsv_roi) const
+    {
+        double h = hsv_roi[0];
+
+        for (const auto& color_config : color_configs_)
+        {
+            if (h >= color_config.h_min && h <= color_config.h_max)
+            {
+                return color_config.name;
+            }
+        }
+
+        return "unknown";
+    }
+
+    std::string ColorDetector::generateImagePath() const
+    {
+        auto now = std::chrono::system_clock::now();
+        auto in_time_t = std::chrono::system_clock::to_time_t(now);
+        std::stringstream ss;
+        ss << "snapshot_"
+            << std::put_time(std::localtime(&in_time_t), "%Y%m%d_%H%M%S")
+            << ".png";
+        return ss.str();
+    }
+}
+
+
+int main(int argc, char* argv[])
+{
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<Modelec::ColorDetector>();
+    rclcpp::spin(node);
+    rclcpp::shutdown();
+    return 0;
+}

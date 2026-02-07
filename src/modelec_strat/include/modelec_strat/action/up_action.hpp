@@ -9,16 +9,18 @@ namespace Modelec
     {
     public:
         UPAction(const std::shared_ptr<ActionExecutor>& action_executor);
-        UPAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front);
+        UPAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side);
 
         void Next() override;
         void Init(const std::vector<std::string>& params) override;
-        void SetFront(Front front);
+        void SetSide(Side side);
+
+        void End() override;
 
         inline static const std::string Name = ActionExec::UP;
 
     private:
-        Front front_;
+        Side side_;
 
         std::queue<int> steps_;
 

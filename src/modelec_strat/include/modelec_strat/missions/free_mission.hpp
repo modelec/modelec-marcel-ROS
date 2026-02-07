@@ -9,7 +9,7 @@ namespace Modelec {
     public:
         FreeMission(const std::shared_ptr<NavigationHelper>& nav,
                       const std::shared_ptr<ActionExecutor>& action_executor,
-                      BaseAction::Front front = BaseAction::FRONT);
+                      BaseAction::Side side = BaseAction::FRONT);
 
         void Start(rclcpp::Node::SharedPtr node) override;
         void Update() override;
@@ -21,14 +21,17 @@ namespace Modelec {
         enum Step
         {
             GO_TO_FREE,
+            CHECK_BOX,
             DOWN,
-            FREE,
+            FREE_FIRST,
+            ROTATE_ARM,
+            FREE_OTHER,
             UP,
             GO_BACK,
             DONE,
         };
 
-        BaseAction::Front front_;
+        BaseAction::Side side_;
 
         MissionStatus status_;
         std::shared_ptr<NavigationHelper> nav_;

@@ -9,20 +9,22 @@ namespace Modelec
     {
     public:
         FreeAction(const std::shared_ptr<ActionExecutor>& action_executor);
-        FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, Front front, int n);
-        FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, Front> servo);
-        FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, Front>> servos);
+        FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, int n);
+        FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::pair<int, Side> servo);
+        FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, std::vector<std::pair<int, Side>> servos);
 
         void Next() override;
         void Init(const std::vector<std::string>& params) override;
-        void AddServo(int id, Front front);
-        void AddServo(std::pair<int, Front> servo);
-        void AddServos(const std::vector<std::pair<int, Front>>& servos);
+        void AddServo(int id, Side side);
+        void AddServo(std::pair<int, Side> servo);
+        void AddServos(const std::vector<std::pair<int, Side>>& servos);
+
+        void End() override;
 
         inline static const std::string Name = ActionExec::FREE;
 
     private:
-        std::vector<std::pair<int, Front>> servos_;
+        std::vector<std::pair<int, Side>> servos_;
 
         std::queue<int> steps_;
 

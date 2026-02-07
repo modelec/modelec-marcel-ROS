@@ -30,7 +30,6 @@ namespace Modelec
         void start_async_write();
 
     public:
-        std::string name_;
         boost::asio::serial_port port_;
 
         rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
@@ -38,13 +37,13 @@ namespace Modelec
 
         SerialListener();
 
-        SerialListener(const std::string& name, int bauds, const std::string& serial_port,
+        SerialListener(int bauds, const std::string& serial_port,
                        int max_message_len);
 
         virtual ~SerialListener();
 
         void close();
-        void open(const std::string& name, int bauds, const std::string& serial_port,
+        void open(int bauds, const std::string& serial_port,
                        int max_message_len);
 
         void SetMaxMessageLen(int max_message_len) { max_message_len_ = max_message_len; }

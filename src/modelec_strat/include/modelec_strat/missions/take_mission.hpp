@@ -9,7 +9,7 @@ namespace Modelec {
     public:
         TakeMission(const std::shared_ptr<NavigationHelper>& nav,
                       const std::shared_ptr<ActionExecutor>& action_executor,
-                      BaseAction::Front front = BaseAction::FRONT);
+                      BaseAction::Side side = BaseAction::FRONT);
 
         void Start(rclcpp::Node::SharedPtr node) override;
         void Update() override;
@@ -28,7 +28,7 @@ namespace Modelec {
             DONE,
         };
 
-        BaseAction::Front front_;
+        BaseAction::Side side_;
 
         std::shared_ptr<BoxObstacle> closestBox;
         MissionStatus status_;

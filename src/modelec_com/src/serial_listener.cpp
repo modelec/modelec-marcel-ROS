@@ -7,10 +7,10 @@ namespace Modelec
     {
     }
 
-    SerialListener::SerialListener(const std::string& name, int bauds, const std::string& serial_port,
+    SerialListener::SerialListener(int bauds, const std::string& serial_port,
                                    int max_message_len) : io_(), port_(io_)
     {
-        open(name, bauds, serial_port, max_message_len);
+        open(bauds, serial_port, max_message_len);
     }
 
     SerialListener::~SerialListener()
@@ -32,9 +32,8 @@ namespace Modelec
         }
     }
 
-    void SerialListener::open(const std::string& name, int bauds, const std::string& serial_port,
+    void SerialListener::open(int bauds, const std::string& serial_port,
                int max_message_len) {
-       this->name_ = name;
        this->bauds_ = bauds;
        this->serial_port_ = serial_port;
        this->max_message_len_ = max_message_len;

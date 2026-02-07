@@ -25,11 +25,14 @@ namespace Modelec
     class BaseAction
     {
     public:
-        enum Front
+        enum Side
         {
             FRONT = 1,
             BACK = 0,
             BOTH = -1,
+            LEFT = 2,
+            RIGHT = 3,
+            CENTER = 4,
         };
 
         using Ptr = std::shared_ptr<BaseAction>;
@@ -54,6 +57,8 @@ namespace Modelec
         static Ptr CreateAction(
             const std::string& action_name,
             const std::shared_ptr<ActionExecutor>& action_executor);
+
+        virtual void End() = 0;
 
     protected:
         std::shared_ptr<ActionExecutor> action_executor_;

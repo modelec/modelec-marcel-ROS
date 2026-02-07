@@ -54,7 +54,13 @@ namespace ModelecGUI
 
         void resizeEvent(QResizeEvent* event) override;
 
-        QSvgRenderer* renderer;
+        void updateBackgroundCache();
+
+        void updateObstaclesCache();
+
+        void updateWaypointsCache();
+
+        QSvgRenderer* renderer_;
 
         modelec_interfaces::msg::OdometryPos robotPos;
         std::vector<QPoint> qpoints;
@@ -95,5 +101,18 @@ namespace ModelecGUI
         bool hasEnemy = false;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_pub_;
         rclcpp::Subscription<modelec_interfaces::msg::OdometryPos>::SharedPtr enemy_pos_sub_;
+
+        QPixmap background_cache_;
+        QPixmap obstacles_cache_;
+        QPixmap waypoints_cache_;
+
+        bool bg_dirty_ = true;
+        bool obstacles_dirty_ = true;
+        bool waypoints_dirty_ = true;
+
+        QPixmap robot_texture_;
+        QPixmap top_texture_;
+        QPixmap obs_texture_;
+
     };
 }

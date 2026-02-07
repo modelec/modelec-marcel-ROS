@@ -5,8 +5,8 @@
 namespace Modelec {
     TakeMission::TakeMission(const std::shared_ptr<NavigationHelper>& nav,
         const std::shared_ptr<ActionExecutor>& action_executor,
-        BaseAction::Front front)
-     : front_(front), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
+        BaseAction::Side side)
+     : side_(side), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
     {
     }
 
@@ -80,16 +80,16 @@ namespace Modelec {
                     break;
                 }
 
-                action_executor_->box_obstacles_[front_] = closestBox;
+                action_executor_->box_obstacles_[side_] = closestBox;
 
                 auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
-                pos.theta += (front_ == BaseAction::FRONT ? 0 : M_PI);
+                pos.theta = Point::normalizeAngle(pos.theta + (side_ == BaseAction::FRONT ? 0 : M_PI));
 
-                if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE | Pathfinding::WALL, front_ == BaseAction::FRONT) != Pathfinding::FREE)
+                if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {
-                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL, front_ == BaseAction::FRONT) != Pathfinding::FREE)
+                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                     {
-                        if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT) != Pathfinding::FREE)
+                        if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                         {
                             status_ = MissionStatus::FAILED;
                             break;
@@ -102,16 +102,16 @@ namespace Modelec {
             break;
         case GO_TO_TAKE_CLOSE:
             {
-                if (action_executor_->box_obstacles_[front_] == nullptr)
+                if (action_executor_->box_obstacles_[side_] == nullptr)
                 {
                     status_ = MissionStatus::FAILED;
                     break;
                 }
 
-                auto pos = action_executor_->box_obstacles_[front_]->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
-                pos.theta += front_ == BaseAction::FRONT ? 0 : M_PI;
+                auto pos = action_executor_->box_obstacles_[side_]->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
+                pos.theta = Point::normalizeAngle(pos.theta + (side_ == BaseAction::FRONT ? 0 : M_PI));
 
-                if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, front_ == BaseAction::FRONT) != Pathfinding::FREE)
+                if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {
                     status_ = MissionStatus::FAILED;
                     break;
@@ -122,32 +122,36 @@ namespace Modelec {
             break;
         case DOWN:
             {
-                action_executor_->Down(front_);
+                action_executor_->RotateArm(side_, false, false);
+
                 deploy_time_ = node_->now();
             }
             break;
         case TAKE:
             {
-                action_executor_->Take({{0, front_}, {1, front_}, {2, front_}, {3, front_}});
+                action_executor_->Take({{0, side_}, {1, side_}, {2, side_}, {3, side_}});
                 deploy_time_ = node_->now();
                 min_time_ = node_->now() + rclcpp::Duration::from_seconds(0.5);
             }
             break;
         case UP:
             {
-                action_executor_->Up(front_);
+                action_executor_->Up(side_);
+                action_executor_->LookOn(side_);
                 deploy_time_ = node_->now();
             }
             break;
         case DONE:
             {
-                if (action_executor_->box_obstacles_[front_] == nullptr)
+                if (action_executor_->box_obstacles_[side_] == nullptr)
                 {
                     status_ = MissionStatus::FAILED;
                     break;
                 }
 
-                nav_->GetPathfinding()->RemoveObstacle(action_executor_->box_obstacles_[front_]->GetId());
+                nav_->GetPathfinding()->RemoveObstacle(action_executor_->box_obstacles_[side_]->GetId());
+
+                action_executor_->AskColor();
             }
 
             status_ = MissionStatus::DONE;

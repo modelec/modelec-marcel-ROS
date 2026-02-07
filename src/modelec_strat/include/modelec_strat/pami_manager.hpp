@@ -2,7 +2,6 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <modelec_utils/config.hpp>
 #include <modelec_utils/point.hpp>
 
 #include <modelec_strat/obstacle/obstacle.hpp>
@@ -28,11 +27,6 @@ namespace Modelec
         int time_to_remove_top_pot_ = 0;
 
         int score_to_add_ = 0;
-
-        int score_goupie_ = 0;
-        int score_superstar_ = 0;
-        int score_all_party_ = 0;
-        int score_free_zone_ = 0;
 
         rclcpp::TimerBase::SharedPtr timer_add_;
         // rclcpp::TimerBase::SharedPtr timer_remove_;

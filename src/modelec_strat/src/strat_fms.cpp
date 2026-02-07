@@ -179,18 +179,18 @@ namespace Modelec
 
         case State::SELECT_MISSION:
             {
-                auto elapsed = now - match_start_time_;
+                auto duration = (now - match_start_time_).seconds();
 
-                if (elapsed.seconds() >= 100)
+                if (duration >= 100)
                 {
                     Transition(State::STOP, "All missions done");
                 }
 
-                else if (elapsed.seconds() > 60 && !action_executor_->IsEmpty())
+                else if (duration > 60 && !action_executor_->IsEmpty() && duration < 90)
                 {
                     Transition(State::FREE_MISSION, "No Time left, freeing boxes");
                 }
-                else if (elapsed.seconds() < 80)
+                else if (duration < 80)
                 {
                     Transition(State::SELECT_GAME_ACTION, "Selecting a game action");
                 }

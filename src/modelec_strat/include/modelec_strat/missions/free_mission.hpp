@@ -21,6 +21,7 @@ namespace Modelec {
         enum Step
         {
             GO_TO_FREE,
+            CHECK_BOX,
             DOWN,
             FREE_FIRST,
             ROTATE_ARM,

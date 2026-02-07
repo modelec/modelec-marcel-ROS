@@ -33,6 +33,7 @@ namespace Modelec
         std::vector<int> GetSide(Team team) const;
 
         void ParseColor(const std::string& colorStr);
+        void ParseColor(const std::vector<std::string>& colorVec);
 
     protected:
 

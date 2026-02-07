@@ -221,10 +221,10 @@ namespace Modelec
                     return;
                 }
 
-                RCLCPP_INFO(node_->get_logger(), "Color detection succeeded: %s", res[1].c_str());
+                RCLCPP_DEBUG(node_->get_logger(), "Color detection succeeded: %s", msg->data.c_str());
 
                 if (box_obstacles_[cam_side_] != nullptr) {
-                    box_obstacles_[cam_side_]->ParseColor(res[1]);
+                    box_obstacles_[cam_side_]->ParseColor(std::vector(res.begin() + 1, res.end()));
                 } else {
                     RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box in the cam side");
                 }

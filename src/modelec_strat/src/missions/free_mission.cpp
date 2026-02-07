@@ -24,6 +24,7 @@ namespace Modelec {
         std::swap(steps_, empty);
 
         steps_.push(GO_TO_FREE);
+        steps_.push(CHECK_BOX);
         steps_.push(DOWN);
         steps_.push(FREE_FIRST);
         steps_.push(ROTATE_ARM);
@@ -37,7 +38,6 @@ namespace Modelec {
     {
         if (!action_executor_->IsActionDone())
         {
-            // RCLCPP_INFO(node_->get_logger(), "FreeMission: Waiting for action to complete");
             return;
         }
 
@@ -100,9 +100,18 @@ namespace Modelec {
                     }
                 }
 
+                action_executor_->LookOn(BaseAction::Side::CENTER);
+
+                go_timeout_ = node_->now();
+            }
+            break;
+        case CHECK_BOX:
+            {
                 auto obs = action_executor_->box_obstacles_[side_];
 
                 auto vect = obs->GetSide(nav_->GetTeamId() == NavigationHelper::BLUE ? BoxObstacle::BLUE : BoxObstacle::YELLOW);
+
+                RCLCPP_DEBUG(node_->get_logger(), "Box on side %d has %d boxes of his color side", static_cast<int>(side_), static_cast<int>(vect.size()));
 
                 if (vect.size() == 4)
                 {
@@ -125,11 +134,8 @@ namespace Modelec {
                     steps_.push(GO_BACK);
                     steps_.push(DONE);
                 }
-
-                action_executor_->LookOn(BaseAction::Side::CENTER);
-
-                go_timeout_ = node_->now();
             }
+
             break;
         case DOWN:
             {

@@ -110,4 +110,19 @@ namespace Modelec
             }
         }
     }
+
+    void BoxObstacle::ParseColor(const std::vector<std::string>& colorVec)
+    {
+        for (size_t i = 0; i < colorVec.size() && i < colors_.size(); ++i)
+        {
+            if (colorVec[i] == "yellow")
+            {
+                colors_[i] = YELLOW;
+            }
+            else if (colorVec[i] == "blue")
+            {
+                colors_[i] = BLUE;
+            }
+        }
+    }
 }

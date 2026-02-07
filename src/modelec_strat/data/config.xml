@@ -81,11 +81,11 @@
         <!--<link>/dev/video0</link>-->
         <link>http://192.168.1.21:8080/video</link>
         <headless>true</headless>
-        <points>
-            <first x="300" y="700" w="50" h="50" />
-            <second x="700" y="700" w="50" h="50" />
-            <third x="1200" y="700" w="50" h="50" />
-            <fourth x="1500" y="700" w="50" h="50" />
-        </points>
+        <rois>
+            <roi x="300" y="700" w="50" h="50" />
+            <roi x="700" y="700" w="50" h="50" />
+            <roi x="1200" y="700" w="50" h="50" />
+            <roi x="1500" y="700" w="50" h="50" />
+        </rois>
     </cam>
 </config>

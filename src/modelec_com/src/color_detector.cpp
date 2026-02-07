@@ -82,6 +82,7 @@ namespace Modelec
 
         if (!cap.isOpened())
         {
+            RCLCPP_ERROR(get_logger(), "Failed to open camera at %s", link_.c_str());
             error = "Failed to open camera";
             return false;
         }
@@ -95,6 +96,7 @@ namespace Modelec
 
         if (frame.empty())
         {
+            RCLCPP_WARN(get_logger(), "Captured empty frame from camera");
             error = "Empty frame";
             return false;
         }
@@ -115,6 +117,7 @@ namespace Modelec
         {
             std::string path = save_directory_ + generateImagePath();
             cv::imwrite(path, frame);
+            RCLCPP_DEBUG(get_logger(), "Saved snapshot to %s", path.c_str());
         }
 
         cap.release();
@@ -140,7 +143,6 @@ namespace Modelec
         response->message = join(colors, ";");
     }
 
-    // 4 independent ROIs
     std::vector<std::string> ColorDetector::classifyROIs(const cv::Mat& hsv, cv::Mat& debug_img) const
     {
         std::vector<std::string> results;
@@ -151,6 +153,12 @@ namespace Modelec
             cv::Scalar mean = cv::mean(hsv(roi));
 
             std::string color = classify(cv::Vec3d(mean[0], mean[1], mean[2]));
+
+            RCLCPP_DEBUG(get_logger(), "ROI at (%d, %d, %d, %d) has mean HSV (%.2f, %.2f, %.2f) classified as %s",
+             roi.x, roi.y, roi.width, roi.height,
+             mean[0], mean[1], mean[2],
+             color.c_str());
+
             results.push_back(color);
 
             if (save_to_file_)
@@ -172,22 +180,17 @@ namespace Modelec
 
     std::string ColorDetector::classify(const cv::Vec3d& hsv_roi) const
     {
-        cv::Scalar yellow_low(20, 100, 100), yellow_high(40, 255, 255);
-        cv::Scalar blue_low(100, 100, 100), blue_high(130, 255, 255);
+        double h = hsv_roi[0];
 
-        cv::Mat yellow_mask, blue_mask;
-        cv::inRange(hsv_roi, yellow_low, yellow_high, yellow_mask);
-        cv::inRange(hsv_roi, blue_low, blue_high, blue_mask);
+        if (h >= 90 && h <= 130)
+        {
+            return "blue";
+        }
 
-        int yellow_count = cv::countNonZero(yellow_mask);
-        int blue_count = cv::countNonZero(blue_mask);
-        int total_pixels = hsv_roi.rows * hsv_roi.cols;
-
-        double yellow_ratio = static_cast<double>(yellow_count) / total_pixels;
-        double blue_ratio = static_cast<double>(blue_count) / total_pixels;
-
-        if (yellow_ratio > blue_ratio && yellow_ratio > 0.3) return "yellow";
-        if (blue_ratio > yellow_ratio && blue_ratio > 0.3) return "blue";
+        if (h >= 20 && h <= 40)
+        {
+            return "yellow";
+        }
 
         return "unknown";
     }
@@ -205,35 +208,19 @@ namespace Modelec
 
     void ColorDetector::SetupRois()
     {
-        rois_.resize(4);
+        auto count = Config::count("config.cam.rois.roi");
 
-        rois_[0] = {
-            Config::get<int>("config.cam.points.first@x", 0),
-            Config::get<int>("config.cam.points.first@y", 0),
-            Config::get<int>("config.cam.points.first@w", 0),
-            Config::get<int>("config.cam.points.first@h", 0)
-        };
+        for (size_t i = 0; i < count; ++i)
+        {
+            std::string prefix = "config.cam.rois.roi[" + std::to_string(i) + "]";
+            int x = Config::get<int>(prefix + "@x", 0);
+            int y = Config::get<int>(prefix + "@y", 0);
+            int width = Config::get<int>(prefix + "@w", 100);
+            int height = Config::get<int>(prefix + "@h", 100);
+            rois_.emplace_back(x, y, width, height);
 
-        rois_[1] = {
-            Config::get<int>("config.cam.points.second@x", 0),
-            Config::get<int>("config.cam.points.second@y", 0),
-            Config::get<int>("config.cam.points.second@w", 0),
-            Config::get<int>("config.cam.points.second@h", 0)
-        };
-
-        rois_[2] = {
-            Config::get<int>("config.cam.points.third@x", 0),
-            Config::get<int>("config.cam.points.third@y", 0),
-            Config::get<int>("config.cam.points.third@w", 0),
-            Config::get<int>("config.cam.points.third@h", 0)
-        };
-
-        rois_[3] = {
-            Config::get<int>("config.cam.points.fourth@x", 0),
-            Config::get<int>("config.cam.points.fourth@y", 0),
-            Config::get<int>("config.cam.points.fourth@w", 0),
-            Config::get<int>("config.cam.points.fourth@h", 0)
-        };
+            RCLCPP_DEBUG(get_logger(), "Loaded ROI %zu: x=%d, y=%d, width=%d, height=%d", i, x, y, width, height);
+        }
     }
 }
 

@@ -16,8 +16,12 @@ namespace Modelec
         template<typename T>
         static T get(const std::string& key, const T& default_value = T());
 
+        static size_t count(const std::string& prefix);
+
+        static void printAll();
+
     private:
-        static void parseNode(tinyxml2::XMLElement* element, const std::string& prefix);
+        static void parseNode(tinyxml2::XMLElement* element, const std::string& key);
 
         static inline std::unordered_map<std::string, std::string> values_;
     };

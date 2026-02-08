@@ -9,5 +9,6 @@
         <file>img/logo/ISEN-Nantes-fond-blanc.png</file>
         <file>img/logo/modelec.png</file>
         <file>img/wood.jpg</file>
+        <file>sound/test.mp3</file>
     </qresource>
 </RCC>

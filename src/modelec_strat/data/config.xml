@@ -108,4 +108,10 @@
         <timeout_ms>300</timeout_ms>
         <attempt>5</attempt>
     </usb>
+    <ihm>
+        <sound>
+            <enabled>false</enabled>
+            <test path=":/sound/test.mp3" />
+        </sound>
+    </ihm>
 </config>

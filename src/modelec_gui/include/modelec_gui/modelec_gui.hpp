@@ -10,7 +10,8 @@
 #include <modelec_gui/pages/map_page.hpp>
 #include <modelec_gui/pages/action_page.hpp>
 #include <modelec_gui/pages/alim_page.hpp>
-
+#include <QMediaPlayer>
+#include <QAudioOutput>
 
 namespace ModelecGUI
 {
@@ -49,6 +50,11 @@ namespace ModelecGUI
         QAction* playmat_grid_;
 
         QAction* toggle_show_obstacle_action_;
+
+        QMediaPlayer* media_player_;
+        QAudioOutput* audio_output_;
+
+        rclcpp::Subscription<std_msgs::msg::String>::SharedPtr audio_sub_;
 
     };
 }

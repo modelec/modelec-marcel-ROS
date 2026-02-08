@@ -2,7 +2,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <QMenuBar>
 #include <utility>
-
+#include <modelec_utils/config.hpp>
 
 namespace ModelecGUI {
 
@@ -34,6 +34,23 @@ namespace ModelecGUI {
         {
             stackedWidget->setCurrentWidget(map_page_);
         });
+
+        if (Modelec::Config::get<bool>("config.ihm.sound.enabled", false))
+        {
+            RCLCPP_INFO(get_node()->get_logger(), "Sound enabled, setting up audio player");
+
+            media_player_ = new QMediaPlayer(this);
+            audio_output_ = new QAudioOutput(this);
+            media_player_->setAudioOutput(audio_output_);
+
+            audio_sub_ = node_->create_subscription<std_msgs::msg::String>(
+                "audio/play", 10, [this](const std_msgs::msg::String::SharedPtr msg)
+                {
+                    QString audio_file = QString::fromStdString(Modelec::Config::get<std::string>("config.ihm.sound." + msg->data + "@path"));
+                    media_player_->setSource(QUrl::fromLocalFile(audio_file));
+                    media_player_->play();
+                });
+        }
     }
 
     void ROS2QtGUI::setupMenu() {

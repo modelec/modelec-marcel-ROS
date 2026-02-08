@@ -773,15 +773,15 @@ namespace Modelec
     void NavigationHelper::SetupSpawn()
     {
         spawn_yellow_["top"] = Point(
-            Config::get<int>("config.spawn.yellow_top@x"),
-            Config::get<int>("config.spawn.yellow_top@y"),
-            Config::get<double>("config.spawn.yellow_top@theta")
+            Config::get<int>("config.spawn.yellow.top@x"),
+            Config::get<int>("config.spawn.yellow..op@y"),
+            Config::get<double>("config.spawn.yellow.top@theta")
         );
 
         spawn_blue_["top"] = Point(
-            Config::get<int>("config.spawn.blue_top@x"),
-            Config::get<int>("config.spawn.blue_top@y"),
-            Config::get<double>("config.spawn.blue_top@theta")
+            Config::get<int>("config.spawn.blue.top@x"),
+            Config::get<int>("config.spawn.blue.top@y"),
+            Config::get<double>("config.spawn.blue.top@theta")
         );
     }
 }

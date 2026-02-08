@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 
     auto node = rclcpp::Node::make_shared("qt_gui_node");
 
-    std::string config_path = ament_index_cpp::get_package_share_directory("modelec_com") + "/data/config.xml";
+    std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
     if (!Modelec::Config::load(config_path))
     {
         RCLCPP_ERROR(node->get_logger(), "Failed to load config file: %s", config_path.c_str());

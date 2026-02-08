@@ -78,7 +78,7 @@
     </thermo>
     <cam>
         <save_to_file>
-            <enabled>true</enabled>
+            <enabled>false</enabled>
             <directory>./cam/</directory>
         </save_to_file>
         <enabled>true</enabled>

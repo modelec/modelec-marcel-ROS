@@ -7,17 +7,17 @@ namespace Modelec
     ColorDetector::ColorDetector()
         : Node("color_detector")
     {
-        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_com") + "/data/config.xml";
+        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
          if (!Config::load(config_path))
          {
              RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
          }
 
-        enable_ = Config::get<bool>("config.camera.enabled", false);
-        link_ = Config::get<std::string>("config.camera.link", "/dev/video0");
-        headless_ = Config::get<bool>("config.camera.headless", true);
-        save_to_file_ = Config::get<bool>("config.camera.save_to_file.enabled", false);
-        save_directory_ = Config::get<std::string>("config.camera.save_to_file.directory", "./");
+        enable_ = Config::get<bool>("config.cam.enabled", false);
+        link_ = Config::get<std::string>("config.cam.link", "/dev/video0");
+        headless_ = Config::get<bool>("config.cam.headless", true);
+        save_to_file_ = Config::get<bool>("config.cam.save_to_file.enabled", false);
+        save_directory_ = Config::get<std::string>("config.cam.save_to_file.directory", "./");
 
         rois_ = Config::get<std::vector<cv::Rect>>("config.cam.rois.roi", {});
         color_configs_ = Config::get<std::vector<ColorSetting>>("config.cam.colors.color", {});

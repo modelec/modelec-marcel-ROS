@@ -56,8 +56,8 @@ namespace ModelecGUI
         robot_length_ = Modelec::Config::get<int>("config.robot.size.length_mm", 300);
         robot_width_ = Modelec::Config::get<int>("config.robot.size.width_mm", 200);
 
-        enemy_length_ = Modelec::Config::get<int>("config.enemy.size.length_mm", 300);
-        enemy_width_ = Modelec::Config::get<int>("config.enemy.size.width_mm", 300);
+        enemy_length_ = Modelec::Config::get<int>("cenemy.size.length_mm", 300);
+        enemy_width_ = Modelec::Config::get<int>("enemy.size.width_mm", 300);
 
         add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryWaypoint>(
             "odometry/add_waypoint", 100,

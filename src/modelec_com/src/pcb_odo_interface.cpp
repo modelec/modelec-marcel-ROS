@@ -7,7 +7,7 @@ namespace Modelec
 {
     PCBOdoInterface::PCBOdoInterface() : Node("pcb_odo_interface")
     {
-        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_com") + "/data/config.xml";
+        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
         if (!Config::load(config_path))
         {
             RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());

@@ -35,7 +35,7 @@ namespace Modelec
     {
         if (!nav_->HasArrived())
         {
-            if ((node_->now() - go_timeout_).seconds() < 2 && (node_->now() - last_ask_waypoint_time_).seconds() > 1)
+            if ((node_->now() - go_timeout_).seconds() > 3 && (node_->now() - last_ask_waypoint_time_).seconds() > 2)
             {
                 nav_->AskWaypoint();
                 last_ask_waypoint_time_ = node_->now();

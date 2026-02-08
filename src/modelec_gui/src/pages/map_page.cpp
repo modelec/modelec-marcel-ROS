@@ -5,6 +5,8 @@
 #include <utility>
 #include <cmath>
 
+#include <modelec_utils/config.hpp>
+
 namespace ModelecGUI
 {
     MapPage::MapPage(rclcpp::Node::SharedPtr node, QWidget* parent) : QWidget(parent),
@@ -48,14 +50,14 @@ namespace ModelecGUI
 
         qpoints = {};
 
-        map_height_ = node_->get_parameter("map.size.map_height_mm").as_int();
-        map_width_ = node_->get_parameter("map.size.map_width_mm").as_int();
+        map_height_ = Modelec::Config::get<int>("config.map.size.map_height_mm", 2000);
+        map_width_ = Modelec::Config::get<int>("config.map.size.map_width_mm", 3000);
 
-        robot_length_ = node_->get_parameter("robot.size.length_mm").as_int();
-        robot_width_ = node_->get_parameter("robot.size.width_mm").as_int();
+        robot_length_ = Modelec::Config::get<int>("config.robot.size.length_mm", 300);
+        robot_width_ = Modelec::Config::get<int>("config.robot.size.width_mm", 200);
 
-        enemy_length_ = node_->get_parameter("enemy.size.length_mm").as_int();
-        enemy_width_ = node_->get_parameter("enemy.size.width_mm").as_int();
+        enemy_length_ = Modelec::Config::get<int>("config.enemy.size.length_mm", 300);
+        enemy_width_ = Modelec::Config::get<int>("config.enemy.size.width_mm", 300);
 
         add_waypoint_sub_ = node_->create_subscription<modelec_interfaces::msg::OdometryWaypoint>(
             "odometry/add_waypoint", 100,

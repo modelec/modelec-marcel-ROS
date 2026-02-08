@@ -1,6 +1,7 @@
 #include <modelec_strat/navigation_helper.hpp>
 #include <utility>
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <modelec_utils/config.hpp>
 
 namespace Modelec
 {
@@ -9,41 +10,9 @@ namespace Modelec
 
     NavigationHelper::NavigationHelper(const rclcpp::Node::SharedPtr& node) : node_(node)
     {
-        node_->declare_parameter("factor_close_enemy", -0.5);
-        node_->declare_parameter("factor.theta", 20.0);
-        node_->declare_parameter("enemy.detection.min_emergency_distance_mm", 390);
-
-        factor_close_enemy_ = node_->get_parameter("factor_close_enemy").as_double();
-        factor_theta_ = node_->get_parameter("factor.theta").as_double();
-        enemy_emergency_distance_ = node_->get_parameter("enemy.detection.min_emergency_distance_mm").as_int();
-
-        node_->declare_parameter("home.yellow.x", 0);
-        node_->declare_parameter("home.yellow.y", 0);
-        node_->declare_parameter("home.yellow.theta", 0.0);
-        node_->declare_parameter("home.blue.x", 0);
-        node_->declare_parameter("home.blue.y", 0);
-        node_->declare_parameter("home.blue.theta", 0.0);
-
-        node_->declare_parameter("thermo.yellow.start.x", 0);
-        node_->declare_parameter("thermo.yellow.start.y", 0);
-        node_->declare_parameter("thermo.yellow.start.theta", 0.0);
-        node_->declare_parameter("thermo.yellow.finish.x", 0);
-        node_->declare_parameter("thermo.yellow.finish.y", 0);
-        node_->declare_parameter("thermo.yellow.finish.theta", 0.0);
-
-        node_->declare_parameter("thermo.blue.start.x", 0);
-        node_->declare_parameter("thermo.blue.start.y", 0);
-        node_->declare_parameter("thermo.blue.start.theta", 0.0);
-        node_->declare_parameter("thermo.blue.finish.x", 0);
-        node_->declare_parameter("thermo.blue.finish.y", 0);
-        node_->declare_parameter("thermo.blue.finish.theta", 0.0);
-
-        node_->declare_parameter("spawn.yellow_top.x", 0);
-        node_->declare_parameter("spawn.yellow_top.y", 0);
-        node_->declare_parameter("spawn.yellow_top.theta", 0.0);
-        node_->declare_parameter("spawn.blue_top.x", 0);
-        node_->declare_parameter("spawn.blue_top.y", 0);
-        node_->declare_parameter("spawn.blue_top.theta", 0.0);
+        factor_close_enemy_ = Config::get<float>("config.factor.close_enemy", 1.0f);
+        factor_theta_ = Config::get<float>("config.factor.theta", 1.0f);
+        enemy_emergency_distance_ = Config::get<int>("config.enemy.detection.min_emergency_distance_mm", 300);
 
         pathfinding_ = std::make_shared<Pathfinding>(node);
 
@@ -567,29 +536,29 @@ namespace Modelec
     {
         PosMsg::SharedPtr home = std::make_shared<PosMsg>();
 
-        std::string prefix = (team_id_ == YELLOW) ? "home.yellow" : "home.blue";
+        std::string prefix = (team_id_ == YELLOW) ? "config.home.yellow" : "config.home.blue";
 
-        home->x = node_->get_parameter(prefix + ".x").as_int();
-        home->y = node_->get_parameter(prefix + ".y").as_int();
-        home->theta = node_->get_parameter(prefix + ".theta").as_double();
+        home->x = Config::get<int>(prefix + "@x");
+        home->y = Config::get<int>(prefix + "@y");
+        home->theta = Config::get<double>(prefix + "@theta");
 
         return home;
     }
 
     std::array<Point, 2> NavigationHelper::GetThermoPositions()
     {
-        std::string prefix = (team_id_ == YELLOW) ? "thermo.yellow" : "thermo.blue";
+        std::string prefix = (team_id_ == YELLOW) ? "config.thermo.yellow" : "config.thermo.blue";
 
         Point start(
-            node_->get_parameter(prefix + ".start.x").as_int(),
-            node_->get_parameter(prefix + ".start.y").as_int(),
-            node_->get_parameter(prefix + ".start.theta").as_double()
+            Config::get<int>(prefix + ".start@x"),
+            Config::get<int>(prefix + ".start@y"),
+            Config::get<double>(prefix + ".start@theta")
         );
 
         Point finish(
-            node_->get_parameter(prefix + ".finish.x").as_int(),
-            node_->get_parameter(prefix + ".finish.y").as_int(),
-            node_->get_parameter(prefix + ".finish.theta").as_double()
+            Config::get<int>(prefix + ".finish@x"),
+            Config::get<int>(prefix + ".finish@y"),
+            Config::get<double>(prefix + ".finish@theta")
         );
 
         return {start, finish};
@@ -804,15 +773,15 @@ namespace Modelec
     void NavigationHelper::SetupSpawn()
     {
         spawn_yellow_["top"] = Point(
-            node_->get_parameter("spawn.yellow_top.x").as_int(),
-            node_->get_parameter("spawn.yellow_top.y").as_int(),
-            node_->get_parameter("spawn.yellow_top.theta").as_double()
+            Config::get<int>("config.spawn.yellow_top@x"),
+            Config::get<int>("config.spawn.yellow_top@y"),
+            Config::get<double>("config.spawn.yellow_top@theta")
         );
 
         spawn_blue_["top"] = Point(
-            node_->get_parameter("spawn.blue_top.x").as_int(),
-            node_->get_parameter("spawn.blue_top.y").as_int(),
-            node_->get_parameter("spawn.blue_top.theta").as_double()
+            Config::get<int>("config.spawn.blue_top@x"),
+            Config::get<int>("config.spawn.blue_top@y"),
+            Config::get<double>("config.spawn.blue_top@theta")
         );
     }
 }

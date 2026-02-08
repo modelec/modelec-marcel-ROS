@@ -1,15 +1,20 @@
 #include <modelec_com/pcb_odo_interface.hpp>
 #include <modelec_utils/utils.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <modelec_utils/config.hpp>
 
 namespace Modelec
 {
     PCBOdoInterface::PCBOdoInterface() : Node("pcb_odo_interface")
     {
-        declare_parameter<std::string>("serial_port", "/dev/USB_ODO");
-        declare_parameter<int>("baudrate", 115200);
+        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_com") + "/data/config.xml";
+        if (!Config::load(config_path))
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
+        }
 
-        auto serial_port = get_parameter("serial_port").as_string();
-        auto baudrate = get_parameter("baudrate").as_int();
+        auto serial_port = Config::get<std::string>("config.usb.odo.port", "/dev/ttyUSB0");
+        auto baudrate = Config::get<long>("config.usb.odo.baudrate", 115200);
 
         RCLCPP_INFO(this->get_logger(), "Starting PCB Odometry Interface on port %s with baudrate %ld", serial_port.c_str(), baudrate);
 

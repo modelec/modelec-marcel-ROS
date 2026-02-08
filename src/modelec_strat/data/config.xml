@@ -12,7 +12,6 @@
             <min_emergency_distance_mm>300</min_emergency_distance_mm>
             <margin_detection_table_mm>50</margin_detection_table_mm>
         </detection>
-        <factor_close_enemy>-2</factor_close_enemy>
     </enemy>
 
     <robot>
@@ -60,8 +59,13 @@
         <theta>20</theta>
         <obs>0.6</obs>
         <thermo>0.7</thermo>
+        <close_enemy>-2</close_enemy>
     </factor>
-    <timer_period_ms>20</timer_period_ms>
+    <timer>
+        <strat>
+            <ms>20</ms>
+        </strat>
+    </timer>
     <thermo>
         <yellow>
             <start x="200" y="175" theta="0" />
@@ -75,7 +79,7 @@
     <cam>
         <save_to_file>
             <enabled>true</enabled>
-            <path>./cam/</path>
+            <directory>./cam/</directory>
         </save_to_file>
         <enabled>true</enabled>
         <!--<link>/dev/video0</link>-->
@@ -92,4 +96,16 @@
             <color name="yellow" hue_min="20" hue_max="40" />
         </colors>
     </cam>
+    <usb>
+        <odo>
+            <port>/dev/USB_ODO</port>
+            <baudrate>115200</baudrate>
+        </odo>
+        <action>
+            <port>/dev/USB_ACTION</port>
+            <baudrate>115200</baudrate>
+        </action>
+        <timeout_ms>300</timeout_ms>
+        <attempt>5</attempt>
+    </usb>
 </config>

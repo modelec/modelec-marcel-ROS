@@ -7,42 +7,20 @@ namespace Modelec
     ColorDetector::ColorDetector()
         : Node("color_detector")
     {
-        this->declare_parameter("enabled", true);
-        this->declare_parameter("link", "");
-        this->declare_parameter("headless", true);
-        this->declare_parameter("save_to_file.enabled", true);
-        this->declare_parameter("save_to_file.path", "./");
-        this->declare_parameter("rois", rclcpp::PARAMETER_INTEGER_ARRAY);
-        this->declare_parameter("colors.blue", rclcpp::PARAMETER_INTEGER_ARRAY);
-        this->declare_parameter("colors.yellow", rclcpp::PARAMETER_INTEGER_ARRAY);
+        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_com") + "/data/config.xml";
+         if (!Config::load(config_path))
+         {
+             RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
+         }
 
-        enable_ = this->get_parameter("enabled").as_bool();
-        link_ = this->get_parameter("link").as_string();
-        headless_ = this->get_parameter("headless").as_bool();
-        save_to_file_ = this->get_parameter("save_to_file.enabled").as_bool();
-        save_directory_ = this->get_parameter("save_to_file.path").as_string();
+        enable_ = Config::get<bool>("config.camera.enabled", false);
+        link_ = Config::get<std::string>("config.camera.link", "/dev/video0");
+        headless_ = Config::get<bool>("config.camera.headless", true);
+        save_to_file_ = Config::get<bool>("config.camera.save_to_file.enabled", false);
+        save_directory_ = Config::get<std::string>("config.camera.save_to_file.directory", "./");
 
-        auto rois_param = this->get_parameter("rois").as_integer_array();
-        for (size_t i = 0; i + 3 < rois_param.size(); i += 4)
-        {
-            rois_.emplace_back(rois_param[i], rois_param[i + 1], rois_param[i + 2], rois_param[i + 3]);
-        }
-
-        auto blue_param = this->get_parameter("colors.blue").as_integer_array();
-        if (blue_param.size() >= 2)
-        {
-            color_configs_.push_back({
-                "blue", static_cast<double>(blue_param[0]), static_cast<double>(blue_param[1])
-            });
-        }
-
-        auto yellow_param = this->get_parameter("colors.yellow").as_integer_array();
-        if (yellow_param.size() >= 2)
-        {
-            color_configs_.push_back({
-                "yellow", static_cast<double>(yellow_param[0]), static_cast<double>(yellow_param[1])
-            });
-        }
+        rois_ = Config::get<std::vector<cv::Rect>>("config.cam.rois.roi", {});
+        color_configs_ = Config::get<std::vector<ColorSetting>>("config.cam.colors.color", {});
 
         if (!enable_)
         {

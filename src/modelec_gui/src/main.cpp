@@ -4,6 +4,7 @@
 #include "modelec_gui/modelec_gui.hpp"
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <modelec_utils/config.hpp>
 
 int main(int argc, char **argv)
 {
@@ -13,14 +14,11 @@ int main(int argc, char **argv)
 
     auto node = rclcpp::Node::make_shared("qt_gui_node");
 
-    node->declare_parameter("map.size.map_width_mm", 3000);
-    node->declare_parameter("map.size.map_height_mm", 2000);
-
-    node->declare_parameter("robot.size.length_mm", 200);
-    node->declare_parameter("robot.size.width_mm", 300);
-
-    node->declare_parameter("enemy.size.length_mm", 200);
-    node->declare_parameter("enemy.size.width_mm", 300);
+    std::string config_path = ament_index_cpp::get_package_share_directory("modelec_com") + "/data/config.xml";
+    if (!Modelec::Config::load(config_path))
+    {
+        RCLCPP_ERROR(node->get_logger(), "Failed to load config file: %s", config_path.c_str());
+    }
 
     ModelecGUI::ROS2QtGUI window(node);
     window.show();

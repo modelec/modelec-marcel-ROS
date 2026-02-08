@@ -1,5 +1,6 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_strat/pathfinding.hpp>
+#include <modelec_utils/config.hpp>
 
 namespace Modelec {
     struct AStarNode {
@@ -22,33 +23,20 @@ namespace Modelec {
     }
 
     Pathfinding::Pathfinding(const rclcpp::Node::SharedPtr &node) : node_(node) {
-        node_->declare_parameter("map.size.map_width_mm", 3000);
-        node_->declare_parameter("map.size.map_height_mm", 2000);
-        node_->declare_parameter("map.size.grid_width", 300);
-        node_->declare_parameter("map.size.grid_height", 200);
 
-        map_width_mm_ = node_->get_parameter("map.size.map_width_mm").as_int();
-        map_height_mm_ = node_->get_parameter("map.size.map_height_mm").as_int();
-        grid_width_ = node_->get_parameter("map.size.grid_width").as_int();
-        grid_height_ = node_->get_parameter("map.size.grid_height").as_int();
+        map_width_mm_ = Config::get<int>("config.map.size.map_width_mm", 4000);
+        map_height_mm_ = Config::get<int>("config.map.size.map_height_mm", 3000);
+        grid_width_ = Config::get<int>("config.map.size.grid_width", 40);
+        grid_height_ = Config::get<int>("config.map.size.grid_height", 30);
 
-        node_->declare_parameter("robot.size.length_mm", 300);
-        node_->declare_parameter("robot.size.width_mm", 300);
-        node_->declare_parameter("robot.size.margin_mm", 100);
+        robot_length_mm_ = Config::get<int>("config.robot.size.length_mm", 300);
+        robot_width_mm_ = Config::get<int>("config.robot.size.width_mm", 200);
+        margin_mm_ = Config::get<int>("config.robot.size.margin_mm", 50);
 
-        robot_length_mm_ = node_->get_parameter("robot.size.length_mm").as_int();
-        robot_width_mm_ = node_->get_parameter("robot.size.width_mm").as_int();
-        margin_mm_ = node_->get_parameter("robot.size.margin_mm").as_int();
-
-        node_->declare_parameter("enemy.size.length_mm", 300);
-        node_->declare_parameter("enemy.size.width_mm", 300);
-        node_->declare_parameter("enemy.size.margin_mm", 50);
-        node_->declare_parameter("enemy.factor_close_enemy", -0.5);
-
-        enemy_length_mm_ = node_->get_parameter("enemy.size.length_mm").as_int();
-        enemy_width_mm_ = node_->get_parameter("enemy.size.width_mm").as_int();
-        enemy_margin_mm_ = node_->get_parameter("enemy.size.margin_mm").as_int();
-        factor_close_enemy_ = node_->get_parameter("enemy.factor_close_enemy").as_double();
+        enemy_length_mm_ = Config::get<int>("config.enemy.size.length_mm", 300);
+        enemy_width_mm_ = Config::get<int>("config.enemy.size.width_mm", 300);
+        enemy_margin_mm_ = Config::get<int>("config.enemy.size.margin_mm", 0);
+        factor_close_enemy_ = Config::get<float>("config.factor.close_enemy", 1.0f);
 
         std::string obstacles_path = ament_index_cpp::get_package_share_directory("modelec_strat") +
                                      "/data/obstacles.xml";

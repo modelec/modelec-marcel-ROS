@@ -50,6 +50,7 @@ namespace Modelec
     template<>
     inline std::string Config::get<std::string>(const std::string& key, const std::string& default_value) {
         auto it = values_.find(key);
+        if (it == values_.end()) std::cerr << "Config key not found: " << key << std::endl;
         return it != values_.end() ? it->second : default_value;
     }
 

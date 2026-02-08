@@ -5,6 +5,7 @@
 #include <std_srvs/srv/trigger.hpp>
 #include <std_msgs/msg/empty.hpp>
 #include <std_msgs/msg/string.hpp>
+#include <modelec_utils/config.hpp>
 
 namespace Modelec
 {
@@ -49,4 +50,46 @@ namespace Modelec
 
         std::vector<ColorSetting> color_configs_;
     };
+
+
+    template<>
+    inline std::vector<ColorSetting>
+    Config::get<std::vector<ColorSetting>>(
+        const std::string& prefix,
+        const std::vector<ColorSetting>& default_value)
+    {
+        auto result = Config::getArray<ColorSetting>(
+            prefix,
+            [](const std::string& base)
+            {
+                return ColorSetting{
+                    Config::get<std::string>(base + "@name"),
+                    Config::get<double>(base + "@hue_min"),
+                    Config::get<double>(base + "@hue_max")
+                };
+            });
+
+        return result.empty() ? default_value : result;
+    }
+
+    template<>
+    inline std::vector<cv::Rect>
+    Config::get<std::vector<cv::Rect>>(
+        const std::string& prefix,
+        const std::vector<cv::Rect>& default_value)
+    {
+        auto result = Config::getArray<cv::Rect>(
+            prefix,
+            [](const std::string& base)
+            {
+                return cv::Rect(
+                    Config::get<int>(base + "@x", 0),
+                    Config::get<int>(base + "@y", 0),
+                    Config::get<int>(base + "@w", 100),
+                    Config::get<int>(base + "@h", 100)
+                );
+            });
+
+        return result.empty() ? default_value : result;
+    }
 }

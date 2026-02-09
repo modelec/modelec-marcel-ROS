@@ -46,13 +46,13 @@ void Modelec::UPAction::Next()
                 msg.items[2].id = 2;
                 msg.items[2].start_angle = action_executor_->arm_pos_[FRONT].rotated ? 0 : 3.05;
                 msg.items[2].end_angle = 0.5;
-                msg.items[2].duration_s = 1.6;
+                msg.items[2].duration_s = 1.3;
 
 
                 msg.items[3].id = 3;
                 msg.items[3].start_angle = action_executor_->arm_pos_[FRONT].rotated ? 3.4 : 0.3;
                 msg.items[3].end_angle = 2.6;
-                msg.items[3].duration_s = 1.6;
+                msg.items[3].duration_s = 1.3;
             }
 
             if (side_ == BACK || side_ == BOTH) {

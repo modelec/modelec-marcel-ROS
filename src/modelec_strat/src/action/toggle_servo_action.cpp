@@ -45,8 +45,8 @@ void Modelec::ToggleServoAction::Next()
             for (size_t i = 0; i < servos_.size(); i++)
             {
                 msg.items[i].id = servos_[i].first + (servos_[i].second ? 4 : 12);
-                msg.items[i].start_angle = action_executor_->servo_pos_[servos_[i].first + (servos_[i].second ? 0 : 4)] ? 1 : 3;
-                msg.items[i].end_angle = action_executor_->servo_pos_[servos_[i].first + (servos_[i].second ? 0 : 4)] ? 3 : 1;
+                msg.items[i].start_angle = action_executor_->servo_pos_[servos_[i].first + (servos_[i].second ? 0 : 4)] ? 3 : 1;
+                msg.items[i].end_angle = action_executor_->servo_pos_[servos_[i].first + (servos_[i].second ? 0 : 4)] ? 1 : 3;
                 msg.items[i].duration_s = 0.5;
             }
 

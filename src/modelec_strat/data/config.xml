@@ -65,6 +65,13 @@
         <strat>
             <ms>20</ms>
         </strat>
+        <action>
+            <timed_servo>
+                <ms>
+                    100
+                </ms>
+            </timed_servo>
+        </action>
     </timer>
     <thermo>
         <yellow>

@@ -17,6 +17,7 @@ namespace Modelec
 
         auto serial_port = Config::get<std::string>("config.usb.action.port", "/dev/ttyUSB0");
         auto baudrate = Config::get<long>("config.usb.action.baudrate", 115200);
+        auto timed_servo_timer_ms = Config::get<int>("config.timer.action.timed_servo.ms", TIMER_SERVO_TIMED_MS);
 
         RCLCPP_INFO(this->get_logger(), "Starting PCB Odometry Interface on port %s with baudrate %ld", serial_port.c_str(), baudrate);
 
@@ -177,9 +178,13 @@ namespace Modelec
             "action/move/servo/timed/res", 10);
 
 		servo_timed_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(TIMER_SERVO_TIMED_MS),
+            std::chrono::milliseconds(timed_servo_timer_ms),
             [this]()
             {
+                if (servo_timed_buffer_.empty()) {
+                    return;
+                }
+
                 rclcpp::Time now = this->now();
 
                 modelec_interfaces::msg::ActionServoTimedArray servo_timed_msg;

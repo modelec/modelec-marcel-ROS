@@ -161,8 +161,8 @@ namespace Modelec
                 {
                     ServoTimedSet servo_timed_set;
                     servo_timed_set.servo_timed = item;
-                    servo_timed_set.start_time = now;
-                    servo_timed_set.end_time = now + rclcpp::Duration::from_seconds(item.duration_s);
+                    servo_timed_set.start_time = now + rclcpp::Duration::from_seconds(item.delay_s);
+                    servo_timed_set.end_time = now + rclcpp::Duration::from_seconds(item.duration_s + item.delay_s);
                     servo_timed_set.active = true;
 
                     RCLCPP_DEBUG(this->get_logger(), "Scheduled timed move for Servo ID %d from %.3f to %.3f over %.3f seconds",
@@ -187,6 +187,10 @@ namespace Modelec
 
                 for (auto& [id, servo_timed_set] : servo_timed_buffer_)
                 {
+                    if (servo_timed_set.active && now.nanoseconds() < servo_timed_set.start_time.nanoseconds())
+                    {
+                        continue;
+                    }
                     if (servo_timed_set.active && now.nanoseconds() >= servo_timed_set.end_time.nanoseconds())
                     {
                         RCLCPP_DEBUG(this->get_logger(), "Timed move for Servo ID %d completed. Setting to final angle %.3f",

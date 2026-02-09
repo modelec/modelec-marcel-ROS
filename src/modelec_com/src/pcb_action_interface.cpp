@@ -3,6 +3,7 @@
 #include <fmt/core.h>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_utils/config.hpp>
+#include <algorithm>
 
 namespace Modelec
 {
@@ -168,7 +169,7 @@ namespace Modelec
                     RCLCPP_DEBUG(this->get_logger(), "Scheduled timed move for Servo ID %d from %.3f to %.3f over %.3f seconds",
                                  item.id, item.start_angle, item.end_angle, item.duration_s);
 
-                    servo_timed_buffer_[item.id] = servo_timed_set;
+                    servo_timed_buffer_.push_back(servo_timed_set);
                 }
             });
 
@@ -183,9 +184,9 @@ namespace Modelec
 
                 modelec_interfaces::msg::ActionServoTimedArray servo_timed_msg;
 
-				std::map<int, double> to_send;
+				std::vector<std::pair<int, double>> to_send;
 
-                for (auto& [id, servo_timed_set] : servo_timed_buffer_)
+                for (auto& servo_timed_set : servo_timed_buffer_)
                 {
                     if (servo_timed_set.active && now.nanoseconds() < servo_timed_set.start_time.nanoseconds())
                     {
@@ -194,9 +195,10 @@ namespace Modelec
                     if (servo_timed_set.active && now.nanoseconds() >= servo_timed_set.end_time.nanoseconds())
                     {
                         RCLCPP_DEBUG(this->get_logger(), "Timed move for Servo ID %d completed. Setting to final angle %.3f",
-                                     id, servo_timed_set.servo_timed.end_angle);
+                                     servo_timed_set.servo_timed.id, servo_timed_set.servo_timed.end_angle);
 
-                        to_send[id] = servo_timed_set.servo_timed.end_angle;
+                        to_send.emplace_back(servo_timed_set.servo_timed.id, servo_timed_set.servo_timed.end_angle);
+
                         servo_timed_set.active = false;
 
                         servo_timed_msg.items.push_back(servo_timed_set.servo_timed);
@@ -207,12 +209,13 @@ namespace Modelec
                         double duration = (servo_timed_set.end_time - servo_timed_set.start_time).seconds();
                         double progress = elapsed / duration;
 
-                        RCLCPP_DEBUG(this->get_logger(), "Servo ID %d progress: %.3f | %.3f %.3f", id, progress, elapsed, duration);
+                        RCLCPP_DEBUG(this->get_logger(), "Servo ID %d progress: %.3f | %.3f %.3f",
+                            servo_timed_set.servo_timed.id, progress, elapsed, duration);
 
                         double intermediate_angle = servo_timed_set.servo_timed.start_angle +
-                                                    progress * (servo_timed_set.servo_timed.end_angle - servo_timed_set.servo_timed.start_angle);
+                            progress * (servo_timed_set.servo_timed.end_angle - servo_timed_set.servo_timed.start_angle);
 
-						to_send[id] = intermediate_angle;
+						to_send.emplace_back(servo_timed_set.servo_timed.id, intermediate_angle);
                     }
                 }
 
@@ -235,6 +238,17 @@ namespace Modelec
                     servo_timed_msg.success = true;
                     servo_move_timed_res_pub_->publish(servo_timed_msg);
                 }
+
+                servo_timed_buffer_.erase(
+                std::remove_if(
+                    servo_timed_buffer_.begin(),
+                    servo_timed_buffer_.end(),
+                    [&](const ServoTimedSet& s)
+                    {
+                        return s.active == false;
+                    }),
+                servo_timed_buffer_.end());
+
 
 			});
 

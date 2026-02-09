@@ -40,7 +40,7 @@ namespace Modelec
         std::map<int, double> servo_value_;
         std::map<int, bool> relay_value_;
 
-        std::map<int, ServoTimedSet> servo_timed_buffer_;
+        std::vector<ServoTimedSet> servo_timed_buffer_;
 
         rclcpp::TimerBase::SharedPtr servo_timed_timer_;
 

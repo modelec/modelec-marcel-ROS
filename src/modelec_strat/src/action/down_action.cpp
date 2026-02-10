@@ -44,15 +44,47 @@ void Modelec::DownAction::Next()
                 msg.items[1].end_angle = 0.91;
                 msg.items[1].duration_s = 2;
 
-                msg.items[2].id = 2;
-                msg.items[2].start_angle = 0.5;
-                msg.items[2].end_angle = inverted_ ? 0 : 3.05;
-                msg.items[2].duration_s = 2;
+                if (!inverted_)
+                {
+                    msg.items[2].id = 2;
+                    msg.items[2].start_angle = 0.5;
+                    msg.items[2].end_angle = 2.45;
+                    msg.items[2].duration_s = 1.3;
 
-                msg.items[3].id = 3;
-                msg.items[3].start_angle = 2.6;
-                msg.items[3].end_angle = inverted_ ? 3.4 : 0.3;
-                msg.items[3].duration_s = 2;
+                    msg.items[3].id = 3;
+                    msg.items[3].start_angle = 2.6;
+                    msg.items[3].end_angle = 0.9;
+                    msg.items[3].duration_s = 1.3;
+
+                    auto last_msg_2 = modelec_interfaces::msg::ActionServoTimed();
+                    last_msg_2.id = 2;
+                    last_msg_2.start_angle = 2.45;
+                    last_msg_2.end_angle = 3.05;
+                    last_msg_2.duration_s = 0.7;
+                    last_msg_2.delay_s = 1.3;
+
+                    msg.items.push_back(last_msg_2);
+
+                    auto last_msg_3 = modelec_interfaces::msg::ActionServoTimed();
+                    last_msg_3.id = 3;
+                    last_msg_3.start_angle = 0.9;
+                    last_msg_3.end_angle = 0.3;
+                    last_msg_3.duration_s = 0.7;
+                    last_msg_3.delay_s = 1.3;
+
+                    msg.items.push_back(last_msg_3);
+                } else
+                {
+                    msg.items[2].id = 2;
+                    msg.items[2].start_angle = 0.5;
+                    msg.items[2].end_angle = 0;
+                    msg.items[2].duration_s = 2;
+
+                    msg.items[3].id = 3;
+                    msg.items[3].start_angle = 2.6;
+                    msg.items[3].end_angle = 3.4;
+                    msg.items[3].duration_s = 2;
+                }
             }
 
             if (side_ == BACK || side_ == BOTH)

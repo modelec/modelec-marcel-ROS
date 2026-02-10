@@ -68,7 +68,7 @@
         <action>
             <timed_servo>
                 <ms>
-                    100
+                    10
                 </ms>
             </timed_servo>
         </action>

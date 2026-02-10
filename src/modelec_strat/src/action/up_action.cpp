@@ -82,7 +82,7 @@ void Modelec::UPAction::Next()
                     last_msg_2.start_angle = 2.45;
                     last_msg_2.end_angle = 0.5;
                     last_msg_2.duration_s = 1;
-                    last_msg_2.delay_s = 0.6;
+                    last_msg_2.delay_s = 1;
 
                     msg.items.push_back(last_msg_2);
 
@@ -91,7 +91,7 @@ void Modelec::UPAction::Next()
                     last_msg_3.start_angle = 0.9;
                     last_msg_3.end_angle = 2.6;
                     last_msg_3.duration_s = 1;
-                    last_msg_3.delay_s = 0.6;
+                    last_msg_3.delay_s = 1;
 
                     msg.items.push_back(last_msg_3);
                 }

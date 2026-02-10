@@ -69,17 +69,17 @@ void Modelec::UPAction::Next()
                 {
                     msg.items[2].id = 2;
                     msg.items[2].start_angle = 3.05;
-                    msg.items[2].end_angle = 2.35;
-                    msg.items[2].duration_s = 0.5;
+                    msg.items[2].end_angle = 2.45;
+                    msg.items[2].duration_s = 1;
 
                     msg.items[3].id = 3;
                     msg.items[3].start_angle = 0.3;
-                    msg.items[3].end_angle = 1;
-                    msg.items[3].duration_s = 0.5;
+                    msg.items[3].end_angle = 0.9;
+                    msg.items[3].duration_s = 1;
 
                     auto last_msg_2 = modelec_interfaces::msg::ActionServoTimed();
                     last_msg_2.id = 2;
-                    last_msg_2.start_angle = 2.35;
+                    last_msg_2.start_angle = 2.45;
                     last_msg_2.end_angle = 0.5;
                     last_msg_2.duration_s = 1;
                     last_msg_2.delay_s = 0.5;
@@ -88,7 +88,7 @@ void Modelec::UPAction::Next()
 
                     auto last_msg_3 = modelec_interfaces::msg::ActionServoTimed();
                     last_msg_3.id = 3;
-                    last_msg_3.start_angle = 1;
+                    last_msg_3.start_angle = 0.9;
                     last_msg_3.end_angle = 2.6;
                     last_msg_3.duration_s = 1;
                     last_msg_3.delay_s = 0.5;

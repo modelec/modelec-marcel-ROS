@@ -77,15 +77,6 @@ void Modelec::UPAction::Next()
                     msg.items[3].end_angle = 1;
                     msg.items[3].duration_s = 0.5;
 
-                    auto last_msg_3 = modelec_interfaces::msg::ActionServoTimed();
-                    last_msg_3.id = 3;
-                    last_msg_3.start_angle = 1;
-                    last_msg_3.end_angle = 2.6;
-                    last_msg_3.duration_s = 1;
-                    last_msg_3.delay_s = 0.5;
-
-                    msg.items.push_back(last_msg_3);
-
                     auto last_msg_2 = modelec_interfaces::msg::ActionServoTimed();
                     last_msg_2.id = 2;
                     last_msg_2.start_angle = 2.35;
@@ -94,6 +85,15 @@ void Modelec::UPAction::Next()
                     last_msg_2.delay_s = 0.5;
 
                     msg.items.push_back(last_msg_2);
+
+                    auto last_msg_3 = modelec_interfaces::msg::ActionServoTimed();
+                    last_msg_3.id = 3;
+                    last_msg_3.start_angle = 1;
+                    last_msg_3.end_angle = 2.6;
+                    last_msg_3.duration_s = 1;
+                    last_msg_3.delay_s = 0.5;
+
+                    msg.items.push_back(last_msg_3);
                 }
             }
 

@@ -46,9 +46,12 @@ namespace ModelecGUI {
             audio_sub_ = node_->create_subscription<std_msgs::msg::String>(
                 "audio/play", 10, [this](const std_msgs::msg::String::SharedPtr msg)
                 {
-                    QString audio_file = QString::fromStdString(Modelec::Config::get<std::string>("config.ihm.sound." + msg->data + "@path"));
-                    media_player_->setSource(QUrl::fromLocalFile(audio_file));
-                    media_player_->play();
+                    if (Modelec::Config::has("config.ihm.sound." + msg->data + "@path"))
+                    {
+                        QString audio_file = QString::fromStdString(Modelec::Config::get<std::string>("config.ihm.sound." + msg->data + "@path"));
+                        media_player_->setSource(QUrl::fromLocalFile(audio_file));
+                        media_player_->play();
+                    }
                 });
         }
     }

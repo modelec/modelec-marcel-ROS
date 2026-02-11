@@ -9,11 +9,11 @@
 
 #include <sensor_msgs/msg/joy.hpp>
 #include <std_msgs/msg/int64.hpp>
+#include <std_msgs/msg/empty.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <std_srvs/srv/trigger.hpp>
 
 #include "action/base_action.hpp"
-#include "missions/thermo_mission.hpp"
 #include "obstacle/box.hpp"
 
 namespace Modelec

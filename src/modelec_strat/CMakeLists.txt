@@ -33,6 +33,10 @@ set(strat_fsm_sources
         src/missions/take_mission.cpp
         src/missions/free_mission.cpp
         src/missions/thermo_mission.cpp
+        src/missions/action_mission.cpp
+        src/missions/move_mission.cpp
+        src/missions/mine_time_mission.cpp
+        src/missions/mission_base.cpp
 
         src/obstacle/obstacle.cpp
         src/obstacle/box.cpp

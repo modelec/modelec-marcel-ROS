@@ -5,13 +5,14 @@
 namespace Modelec
 {
     GoHomeMission::GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const rclcpp::Time& start_time) :
-        status_(MissionStatus::READY), nav_(nav), start_time_(start_time)
+        Mission(MissionStatus::READY), MoveMission(nav),
+        start_time_(start_time)
     {
     }
 
     void GoHomeMission::Start(rclcpp::Node::SharedPtr node)
     {
-        node_ = node;
+        Mission::Start(node);
 
         mission_score_ = Config::get<int>("config.mission_score.go_home", 0);
 
@@ -31,32 +32,11 @@ namespace Modelec
         steps_.push(DONE);
     }
 
-    void GoHomeMission::Update()
+    bool GoHomeMission::Update()
     {
-        if (!nav_->HasArrived())
+        if (!MoveMission::Update())
         {
-            if ((node_->now() - go_timeout_).seconds() > 3 && (node_->now() - last_ask_waypoint_time_).seconds() > 2)
-            {
-                nav_->AskWaypoint();
-                last_ask_waypoint_time_ = node_->now();
-                return;
-            }
-            if ((node_->now() - go_timeout_).seconds() < 10)
-            {
-                return;
-            }
-        }
-
-        if (min_time_.has_value())
-        {
-            if ((node_->now() - min_time_.value()).seconds() < 0.1)
-            {
-                return;
-            }
-            else
-            {
-                min_time_.reset();
-            }
+            return false;
         }
 
         auto step_ = steps_.front();
@@ -73,7 +53,7 @@ namespace Modelec
                     if (nav_->CanGoTo(home_point_.GetTakeBasePosition(), true) != Pathfinding::FREE)
                     {
                         status_ = MissionStatus::FAILED;
-                        return;
+                        return false;
                     }
                 }
                 nav_->RotateTo(home_point_);
@@ -88,7 +68,7 @@ namespace Modelec
                     if (nav_->GoTo(home_point_.GetTakeBasePosition(), true) != Pathfinding::FREE)
                     {
                         status_ = MissionStatus::FAILED;
-                        return;
+                        return false;
                     }
                 }
 
@@ -97,11 +77,6 @@ namespace Modelec
             break;
         case GO_CLOSE:
             {
-                /*if ((node_->now() - start_time_).seconds() < 94)
-                {
-                    break;
-                }*/
-
                 nav_->GoTo(home_point_, true);
 
                 go_timeout_ = node_->now();
@@ -119,14 +94,12 @@ namespace Modelec
         default:
             break;
         }
+
+        return true;
     }
 
     void GoHomeMission::Clear()
     {
     }
 
-    MissionStatus GoHomeMission::GetStatus() const
-    {
-        return status_;
-    }
 }

@@ -50,6 +50,29 @@
     </spawn>
     <mission_score>
     </mission_score>
+    <mission>
+        <action>
+            <timeout>
+                <s>5</s>
+            </timeout>
+        </action>
+        <min_time>
+            <min_time_duration>
+                <s>100</s>
+            </min_time_duration>
+        </min_time>
+        <move>
+            <min_ask_waypoint>
+                <s>3</s>
+            </min_ask_waypoint>
+            <ask_waypoint_interval>
+                <s>2</s>
+            </ask_waypoint_interval>
+            <go_timeout>
+                <s>10</s>
+            </go_timeout>
+        </move>
+    </mission>
     <pami>
         <time_to_put_zone>77</time_to_put_zone>
         <time_to_remove_top_pot>65</time_to_remove_top_pot>

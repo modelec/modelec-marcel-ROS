@@ -44,11 +44,19 @@ namespace Modelec
     template<typename T>
     T Config::get(const std::string& key, const T& default_value) {
         auto it = values_.find(key);
-        if (it == values_.end()) return default_value;
+        if (it == values_.end())
+        {
+            std::cerr << "Config key not found: " << key << std::endl;
+            return default_value;
+        }
 
         std::istringstream iss(it->second);
         T result;
-        if (!(iss >> result)) return default_value;
+        if (!(iss >> result))
+        {
+            std::cerr << "Config key has invalid format: " << key << " = " << it->second << std::endl;
+            return default_value;
+        }
         return result;
     }
 

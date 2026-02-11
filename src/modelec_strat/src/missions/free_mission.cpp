@@ -4,19 +4,17 @@
 
 namespace Modelec {
     FreeMission::FreeMission(const std::shared_ptr<NavigationHelper>& nav,
-        const std::shared_ptr<ActionExecutor>& action_executor,
-        BaseAction::Side side)
-     : side_(side), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
+        const std::shared_ptr<ActionExecutor>& action_executor, BaseAction::Side side) :
+        Mission(MissionStatus::READY), ActionMission(action_executor), MoveMission(nav),
+        side_(side)
     {
     }
 
     void FreeMission::Start(rclcpp::Node::SharedPtr node)
     {
-        node_ = node;
-
-        go_timeout_ = node_->now();
-        deploy_time_ = node_->now();
-        last_ask_waypoint_time_ = node_->now();
+        ActionMission::Start(node);
+        MoveMission::Start(node);
+        MinTimeMission::Start(node);
 
         status_ = MissionStatus::RUNNING;
 
@@ -34,39 +32,12 @@ namespace Modelec {
         steps_.push(DONE);
     }
 
-    void FreeMission::Update()
+    bool FreeMission::Update()
     {
-        if (!action_executor_->IsActionDone())
+        if (!ActionMission::Update() || !MoveMission::Update() || !MinTimeMission::Update())
         {
-            return;
+            return false;
         }
-
-        if (!nav_->HasArrived())
-        {
-            if ((node_->now() - go_timeout_).seconds() > 3 && (node_->now() - last_ask_waypoint_time_).seconds() > 2)
-            {
-                nav_->AskWaypoint();
-                last_ask_waypoint_time_ = node_->now();
-                return;
-            }
-            if ((node_->now() - go_timeout_).seconds() < 10)
-            {
-                return;
-            }
-        }
-
-        if (min_time_.has_value())
-        {
-            if ((node_->now() - min_time_.value()).seconds() < 0.1)
-            {
-                return;
-            }
-            else
-            {
-                min_time_.reset();
-            }
-        }
-
 
 		auto step_ = steps_.front();
 		steps_.pop();
@@ -82,7 +53,7 @@ namespace Modelec {
                 if (target_deposite_zone_ == nullptr)
                 {
                     status_ = MissionStatus::FAILED;
-                    return;
+                    return false;
                 }
 
                 auto depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
@@ -96,7 +67,7 @@ namespace Modelec {
                     if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                     {
                         status_ = MissionStatus::FAILED;
-                        return;
+                        return false;
                     }
                 }
 
@@ -195,7 +166,7 @@ namespace Modelec {
                 if (nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE) != Pathfinding::FREE)
                 {
                     status_ = MissionStatus::FAILED;
-                    return;
+                    return false;
                 }
 
                 go_timeout_ = node_->now();
@@ -226,15 +197,12 @@ namespace Modelec {
         default:
             break;
         }
+
+        return true;
     }
 
     void FreeMission::Clear()
     {
-    }
-
-    MissionStatus FreeMission::GetStatus() const
-    {
-        return status_;
     }
 
 }

@@ -4,27 +4,24 @@
 
 namespace Modelec
 {
-    DepositeZone::DepositeZone(tinyxml2::XMLElement* obstacleElem)
+    DepositeZone::DepositeZone(int id)
     {
-        obstacleElem->QueryIntAttribute("id", &id_);
+        id_ = Config::get<int>("Map.DepositeZone[" + std::to_string(id) + "]@id", id);
+        w_ = Config::get<int>("Map.DepositeZone[" + std::to_string(id) + "]@w");
+        h_ = Config::get<int>("Map.DepositeZone[" + std::to_string(id) + "]@h");
+        position_ = Point(
+            Config::get<int>("Map.DepositeZone[" + std::to_string(id) + "].Pos@x"),
+            Config::get<int>("Map.DepositeZone[" + std::to_string(id) + "].Pos@y"),
+            Config::get<double>("Map.DepositeZone[" + std::to_string(id) + "].Pos@theta")
+            );
 
-        auto posElem = obstacleElem->FirstChildElement("Pos");
-        if (posElem)
+        if (Config::count("Map.DepositeZone[" + std::to_string(id) + "].TakeAngle.Angle") > 0)
         {
-            posElem->QueryIntAttribute("x", &position_.x);
-            posElem->QueryIntAttribute("y", &position_.y);
-            posElem->QueryDoubleAttribute("theta", &position_.theta);
-            posElem->QueryIntAttribute("w", &w_);
-            posElem->QueryIntAttribute("h", &h_);
-
-            if (auto TakeAngleElem = obstacleElem->FirstChildElement("TakeAngle"))
-            {
-                for (auto takePos = TakeAngleElem->FirstChildElement("Angle"); takePos; takePos = takePos->NextSiblingElement("Angle"))
-                {
-                    double angle = takePos->DoubleText(0);
-                    take_angle_.push_back(angle);
-                }
-            }
+            take_angle_ = Config::getArray<double>("Map.DepositeZone[" + std::to_string(id) + "].TakeAngle.Angle");
+        } else
+        {
+            auto take_angle = Config::get<double>("Map.DepositeZone[" + std::to_string(id) + "].TakeAngle.Angle", position_.theta);
+            take_angle_ = {take_angle};
         }
     }
 
@@ -75,9 +72,6 @@ namespace Modelec
 
     int DepositeZone::GetId() const
     { return id_; }
-
-    int DepositeZone::GetMaxPot() const
-    { return max_pot_; }
 
     int DepositeZone::GetWidth() const
     { return w_; }

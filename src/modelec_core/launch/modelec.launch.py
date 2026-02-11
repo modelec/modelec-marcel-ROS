@@ -14,7 +14,6 @@ from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    pkg_name = 'modelec_core'
     # -------------------------------------------------
     # Launch arguments
     # -------------------------------------------------
@@ -138,7 +137,7 @@ def generate_launch_description():
         return []
 
     # -------------------------------------------------
-    # Strategy nodes (WITHOUT enemy_manager)
+    # Strategy nodes
     # -------------------------------------------------
     def launch_strat(context, *args, **kwargs):
         if context.launch_configurations.get('with_strat') == 'true':
@@ -158,7 +157,7 @@ def generate_launch_description():
         return []
 
     # -------------------------------------------------
-    # Enemy manager (standalone)
+    # Enemy manager
     # -------------------------------------------------
     def launch_enemy_manager(context, *args, **kwargs):
         if context.launch_configurations.get('with_enemy_manager') == 'true':

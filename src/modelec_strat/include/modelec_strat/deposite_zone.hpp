@@ -1,7 +1,6 @@
 #pragma once
 
-#include <queue>
-#include <tinyxml2.h>
+#include <modelec_utils/config.hpp>
 #include <modelec_utils/point.hpp>
 
 namespace Modelec
@@ -9,7 +8,7 @@ namespace Modelec
     class DepositeZone
     {
     public:
-        DepositeZone(tinyxml2::XMLElement* obstacleElem);
+        DepositeZone(int id);
 
         Point GetPosition() const;
 
@@ -20,13 +19,12 @@ namespace Modelec
         bool Validate() const;
 
         int GetId() const;
-        int GetMaxPot() const;
 
         int GetWidth() const;
         int GetHeight() const;
 
     protected:
-        int id_, max_pot_;
+        int id_;
         int w_, h_;
         Point position_;
 

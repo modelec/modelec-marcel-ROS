@@ -38,11 +38,7 @@ namespace Modelec {
         enemy_margin_mm_ = Config::get<int>("config.enemy.size.margin_mm", 0);
         factor_close_enemy_ = Config::get<float>("config.factor.close_enemy", 1.0f);
 
-        std::string obstacles_path = ament_index_cpp::get_package_share_directory("modelec_strat") +
-                                     "/data/obstacles.xml";
-        if (!LoadObstaclesFromXML(obstacles_path)) {
-            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacles from XML");
-        }
+        LoadObstaclesFromXML();
 
         obstacle_add_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>(
             "obstacle/add", 10,
@@ -189,7 +185,7 @@ namespace Modelec {
 
         // 2. Fill obstacles with inflation
         // TODO some bug exist with the inflate
-        for (const auto &[id, obstacle]: obstacle_map_) {
+        for (const auto &obstacle: obstacles_) {
             float cx = obstacle->GetX();
             float cy = obstacle->GetY();
             float width = obstacle->GetWidth() + inflate_x * 2 * cell_size_mm_x;
@@ -493,11 +489,13 @@ namespace Modelec {
     }
 
     std::shared_ptr<Obstacle> Pathfinding::GetObstacle(int id) const {
-        return obstacle_map_.at(id);
+        return obstacles_.at(id);
     }
 
     void Pathfinding::RemoveObstacle(int id) {
-        obstacle_map_.erase(id);
+        obstacles_.erase(std::remove_if(obstacles_.begin(), obstacles_.end(),
+                                           [id](const std::shared_ptr<Obstacle> &obs) { return obs->GetId() == id; }),
+                            obstacles_.end());
 
         modelec_interfaces::msg::Obstacle msg;
         msg.id = id;
@@ -505,7 +503,7 @@ namespace Modelec {
     }
 
     void Pathfinding::AddObstacle(const std::shared_ptr<Obstacle> &obstacle) {
-        obstacle_map_[obstacle->GetId()] = obstacle;
+        obstacles_[obstacle->GetId()] = obstacle;
         modelec_interfaces::msg::Obstacle msg = obstacle->toMsg();
         obstacle_add_pub_->publish(msg);
     }
@@ -530,7 +528,7 @@ namespace Modelec {
 
     void Pathfinding::HandleAskObstacleRequest(const std::shared_ptr<std_srvs::srv::Empty::Request>,
                                                const std::shared_ptr<std_srvs::srv::Empty::Response>) {
-        for (auto &[index, obs]: obstacle_map_) {
+        for (auto &obs: obstacles_) {
             obstacle_add_pub_->publish(obs->toMsg());
         }
     }
@@ -542,7 +540,7 @@ namespace Modelec {
 
     void Pathfinding::OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
         Point enemyPos(msg->x, msg->y, msg->theta);
-        for (auto &[index, obs]: obstacle_map_) {
+        for (auto &obs: obstacles_) {
             if (auto column = std::dynamic_pointer_cast<BoxObstacle>(obs)) {
                 if (Point::distance(enemyPos, column->GetPosition()) < enemy_width_mm_ + (column->GetWidth() / 2) +
                     enemy_margin_mm_) {
@@ -556,41 +554,19 @@ namespace Modelec {
         if (y < 0 || y >= static_cast<int>(grid_.size()) ||
             x < 0 || x >= static_cast<int>(grid_[y].size())) {
             RCLCPP_WARN(node_->get_logger(), "TestCollision: access out of bounds x=%d y=%d", x, y);
-            return false; // ou true, selon ce que tu veux (false = pas de collision)
+            return false;
         }
 
         return (grid_[y][x] & collisionMask) && !(grid_[y][x] & ~collisionMask);
     }
 
-    bool Pathfinding::LoadObstaclesFromXML(const std::string &filename) {
-        tinyxml2::XMLDocument doc;
-        if (doc.LoadFile(filename.c_str()) != tinyxml2::XML_SUCCESS) {
-            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacle XML file: %s", filename.c_str());
-            return false;
+    void Pathfinding::LoadObstaclesFromXML() {
+        for (size_t i = 0; i < Config::count("Obstacles.Obstacle"); ++i)
+        {
+            obstacles_.push_back(std::make_shared<BoxObstacle>(i));
         }
 
-        tinyxml2::XMLElement *root = doc.FirstChildElement("Obstacles");
-        if (!root) {
-            RCLCPP_ERROR(node_->get_logger(), "No <Obstacles> root element in file");
-            return false;
-        }
-
-        for (tinyxml2::XMLElement *obstacleElem = root->FirstChildElement("Obstacle");
-             obstacleElem != nullptr;
-             obstacleElem = obstacleElem->NextSiblingElement("Obstacle")) {
-            std::shared_ptr<Obstacle> obs = std::make_shared<Obstacle>(obstacleElem);
-            obstacle_map_[obs->GetId()] = obs;
-        }
-
-        for (tinyxml2::XMLElement *obstacleElem = root->FirstChildElement("Box");
-             obstacleElem != nullptr;
-             obstacleElem = obstacleElem->NextSiblingElement("Box")) {
-            std::shared_ptr<BoxObstacle> obs = std::make_shared<BoxObstacle>(obstacleElem);
-            obstacle_map_[obs->GetId()] = obs;
-        }
-
-        RCLCPP_INFO(node_->get_logger(), "Loaded %zu obstacles from XML", obstacle_map_.size());
-        return true;
+        RCLCPP_INFO(node_->get_logger(), "Loaded %zu obstacles from XML", obstacles_.size());
     }
 
     Waypoint::Waypoint(const modelec_interfaces::msg::OdometryPos &pos, int index, bool isLast) {

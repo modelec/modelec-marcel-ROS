@@ -15,10 +15,18 @@ namespace Modelec
 
     StratFMS::StratFMS() : Node("start_fms")
     {
-        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
-        if (!Config::load(config_path))
+        std::string data_dir = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/";
+        if (!Config::load(data_dir + "/config.xml"))
         {
-            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", (data_dir + "/config.xml").c_str());
+        }
+        if (!Config::load(data_dir + "/obstacles.xml"))
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", (data_dir + "/config.xml").c_str());
+        }
+        if (!Config::load(data_dir + "/deposite_zone.xml"))
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", (data_dir + "/config.xml").c_str());
         }
 
         static_strat_ = Config::get<bool>("config.static_strat", false);

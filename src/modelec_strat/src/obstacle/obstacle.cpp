@@ -1,5 +1,7 @@
 #include <modelec_strat/obstacle/obstacle.hpp>
 
+#include "modelec_utils/config.hpp"
+
 namespace Modelec
 {
     Obstacle::Obstacle(int id, int x, int y, double theta, int w, int h, const std::string& type)
@@ -7,26 +9,20 @@ namespace Modelec
     {
     }
 
-    Obstacle::Obstacle(tinyxml2::XMLElement* obstacleElem)
-    {
-        const char* type = nullptr;
-        if (obstacleElem->QueryIntAttribute("id", &id_) != tinyxml2::XML_SUCCESS ||
-            obstacleElem->QueryIntAttribute("x", &x_) != tinyxml2::XML_SUCCESS ||
-            obstacleElem->QueryIntAttribute("y", &y_) != tinyxml2::XML_SUCCESS ||
-            obstacleElem->QueryDoubleAttribute("theta", &theta_) != tinyxml2::XML_SUCCESS ||
-            obstacleElem->QueryIntAttribute("width", &w_) != tinyxml2::XML_SUCCESS ||
-            obstacleElem->QueryIntAttribute("height", &h_) != tinyxml2::XML_SUCCESS ||
-            obstacleElem->QueryStringAttribute("type", &type) != tinyxml2::XML_SUCCESS)
-        {
-            RCLCPP_WARN(rclcpp::get_logger("Obstacle"), "Failed to parse obstacle element");
-            return;
-        }
-        type_ = type;
-    }
-
     Obstacle::Obstacle(const modelec_interfaces::msg::Obstacle& msg)
         : id_(msg.id), x_(msg.x), y_(msg.y), w_(msg.width), h_(msg.height), theta_(msg.theta), type_("unknown")
     {
+    }
+
+    Obstacle::Obstacle(int id)
+    {
+        id_ = Config::get<int>("Obstacles.Obstacle[" + std::to_string(id) + "]@id", id);
+        x_ = Config::get<int>("Obstacles.Obstacle[" + std::to_string(id) + "]@x");
+        y_ = Config::get<int>("Obstacles.Obstacle[" + std::to_string(id) + "]@y");
+        theta_ = Config::get<double>("Obstacles.Obstacle[" + std::to_string(id) + "]@theta");
+        w_ = Config::get<int>("Obstacles.Obstacle[" + std::to_string(id) + "]@width");
+        h_ = Config::get<int>("Obstacles.Obstacle[" + std::to_string(id) + "]@height");
+        type_ = Config::get<std::string>("Obstacles.Obstacle[" + std::to_string(id) + "]@type", "box");
     }
 
     modelec_interfaces::msg::Obstacle Obstacle::toMsg() const

@@ -59,13 +59,6 @@ namespace Modelec
 
         start_odo_pub_ = node_->create_publisher<std_msgs::msg::Bool>("odometry/start", 10);
 
-        std::string deposite_zone_path = ament_index_cpp::get_package_share_directory("modelec_strat") +
-            "/data/deposite_zone.xml";
-        if (!LoadDepositeZoneFromXML(deposite_zone_path))
-        {
-            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacles from XML");
-        }
-
         spawn_pub_ = node_->create_publisher<modelec_interfaces::msg::Spawn>("nav/spawn", 10);
 
         ask_spawn_srv_ = node->create_service<std_srvs::srv::Empty>(
@@ -99,6 +92,8 @@ namespace Modelec
 
         odo_ask_waypoint_pub_ = node_->create_publisher<std_msgs::msg::Empty>(
             "odometry/ask_active_waypoint", 30);
+
+        LoadDepositeZoneFromXML();
     }
 
     void NavigationHelper::ReInit()
@@ -474,32 +469,14 @@ namespace Modelec
         return current_pos_;
     }
 
-    bool NavigationHelper::LoadDepositeZoneFromXML(const std::string& filename)
+    void NavigationHelper::LoadDepositeZoneFromXML()
     {
-        tinyxml2::XMLDocument doc;
-        if (doc.LoadFile(filename.c_str()) != tinyxml2::XML_SUCCESS)
+        for (size_t i = 0; i < Config::count("Map.DepositeZone"); ++i)
         {
-            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacle XML file: %s", filename.c_str());
-            return false;
+            deposite_zones_.push_back(std::make_shared<DepositeZone>(i));
         }
 
-        tinyxml2::XMLElement* root = doc.FirstChildElement("Map");
-        if (!root)
-        {
-            RCLCPP_ERROR(node_->get_logger(), "No <Obstacles> root element in file");
-            return false;
-        }
-
-        for (tinyxml2::XMLElement* elem = root->FirstChildElement("DepositeZone");
-             elem != nullptr;
-             elem = elem->NextSiblingElement("DepositeZone"))
-        {
-            std::shared_ptr<DepositeZone> obs = std::make_shared<DepositeZone>(elem);
-            deposite_zones_[obs->GetId()] = obs;
-        }
-
-        RCLCPP_INFO(node_->get_logger(), "Loaded %zu zone from XML", deposite_zones_.size());
-        return true;
+        RCLCPP_INFO(node_->get_logger(), "Loaded %zu deposite zones from XML", deposite_zones_.size());
     }
 
     std::shared_ptr<DepositeZone> NavigationHelper::GetClosestDepositeZone(
@@ -510,10 +487,10 @@ namespace Modelec
         auto posPoint = Point(pos->x, pos->y, pos->theta);
         auto enemyPos = Point(last_enemy_pos_.x, last_enemy_pos_.y, last_enemy_pos_.theta);
 
-        for (const auto& [id, zone] : deposite_zones_)
+        for (const auto& zone : deposite_zones_)
         {
             if (blacklistedId.end() == std::find(
-                blacklistedId.begin(), blacklistedId.end(), id)
+                blacklistedId.begin(), blacklistedId.end(), zone->GetId())
                 && (!only_free || !zone->Validate()))
             {
                 auto zonePoint = zone->GetPosition();
@@ -622,13 +599,13 @@ namespace Modelec
         pathfinding_->OnEnemyPositionLongTime(msg);
 
         Point enemy_pos(msg->x, msg->y, msg->theta);
-        for (auto& [id, zone] : deposite_zones_)
+        for (auto& zone : deposite_zones_)
         {
             auto zonePos = zone->GetPosition();
             if (Point::distance(enemy_pos, zonePos) < (zone->GetWidth() / 2) + pathfinding_->enemy_margin_mm_)
             {
                 std::shared_ptr<Obstacle> obs = std::make_shared<Obstacle>(
-                    id, zonePos.x, zonePos.y, zonePos.theta, zone->GetWidth(), zone->GetHeight(), "enemy-zone");
+                    zone->GetId(), zonePos.x, zonePos.y, zonePos.theta, zone->GetWidth(), zone->GetHeight(), "enemy-zone");
                 pathfinding_->AddObstacle(obs);
             }
         }

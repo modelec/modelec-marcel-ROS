@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <functional>
+#include <iostream>
 
 namespace Modelec
 {
@@ -27,6 +28,10 @@ namespace Modelec
                                     BuilderFunc<T> builder = [](const std::string& base) { return get<T>(base); });
 
         static size_t count(const std::string& prefix);
+
+        static void clear(const std::string& prefix);
+
+        static bool has(const std::string& prefix);
 
         static void printAll();
 
@@ -66,13 +71,22 @@ namespace Modelec
     {
         std::vector<T> result;
 
-        size_t n = Config::count(prefix);
+        size_t n = count(prefix);
         result.reserve(n);
 
-        for (size_t i = 0; i < n; ++i)
+        if (n > 0)
         {
-            std::string base = prefix + "[" + std::to_string(i) + "]";
-            result.emplace_back(builder(base));
+            if (n == 1 && !has(prefix + "[0]"))
+            {
+                result.emplace_back(builder(prefix));
+            } else
+            {
+                for (size_t i = 0; i < n; ++i)
+                {
+                    std::string base = prefix + "[" + std::to_string(i) + "]";
+                    result.emplace_back(builder(base));
+                }
+            }
         }
 
         return result;

@@ -1,4 +1,3 @@
-#include <iostream>
 #include <modelec_utils/config.hpp>
 
 namespace Modelec
@@ -40,7 +39,29 @@ namespace Modelec
             }
         }
 
-        return found ? max_index + 1 : 0;
+        return found ? max_index + 1 : has(prefix) ? 1 : 0;
+    }
+
+    void Config::clear(const std::string& prefix)
+    {
+        for (auto it = values_.begin(); it != values_.end();)
+        {
+            if (it->first.rfind(prefix, 0) == 0)
+            {
+                it = values_.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
+
+    bool Config::has(const std::string& prefix)
+    {
+        return std::any_of(values_.begin(), values_.end(), [&prefix](const auto& pair) {
+            return pair.first.rfind(prefix, 0) == 0;
+        });
     }
 
     void Config::printAll()
@@ -60,20 +81,17 @@ namespace Modelec
             }
         }
 
-        // Store attributes
         for (auto* attr = element->FirstAttribute(); attr; attr = attr->Next())
         {
             values_[key + "@" + attr->Name()] = attr->Value();
         }
 
-        // Count children by name
         std::unordered_map<std::string, int> child_count;
         for (auto* child = element->FirstChildElement(); child; child = child->NextSiblingElement())
         {
             child_count[child->Name()]++;
         }
 
-        // Index children
         std::unordered_map<std::string, int> child_index;
 
         for (auto* child = element->FirstChildElement(); child; child = child->NextSiblingElement())

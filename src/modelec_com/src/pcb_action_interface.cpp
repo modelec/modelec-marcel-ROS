@@ -540,9 +540,9 @@ namespace Modelec
     {
         if (IsOk())
         {
-            RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
-            // RCLCPP_INFO_ONCE(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
-            // RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Sending to PCB: %s", data.c_str());
+            // RCLCPP_INFO(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
+            RCLCPP_INFO_ONCE(this->get_logger(), "Sending to PCB: %s", trim(data).c_str());
+            RCLCPP_DEBUG_SKIPFIRST(this->get_logger(), "Sending to PCB: %s", data.c_str());
             this->write(data);
         }
     }
@@ -560,7 +560,6 @@ namespace Modelec
         SendToPCB(command);
     }
 
-    // TODO CHANGE TO AAA;BBB;N;X;Y;X;Y;X;Y where N is number of elem you want to send
     void PCBActionInterface::GetData(const std::string& elem, const std::vector<std::string>& data)
     {
         SendToPCB("GET", elem, data);

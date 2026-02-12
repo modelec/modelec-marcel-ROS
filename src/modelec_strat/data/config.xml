@@ -24,8 +24,8 @@
 
     <map>
         <size>
-            <grid_width>600</grid_width>
-            <grid_height>400</grid_height>
+            <grid_width>300</grid_width>
+            <grid_height>200</grid_height>
 
             <map_width_mm>3000</map_width_mm>
             <map_height_mm>2000</map_height_mm>
@@ -58,7 +58,7 @@
         </action>
         <min_time>
             <min_time_duration>
-                <s>100</s>
+                <s>0.1</s>
             </min_time_duration>
         </min_time>
         <move>

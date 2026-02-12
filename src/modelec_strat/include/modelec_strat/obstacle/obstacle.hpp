@@ -32,7 +32,7 @@ namespace Modelec
         double GetTheta() const;
         int GetWidth() const;
         int GetHeight() const;
-        const std::string& Type() const;
+        const std::string& GetType() const;
         Point GetPosition() const;
 
         void SetId(int id);

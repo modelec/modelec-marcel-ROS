@@ -24,10 +24,10 @@ namespace Modelec {
 
     Pathfinding::Pathfinding(const rclcpp::Node::SharedPtr &node) : node_(node) {
 
-        map_width_mm_ = Config::get<int>("config.map.size.map_width_mm", 4000);
-        map_height_mm_ = Config::get<int>("config.map.size.map_height_mm", 3000);
-        grid_width_ = Config::get<int>("config.map.size.grid_width", 40);
-        grid_height_ = Config::get<int>("config.map.size.grid_height", 30);
+        map_width_mm_ = Config::get<int>("config.map.size.map_width_mm", 3000);
+        map_height_mm_ = Config::get<int>("config.map.size.map_height_mm", 2000);
+        grid_width_ = Config::get<int>("config.map.size.grid_width", 300);
+        grid_height_ = Config::get<int>("config.map.size.grid_height", 200);
 
         robot_length_mm_ = Config::get<int>("config.robot.size.length_mm", 300);
         robot_width_mm_ = Config::get<int>("config.robot.size.width_mm", 200);
@@ -561,9 +561,19 @@ namespace Modelec {
     }
 
     void Pathfinding::LoadObstaclesFromXML() {
-        for (size_t i = 0; i < Config::count("Obstacles.Obstacle"); ++i)
+        auto obs = Config::getArray<std::string>("Obstacles.Obstacle", [](const std::string& prefix)
         {
-            obstacles_.push_back(std::make_shared<BoxObstacle>(i));
+            return Config::get<std::string>(prefix + "@type", "box");
+        });
+        for (size_t i = 0; i < obs.size(); ++i)
+        {
+            if (obs[i] == "box")
+            {
+                obstacles_.push_back(std::make_shared<BoxObstacle>(i));
+            } else
+            {
+                obstacles_.push_back(std::make_shared<Obstacle>(i));
+            }
         }
 
         RCLCPP_INFO(node_->get_logger(), "Loaded %zu obstacles from XML", obstacles_.size());

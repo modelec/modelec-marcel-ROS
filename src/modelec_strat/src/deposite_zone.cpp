@@ -7,8 +7,8 @@ namespace Modelec
     DepositeZone::DepositeZone(int id)
     {
         id_ = Config::get<int>("Map.DepositeZone[" + std::to_string(id) + "]@id", id);
-        w_ = Config::get<int>("Map.DepositeZone[" + std::to_string(id) + "]@w");
-        h_ = Config::get<int>("Map.DepositeZone[" + std::to_string(id) + "]@h");
+        w_ = Config::get<int>("Map.DepositeZone[" + std::to_string(id) + "].Pos@w");
+        h_ = Config::get<int>("Map.DepositeZone[" + std::to_string(id) + "].Pos@h");
         position_ = Point(
             Config::get<int>("Map.DepositeZone[" + std::to_string(id) + "].Pos@x"),
             Config::get<int>("Map.DepositeZone[" + std::to_string(id) + "].Pos@y"),

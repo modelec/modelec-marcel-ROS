@@ -751,7 +751,7 @@ namespace Modelec
     {
         spawn_yellow_["top"] = Point(
             Config::get<int>("config.spawn.yellow.top@x"),
-            Config::get<int>("config.spawn.yellow..op@y"),
+            Config::get<int>("config.spawn.yellow.top@y"),
             Config::get<double>("config.spawn.yellow.top@theta")
         );
 

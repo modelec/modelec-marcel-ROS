@@ -58,7 +58,7 @@ namespace Modelec
     int Obstacle::GetHeight() const
     { return h_; }
 
-    const std::string& Obstacle::Type() const
+    const std::string& Obstacle::GetType() const
     { return type_; }
 
     Point Obstacle::GetPosition() const

@@ -66,9 +66,22 @@ namespace Modelec
 
     void Config::printAll()
     {
+        std::cerr << "Config values:" << std::endl;
         for (const auto& [key, value] : values_)
         {
-            std::cout << key << " = " << value << std::endl;
+            std::cerr << "    " << key << " = " << value << std::endl;
+        }
+    }
+
+    void Config::print(const std::string& prefix)
+    {
+        std::cerr << "Config values with prefix '" << prefix << "':" << std::endl;
+        for (const auto& [key, value] : values_)
+        {
+            if (key.rfind(prefix, 0) == 0)
+            {
+                std::cerr << "    " << key << " = " << value << std::endl;
+            }
         }
     }
 

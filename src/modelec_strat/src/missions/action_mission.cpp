@@ -18,7 +18,7 @@ namespace Modelec {
         IsInit = true;
     }
 
-    void ActionMission::Start(rclcpp::Node::SharedPtr node)
+    void ActionMission::Start(const rclcpp::Node::SharedPtr& node)
     {
         Mission::Start(node);
 
@@ -32,8 +32,13 @@ namespace Modelec {
 
     bool ActionMission::Update()
     {
-        if (!action_executor_->IsActionDone() && (node_->now() - deploy_time_).seconds() < TIMEOUT)
+        if (!action_executor_->IsActionDone())
         {
+            if ((node_->now() - deploy_time_).seconds() > TIMEOUT)
+            {
+                RCLCPP_WARN(node_->get_logger(), "ActionMission Update TIMEOUT");
+                return true;
+            }
             return false;
         }
 

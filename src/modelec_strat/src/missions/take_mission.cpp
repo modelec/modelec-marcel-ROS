@@ -10,7 +10,7 @@ namespace Modelec {
     {
     }
 
-    void TakeMission::Start(rclcpp::Node::SharedPtr node)
+    void TakeMission::Start(const rclcpp::Node::SharedPtr& node)
     {
         ActionMission::Start(node);
         MoveMission::Start(node);
@@ -57,12 +57,15 @@ namespace Modelec {
                 auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
                 pos.theta = Point::normalizeAngle(pos.theta + (side_ == BaseAction::FRONT ? 0 : M_PI));
 
-                if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
+                if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {
-                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
+                    if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                     {
-                        status_ = MissionStatus::FAILED;
-                        return false;
+                        if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
+                        {
+                            status_ = MissionStatus::FAILED;
+                            return false;
+                        }
                     }
                 }
 

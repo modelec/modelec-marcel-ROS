@@ -15,6 +15,7 @@ namespace Modelec
         void Init(const std::vector<std::string>& params) override;
         void SetSide(Side side);
         void SetDeploy(bool deploy);
+        static void InitConfig();
 
         void End() override;
 
@@ -25,6 +26,13 @@ namespace Modelec
         bool deploy_ = true;
 
         std::queue<int> steps_;
+
+        static inline std::vector<ActionServoTimed> left_deploy_msg_;
+        static inline std::vector<ActionServoTimed> left_undeploy_msg_;
+        static inline std::vector<ActionServoTimed> right_deploy_msg_;
+        static inline std::vector<ActionServoTimed> right_undeploy_msg_;
+
+        static inline bool isConfigInit_ = false;
 
         inline static const bool registered_ =
         []()

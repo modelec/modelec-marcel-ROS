@@ -12,7 +12,7 @@ namespace Modelec {
     {
     }
 
-    void ThermoMission::Start(rclcpp::Node::SharedPtr node)
+    void ThermoMission::Start(const rclcpp::Node::SharedPtr& node)
     {
         ActionMission::Start(node);
         MoveMission::Start(node);

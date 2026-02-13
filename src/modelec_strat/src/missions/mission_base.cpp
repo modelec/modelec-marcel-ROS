@@ -7,7 +7,7 @@ namespace Modelec
     {
     }
 
-    void Mission::Start(rclcpp::Node::SharedPtr node)
+    void Mission::Start(const rclcpp::Node::SharedPtr& node)
     {
         node_ = node;
     }

@@ -10,16 +10,13 @@ namespace Modelec
     {
     }
 
-    void GoHomeMission::Start(rclcpp::Node::SharedPtr node)
+    void GoHomeMission::Start(const rclcpp::Node::SharedPtr& node)
     {
-        Mission::Start(node);
+        MoveMission::Start(node);
 
         mission_score_ = Config::get<int>("config.mission_score.go_home", 0);
 
         score_pub_ = node_->create_publisher<std_msgs::msg::Int64>("/strat/score", 10);
-
-        go_timeout_ = node_->now();
-        last_ask_waypoint_time_ = node_->now();
 
         status_ = MissionStatus::RUNNING;
 

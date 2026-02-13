@@ -23,7 +23,7 @@ namespace Modelec {
         IsInit = true;
     }
 
-    void MoveMission::Start(rclcpp::Node::SharedPtr node)
+    void MoveMission::Start(const rclcpp::Node::SharedPtr& node)
     {
         Mission::Start(node);
 
@@ -51,9 +51,10 @@ namespace Modelec {
                 return false;
             }
 
-            if (elapsed_total < GO_TIMEOUT)
+            if (elapsed_total > GO_TIMEOUT)
             {
-                return false;
+                RCLCPP_WARN(node_->get_logger(), "Go Timeout");
+                return true;
             }
         }
 

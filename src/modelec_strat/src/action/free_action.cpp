@@ -6,6 +6,8 @@ Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_ex
 {
     steps_.push(ActionExec::FREE_STEP);
     steps_.push(ActionExec::DONE_STEP);
+
+    InitConfig();
 }
 
 Modelec::FreeAction::FreeAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, int n) : FreeAction(action_executor)
@@ -45,9 +47,9 @@ void Modelec::FreeAction::Next()
             for (size_t i = 0; i < servos_.size(); i++)
             {
                 msg.items[i].id = servos_[i].first + (servos_[i].second ? 4 : 12);
-                msg.items[i].start_angle = 3;
-                msg.items[i].end_angle = 1;
-                msg.items[i].duration_s = 0.5;
+                msg.items[i].start_angle = start_angle_;
+                msg.items[i].end_angle = end_angle_;
+                msg.items[i].duration_s = duration_s_;
             }
 
             action_executor_->MoveServoTimed(msg);
@@ -89,6 +91,18 @@ void Modelec::FreeAction::AddServo(std::pair<int, Side> servo)
 void Modelec::FreeAction::AddServos(const std::vector<std::pair<int, Side>>& servos)
 {
     servos_.insert(servos_.end(), servos.begin(), servos.end());
+}
+
+void Modelec::FreeAction::InitConfig()
+{
+    if (isConfigInit_) return;
+    isConfigInit_ = true;
+
+    first_servo_ = Config::get<int>("action.free.id@first", 0);
+    second_servo_ = Config::get<int>("action.free.id@second", 0);
+    start_angle_ = Config::get<double>("action.free.msg@start_angle", 3);
+    end_angle_ = Config::get<double>("action.free.msg@end_angle", 1);
+    duration_s_ = Config::get<double>("action.free.msg@duration_s", 0.5);
 }
 
 void Modelec::FreeAction::End()

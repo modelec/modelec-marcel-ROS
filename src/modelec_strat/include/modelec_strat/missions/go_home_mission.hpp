@@ -10,7 +10,7 @@ namespace Modelec
     public:
         GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const rclcpp::Time& start_time);
 
-        void Start(rclcpp::Node::SharedPtr node) override;
+        void Start(const rclcpp::Node::SharedPtr& node) override;
         bool Update() override;
         void Clear() override;
         std::string GetName() const override { return "GoHome"; }
@@ -25,12 +25,9 @@ namespace Modelec
         };
 
         rclcpp::Time go_home_time_;
-        rclcpp::Node::SharedPtr node_;
         rclcpp::Time start_time_;
         Point home_point_;
         rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr score_pub_;
         int mission_score_ = 0;
-
-        rclcpp::Time last_ask_waypoint_time_;
     };
 }

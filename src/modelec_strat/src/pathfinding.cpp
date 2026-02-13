@@ -503,7 +503,7 @@ namespace Modelec {
     }
 
     void Pathfinding::AddObstacle(const std::shared_ptr<Obstacle> &obstacle) {
-        obstacles_[obstacle->GetId()] = obstacle;
+        obstacles_.push_back(obstacle);
         modelec_interfaces::msg::Obstacle msg = obstacle->toMsg();
         obstacle_add_pub_->publish(msg);
     }

@@ -15,6 +15,7 @@ namespace Modelec
         void Init(const std::vector<std::string>& params) override;
         void SetSide(Side side);
         void SetInverted(bool inverted);
+        static void InitConfig();
 
         void End() override;
 
@@ -26,6 +27,13 @@ namespace Modelec
         bool inverted_;
 
         std::queue<int> steps_;
+
+        static inline std::vector<ActionServoTimed> front_direct_msg_;
+        static inline std::vector<ActionServoTimed> front_inverted_msg_;
+        static inline std::vector<ActionServoTimed> back_direct_msg_;
+        static inline std::vector<ActionServoTimed> back_inverted_msg_;
+
+        static inline bool isConfigInit_ = false;
 
         inline static const bool registered_ =
         []()

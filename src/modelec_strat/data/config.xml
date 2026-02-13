@@ -49,11 +49,12 @@
         <height_mm>450</height_mm>
     </spawn>
     <mission_score>
+        <go_home>10</go_home>
     </mission_score>
     <mission>
         <action>
             <timeout>
-                <s>5</s>
+                <s>10</s>
             </timeout>
         </action>
         <min_time>
@@ -77,7 +78,14 @@
         <time_to_put_zone>77</time_to_put_zone>
         <time_to_remove_top_pot>65</time_to_remove_top_pot>
     </pami>
-    <static_strat>false</static_strat>
+    <static_strat>
+        <enabled>true</enabled>
+        <missions>
+            <mission name="" />
+            <mission />
+            <mission />
+        </missions>
+    </static_strat>
     <factor>
         <theta>20</theta>
         <obs>0.6</obs>

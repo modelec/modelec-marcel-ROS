@@ -14,6 +14,7 @@ namespace Modelec
         void Next() override;
         void Init(const std::vector<std::string>& params) override;
         void SetSide(Side side);
+        static void InitConfig();
 
         void End() override;
 
@@ -23,6 +24,14 @@ namespace Modelec
         Side side_ = CENTER;
 
         std::queue<int> steps_;
+
+        static inline int id_;
+        static inline double center_;
+        static inline double front_;
+        static inline double back_;
+        static inline double duration_s_;
+
+        static inline bool isConfigInit_ = false;
 
         inline static const bool registered_ =
         []()

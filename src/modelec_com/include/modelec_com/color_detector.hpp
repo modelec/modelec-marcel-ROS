@@ -56,7 +56,7 @@ namespace Modelec
     inline std::vector<ColorSetting>
     Config::get<std::vector<ColorSetting>>(
         const std::string& prefix,
-        const std::vector<ColorSetting>& default_value)
+        const std::vector<ColorSetting>& default_value, bool)
     {
         auto result = Config::getArray<ColorSetting>(
             prefix,
@@ -76,7 +76,7 @@ namespace Modelec
     inline std::vector<cv::Rect>
     Config::get<std::vector<cv::Rect>>(
         const std::string& prefix,
-        const std::vector<cv::Rect>& default_value)
+        const std::vector<cv::Rect>& default_value, bool)
     {
         auto result = Config::getArray<cv::Rect>(
             prefix,

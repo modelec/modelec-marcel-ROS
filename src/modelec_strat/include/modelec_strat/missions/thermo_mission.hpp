@@ -9,7 +9,7 @@ namespace Modelec {
         ThermoMission(const std::shared_ptr<NavigationHelper>& nav,
                       const std::shared_ptr<ActionExecutor>& action_executor);
 
-        void Start(rclcpp::Node::SharedPtr node) override;
+        void Start(const rclcpp::Node::SharedPtr& node) override;
         bool Update() override;
         void Clear() override;
         std::string GetName() const override { return "Thermo"; }

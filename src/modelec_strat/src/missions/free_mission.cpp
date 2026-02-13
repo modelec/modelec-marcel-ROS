@@ -10,7 +10,7 @@ namespace Modelec {
     {
     }
 
-    void FreeMission::Start(rclcpp::Node::SharedPtr node)
+    void FreeMission::Start(const rclcpp::Node::SharedPtr& node)
     {
         ActionMission::Start(node);
         MoveMission::Start(node);
@@ -181,8 +181,8 @@ namespace Modelec {
                 auto pos = nav_->GetCurrentPos();
 
                 obs->SetPosition(
-                    pos->x + 300 * cos(pos->theta + (side_ == BaseAction::FRONT ? 0 : M_PI)),
-                    pos->y + 300 * sin(pos->theta + (side_ == BaseAction::FRONT ? 0 : M_PI)),
+                    target_deposite_zone_->GetPosition().x,
+                    target_deposite_zone_->GetPosition().y,
                     pos->theta);
 
                 obs->SetAtObjective(true);

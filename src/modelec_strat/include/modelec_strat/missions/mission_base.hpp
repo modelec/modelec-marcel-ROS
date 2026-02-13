@@ -21,7 +21,7 @@ namespace Modelec
         Mission(MissionStatus status = MissionStatus::READY);
         virtual ~Mission() = default;
 
-        virtual void Start(rclcpp::Node::SharedPtr node);
+        virtual void Start(const rclcpp::Node::SharedPtr& node);
         virtual bool Update() = 0;
         virtual void Clear() = 0;
 

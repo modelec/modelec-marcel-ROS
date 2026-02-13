@@ -87,7 +87,6 @@ namespace Modelec
         joy_sub_ = node_->create_subscription<sensor_msgs::msg::Joy>(
             "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg)
             {
-                // use game controller to manually control all the action. make it carefully
                 if (msg->buttons.size() >= 15)
                 {
                     if (msg->buttons[0] == 1) // A button
@@ -539,27 +538,6 @@ namespace Modelec
 
     void ActionExecutor::AskColor() const
     {
-        /*if (!ask_color_client_->service_is_ready()) {
-            RCLCPP_ERROR(node_->get_logger(), "Color detection service not ready");
-            return;
-        }
-
-        auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
-
-        ask_color_client_->async_send_request(request,
-            [this](rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture future) {
-                auto response = future.get();
-                if (response->success) {
-                    RCLCPP_INFO(node_->get_logger(), "Color detection succeeded: %s", response->message.c_str());
-                    if (box_obstacles_[cam_side_] != nullptr) {
-                        box_obstacles_[cam_side_]->ParseColor(response->message);
-                    } else {
-                        RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box in the cam side");
-                    }
-                } else {
-                    RCLCPP_ERROR(node_->get_logger(), "Color detection failed: %s", response->message.c_str());
-                }
-            });*/
         ask_pub_->publish(std_msgs::msg::Empty());
     }
 }

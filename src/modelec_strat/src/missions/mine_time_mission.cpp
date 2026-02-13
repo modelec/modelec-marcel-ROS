@@ -16,7 +16,7 @@ namespace Modelec {
         IsInit = true;
     }
 
-    void MinTimeMission::Start(rclcpp::Node::SharedPtr node)
+    void MinTimeMission::Start(const rclcpp::Node::SharedPtr& node)
     {
         Mission::Start(node);
 

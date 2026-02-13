@@ -6,6 +6,8 @@ Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_ex
 {
     steps_.push(ActionExec::TAKE_STEP);
     steps_.push(ActionExec::DONE_STEP);
+
+    InitConfig();
 }
 
 Modelec::TakeAction::TakeAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, int n) : TakeAction(action_executor)
@@ -44,10 +46,10 @@ void Modelec::TakeAction::Next()
 
             for (size_t i = 0; i < servos_.size(); i++)
             {
-                msg.items[i].id = servos_[i].first + (servos_[i].second ? 4 : 12);
-                msg.items[i].start_angle = 0;
-                msg.items[i].end_angle = 3;
-                msg.items[i].duration_s = 0.5;
+                msg.items[i].id = servos_[i].first + (servos_[i].second ? first_servo_ : second_servo_);
+                msg.items[i].start_angle = start_angle_;
+                msg.items[i].end_angle = end_angle_;
+                msg.items[i].duration_s = duration_s_;
             }
 
             action_executor_->MoveServoTimed(msg);
@@ -89,6 +91,18 @@ void Modelec::TakeAction::AddServo(std::pair<int, Side> servo)
 void Modelec::TakeAction::AddServos(const std::vector<std::pair<int, Side>>& servos)
 {
     servos_.insert(servos_.end(), servos.begin(), servos.end());
+}
+
+void Modelec::TakeAction::InitConfig()
+{
+    if (isConfigInit_) return;
+    isConfigInit_ = true;
+
+    first_servo_ = Config::get<int>("action.take.id@first", 0);
+    second_servo_ = Config::get<int>("action.take.id@second", 0);
+    start_angle_ = Config::get<double>("action.take.msg@start_angle", 3);
+    end_angle_ = Config::get<double>("action.take.msg@end_angle", 1);
+    duration_s_ = Config::get<double>("action.take.msg@duration_s", 0.5);
 }
 
 void Modelec::TakeAction::End()

@@ -21,7 +21,7 @@ namespace Modelec
         static bool load(const std::string& filepath);
 
         template<typename T>
-        static T get(const std::string& key, const T& default_value = T());
+        static T get(const std::string& key, const T& default_value = T(), bool is_optional = false);
 
         template<typename T>
         static std::vector<T> getArray(const std::string& prefix,
@@ -35,6 +35,8 @@ namespace Modelec
 
         static void printAll();
 
+        static void print(const std::string& prefix);
+
     private:
         static void parseNode(tinyxml2::XMLElement* element, const std::string& key);
 
@@ -42,11 +44,14 @@ namespace Modelec
     };
 
     template<typename T>
-    T Config::get(const std::string& key, const T& default_value) {
+    T Config::get(const std::string& key, const T& default_value, bool is_optional) {
         auto it = values_.find(key);
         if (it == values_.end())
         {
-            std::cerr << "Config key not found: " << key << std::endl;
+            if (!is_optional)
+            {
+                std::cerr << "Config key not found: " << key << std::endl;
+            }
             return default_value;
         }
 
@@ -54,22 +59,32 @@ namespace Modelec
         T result;
         if (!(iss >> result))
         {
-            std::cerr << "Config key has invalid format: " << key << " = " << it->second << std::endl;
+            if (!is_optional)
+            {
+                std::cerr << "Config key has invalid format: " << key << " = " << it->second << std::endl;
+            }
             return default_value;
         }
         return result;
     }
 
     template<>
-    inline std::string Config::get<std::string>(const std::string& key, const std::string& default_value) {
+    inline std::string Config::get<std::string>(const std::string& key, const std::string& default_value, bool is_optional) {
         auto it = values_.find(key);
-        if (it == values_.end()) std::cerr << "Config key not found: " << key << std::endl;
-        return it != values_.end() ? it->second : default_value;
+        if (it == values_.end())
+        {
+            if (is_optional)
+            {
+                std::cerr << "Config key not found: " << key << std::endl;
+            }
+            return default_value;
+        }
+        return it->second;
     }
 
     template<>
-    inline bool Config::get<bool>(const std::string& key, const bool& default_value) {
-        auto str = get<std::string>(key, default_value ? "true" : "false");
+    inline bool Config::get<bool>(const std::string& key, const bool& default_value, bool is_optional) {
+        auto str = get<std::string>(key, default_value ? "true" : "false", is_optional);
         return str == "true" || str == "1";
     }
 
@@ -95,6 +110,9 @@ namespace Modelec
                     result.emplace_back(builder(base));
                 }
             }
+        } else
+        {
+            std::cerr << "Config array not found: " << prefix << std::endl;
         }
 
         return result;

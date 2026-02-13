@@ -22,14 +22,18 @@ namespace Modelec
         }
         if (!Config::load(data_dir + "/obstacles.xml"))
         {
-            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", (data_dir + "/config.xml").c_str());
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", (data_dir + "/obstacles.xml").c_str());
         }
         if (!Config::load(data_dir + "/deposite_zone.xml"))
         {
-            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", (data_dir + "/config.xml").c_str());
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", (data_dir + "/deposite_zone.xml").c_str());
+        }
+        if (!Config::load(data_dir + "/action.xml"))
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", (data_dir + "/action.xml").c_str());
         }
 
-        static_strat_ = Config::get<bool>("config.static_strat", false);
+        static_strat_ = Config::get<bool>("config.static_strat.enabled", false);
         factor_obs_ = Config::get<float>("config.factor.obs", 1.0);
         factor_thermo_ = Config::get<float>("config.factor.thermo", 1.0);
         timer_period_ms_ = Config::get<int>("config.timer.strat.ms", 100);
@@ -160,10 +164,7 @@ namespace Modelec
                 auto empty_queue_ = std::queue<State>();
                 std::swap(game_action_sequence_, empty_queue_);
                 game_action_sequence_.push(State::TAKE_MISSION);
-                game_action_sequence_.push(State::TAKE_MISSION);
                 game_action_sequence_.push(State::FREE_MISSION);
-                game_action_sequence_.push(State::FREE_MISSION);
-                game_action_sequence_.push(State::THERMO_MISSION);
 
                 Transition(State::WAIT_START, "System ready");
             }

@@ -10,7 +10,7 @@ namespace Modelec {
 
         static void InitConfig();
 
-        void Start(rclcpp::Node::SharedPtr node) override;
+        void Start(const rclcpp::Node::SharedPtr& node) override;
 
         bool Update() override;
 

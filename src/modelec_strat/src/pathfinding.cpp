@@ -186,6 +186,10 @@ namespace Modelec {
         // 2. Fill obstacles with inflation
         // TODO some bug exist with the inflate
         for (const auto &obstacle: obstacles_) {
+            if (!obstacle->ShouldTakeCountInPathfinding())
+            {
+                continue;
+            }
             float cx = obstacle->GetX();
             float cy = obstacle->GetY();
             float width = obstacle->GetWidth() + inflate_x * 2 * cell_size_mm_x;
@@ -270,10 +274,10 @@ namespace Modelec {
 
         if (!TestCollision(start_x, start_y, collisionMask) || !TestCollision(goal_x, goal_y, collisionMask)) {
             if (!TestCollision(start_x, start_y, collisionMask)) {
-                RCLCPP_WARN(node_->get_logger(), "Start inside an obstacle");
+                RCLCPP_WARN(node_->get_logger(), "Start inside an obstacle x=%d y=%d mask=%d | %d", start_x, start_y, collisionMask, grid_[start_y][start_x]);
                 return {grid_[start_y][start_x], waypoints};
             } else {
-                RCLCPP_WARN(node_->get_logger(), "Goal inside an obstacle");
+                RCLCPP_WARN(node_->get_logger(), "Goal inside an obstacle x=%d y=%d mask=%d | %d", goal_x, goal_y, collisionMask, grid_[goal_y][goal_x]);
                 return {grid_[goal_y][goal_x], waypoints};
             }
         }

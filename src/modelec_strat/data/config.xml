@@ -18,14 +18,14 @@
         <size>
             <width_mm>300</width_mm>
             <length_mm>300</length_mm>
-            <margin_mm>100</margin_mm>
+            <margin_mm>20</margin_mm>
         </size>
     </robot>
 
     <map>
         <size>
-            <grid_width>300</grid_width>
-            <grid_height>200</grid_height>
+            <grid_width>3000</grid_width>
+            <grid_height>2000</grid_height>
 
             <map_width_mm>3000</map_width_mm>
             <map_height_mm>2000</map_height_mm>
@@ -79,7 +79,7 @@
         <time_to_remove_top_pot>65</time_to_remove_top_pot>
     </pami>
     <static_strat>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <missions>
             <mission name="" />
             <mission />

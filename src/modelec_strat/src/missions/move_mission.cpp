@@ -56,6 +56,8 @@ namespace Modelec {
                 RCLCPP_WARN(node_->get_logger(), "Go Timeout");
                 return true;
             }
+
+            return false;
         }
 
         return true;

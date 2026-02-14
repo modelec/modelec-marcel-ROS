@@ -114,4 +114,14 @@ namespace Modelec
     {
         isAtObjective = atObjective;
     }
+
+    bool Obstacle::ShouldTakeCountInPathfinding() const
+    {
+        return takeCountInPathfinding;
+    }
+
+    void Obstacle::SetTakeCountInPathfinding(bool takeCount)
+    {
+        takeCountInPathfinding = takeCount;
+    }
 }

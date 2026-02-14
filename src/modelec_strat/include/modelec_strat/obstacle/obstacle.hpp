@@ -52,11 +52,15 @@ namespace Modelec
         bool IsAtObjective() const;
         void SetAtObjective(bool atObjective);
 
+        bool ShouldTakeCountInPathfinding() const;
+        void SetTakeCountInPathfinding(bool takeCount);
+
     protected:
         int id_, x_, y_, w_, h_;
         double theta_;
         std::string type_;
 
         bool isAtObjective = false;
+        bool takeCountInPathfinding = true;
     };
 }

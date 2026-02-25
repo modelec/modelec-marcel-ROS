@@ -54,6 +54,12 @@ namespace ModelecGUI {
                     }
                 });
         }
+
+        quit_sub_ = node_->create_subscription<std_msgs::msg::Empty>(
+            "gui/quit", 10, [this](const std_msgs::msg::Empty::SharedPtr)
+            {
+                close();
+            });
     }
 
     void ROS2QtGUI::setupMenu() {

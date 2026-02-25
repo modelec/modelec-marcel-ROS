@@ -55,6 +55,7 @@ namespace ModelecGUI
         QAudioOutput* audio_output_;
 
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr audio_sub_;
+        rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr quit_sub_;
 
     };
 }

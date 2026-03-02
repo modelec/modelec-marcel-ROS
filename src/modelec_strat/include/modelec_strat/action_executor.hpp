@@ -143,6 +143,9 @@ namespace Modelec
         float last_left_trig = 1.0f;
         float last_right_trig = 1.0f;
 
+        bool last_l3 = false;
+        bool last_r3 = false;
+
     private:
         rclcpp::Node::SharedPtr node_;
     };

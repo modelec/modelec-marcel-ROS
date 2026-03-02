@@ -133,11 +133,17 @@ namespace Modelec
                     }
                     else if (msg->buttons[13] == 1) // LT button
                     {
-                        ActivateThermo(BaseAction::Side::LEFT, !thermo_state_[BaseAction::Side::LEFT]);
+                        if (action_done_)
+                        {
+                            ActivateThermo(BaseAction::Side::LEFT, !thermo_state_[BaseAction::Side::LEFT]);
+                        }
                     }
                     else if (msg->buttons[14] == 1) // LR button
                     {
-                        ActivateThermo(BaseAction::Side::RIGHT, !thermo_state_[BaseAction::Side::RIGHT]);
+                        if (action_done_)
+                        {
+                            ActivateThermo(BaseAction::Side::RIGHT, !thermo_state_[BaseAction::Side::RIGHT]);
+                        }
                     }
                 }
                 if (msg->axes.size() == 8)

@@ -116,12 +116,12 @@
     </thermo>
     <cam>
         <save_to_file>
-            <enabled>false</enabled>
+            <enabled>true</enabled>
             <directory>./cam/</directory>
         </save_to_file>
-        <enabled>false</enabled>
-        <!--<link>/dev/video0</link>-->
-        <link>http://192.168.1.21:8080/video</link>
+        <enabled>true</enabled>
+        <link>/dev/video0</link>
+        <!--<link>http://192.168.1.21:8080/video</link>-->
         <headless>true</headless>
         <rois>
             <roi x="300" y="700" w="50" h="50" />

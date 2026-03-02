@@ -38,8 +38,8 @@
             <unrotated>
                 <msg id="0" start_angle="2.96" end_angle="1.74" duration_s="2" />
                 <msg id="1" start_angle="0.91" end_angle="2.13" duration_s="2" />
-                <msg id="2" start_angle="3.35" end_angle="0.7" duration_s="1" delay_s="0.5" />
-                <msg id="3" start_angle="0.1" end_angle="2.6" duration_s="1" delay_s="0.5" />
+                <msg id="2" start_angle="3.35" end_angle="0.7" duration_s="2" />
+                <msg id="3" start_angle="0.1" end_angle="2.6" duration_s="2" />
             </unrotated>
             <rotated>
                 <msg id="0" start_angle="2.56" end_angle="1.74" duration_s="2" />

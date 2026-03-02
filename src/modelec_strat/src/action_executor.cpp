@@ -133,10 +133,12 @@ namespace Modelec
                     }
                     else if (msg->buttons[14] == 1) // LT button
                     {
+                        RCLCPP_INFO(node_->get_logger(), "Left thermo button pressed");
                         ActivateThermo(BaseAction::Side::LEFT, !thermo_state_[BaseAction::Side::LEFT]);
                     }
                     else if (msg->buttons[15] == 1) // LR button
                     {
+                        RCLCPP_INFO(node_->get_logger(), "Right thermo button pressed");
                         ActivateThermo(BaseAction::Side::RIGHT, !thermo_state_[BaseAction::Side::RIGHT]);
                     }
                 }

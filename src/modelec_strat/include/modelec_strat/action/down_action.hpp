@@ -28,10 +28,10 @@ namespace Modelec
 
         std::queue<int> steps_;
 
-        static inline std::vector<ActionServoTimed> front_direct_msg_;
-        static inline std::vector<ActionServoTimed> front_inverted_msg_;
-        static inline std::vector<ActionServoTimed> back_direct_msg_;
-        static inline std::vector<ActionServoTimed> back_inverted_msg_;
+        static inline std::vector<ActionServoTimed> front_unrotated_msg_;
+        static inline std::vector<ActionServoTimed> front_rotated_msg_;
+        static inline std::vector<ActionServoTimed> back_unrotated_msg_;
+        static inline std::vector<ActionServoTimed> back_rotated_msg_;
 
         static inline bool isConfigInit_ = false;
 

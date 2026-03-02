@@ -39,10 +39,10 @@ void Modelec::DownAction::Next()
             {
                 if (inverted_)
                 {
-                    msg.items.insert(msg.items.end(), front_inverted_msg_.begin(), front_inverted_msg_.end());
+                    msg.items.insert(msg.items.end(), front_rotated_msg_.begin(), front_rotated_msg_.end());
                 } else
                 {
-                    msg.items.insert(msg.items.end(), front_direct_msg_.begin(), front_direct_msg_.end());
+                    msg.items.insert(msg.items.end(), front_unrotated_msg_.begin(), front_unrotated_msg_.end());
                 }
             }
 
@@ -50,10 +50,10 @@ void Modelec::DownAction::Next()
             {
                 if (inverted_)
                 {
-                    msg.items.insert(msg.items.end(), back_inverted_msg_.begin(), back_inverted_msg_.end());
+                    msg.items.insert(msg.items.end(), back_rotated_msg_.begin(), back_rotated_msg_.end());
                 } else
                 {
-                    msg.items.insert(msg.items.end(), back_direct_msg_.begin(), back_direct_msg_.end());
+                    msg.items.insert(msg.items.end(), back_unrotated_msg_.begin(), back_unrotated_msg_.end());
                 }
             }
 
@@ -94,10 +94,10 @@ void Modelec::DownAction::InitConfig()
     if (isConfigInit_) return;
     isConfigInit_ = true;
 
-    front_direct_msg_ = Config::get<std::vector<ActionServoTimed>>("action.down.front.direct.msg");
-    front_inverted_msg_ = Config::get<std::vector<ActionServoTimed>>("action.down.front.inverted.msg");
-    back_direct_msg_ = Config::get<std::vector<ActionServoTimed>>("action.down.back.direct.msg");
-    back_inverted_msg_ = Config::get<std::vector<ActionServoTimed>>("action.down.back.inverted.msg");
+    front_unrotated_msg_ = Config::get<std::vector<ActionServoTimed>>("action.down.front.unrotated.msg");
+    front_rotated_msg_ = Config::get<std::vector<ActionServoTimed>>("action.down.front.rotated.msg");
+    back_unrotated_msg_ = Config::get<std::vector<ActionServoTimed>>("action.down.back.unrotated.msg");
+    back_rotated_msg_ = Config::get<std::vector<ActionServoTimed>>("action.down.back.rotated.msg");
 }
 
 void Modelec::DownAction::End()

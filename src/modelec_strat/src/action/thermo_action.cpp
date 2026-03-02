@@ -92,10 +92,10 @@ void Modelec::ThermoAction::InitConfig()
     if (isConfigInit_) return;
     isConfigInit_ = true;
 
-    left_deploy_msg_ = Config::get<std::vector<ActionServoTimed>>("action.thermo.front.deploy");
-    left_undeploy_msg_ = Config::get<std::vector<ActionServoTimed>>("action.thermo.front.undeploy");
-    right_deploy_msg_ = Config::get<std::vector<ActionServoTimed>>("action.thermo.back.deploy");
-    right_undeploy_msg_ = Config::get<std::vector<ActionServoTimed>>("action.thermo.back.undeploy");
+    left_deploy_msg_ = Config::get<std::vector<ActionServoTimed>>("action.thermo.left.deploy");
+    left_undeploy_msg_ = Config::get<std::vector<ActionServoTimed>>("action.thermo.left.undeploy");
+    right_deploy_msg_ = Config::get<std::vector<ActionServoTimed>>("action.thermo.right.deploy");
+    right_undeploy_msg_ = Config::get<std::vector<ActionServoTimed>>("action.thermo.right.undeploy");
 }
 
 void Modelec::ThermoAction::End()

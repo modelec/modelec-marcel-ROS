@@ -85,13 +85,13 @@
         <duration_s>0.5</duration_s>
     </look_on>
     <thermo>
-        <front>
+        <left>
             <deploy id="16" start_angle="1" end_angle="2" duration_s="0.5" />
             <undeploy id="16" start_angle="2" end_angle="1" duration_s="0.5" />
-        </front>
-        <back>
-            <deploy id="17" start_angle="1" end_angle="2" duration_s="0.5" />
-            <undeploy id="17" start_angle="2" end_angle="1" duration_s="0.5" />
-        </back>
+        </left>
+        <right>
+            <deploy id="15" start_angle="0" end_angle="1.5" duration_s="0.5" />
+            <undeploy id="15" start_angle="1.5" end_angle="0" duration_s="0.5" />
+        </right>
     </thermo>
 </action>

@@ -2,11 +2,6 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_utils/utils.hpp>
 
-#include <libcamera/libcamera.h>
-#include <libcamera/camera.h>
-#include <libcamera/framebuffer_allocator.h>
-#include <libcamera/request.h>
-
 namespace Modelec
 {
     ColorDetector::ColorDetector()
@@ -83,77 +78,25 @@ namespace Modelec
 
     bool ColorDetector::processSnapshot(std::vector<std::string>& colors, std::string& error)
     {
-        libcamera::CameraManager cm;
-        cm.start();
+        cv::VideoCapture cap(link_, cv::CAP_V4L2);
 
-        if (cm.cameras().empty()) {
-            error = "No cameras detected";
+        if (!cap.isOpened())
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to open camera at %s", link_.c_str());
+            error = "Failed to open camera";
             return false;
         }
 
-        auto camera = cm.cameras()[0]; // shared_ptr<Camera>
-        if (!camera->acquire()) {
-            error = "Failed to acquire camera";
-            return false;
-        }
+        cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
 
-        // Camera configuration
-        std::unique_ptr<libcamera::CameraConfiguration> config =
-            camera->generateConfiguration({libcamera::StreamRole::VideoRecording});
+        cv::Mat frame;
 
-        config->at(0).size.width = 2304;
-        config->at(0).size.height = 1296;
-        config->at(0).pixelFormat = libcamera::formats::RGB888;
+        cap >> frame;
 
-        if (camera->configure(config.get()) < 0) {
-            error = "Camera configuration failed";
-            camera->release();
-            return false;
-        }
-
-        libcamera::FrameBufferAllocator allocator(camera);
-        if (allocator.allocate(config->at(0).stream()) < 0) {
-            error = "Buffer allocation failed";
-            camera->release();
-            return false;
-        }
-
-        // Create request
-        auto request = camera->createRequest();
-        if (!request) {
-            error = "Request creation failed";
-            camera->release();
-            return false;
-        }
-
-        request->addBuffer(config->at(0).stream(), allocator.buffers(config->at(0).stream())[0].get());
-
-        // Start camera
-        if (camera->start() < 0) {
-            error = "Camera start failed";
-            camera->release();
-            return false;
-        }
-
-        if (camera->queueRequest(request.get()) < 0) {
-            error = "Queue request failed";
-            camera->stop();
-            camera->release();
-            return false;
-        }
-
-        // Wait for request completion
-        while (request->status() != libcamera::Request::RequestComplete) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
-
-        const libcamera::FrameBuffer &fb = *request->buffers().begin()->second;
-        cv::Mat frame(config->at(0).size.height, config->at(0).size.width, CV_8UC3, fb.planes()[0].data());
-
-        if (frame.empty()) {
+        if (frame.empty())
+        {
+            RCLCPP_WARN(get_logger(), "Captured empty frame from camera");
             error = "Empty frame";
-            camera->stop();
-            camera->release();
             return false;
         }
 
@@ -176,9 +119,7 @@ namespace Modelec
             RCLCPP_DEBUG(get_logger(), "Saved snapshot to %s", path.c_str());
         }
 
-        camera->stop();
-        camera->release();
-        cm.stop();
+        cap.release();
 
         return true;
     }

@@ -3,7 +3,7 @@
         <servo id="0" angle="2.96" />
         <servo id="1" angle="0.91" />
         <servo id="2" angle="3.35" />
-        <servo id="3" angle="1" />
+        <servo id="3" angle="0.1" />
         <servo id="4" angle="1" />
         <servo id="5" angle="1" />
         <servo id="6" angle="1" />

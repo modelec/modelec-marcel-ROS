@@ -78,7 +78,12 @@ namespace Modelec
 
     bool ColorDetector::processSnapshot(std::vector<std::string>& colors, std::string& error)
     {
-        cv::VideoCapture cap(link_);
+        cv::VideoCapture cap;
+
+        int deviceID = 0;
+        int apiID = cv::CAP_ANY;
+
+        cap.open(deviceID, apiID);
 
         if (!cap.isOpened())
         {

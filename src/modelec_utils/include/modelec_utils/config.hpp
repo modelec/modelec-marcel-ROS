@@ -18,6 +18,9 @@ namespace Modelec
         template<typename T>
         using BuilderFunc = std::function<T(const std::string& base_key)>;
 
+        template<typename K, typename V>
+        using MapBuilderFunc = std::function<std::pair<K, V>(const std::string& base_key)>;
+
         static bool load(const std::string& filepath);
 
         template<typename T>
@@ -26,6 +29,11 @@ namespace Modelec
         template<typename T>
         static std::vector<T> getArray(const std::string& prefix,
                                     BuilderFunc<T> builder = [](const std::string& base) { return get<T>(base); });
+
+        template<typename K, typename V>
+        static std::unordered_map<K, V> getMap(
+            const std::string& prefix,
+            MapBuilderFunc<K, V> builder);
 
         static size_t count(const std::string& prefix);
 
@@ -113,6 +121,30 @@ namespace Modelec
         } else
         {
             std::cerr << "Config array not found: " << prefix << std::endl;
+        }
+
+        return result;
+    }
+
+    template<typename K, typename V>
+    std::unordered_map<K, V> Config::getMap(
+        const std::string& prefix,
+        MapBuilderFunc<K, V> builder)
+    {
+        std::unordered_map<K, V> result;
+
+        size_t n = count(prefix);
+        if (n == 0)
+        {
+            std::cerr << "Config map not found: " << prefix << std::endl;
+            return result;
+        }
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            std::string base = prefix + "[" + std::to_string(i) + "]";
+            auto [key, value] = builder(base);
+            result.emplace(key, value);
         }
 
         return result;

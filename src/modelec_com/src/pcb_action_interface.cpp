@@ -15,6 +15,12 @@ namespace Modelec
             RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
         }
 
+        std::string action_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/action.xml";
+        if (!Config::load(action_path))
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", action_path.c_str());
+        }
+
         auto serial_port = Config::get<std::string>("config.usb.action.port", "/dev/ttyUSB0");
         auto baudrate = Config::get<long>("config.usb.action.baudrate", 115200);
         auto timed_servo_timer_ms = Config::get<int>("config.timer.action.timed_servo.ms", TIMER_SERVO_TIMED_MS);
@@ -259,43 +265,7 @@ namespace Modelec
 
         this->open(baudrate, serial_port, MAX_MESSAGE_LEN);
 
-        // TODO : check for real value there
-        /*asc_value_mapper_ = {
-            {0, 0},
-            {1, 100},
-            {2, 200},
-            {3, 300}
-        };*/
-        /*for (auto & [id, v] : asc_value_mapper_)
-        {
-            SendOrder("ASC", {std::to_string(id), std::to_string(v)});
-        }*/
-
-        // asc_state_ = 3;
-
-        // SendMove("ASC", {std::to_string(asc_state_)});
-
-        // rclcpp::sleep_for(std::chrono::milliseconds(100));
-
-        /*servo_value_ = {
-            {0, 1},
-            {1, 1},
-            {2, 0},
-            {3, 0},
-            {4, 1},
-            {5, 0}
-        };*/
-
-        servo_value_ = {
-            {0, 2.96},
-            {1, 0.91},
-            {2, 3.35},
-            {3, 0.1},
-            {4, 1},
-            {5, 1},
-            {6, 1},
-            {7, 1},
-        };
+        servo_value_ = Config::get<std::unordered_map<int, double>>("action.init.servo");
 
         std::string data = "MOV;SERVO;" + std::to_string(servo_value_.size()) + ";";
 
@@ -307,31 +277,6 @@ namespace Modelec
 		data += "\n";
 
         SendToPCB(data);
-
-        /*relay_value_ = {
-            {1, false},
-            {2, false},
-            {3, false},
-        };*/
-
-        /*rclcpp::sleep_for(std::chrono::milliseconds(100));
-
-        data = "SET;RELAY;STATE;";
-        data += std::to_string(relay_value_.size()) + ";";
-
-        for (auto & [id, v] : relay_value_)
-        {
-            data += std::to_string(id) + ";" + std::to_string(v) + ";";
-        }
-
-        SendToPCB(data);*/
-
-        /*for (auto & [id, v] : relay_value_)
-        {
-            rclcpp::sleep_for(std::chrono::milliseconds(100));
-
-            SendMove("RELAY" + std::to_string(id), {std::to_string(v)});
-        }*/
     }
 
     PCBActionInterface::~PCBActionInterface()

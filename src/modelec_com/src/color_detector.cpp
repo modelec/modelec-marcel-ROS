@@ -91,8 +91,7 @@ namespace Modelec
 
         cv::Mat frame;
 
-        for (int i = 0; i < 3; ++i)
-            cap >> frame;
+        cap >> frame;
 
         if (frame.empty())
         {

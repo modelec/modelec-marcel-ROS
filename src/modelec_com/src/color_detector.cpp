@@ -78,7 +78,11 @@ namespace Modelec
 
     bool ColorDetector::processSnapshot(std::vector<std::string>& colors, std::string& error)
     {
-        cv::VideoCapture cap(link_, cv::CAP_V4L2);
+        // Construct a GStreamer pipeline string
+        std::string pipeline = "libcamerasrc ! video/x-raw, width=640, height=480, framerate=30/1 ! videoconvert ! videoscale ! appsink";
+
+        // Use the pipeline instead of the device link
+        cv::VideoCapture cap(pipeline, cv::CAP_GSTREAMER);
 
         if (!cap.isOpened())
         {

@@ -2,6 +2,11 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_utils/utils.hpp>
 
+#include <libcamera/libcamera.h>
+#include <libcamera/camera.h>
+#include <libcamera/framebuffer_allocator.h>
+#include <libcamera/request.h>
+
 namespace Modelec
 {
     ColorDetector::ColorDetector()
@@ -78,30 +83,91 @@ namespace Modelec
 
     bool ColorDetector::processSnapshot(std::vector<std::string>& colors, std::string& error)
     {
-        cv::VideoCapture cap;
+        libcamera::CameraManager cm;
+        cm.start();
 
-        int deviceID = 0;
-        int apiID = cv::CAP_ANY;
-
-        cap.open(deviceID, apiID);
-
-        if (!cap.isOpened())
-        {
-            RCLCPP_ERROR(get_logger(), "Failed to open camera at %s", link_.c_str());
-            error = "Failed to open camera";
+        if (cm.cameras().empty()) {
+            RCLCPP_ERROR(get_logger(), "No cameras detected");
+            error = "No cameras detected";
+            cm.stop();
             return false;
         }
 
-        cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
+        // Pick the first camera
+        libcamera::Camera *camera = cm.cameras()[0].get();
+        if (!camera->acquire()) {
+            RCLCPP_ERROR(get_logger(), "Failed to acquire camera");
+            error = "Failed to acquire camera";
+            cm.stop();
+            return false;
+        }
 
-        cv::Mat frame;
+        // Configure camera stream
+        libcamera::StreamConfiguration &config = camera->generateConfiguration({libcamera::StreamRole::VideoRecording})[0];
+        config.size.width = 2304;   // Adjust as needed
+        config.size.height = 1296;
+        config.pixelFormat = libcamera::formats::RGB888;
 
-        cap >> frame;
+        if (camera->configure(config) < 0) {
+            RCLCPP_ERROR(get_logger(), "Failed to configure camera");
+            error = "Camera configuration failed";
+            camera->release();
+            cm.stop();
+            return false;
+        }
 
-        if (frame.empty())
-        {
+        libcamera::FrameBufferAllocator allocator(camera);
+        if (allocator.allocate(config.stream()) < 0) {
+            RCLCPP_ERROR(get_logger(), "Failed to allocate buffers");
+            error = "Buffer allocation failed";
+            camera->release();
+            cm.stop();
+            return false;
+        }
+
+        // Create a single request
+        libcamera::Request *request = camera->createRequest();
+        if (!request) {
+            RCLCPP_ERROR(get_logger(), "Failed to create request");
+            error = "Request creation failed";
+            camera->release();
+            cm.stop();
+            return false;
+        }
+
+        auto buffers = allocator.buffers(config.stream());
+        request->addBuffer(config.stream(), buffers[0].get());
+
+        if (camera->start() < 0) {
+            RCLCPP_ERROR(get_logger(), "Failed to start camera");
+            error = "Camera start failed";
+            camera->release();
+            cm.stop();
+            return false;
+        }
+
+        if (camera->queueRequest(request) < 0) {
+            RCLCPP_ERROR(get_logger(), "Failed to queue request");
+            error = "Queue request failed";
+            camera->stop();
+            camera->release();
+            cm.stop();
+            return false;
+        }
+
+        // Wait for completion
+        camera->waitForIdle();
+
+        // Convert to OpenCV Mat
+        const libcamera::FrameBuffer &fb = request->buffers().begin()->second;
+        cv::Mat frame(config.size.height, config.size.width, CV_8UC3, fb.planes()[0].mem);
+
+        if (frame.empty()) {
             RCLCPP_WARN(get_logger(), "Captured empty frame from camera");
             error = "Empty frame";
+            camera->stop();
+            camera->release();
+            cm.stop();
             return false;
         }
 
@@ -124,7 +190,9 @@ namespace Modelec
             RCLCPP_DEBUG(get_logger(), "Saved snapshot to %s", path.c_str());
         }
 
-        cap.release();
+        camera->stop();
+        camera->release();
+        cm.stop();
 
         return true;
     }

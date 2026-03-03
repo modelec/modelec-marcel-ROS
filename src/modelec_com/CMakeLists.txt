@@ -16,6 +16,7 @@ find_package(ament_index_cpp REQUIRED)
 find_package(fmt)
 
 find_package(OpenCV REQUIRED)
+find_package(libcamera REQUIRED)
 
 find_package(modelec_interfaces REQUIRED)
 find_package(modelec_utils REQUIRED)
@@ -55,6 +56,7 @@ target_link_libraries(color_detector
   ${OpenCV_LIBS}
   modelec_utils::utils
   modelec_utils::config
+  libcamera::libcamera
 )
 
 target_include_directories(color_detector PUBLIC

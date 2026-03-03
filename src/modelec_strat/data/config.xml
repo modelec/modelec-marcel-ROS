@@ -119,7 +119,7 @@
             <enabled>true</enabled>
             <directory>./cam/</directory>
         </save_to_file>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <link>/dev/video0</link>
         <!--<link>http://192.168.1.21:8080/video</link>-->
         <headless>true</headless>
@@ -136,11 +136,11 @@
     </cam>
     <usb>
         <odo>
-            <port>/dev/USB_ODO</port>
+            <port>/tmp/USB_ODO</port>
             <baudrate>115200</baudrate>
         </odo>
         <action>
-            <port>/dev/USB_ACTION</port>
+            <port>/tmp/USB_ACTION</port>
             <baudrate>115200</baudrate>
         </action>
         <timeout_ms>300</timeout_ms>

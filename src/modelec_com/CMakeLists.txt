@@ -16,7 +16,12 @@ find_package(ament_index_cpp REQUIRED)
 find_package(fmt)
 
 find_package(OpenCV REQUIRED)
-find_package(libcamera REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBCAMERA REQUIRED libcamera)
+
+include_directories(${LIBCAMERA_INCLUDE_DIRS})
+link_directories(${LIBCAMERA_LIBRARY_DIRS})
+add_definitions(${LIBCAMERA_CFLAGS_OTHER})
 
 find_package(modelec_interfaces REQUIRED)
 find_package(modelec_utils REQUIRED)
@@ -56,7 +61,7 @@ target_link_libraries(color_detector
   ${OpenCV_LIBS}
   modelec_utils::utils
   modelec_utils::config
-  libcamera::libcamera
+  ${LIBCAMERA_LIBRARIES}
 )
 
 target_include_directories(color_detector PUBLIC

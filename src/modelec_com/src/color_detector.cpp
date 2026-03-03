@@ -87,87 +87,73 @@ namespace Modelec
         cm.start();
 
         if (cm.cameras().empty()) {
-            RCLCPP_ERROR(get_logger(), "No cameras detected");
             error = "No cameras detected";
-            cm.stop();
             return false;
         }
 
-        // Pick the first camera
-        libcamera::Camera *camera = cm.cameras()[0].get();
+        auto camera = cm.cameras()[0]; // shared_ptr<Camera>
         if (!camera->acquire()) {
-            RCLCPP_ERROR(get_logger(), "Failed to acquire camera");
             error = "Failed to acquire camera";
-            cm.stop();
             return false;
         }
 
-        // Configure camera stream
-        libcamera::StreamConfiguration &config = camera->generateConfiguration({libcamera::StreamRole::VideoRecording})[0];
-        config.size.width = 2304;   // Adjust as needed
-        config.size.height = 1296;
-        config.pixelFormat = libcamera::formats::RGB888;
+        // Camera configuration
+        std::unique_ptr<libcamera::CameraConfiguration> config =
+            camera->generateConfiguration({libcamera::StreamRole::VideoRecording});
 
-        if (camera->configure(config) < 0) {
-            RCLCPP_ERROR(get_logger(), "Failed to configure camera");
+        config->at(0).size.width = 2304;
+        config->at(0).size.height = 1296;
+        config->at(0).pixelFormat = libcamera::formats::RGB888;
+
+        if (camera->configure(config.get()) < 0) {
             error = "Camera configuration failed";
             camera->release();
-            cm.stop();
             return false;
         }
 
         libcamera::FrameBufferAllocator allocator(camera);
-        if (allocator.allocate(config.stream()) < 0) {
-            RCLCPP_ERROR(get_logger(), "Failed to allocate buffers");
+        if (allocator.allocate(config->at(0).stream()) < 0) {
             error = "Buffer allocation failed";
             camera->release();
-            cm.stop();
             return false;
         }
 
-        // Create a single request
-        libcamera::Request *request = camera->createRequest();
+        // Create request
+        auto request = camera->createRequest();
         if (!request) {
-            RCLCPP_ERROR(get_logger(), "Failed to create request");
             error = "Request creation failed";
             camera->release();
-            cm.stop();
             return false;
         }
 
-        auto buffers = allocator.buffers(config.stream());
-        request->addBuffer(config.stream(), buffers[0].get());
+        request->addBuffer(config->at(0).stream(), allocator.buffers(config->at(0).stream())[0].get());
 
+        // Start camera
         if (camera->start() < 0) {
-            RCLCPP_ERROR(get_logger(), "Failed to start camera");
             error = "Camera start failed";
             camera->release();
-            cm.stop();
             return false;
         }
 
-        if (camera->queueRequest(request) < 0) {
-            RCLCPP_ERROR(get_logger(), "Failed to queue request");
+        if (camera->queueRequest(request.get()) < 0) {
             error = "Queue request failed";
             camera->stop();
             camera->release();
-            cm.stop();
             return false;
         }
 
-        // Wait for completion
-        camera->waitForIdle();
+        // Wait for request completion
+        while (request->status() != libcamera::Request::RequestComplete) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
 
-        // Convert to OpenCV Mat
-        const libcamera::FrameBuffer &fb = request->buffers().begin()->second;
-        cv::Mat frame(config.size.height, config.size.width, CV_8UC3, fb.planes()[0].mem);
+        const libcamera::FrameBuffer &fb = *request->buffers().begin()->second;
+        cv::Mat frame(config->at(0).size.height, config->at(0).size.width, CV_8UC3, fb.planes()[0].data());
 
         if (frame.empty()) {
-            RCLCPP_WARN(get_logger(), "Captured empty frame from camera");
             error = "Empty frame";
             camera->stop();
             camera->release();
-            cm.stop();
             return false;
         }
 

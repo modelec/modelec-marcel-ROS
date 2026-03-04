@@ -79,7 +79,7 @@ namespace Modelec
     bool ColorDetector::processSnapshot(std::vector<std::string>& colors, std::string& error)
     {
         // Construct a GStreamer pipeline string
-        std::string pipeline = "v4l2src device=/dev/video0 io-mode=2 ! image/jpeg, width=(int)3840, height=(int)2160 !  nvjpegdec ! video/x-raw, format=I420 ! appsink";
+        std::string pipeline = "v4l2src device=/dev/video0 io-mode=2 ! image/jpeg, width=(int)2304, height=(int)1296 !  nvjpegdec ! video/x-raw, format=I420 ! appsink";
 
         // Use the pipeline instead of the device link
         cv::VideoCapture cap(pipeline, cv::CAP_GSTREAMER);

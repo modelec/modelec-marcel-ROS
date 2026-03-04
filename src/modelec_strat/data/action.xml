@@ -22,8 +22,8 @@
             <rotated>
                 <msg id="0" start_angle="1.84" end_angle="2.88" duration_s="2" />
                 <msg id="1" start_angle="2.15" end_angle="1.07" duration_s="2" />
-                <msg id="2" start_angle="0.7" end_angle="0" duration_s="1" />
-                <msg id="3" start_angle="2.7" end_angle="3.4" duration_s="1" />
+                <msg id="2" start_angle="0.7" end_angle="0.1" duration_s="1" />
+                <msg id="3" start_angle="2.7" end_angle="3.3" duration_s="1" />
             </rotated>
         </front>
         <back>
@@ -56,8 +56,8 @@
             <rotated>
                 <msg id="0" start_angle="2.88" end_angle="1.84" duration_s="2" />
                 <msg id="1" start_angle="1.07" end_angle="2.15" duration_s="2" />
-                <msg id="2" start_angle="0" end_angle="0.7" duration_s="2" />
-                <msg id="3" start_angle="3.4" end_angle="2.7" duration_s="2" />
+                <msg id="2" start_angle="0.1" end_angle="0.7" duration_s="2" />
+                <msg id="3" start_angle="3.3" end_angle="2.7" duration_s="2" />
             </rotated>
         </front>
         <back>

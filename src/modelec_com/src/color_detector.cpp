@@ -82,7 +82,7 @@ namespace Modelec
         std::string pipeline = "libcamerasrc ! video/x-raw,width=640,height=480 ! videoconvert ! video/x-raw,format=BGR ! appsink drop=true";
 
         // Use the pipeline instead of the device link
-        cv::VideoCapture cap(0, cv::CAP_GSTREAMER);
+        cv::VideoCapture cap(0);
 
         if (!cap.isOpened())
         {

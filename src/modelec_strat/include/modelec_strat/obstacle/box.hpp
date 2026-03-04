@@ -43,8 +43,8 @@ namespace Modelec
         std::array<Team, 4> colors_ = {
             BLUE,
             BLUE,
-            BLUE,
-            BLUE
+            YELLOW,
+            YELLOW
         };
     };
 }

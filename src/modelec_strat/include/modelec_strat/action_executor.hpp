@@ -68,7 +68,10 @@ namespace Modelec
             bool down;
             bool rotated;
         };
-        std::array<ArmState, 2> arm_pos_;
+        std::array<ArmState, 2> arm_pos_ = {
+            ArmState{false, false},
+            ArmState{false, false},
+        };
 
         std::array<float, 16> servo_value_ = {
             2.91,

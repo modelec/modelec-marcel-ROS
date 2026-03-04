@@ -79,7 +79,7 @@
         <time_to_remove_top_pot>65</time_to_remove_top_pot>
     </pami>
     <static_strat>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
         <missions>
             <mission name="" />
             <mission />

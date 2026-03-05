@@ -22,7 +22,7 @@ namespace Modelec
         }
 
         auto serial_port = Config::get<std::string>("config.usb.action.port", "/dev/ttyUSB0");
-        auto baudrate = Config::get<long>("config.usb.action.baudrate", 115200);
+        auto baudrate = Config::get<int>("config.usb.action.baudrate", 115200);
         auto timed_servo_timer_ms = Config::get<int>("config.timer.action.timed_servo.ms", TIMER_SERVO_TIMED_MS);
 
         RCLCPP_INFO(this->get_logger(), "Starting PCB Odometry Interface on port %s with baudrate %ld", serial_port.c_str(), baudrate);

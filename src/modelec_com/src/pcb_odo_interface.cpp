@@ -111,8 +111,8 @@ namespace Modelec
 
         SetPID("THETA", 14, 0, 0);
         SetPID("POS", 5, 0, 0);
-        SetPID("LEFT", 5, 0, 0);
-        SetPID("RIGHT", 5, 0, 0);
+        SetPID("LEFT", 4, 0, 1);
+        SetPID("RIGHT", 4, 0, 1);
     }
 
     PCBOdoInterface::~PCBOdoInterface()

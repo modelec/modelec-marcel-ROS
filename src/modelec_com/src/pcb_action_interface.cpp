@@ -25,7 +25,7 @@ namespace Modelec
         auto baudrate = Config::get<int>("config.usb.action.baudrate", 115200);
         auto timed_servo_timer_ms = Config::get<int>("config.timer.action.timed_servo.ms", TIMER_SERVO_TIMED_MS);
 
-        RCLCPP_INFO(this->get_logger(), "Starting PCB Odometry Interface on port %s with baudrate %ld", serial_port.c_str(), baudrate);
+        RCLCPP_INFO(this->get_logger(), "Starting PCB Odometry Interface on port %s with baudrate %d", serial_port.c_str(), baudrate);
 
         asc_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
             "action/get/asc", 10,

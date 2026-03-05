@@ -35,11 +35,14 @@ def read_serial(ser, log_lines, log_lock):
                     log_lines.append(f"[Serial Error] {e}")
         time.sleep(0.05)
 
-def curses_main(stdscr, port, baudrate):
+def curses_main(stdscr, port, baudrate, filter_start=None):
     global stop_thread
     curses.curs_set(1)
     stdscr.nodelay(True)
     stdscr.timeout(100)
+
+    if filter_start is None:
+        filter_start = ["SET;POS"]  # default prefix array
 
     log_lines = []
     log_lock = threading.Lock()
@@ -57,24 +60,36 @@ def curses_main(stdscr, port, baudrate):
             stdscr.clear()
             h, w = stdscr.getmaxyx()
 
-            # Split screen horizontally (70% logs, 30% command history)
-            split_x = int(w * 0.7)
+            # --- Split into 3 vertical columns ---
+            col_width = w // 3
+            col1_x = 0
+            col2_x = col_width
+            col3_x = 2 * col_width
+
             log_height = h - 2
 
-            # --- Left panel: logs ---
+            # --- Separate logs into filtered and others ---
             with log_lock:
-                visible_logs = log_lines[-log_height:]
-            for i, line in enumerate(visible_logs):
-                stdscr.addnstr(i, 0, line, split_x - 1)
+                filtered_logs = [line for line in log_lines if any(line.startswith(p) for p in filter_start)]
+                other_logs = [line for line in log_lines if not any(line.startswith(p) for p in filter_start)]
+                visible_filtered = filtered_logs[-log_height:]
+                visible_other = other_logs[-log_height:]
+                visible_history = cmd_history[-log_height:]
 
-            # --- Right panel: command history ---
-            stdscr.vline(0, split_x, "|", log_height)
-            history_start_x = split_x + 2
-            stdscr.addstr(0, history_start_x, "Command History:")
+            # --- Column 1: Filtered serial output ---
+            stdscr.addstr(0, col1_x, f"Filtered ({', '.join(filter_start)}):")
+            for i, line in enumerate(visible_filtered):
+                stdscr.addnstr(i + 1, col1_x, line, col_width - 1)
 
-            visible_history = cmd_history[-(log_height - 2):]
+            # --- Column 2: Other serial output ---
+            stdscr.addstr(0, col2_x, "Other Logs:")
+            for i, line in enumerate(visible_other):
+                stdscr.addnstr(i + 1, col2_x, line, col_width - 1)
+
+            # --- Column 3: Command history ---
+            stdscr.addstr(0, col3_x, "Command History:")
             for i, cmd in enumerate(visible_history):
-                stdscr.addnstr(i + 1, history_start_x, cmd, w - history_start_x - 1)
+                stdscr.addnstr(i + 1, col3_x, cmd, col_width - 1)
 
             # --- Input line ---
             stdscr.addstr(log_height, 0, "-" * (w - 1))

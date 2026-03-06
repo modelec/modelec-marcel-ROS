@@ -109,10 +109,10 @@ namespace Modelec
 
         this->open(baudrate, serial_port, MAX_MESSAGE_LEN);
 
-        SetPID("THETA", 4, 0, 0.5);
-        SetPID("POS", 4, 0, 0.5);
-        SetPID("LEFT", 3, -0.1, 0);
-        SetPID("RIGHT", 6, 0, 0.5);
+        SetPID("THETA", 3, 0, 0.2);
+        SetPID("POS", 3, 0, 0.2);
+        SetPID("LEFT", 2, -0.1, 0);
+        SetPID("RIGHT", 5, 0, 0);
     }
 
     PCBOdoInterface::~PCBOdoInterface()

@@ -19,7 +19,6 @@
 
 #include <sensor_msgs/msg/joy.hpp>
 
-#include "color_detector.hpp"
 #include "modelec_utils/config.hpp"
 
 namespace Modelec

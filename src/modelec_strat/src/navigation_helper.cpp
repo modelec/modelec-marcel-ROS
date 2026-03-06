@@ -373,6 +373,7 @@ namespace Modelec
         auto p = Point(wl[0].x, wl[0].y, wl[0].theta);
         if (RotateTo(p, front))
         {
+            RCLCPP_INFO(node_->get_logger(), "Rotating to angle %f before going to target", p.theta);
             await_rotate_ = true;
 
             send_back_waypoints_.clear();
@@ -384,6 +385,7 @@ namespace Modelec
         }
         else
         {
+            RCLCPP_INFO(node_->get_logger(), "No need to rotate before going to target");
             waypoints_.clear();
 
             for (auto& w : wl)

@@ -42,12 +42,12 @@ def curses_main(stdscr, port, baudrate, filter_start=None):
     stdscr.timeout(100)
 
     if filter_start is None:
-        filter_start = ["SET;POS"]  # default prefix array
+        filter_start = ["SET;POS"]
 
     log_lines = []
     log_lock = threading.Lock()
     cmd_history = []
-    history_index = -1  # For navigating command history
+    history_index = -1
 
     with serial.Serial(port, baudrate, timeout=1) as ser:
         time.sleep(2)

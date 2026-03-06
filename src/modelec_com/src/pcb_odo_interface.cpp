@@ -109,10 +109,10 @@ namespace Modelec
 
         this->open(baudrate, serial_port, MAX_MESSAGE_LEN);
 
-        SetPID("THETA", 3, 0, 0.1);
-        SetPID("POS", 3, 0, 0.1);
-        SetPID("LEFT", 4, -0.1, 0);
-        SetPID("RIGHT", 8, 0, 0);
+        SetPID("THETA", Config::get<PIDData>("config.odo.pid.theta"));
+        SetPID("POS", Config::get<PIDData>("config.odo.pid.pos"));
+        SetPID("LEFT", Config::get<PIDData>("config.odo.pid.left"));
+        SetPID("RIGHT", Config::get<PIDData>("config.odo.pid.right"));
     }
 
     PCBOdoInterface::~PCBOdoInterface()
@@ -434,6 +434,11 @@ namespace Modelec
         }
 
         SendOrder("PID", data);
+    }
+
+    void PCBOdoInterface::SetPID(std::string name, const PIDData& pid_data)
+    {
+        SetPID(name, pid_data.p, pid_data.i, pid_data.d, pid_data.min, pid_data.max);
     }
 
     void PCBOdoInterface::SetMotor(int left, int right)

@@ -19,6 +19,9 @@
 
 #include <sensor_msgs/msg/joy.hpp>
 
+#include "color_detector.hpp"
+#include "modelec_utils/config.hpp"
+
 namespace Modelec
 {
     class PCBOdoInterface : public rclcpp::Node, public SerialListener
@@ -37,9 +40,11 @@ namespace Modelec
 
         struct PIDData
         {
-            float p;
-            float i;
-            float d;
+            float p = 0.0f;
+            float i = 0.0f;
+            float d = 0.0f;
+            std::optional<float> min;
+            std::optional<float> max;
         };
 
     private:
@@ -95,7 +100,26 @@ namespace Modelec
         void GetPID();
         void SetPID(const modelec_interfaces::msg::OdometryPid::SharedPtr msg);
         void SetPID(std::string name, float p, float i, float d, std::optional<float> min = std::nullopt, std::optional<float> max = std::nullopt);
+        void SetPID(std::string name, const PIDData& pid_data);
 
         void SetMotor(int left, int right);
     };
+
+    template<>
+    inline PCBOdoInterface::PIDData
+    Config::get<PCBOdoInterface::PIDData>(
+        const std::string& prefix,
+        const PCBOdoInterface::PIDData& default_value, bool)
+    {
+        PCBOdoInterface::PIDData result;
+        result.p = Config::get<float>(prefix + "@p", default_value.p);
+        result.i = Config::get<float>(prefix + "@i", default_value.i);
+        result.d = Config::get<float>(prefix + "@d", default_value.d);
+        if (Config::has(prefix + "@min"))
+            result.min = Config::get<float>(prefix + "@min");
+        if (Config::has(prefix + "@max"))
+            result.max = Config::get<float>(prefix + "@max");
+        return result;
+    }
+
 } // namespace Modelec

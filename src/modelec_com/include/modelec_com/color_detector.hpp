@@ -51,7 +51,6 @@ namespace Modelec
         std::vector<ColorSetting> color_configs_;
     };
 
-
     template<>
     inline std::vector<ColorSetting>
     Config::get<std::vector<ColorSetting>>(

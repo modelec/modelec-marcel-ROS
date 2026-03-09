@@ -154,10 +154,10 @@
     </ihm>
     <odo>
         <pid>
-            <theta p="8" i="0" d="0" />
-            <pos p="4" i="-0.2" d="0" />
-            <left p="2" i="0" d="0" />
-            <right p="2" i="0" d="0" />
+            <left p="4" i="0.1" d="0" />
+            <right p="4" i="0.1" d="0" />
+            <pos p="6" i="0" d="0.1" />
+            <theta p="10" i="0" d="0.1" />
         </pid>
     </odo>
 </config>

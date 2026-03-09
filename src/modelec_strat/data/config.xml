@@ -79,11 +79,11 @@
         <time_to_remove_top_pot>65</time_to_remove_top_pot>
     </pami>
     <static_strat>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <missions>
-            <mission name="" />
-            <mission />
-            <mission />
+            <mission name="TAKE_MISSION" />
+            <mission name="FREE_MISSION" />
+            <mission name="THERMO_MISSION" />
         </missions>
     </static_strat>
     <factor>

@@ -3,12 +3,12 @@
     <Obstacle id="2" x="1500" y="1775" theta="1.5708" width="1800" height="450" type="estrade"/>
 
     <!-- Box TOP TO BOTTOM    LEFT -->
-    <Obstacle id="10" x="175" y="1200" theta="0" width="200" height="150" type="box" />
+    <!--<Obstacle id="10" x="175" y="1200" theta="0" width="200" height="150" type="box" />
     <Obstacle id="11" x="1150" y="800" theta="1.5708" width="200" height="150" type="box" >
         <possible-angle theta="-1.5708" />
     </Obstacle>
     <Obstacle id="12" x="175" y="400" theta="0" width="200" height="150" type="box" />
-    <Obstacle id="13" x="1100" y="175" theta="1.5708" width="200" height="150" type="box" />
+    <Obstacle id="13" x="1100" y="175" theta="1.5708" width="200" height="150" type="box" />-->
 
     <!-- Box TOP TO BOTTOM    RIGHT -->
     <Obstacle id="20" x="2825" y="1200" theta="3.1415" width="200" height="150" type="box" />

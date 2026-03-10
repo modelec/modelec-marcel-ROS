@@ -132,6 +132,10 @@
         <colors>
             <color name="blue" hue_min="90" hue_max="130" />
             <color name="yellow" hue_min="20" hue_max="40" />
+
+            <color name="red" hue_min="0" hue_max="10" />
+
+            <color name="red" hue_min="160" hue_max="180" />
         </colors>
     </cam>
     <usb>

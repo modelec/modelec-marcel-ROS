@@ -62,8 +62,10 @@ target_link_libraries(color_detector
   modelec_utils::utils
   modelec_utils::config
   ${LIBCAMERA_LIBRARIES}
-  "/usr/local/lib/aarch64-linux-gnu/libcamera.so"
-  "/usr/local/lib/aarch64-linux-gnu/libcamera-base.so"
+        -Wl,--no-as-needed
+        "/usr/local/lib/aarch64-linux-gnu/libcamera.so"
+        "/usr/local/lib/aarch64-linux-gnu/libcamera-base.so"
+        -Wl,--as-needed
   cam2opencv
 )
 

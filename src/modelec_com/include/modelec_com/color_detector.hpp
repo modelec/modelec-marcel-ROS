@@ -11,7 +11,7 @@
 
 #ifdef RPI_BUILD
 #include <libcam2opencv.h>
-#else
+#endif
 
 namespace Modelec
 {

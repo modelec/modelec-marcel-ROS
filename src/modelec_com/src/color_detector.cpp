@@ -1,23 +1,25 @@
 #include <modelec_com/color_detector.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_utils/utils.hpp>
-#include <libcam2opencv.h>
 #include <mutex>
+
+#ifdef RPI_BUILD
+#include <libcam2opencv.h>
+#endif
 
 namespace Modelec
 {
+#ifdef RPI_BUILD
     struct CamCallback : Libcam2OpenCV::Callback {
         cv::Mat* target_frame;
         std::mutex* frame_mutex;
-
         CamCallback(cv::Mat& frame, std::mutex& mtx) : target_frame(&frame), frame_mutex(&mtx) {}
-
         void hasFrame(const cv::Mat &frame, const libcamera::ControlList &) override {
             std::lock_guard<std::mutex> lock(*frame_mutex);
             frame.copyTo(*target_frame);
         }
     };
-
+#endif
     ColorDetector::ColorDetector()
         : Node("color_detector")
     {
@@ -43,11 +45,16 @@ namespace Modelec
             return;
         }
 
+#ifdef RPI_BUILD
+        RCLCPP_INFO(get_logger(), "Starting RPi Libcamera (Full FOV mode)...");
+        camera_.init(2304, 1296); // Forces Full FOV on IMX708
         my_callback_ = std::make_unique<CamCallback>(latest_frame_, frame_mutex_);
         camera_.registerCallback(my_callback_.get());
-
-        RCLCPP_INFO(get_logger(), "Starting libcamera stream...");
         camera_.start();
+#else
+        RCLCPP_INFO(get_logger(), "Starting PC Webcam (OpenCV)...");
+        pc_cap_.open(0);
+#endif
 
         service_ = create_service<std_srvs::srv::Trigger>(
             "action/detect_color",
@@ -90,7 +97,12 @@ namespace Modelec
 
     ColorDetector::~ColorDetector()
     {
+#ifdef RPI_BUILD
         camera_.stop();
+#else
+        if(pc_cap_.isOpened()) pc_cap_.release();
+#endif
+
         if (!headless_)
         {
             cv::destroyAllWindows();
@@ -100,7 +112,7 @@ namespace Modelec
     bool ColorDetector::processSnapshot(std::vector<std::string>& colors, std::string& error)
     {
         cv::Mat frame;
-
+#ifdef RPI_BUILD
         {
             std::lock_guard<std::mutex> lock(frame_mutex_);
             if (latest_frame_.empty()) {
@@ -110,6 +122,10 @@ namespace Modelec
             }
             latest_frame_.copyTo(frame);
         }
+#else
+if(!pc_cap_.isOpened()) { error = "PC Cam not open"; return false; }
+pc_cap_ >> frame;
+#endif
 
         if (frame.empty())
         {

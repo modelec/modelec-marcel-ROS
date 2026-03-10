@@ -6,9 +6,12 @@
 #include <std_msgs/msg/empty.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <modelec_utils/config.hpp>
-#include <libcam2opencv.h>
 #include <mutex>
 #include <memory>
+
+#ifdef RPI_BUILD
+#include <libcam2opencv.h>
+#else
 
 namespace Modelec
 {
@@ -40,13 +43,16 @@ namespace Modelec
 
         std::string generateImagePath() const;
 
-        Libcam2OpenCV camera_;
+        #ifdef RPI_BUILD
+                Libcam2OpenCV camera_;
+                std::unique_ptr<CamCallback> my_callback_;
+        #else
+                cv::VideoCapture pc_cap_;
+        #endif
 
         cv::Mat latest_frame_;
 
         std::mutex frame_mutex_;
-
-        std::unique_ptr<CamCallback> my_callback_;
 
         rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_;
 

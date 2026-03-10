@@ -17,7 +17,7 @@ find_package(fmt)
 
 find_package(OpenCV REQUIRED)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBCAMERA REQUIRED IMPORTED_TARGET libcamera)
+pkg_check_modules(LIBCAMERA REQUIRED libcamera)
 
 include_directories(${LIBCAMERA_INCLUDE_DIRS})
 link_directories(${LIBCAMERA_LIBRARY_DIRS})

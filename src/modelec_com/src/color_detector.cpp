@@ -22,9 +22,6 @@ namespace Modelec
 #endif
     ColorDetector::ColorDetector()
     : Node("color_detector")
-#ifdef RPI_BUILD
-  ,camera_(2304, 1296)
-#endif
     {
         std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
          if (!Config::load(config_path))
@@ -50,9 +47,15 @@ namespace Modelec
 
 #ifdef RPI_BUILD
         RCLCPP_INFO(get_logger(), "Starting RPi Libcamera (Full FOV mode)...");
+        Libcam2OpenCVSettings settings;
+        settings.width = 2304;
+        settings.height = 1296;
+        settings.framerate = 30;
+        settings.cameraIndex = 0;
+
         my_callback_ = std::make_unique<CamCallback>(latest_frame_, frame_mutex_);
         camera_.registerCallback(my_callback_.get());
-        camera_.start();
+        camera_.start(settings);
 #else
         RCLCPP_INFO(get_logger(), "Starting PC Webcam (OpenCV)...");
         pc_cap_.open(0);

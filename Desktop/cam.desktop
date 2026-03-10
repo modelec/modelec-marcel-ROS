@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Cam
+Comment=Cam
+Exec=ros2 run modelec_com color_detector
+Icon=utilities-terminal
+Terminal=true
+Categories=Utility;

@@ -100,8 +100,13 @@ namespace Modelec
 
         cv::Mat frame;
 
-        for(int i = 0; i < 5; i++) {
-            cap >> frame;
+        int retry_count = 0;
+        while (retry_count < 30) {
+            if (cap.read(frame) && !frame.empty()) {
+                break;
+            }
+            rclcpp::sleep_for(std::chrono::milliseconds(30));
+            retry_count++;
         }
 
         RCLCPP_INFO(get_logger(), "Capturing frame from camera");

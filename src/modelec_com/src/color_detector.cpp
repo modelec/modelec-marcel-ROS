@@ -80,11 +80,7 @@ namespace Modelec
     {
         RCLCPP_INFO(get_logger(), "Capturing snapshot from camera at %s", link_.c_str());
         // cv::VideoCapture cap(link_, cv::CAP_V4L2);
-        cv::VideoCapture cap(
-            "v4l2src device=/dev/video0 ! video/x-raw,width=1280,height=720,framerate=30/1 ! videoconvert ! appsink",
-            cv::CAP_GSTREAMER);
-
-        RCLCPP_INFO(get_logger(), "Opened camera stream: %s", cap.isOpened() ? "success" : "failure");
+        cv::VideoCapture cap("/dev/video0", cv::CAP_V4L2);
 
         if (!cap.isOpened())
         {
@@ -95,6 +91,9 @@ namespace Modelec
 
         RCLCPP_INFO(get_logger(), "Setting camera properties");
 
+        cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
+        cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
+        cap.set(cv::CAP_PROP_FPS, 30);
         cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
 
         RCLCPP_INFO(get_logger(), "Camera properties set, warming up camera");

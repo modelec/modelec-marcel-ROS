@@ -80,7 +80,9 @@ namespace Modelec
     {
         RCLCPP_INFO(get_logger(), "Capturing snapshot from camera at %s", link_.c_str());
         // cv::VideoCapture cap(link_, cv::CAP_V4L2);
-        cv::VideoCapture cap(0, cv::CAP_V4L2);
+        std::string pipeline = "libcamerasrc ! video/x-raw, width=1280, height=720 ! videoconvert ! appsink";
+
+        cv::VideoCapture cap(pipeline, cv::CAP_GSTREAMER);
 
         if (!cap.isOpened())
         {

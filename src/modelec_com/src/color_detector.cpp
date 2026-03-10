@@ -81,7 +81,7 @@ namespace Modelec
         RCLCPP_INFO(get_logger(), "Capturing snapshot from camera at %s", link_.c_str());
         // cv::VideoCapture cap(link_, cv::CAP_V4L2);
         cv::VideoCapture cap(
-            "libcamerasrc ! video/x-raw,width=1280,height=720 ! videoconvert ! appsink",
+            "v4l2src device=/dev/video0 ! video/x-raw,width=1280,height=720,framerate=30/1 ! videoconvert ! appsink",
             cv::CAP_GSTREAMER);
 
         RCLCPP_INFO(get_logger(), "Opened camera stream: %s", cap.isOpened() ? "success" : "failure");

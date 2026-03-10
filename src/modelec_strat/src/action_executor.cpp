@@ -5,7 +5,6 @@
 #include "modelec_strat/action/free_action.hpp"
 #include "modelec_strat/action/take_action.hpp"
 #include "modelec_strat/action/toggle_servo_action.hpp"
-#include "modelec_strat/action/look_on_action.hpp"
 #include "modelec_strat/action/thermo_action.hpp"
 #include "modelec_utils/utils.hpp"
 
@@ -228,10 +227,18 @@ namespace Modelec
 
                 RCLCPP_DEBUG(node_->get_logger(), "Color detection succeeded: %s", res[1].c_str());
 
-                if (box_obstacles_[cam_side_] != nullptr) {
-                    box_obstacles_[cam_side_]->ParseColor(res[1]);
+                auto color = split(res[1], ';');
+
+                if (box_obstacles_[BaseAction::FRONT] != nullptr) {
+                    box_obstacles_[BaseAction::FRONT]->ParseColor(std::vector(color.begin(), color.begin() + 4));
                 } else {
-                    RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box in the cam side");
+                    RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box obstacle found to update");
+                }
+
+                if (box_obstacles_[BaseAction::BACK] != nullptr) {
+                    box_obstacles_[BaseAction::BACK]->ParseColor(std::vector(color.begin() + 4, color.begin() + 8));
+                } else {
+                    RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box obstacle found to update");
                 }
             });
 
@@ -470,22 +477,6 @@ namespace Modelec
         if (thermo_state_[side] != deploy || force)
         {
             auto action = std::make_shared<ThermoAction>(shared_from_this(), side, deploy);
-            action_.push(action);
-            if (action_done_)
-            {
-                step_running_ = 0;
-            }
-            action_done_ = false;
-
-            Update();
-        }
-    }
-
-    void ActionExecutor::LookOn(BaseAction::Side side, bool force)
-    {
-        if (cam_side_ != side || force)
-        {
-            auto action = std::make_shared<LookOnAction>(shared_from_this(), side);
             action_.push(action);
             if (action_done_)
             {

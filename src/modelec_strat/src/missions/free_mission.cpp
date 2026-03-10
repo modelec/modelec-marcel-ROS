@@ -71,8 +71,6 @@ namespace Modelec {
                     }
                 }
 
-                action_executor_->LookOn(BaseAction::Side::CENTER);
-
                 go_timeout_ = node_->now();
             }
             break;

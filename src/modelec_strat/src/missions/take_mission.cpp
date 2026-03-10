@@ -111,7 +111,6 @@ namespace Modelec {
         case UP:
             {
                 action_executor_->Up(side_);
-                action_executor_->LookOn(side_);
                 deploy_time_ = node_->now();
             }
             break;

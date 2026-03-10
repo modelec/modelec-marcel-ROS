@@ -58,7 +58,7 @@ namespace Modelec
         camera_.start(settings);
 #else
         RCLCPP_INFO(get_logger(), "Starting PC Webcam (OpenCV)...");
-        pc_cap_.open(0);
+        pc_cap_.open(link_);
 #endif
 
         service_ = create_service<std_srvs::srv::Trigger>(

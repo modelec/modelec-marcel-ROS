@@ -55,8 +55,6 @@ namespace Modelec
 
         void ActivateThermo(BaseAction::Side side, bool deploy, bool force = false);
 
-        void LookOn(BaseAction::Side side, bool force = false);
-
         void ActionFinished(const std::shared_ptr<BaseAction>& action);
 
         std::array<std::shared_ptr<BoxObstacle>, 2> box_obstacles_;
@@ -88,10 +86,6 @@ namespace Modelec
             {BaseAction::LEFT, false},
             {BaseAction::RIGHT, false},
         };
-
-        BaseAction::Side cam_side_ = BaseAction::Side::CENTER;
-
-        bool looking_on_front_ = true;
 
         bool IsEmpty() const;
 

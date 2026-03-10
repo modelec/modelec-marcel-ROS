@@ -2,7 +2,7 @@
 Type=Application
 Name=Cam
 Comment=Cam
-Exec=ros2 run modelec_com color_detector
+Exec=/home/modelec/Modelec-ROS2/start_cam_ros2.sh
 Icon=utilities-terminal
 Terminal=true
 Categories=Utility;

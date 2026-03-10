@@ -14,7 +14,7 @@ namespace Modelec
 
         void hasFrame(const cv::Mat &frame, const libcamera::ControlList &) override {
             std::lock_guard<std::mutex> lock(*frame_mutex);
-            frame.copyTo(*target_frame); // Store the latest frame
+            frame.copyTo(*target_frame);
         }
     };
 
@@ -136,6 +136,8 @@ namespace Modelec
             cv::imwrite(path, frame);
             RCLCPP_DEBUG(get_logger(), "Saved snapshot to %s", path.c_str());
         }
+
+        RCLCPP_INFO(get_logger(), "Color detection successful: %s", join(colors, ", ").c_str());
 
         return true;
     }

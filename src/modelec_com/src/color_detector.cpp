@@ -137,8 +137,6 @@ namespace Modelec
             RCLCPP_INFO(get_logger(), "Saved snapshot to %s", path.c_str());
         }
 
-        RCLCPP_INFO(get_logger(), "Color detection successful: %s", join(colors, ", ").c_str());
-
         return true;
     }
 

@@ -124,10 +124,10 @@
         <!--<link>http://192.168.1.21:8080/video</link>-->
         <headless>true</headless>
         <rois>
-            <roi x="100" y="300" w="50" h="50" />
+            <roi x="10" y="300" w="50" h="50" />
             <roi x="300" y="300" w="50" h="50" />
-            <roi x="600" y="300" w="50" h="50" />
-            <roi x="900" y="300" w="50" h="50" />
+            <roi x="500" y="300" w="50" h="50" />
+            <roi x="700" y="300" w="50" h="50" />
         </rois>
         <colors>
             <color name="blue" hue_min="90" hue_max="130" />

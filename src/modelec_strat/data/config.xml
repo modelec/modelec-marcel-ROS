@@ -117,7 +117,7 @@
     <cam>
         <save_to_file>
             <enabled>true</enabled>
-            <directory>/home/modelec/Modelec-ROS2/cam/</directory>
+            <directory>./cam/</directory>
         </save_to_file>
         <enabled>true</enabled>
         <link>/dev/video0</link>

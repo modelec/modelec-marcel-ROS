@@ -6,9 +6,14 @@
 #include <std_msgs/msg/empty.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <modelec_utils/config.hpp>
+#include <libcam2opencv.h>
+#include <mutex>
+#include <memory>
 
 namespace Modelec
 {
+    struct CamCallback;
+
     struct ColorSetting
     {
         std::string name;
@@ -34,6 +39,14 @@ namespace Modelec
         std::string classify(const cv::Vec3d& hsv_roi) const;
 
         std::string generateImagePath() const;
+
+        Libcam2OpenCV camera_;
+
+        cv::Mat latest_frame_;
+
+        std::mutex frame_mutex_;
+
+        std::unique_ptr<CamCallback> my_callback_;
 
         rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_;
 

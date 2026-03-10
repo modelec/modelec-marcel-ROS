@@ -1,9 +1,23 @@
 #include <modelec_com/color_detector.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_utils/utils.hpp>
+#include <libcam2opencv.h>
+#include <mutex>
 
 namespace Modelec
 {
+    struct CamCallback : Libcam2OpenCV::Callback {
+        cv::Mat* target_frame;
+        std::mutex* frame_mutex;
+
+        CamCallback(cv::Mat& frame, std::mutex& mtx) : target_frame(&frame), frame_mutex(&mtx) {}
+
+        void hasFrame(const cv::Mat &frame, const libcamera::ControlList &) override {
+            std::lock_guard<std::mutex> lock(*frame_mutex);
+            frame.copyTo(*target_frame); // Store the latest frame
+        }
+    };
+
     ColorDetector::ColorDetector()
         : Node("color_detector")
     {
@@ -28,6 +42,12 @@ namespace Modelec
             rclcpp::shutdown();
             return;
         }
+
+        my_callback_ = std::make_unique<CamCallback>(latest_frame_, frame_mutex_);
+        camera_.registerCallback(my_callback_.get());
+
+        RCLCPP_INFO(get_logger(), "Starting libcamera stream...");
+        camera_.start();
 
         service_ = create_service<std_srvs::srv::Trigger>(
             "action/detect_color",
@@ -70,6 +90,7 @@ namespace Modelec
 
     ColorDetector::~ColorDetector()
     {
+        camera_.stop();
         if (!headless_)
         {
             cv::destroyAllWindows();
@@ -78,40 +99,17 @@ namespace Modelec
 
     bool ColorDetector::processSnapshot(std::vector<std::string>& colors, std::string& error)
     {
-        RCLCPP_INFO(get_logger(), "Capturing snapshot from camera at %s", link_.c_str());
-        // cv::VideoCapture cap(link_, cv::CAP_V4L2);
-        std::string pipeline = "libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/imx708@1a ! video/x-raw,width=640,height=480,framerate=10/1,format=RGBx ! videoconvert ! videoscale ! video/x-raw,width=640,height=480,format=BGR ! appsink";
-
-        cv::VideoCapture cap(pipeline, cv::CAP_GSTREAMER);
-
-        if (!cap.isOpened())
-        {
-            RCLCPP_ERROR(get_logger(), "Failed to open camera at %s", link_.c_str());
-            error = "Failed to open camera";
-            return false;
-        }
-
-        RCLCPP_INFO(get_logger(), "Setting camera properties");
-
-        cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
-        cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
-        cap.set(cv::CAP_PROP_FPS, 30);
-        cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
-
-        RCLCPP_INFO(get_logger(), "Camera properties set, warming up camera");
-
         cv::Mat frame;
 
-        int retry_count = 0;
-        while (retry_count < 30) {
-            if (cap.read(frame) && !frame.empty()) {
-                break;
+        {
+            std::lock_guard<std::mutex> lock(frame_mutex_);
+            if (latest_frame_.empty()) {
+                RCLCPP_WARN(get_logger(), "No frame received from libcamera yet");
+                error = "Empty frame";
+                return false;
             }
-            rclcpp::sleep_for(std::chrono::milliseconds(30));
-            retry_count++;
+            latest_frame_.copyTo(frame);
         }
-
-        RCLCPP_INFO(get_logger(), "Capturing frame from camera");
 
         if (frame.empty())
         {
@@ -120,15 +118,11 @@ namespace Modelec
             return false;
         }
 
-        RCLCPP_INFO(get_logger(), "Frame captured, processing");
-
         cv::Mat hsv;
         cv::GaussianBlur(frame, frame, cv::Size(5, 5), 0);
         cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
 
         colors = classifyROIs(hsv, frame);
-
-        RCLCPP_INFO(get_logger(), "Color classification completed: %s", join(colors, ", ").c_str());
 
         if (!headless_)
         {

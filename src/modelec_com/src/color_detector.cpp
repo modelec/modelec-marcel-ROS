@@ -134,7 +134,7 @@ namespace Modelec
         {
             std::string path = save_directory_ + generateImagePath();
             cv::imwrite(path, frame);
-            RCLCPP_DEBUG(get_logger(), "Saved snapshot to %s", path.c_str());
+            RCLCPP_INFO(get_logger(), "Saved snapshot to %s", path.c_str());
         }
 
         RCLCPP_INFO(get_logger(), "Color detection successful: %s", join(colors, ", ").c_str());

@@ -95,6 +95,8 @@ namespace Modelec
         if (!headless_)
         {
             cv::namedWindow("color_detector", cv::WINDOW_NORMAL);
+
+            cv::setWindowProperty("color_detector", cv::WND_PROP_AUTOSIZE, cv::WINDOW_GUI_EXPANDED);
         }
 
         RCLCPP_INFO(get_logger(), "Color detector service ready");

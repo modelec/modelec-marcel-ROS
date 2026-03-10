@@ -84,6 +84,8 @@ namespace Modelec
             "libcamerasrc ! video/x-raw,width=1280,height=720 ! videoconvert ! appsink",
             cv::CAP_GSTREAMER);
 
+        RCLCPP_INFO(get_logger(), "Opened camera stream: %s", cap.isOpened() ? "success" : "failure");
+
         if (!cap.isOpened())
         {
             RCLCPP_ERROR(get_logger(), "Failed to open camera at %s", link_.c_str());
@@ -91,13 +93,19 @@ namespace Modelec
             return false;
         }
 
+        RCLCPP_INFO(get_logger(), "Setting camera properties");
+
         cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
+
+        RCLCPP_INFO(get_logger(), "Camera properties set, warming up camera");
 
         cv::Mat frame;
 
         for(int i = 0; i < 5; i++) {
             cap >> frame;
         }
+
+        RCLCPP_INFO(get_logger(), "Capturing frame from camera");
 
         if (frame.empty())
         {
@@ -106,11 +114,15 @@ namespace Modelec
             return false;
         }
 
+        RCLCPP_INFO(get_logger(), "Frame captured, processing");
+
         cv::Mat hsv;
         cv::GaussianBlur(frame, frame, cv::Size(5, 5), 0);
         cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
 
         colors = classifyROIs(hsv, frame);
+
+        RCLCPP_INFO(get_logger(), "Color classification completed: %s", join(colors, ", ").c_str());
 
         if (!headless_)
         {

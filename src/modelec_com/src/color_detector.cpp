@@ -137,8 +137,6 @@ namespace Modelec
             RCLCPP_DEBUG(get_logger(), "Saved snapshot to %s", path.c_str());
         }
 
-        cap.release();
-
         return true;
     }
 

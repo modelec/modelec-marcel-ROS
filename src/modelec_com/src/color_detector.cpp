@@ -21,7 +21,10 @@ namespace Modelec
     };
 #endif
     ColorDetector::ColorDetector()
-        : Node("color_detector")
+    : Node("color_detector")
+#ifdef RPI_BUILD
+  ,camera_(2304, 1296)
+#endif
     {
         std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
          if (!Config::load(config_path))
@@ -47,7 +50,6 @@ namespace Modelec
 
 #ifdef RPI_BUILD
         RCLCPP_INFO(get_logger(), "Starting RPi Libcamera (Full FOV mode)...");
-        camera_.init(2304, 1296); // Forces Full FOV on IMX708
         my_callback_ = std::make_unique<CamCallback>(latest_frame_, frame_mutex_);
         camera_.registerCallback(my_callback_.get());
         camera_.start();

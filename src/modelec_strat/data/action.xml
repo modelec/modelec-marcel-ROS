@@ -8,6 +8,17 @@
         <servo id="5" angle="1" />
         <servo id="6" angle="1" />
         <servo id="7" angle="1" />
+        <!--<servo id="8" angle="3.1" />-->
+        <!--<servo id="9" angle="0.96" />-->
+        <!--<servo id="10" angle="1" />-->
+        <!--<servo id="11" angle="1" />-->
+        <!--<servo id="12" angle="1" />-->
+        <!--<servo id="13" angle="1" />-->
+        <!--<servo id="14" angle="1" />-->
+        <!--<servo id="15" angle="1" />-->
+        <!--<servo id="16" angle="1" />-->
+        <!--<servo id="17" angle="1" />-->
+        <!--<servo id="18" angle="1" />-->
     </init>
     <down>
         <front>

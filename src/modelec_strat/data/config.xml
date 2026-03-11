@@ -122,7 +122,7 @@
         <enabled>true</enabled>
         <!--<link>/dev/video0</link>-->
         <link>http://192.168.1.10:8080/video</link>
-        <headless>false</headless>
+        <headless>true</headless>
         <rois>
             <roi x="400" y="200" w="150" h="150" />
             <roi x="400" y="500" w="150" h="150" />

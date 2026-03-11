@@ -1,6 +1,7 @@
 #include <modelec_strat/navigation_helper.hpp>
 #include <utility>
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <modelec_utils/config.hpp>
 
 namespace Modelec
 {
@@ -9,41 +10,9 @@ namespace Modelec
 
     NavigationHelper::NavigationHelper(const rclcpp::Node::SharedPtr& node) : node_(node)
     {
-        node_->declare_parameter("factor_close_enemy", -0.5);
-        node_->declare_parameter("factor.theta", 20.0);
-        node_->declare_parameter("enemy.detection.min_emergency_distance_mm", 390);
-
-        factor_close_enemy_ = node_->get_parameter("factor_close_enemy").as_double();
-        factor_theta_ = node_->get_parameter("factor.theta").as_double();
-        enemy_emergency_distance_ = node_->get_parameter("enemy.detection.min_emergency_distance_mm").as_int();
-
-        node_->declare_parameter("home.yellow.x", 0);
-        node_->declare_parameter("home.yellow.y", 0);
-        node_->declare_parameter("home.yellow.theta", 0.0);
-        node_->declare_parameter("home.blue.x", 0);
-        node_->declare_parameter("home.blue.y", 0);
-        node_->declare_parameter("home.blue.theta", 0.0);
-
-        node_->declare_parameter("thermo.yellow.start.x", 0);
-        node_->declare_parameter("thermo.yellow.start.y", 0);
-        node_->declare_parameter("thermo.yellow.start.theta", 0.0);
-        node_->declare_parameter("thermo.yellow.finish.x", 0);
-        node_->declare_parameter("thermo.yellow.finish.y", 0);
-        node_->declare_parameter("thermo.yellow.finish.theta", 0.0);
-
-        node_->declare_parameter("thermo.blue.start.x", 0);
-        node_->declare_parameter("thermo.blue.start.y", 0);
-        node_->declare_parameter("thermo.blue.start.theta", 0.0);
-        node_->declare_parameter("thermo.blue.finish.x", 0);
-        node_->declare_parameter("thermo.blue.finish.y", 0);
-        node_->declare_parameter("thermo.blue.finish.theta", 0.0);
-
-        node_->declare_parameter("spawn.yellow_top.x", 0);
-        node_->declare_parameter("spawn.yellow_top.y", 0);
-        node_->declare_parameter("spawn.yellow_top.theta", 0.0);
-        node_->declare_parameter("spawn.blue_top.x", 0);
-        node_->declare_parameter("spawn.blue_top.y", 0);
-        node_->declare_parameter("spawn.blue_top.theta", 0.0);
+        factor_close_enemy_ = Config::get<float>("config.factor.close_enemy", 1.0f);
+        factor_theta_ = Config::get<float>("config.factor.theta", 1.0f);
+        enemy_emergency_distance_ = Config::get<int>("config.enemy.detection.min_emergency_distance_mm", 300);
 
         pathfinding_ = std::make_shared<Pathfinding>(node);
 
@@ -90,13 +59,6 @@ namespace Modelec
 
         start_odo_pub_ = node_->create_publisher<std_msgs::msg::Bool>("odometry/start", 10);
 
-        std::string deposite_zone_path = ament_index_cpp::get_package_share_directory("modelec_strat") +
-            "/data/deposite_zone.xml";
-        if (!LoadDepositeZoneFromXML(deposite_zone_path))
-        {
-            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacles from XML");
-        }
-
         spawn_pub_ = node_->create_publisher<modelec_interfaces::msg::Spawn>("nav/spawn", 10);
 
         ask_spawn_srv_ = node->create_service<std_srvs::srv::Empty>(
@@ -130,6 +92,8 @@ namespace Modelec
 
         odo_ask_waypoint_pub_ = node_->create_publisher<std_msgs::msg::Empty>(
             "odometry/ask_active_waypoint", 30);
+
+        LoadDepositeZoneFromXML();
     }
 
     void NavigationHelper::ReInit()
@@ -333,7 +297,7 @@ namespace Modelec
     {
         double angle = std::atan2(pos.y - current_pos_->y, pos.x - current_pos_->x);
 
-        if (Point::angleDiff(angle, (current_pos_->theta + (front ? 0 : M_PI))) > M_PI / 4)
+        if (std::abs(Point::angleDiff(angle, (current_pos_->theta + (front ? 0 : M_PI)))) > M_PI / 4)
         {
             Rotate(angle);
             return true;
@@ -505,32 +469,14 @@ namespace Modelec
         return current_pos_;
     }
 
-    bool NavigationHelper::LoadDepositeZoneFromXML(const std::string& filename)
+    void NavigationHelper::LoadDepositeZoneFromXML()
     {
-        tinyxml2::XMLDocument doc;
-        if (doc.LoadFile(filename.c_str()) != tinyxml2::XML_SUCCESS)
+        for (size_t i = 0; i < Config::count("Map.DepositeZone"); ++i)
         {
-            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacle XML file: %s", filename.c_str());
-            return false;
+            deposite_zones_.push_back(std::make_shared<DepositeZone>(i));
         }
 
-        tinyxml2::XMLElement* root = doc.FirstChildElement("Map");
-        if (!root)
-        {
-            RCLCPP_ERROR(node_->get_logger(), "No <Obstacles> root element in file");
-            return false;
-        }
-
-        for (tinyxml2::XMLElement* elem = root->FirstChildElement("DepositeZone");
-             elem != nullptr;
-             elem = elem->NextSiblingElement("DepositeZone"))
-        {
-            std::shared_ptr<DepositeZone> obs = std::make_shared<DepositeZone>(elem);
-            deposite_zones_[obs->GetId()] = obs;
-        }
-
-        RCLCPP_INFO(node_->get_logger(), "Loaded %zu zone from XML", deposite_zones_.size());
-        return true;
+        RCLCPP_INFO(node_->get_logger(), "Loaded %zu deposite zones from XML", deposite_zones_.size());
     }
 
     std::shared_ptr<DepositeZone> NavigationHelper::GetClosestDepositeZone(
@@ -541,10 +487,10 @@ namespace Modelec
         auto posPoint = Point(pos->x, pos->y, pos->theta);
         auto enemyPos = Point(last_enemy_pos_.x, last_enemy_pos_.y, last_enemy_pos_.theta);
 
-        for (const auto& [id, zone] : deposite_zones_)
+        for (const auto& zone : deposite_zones_)
         {
             if (blacklistedId.end() == std::find(
-                blacklistedId.begin(), blacklistedId.end(), id)
+                blacklistedId.begin(), blacklistedId.end(), zone->GetId())
                 && (!only_free || !zone->Validate()))
             {
                 auto zonePoint = zone->GetPosition();
@@ -567,29 +513,29 @@ namespace Modelec
     {
         PosMsg::SharedPtr home = std::make_shared<PosMsg>();
 
-        std::string prefix = (team_id_ == YELLOW) ? "home.yellow" : "home.blue";
+        std::string prefix = (team_id_ == YELLOW) ? "config.home.yellow" : "config.home.blue";
 
-        home->x = node_->get_parameter(prefix + ".x").as_int();
-        home->y = node_->get_parameter(prefix + ".y").as_int();
-        home->theta = node_->get_parameter(prefix + ".theta").as_double();
+        home->x = Config::get<int>(prefix + "@x");
+        home->y = Config::get<int>(prefix + "@y");
+        home->theta = Config::get<double>(prefix + "@theta");
 
         return home;
     }
 
     std::array<Point, 2> NavigationHelper::GetThermoPositions()
     {
-        std::string prefix = (team_id_ == YELLOW) ? "thermo.yellow" : "thermo.blue";
+        std::string prefix = (team_id_ == YELLOW) ? "config.thermo.yellow" : "config.thermo.blue";
 
         Point start(
-            node_->get_parameter(prefix + ".start.x").as_int(),
-            node_->get_parameter(prefix + ".start.y").as_int(),
-            node_->get_parameter(prefix + ".start.theta").as_double()
+            Config::get<int>(prefix + ".start@x"),
+            Config::get<int>(prefix + ".start@y"),
+            Config::get<double>(prefix + ".start@theta")
         );
 
         Point finish(
-            node_->get_parameter(prefix + ".finish.x").as_int(),
-            node_->get_parameter(prefix + ".finish.y").as_int(),
-            node_->get_parameter(prefix + ".finish.theta").as_double()
+            Config::get<int>(prefix + ".finish@x"),
+            Config::get<int>(prefix + ".finish@y"),
+            Config::get<double>(prefix + ".finish@theta")
         );
 
         return {start, finish};
@@ -653,13 +599,13 @@ namespace Modelec
         pathfinding_->OnEnemyPositionLongTime(msg);
 
         Point enemy_pos(msg->x, msg->y, msg->theta);
-        for (auto& [id, zone] : deposite_zones_)
+        for (auto& zone : deposite_zones_)
         {
             auto zonePos = zone->GetPosition();
             if (Point::distance(enemy_pos, zonePos) < (zone->GetWidth() / 2) + pathfinding_->enemy_margin_mm_)
             {
                 std::shared_ptr<Obstacle> obs = std::make_shared<Obstacle>(
-                    id, zonePos.x, zonePos.y, zonePos.theta, zone->GetWidth(), zone->GetHeight(), "enemy-zone");
+                    zone->GetId(), zonePos.x, zonePos.y, zonePos.theta, zone->GetWidth(), zone->GetHeight(), "enemy-zone");
                 pathfinding_->AddObstacle(obs);
             }
         }
@@ -804,15 +750,15 @@ namespace Modelec
     void NavigationHelper::SetupSpawn()
     {
         spawn_yellow_["top"] = Point(
-            node_->get_parameter("spawn.yellow_top.x").as_int(),
-            node_->get_parameter("spawn.yellow_top.y").as_int(),
-            node_->get_parameter("spawn.yellow_top.theta").as_double()
+            Config::get<int>("config.spawn.yellow.top@x"),
+            Config::get<int>("config.spawn.yellow.top@y"),
+            Config::get<double>("config.spawn.yellow.top@theta")
         );
 
         spawn_blue_["top"] = Point(
-            node_->get_parameter("spawn.blue_top.x").as_int(),
-            node_->get_parameter("spawn.blue_top.y").as_int(),
-            node_->get_parameter("spawn.blue_top.theta").as_double()
+            Config::get<int>("config.spawn.blue.top@x"),
+            Config::get<int>("config.spawn.blue.top@y"),
+            Config::get<double>("config.spawn.blue.top@theta")
         );
     }
 }

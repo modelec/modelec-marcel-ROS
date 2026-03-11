@@ -73,14 +73,14 @@ namespace Modelec
 
         //void SetStartAndGoal(const PosMsg::SharedPtr& start, const PosMsg::SharedPtr& goal);
 
-        bool LoadObstaclesFromXML(const std::string& filename);
+        void LoadObstaclesFromXML();
 
         void SetCurrentPos(const PosMsg::SharedPtr& pos);
 
         [[nodiscard]] std::shared_ptr<Obstacle> GetObstacle(int id) const;
 
-        std::map<int, std::shared_ptr<Obstacle>> GetObstacles() const {
-            return obstacle_map_;
+        std::vector<std::shared_ptr<Obstacle>> GetObstacles() const {
+            return obstacles_;
         }
 
         void RemoveObstacle(int id);
@@ -114,7 +114,7 @@ namespace Modelec
 
         std::vector<std::vector<int>> grid_;
 
-        std::map<int, std::shared_ptr<Obstacle>> obstacle_map_;
+        std::vector<std::shared_ptr<Obstacle>> obstacles_;
 
         PosMsg::SharedPtr current_start_;
         PosMsg::SharedPtr current_goal_;

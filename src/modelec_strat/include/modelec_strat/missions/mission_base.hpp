@@ -2,7 +2,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <string>
-
+#include <queue>
 
 namespace Modelec
 {
@@ -18,14 +18,19 @@ namespace Modelec
     class Mission
     {
     public:
+        Mission(MissionStatus status = MissionStatus::READY);
         virtual ~Mission() = default;
-        virtual void Start(rclcpp::Node::SharedPtr node) = 0;
-        virtual void Update() = 0;
+
+        virtual void Start(const rclcpp::Node::SharedPtr& node);
+        virtual bool Update() = 0;
         virtual void Clear() = 0;
-        virtual MissionStatus GetStatus() const = 0;
+
+        virtual MissionStatus GetStatus() const;
         virtual std::string GetName() const = 0;
 
     protected:
         std::queue<int> steps_;
+        rclcpp::Node::SharedPtr node_;
+        MissionStatus status_;
     };
 }

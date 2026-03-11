@@ -3,7 +3,7 @@
         <size>
             <width_mm>300</width_mm>
             <length_mm>300</length_mm>
-            <margin_mm>50</margin_mm>
+            <margin_mm>75</margin_mm>
         </size>
         <detection>
             <min_move_threshold_mm>50</min_move_threshold_mm>
@@ -12,21 +12,20 @@
             <min_emergency_distance_mm>300</min_emergency_distance_mm>
             <margin_detection_table_mm>50</margin_detection_table_mm>
         </detection>
-        <factor_close_enemy>-2</factor_close_enemy>
     </enemy>
 
     <robot>
         <size>
             <width_mm>300</width_mm>
             <length_mm>300</length_mm>
-            <margin_mm>100</margin_mm>
+            <margin_mm>20</margin_mm>
         </size>
     </robot>
 
     <map>
         <size>
-            <grid_width>600</grid_width>
-            <grid_height>400</grid_height>
+            <grid_width>3000</grid_width>
+            <grid_height>2000</grid_height>
 
             <map_width_mm>3000</map_width_mm>
             <map_height_mm>2000</map_height_mm>
@@ -50,18 +49,61 @@
         <height_mm>450</height_mm>
     </spawn>
     <mission_score>
+        <go_home>10</go_home>
     </mission_score>
+    <mission>
+        <action>
+            <timeout>
+                <s>10</s>
+            </timeout>
+        </action>
+        <min_time>
+            <min_time_duration>
+                <s>0.1</s>
+            </min_time_duration>
+        </min_time>
+        <move>
+            <min_ask_waypoint>
+                <s>3</s>
+            </min_ask_waypoint>
+            <ask_waypoint_interval>
+                <s>2</s>
+            </ask_waypoint_interval>
+            <go_timeout>
+                <s>10</s>
+            </go_timeout>
+        </move>
+    </mission>
     <pami>
         <time_to_put_zone>77</time_to_put_zone>
         <time_to_remove_top_pot>65</time_to_remove_top_pot>
     </pami>
-    <static_strat>false</static_strat>
+    <static_strat>
+        <enabled>false</enabled>
+        <missions>
+            <mission name="TAKE_MISSION" />
+            <mission name="FREE_MISSION" />
+            <mission name="THERMO_MISSION" />
+        </missions>
+    </static_strat>
     <factor>
         <theta>20</theta>
         <obs>0.6</obs>
         <thermo>0.7</thermo>
+        <close_enemy>-2</close_enemy>
     </factor>
-    <timer_period_ms>20</timer_period_ms>
+    <timer>
+        <strat>
+            <ms>20</ms>
+        </strat>
+        <action>
+            <timed_servo>
+                <ms>
+                    10
+                </ms>
+            </timed_servo>
+        </action>
+    </timer>
     <thermo>
         <yellow>
             <start x="200" y="175" theta="0" />
@@ -75,21 +117,56 @@
     <cam>
         <save_to_file>
             <enabled>true</enabled>
-            <path>./cam/</path>
+            <directory>./cam/</directory>
         </save_to_file>
         <enabled>true</enabled>
         <!--<link>/dev/video0</link>-->
-        <link>http://192.168.1.21:8080/video</link>
-        <headless>true</headless>
+        <link>http://192.168.1.10:8080/video</link>
+        <headless>false</headless>
         <rois>
-            <roi x="300" y="700" w="50" h="50" />
-            <roi x="700" y="700" w="50" h="50" />
-            <roi x="1200" y="700" w="50" h="50" />
-            <roi x="1500" y="700" w="50" h="50" />
+            <roi x="400" y="200" w="150" h="150" />
+            <roi x="400" y="500" w="150" h="150" />
+            <roi x="400" y="700" w="150" h="150" />
+            <roi x="400" y="1000" w="150" h="150" />
+
+            <roi x="1900" y="200" w="150" h="150" />
+            <roi x="1900" y="500" w="150" h="150" />
+            <roi x="1900" y="700" w="150" h="150" />
+            <roi x="1900" y="1000" w="150" h="150" />
         </rois>
         <colors>
             <color name="blue" hue_min="90" hue_max="130" />
             <color name="yellow" hue_min="20" hue_max="40" />
+
+            <color name="red" hue_min="0" hue_max="10" />
+
+            <color name="red" hue_min="160" hue_max="180" />
         </colors>
     </cam>
+    <usb>
+        <odo>
+            <port>/dev/USB_ODO</port>
+            <baudrate>115200</baudrate>
+        </odo>
+        <action>
+            <port>/dev/USB_ACTION</port>
+            <baudrate>115200</baudrate>
+        </action>
+        <timeout_ms>300</timeout_ms>
+        <attempt>5</attempt>
+    </usb>
+    <ihm>
+        <sound>
+            <enabled>false</enabled>
+            <test path=":/sound/test.mp3" />
+        </sound>
+    </ihm>
+    <odo>
+        <pid>
+            <left p="4" i="0.1" d="0" />
+            <right p="4" i="0.1" d="0" />
+            <pos p="6" i="0" d="0.1" />
+            <theta p="10" i="0" d="0.1" />
+        </pid>
+    </odo>
 </config>

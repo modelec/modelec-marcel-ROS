@@ -4,19 +4,17 @@
 
 namespace Modelec {
     TakeMission::TakeMission(const std::shared_ptr<NavigationHelper>& nav,
-        const std::shared_ptr<ActionExecutor>& action_executor,
-        BaseAction::Side side)
-     : side_(side), status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
+        const std::shared_ptr<ActionExecutor>& action_executor, BaseAction::Side side) :
+    Mission(MissionStatus::READY), ActionMission(action_executor), MoveMission(nav),
+    side_(side)
     {
     }
 
-    void TakeMission::Start(rclcpp::Node::SharedPtr node)
+    void TakeMission::Start(const rclcpp::Node::SharedPtr& node)
     {
-        node_ = node;
-
-        go_timeout_ = node_->now();
-        deploy_time_ = node_->now();
-        last_ask_waypoint_time_ = node_->now();
+        ActionMission::Start(node);
+        MoveMission::Start(node);
+        MinTimeMission::Start(node);
 
         status_ = MissionStatus::RUNNING;
 
@@ -31,37 +29,11 @@ namespace Modelec {
         steps_.push(DONE);
     }
 
-    void TakeMission::Update()
+    bool TakeMission::Update()
     {
-        if (!action_executor_->IsActionDone())
+        if (!ActionMission::Update() || !MoveMission::Update() || !MinTimeMission::Update())
         {
-            return;
-        }
-
-        if (!nav_->HasArrived())
-        {
-            if ((node_->now() - go_timeout_).seconds() < 2 && (node_->now() - last_ask_waypoint_time_).seconds() > 1)
-            {
-                nav_->AskWaypoint();
-                last_ask_waypoint_time_ = node_->now();
-                return;
-            }
-            if ((node_->now() - go_timeout_).seconds() < 10)
-            {
-                return;
-            }
-        }
-
-        if (min_time_.has_value())
-        {
-            if ((node_->now() - min_time_.value()).seconds() < 0.1)
-            {
-                return;
-            }
-            else
-            {
-                min_time_.reset();
-            }
+            return false;
         }
 
         auto step_ = steps_.front();
@@ -85,6 +57,8 @@ namespace Modelec {
                 auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
                 pos.theta = Point::normalizeAngle(pos.theta + (side_ == BaseAction::FRONT ? 0 : M_PI));
 
+                // TODO the robot do not go to the exact position i would like it to go to the exact so he can go forward after to take the box in a good way
+
                 if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {
                     if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
@@ -92,7 +66,7 @@ namespace Modelec {
                         if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                         {
                             status_ = MissionStatus::FAILED;
-                            break;
+                            return false;
                         }
                     }
                 }
@@ -105,7 +79,7 @@ namespace Modelec {
                 if (action_executor_->box_obstacles_[side_] == nullptr)
                 {
                     status_ = MissionStatus::FAILED;
-                    break;
+                    return false;
                 }
 
                 auto pos = action_executor_->box_obstacles_[side_]->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeClosePosition();
@@ -114,7 +88,7 @@ namespace Modelec {
                 if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL | Pathfinding::OBSTACLE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {
                     status_ = MissionStatus::FAILED;
-                    break;
+                    return false;
                 }
 
                 go_timeout_ = node_->now();
@@ -137,7 +111,6 @@ namespace Modelec {
         case UP:
             {
                 action_executor_->Up(side_);
-                action_executor_->LookOn(side_);
                 deploy_time_ = node_->now();
             }
             break;
@@ -146,7 +119,7 @@ namespace Modelec {
                 if (action_executor_->box_obstacles_[side_] == nullptr)
                 {
                     status_ = MissionStatus::FAILED;
-                    break;
+                    return false;
                 }
 
                 nav_->GetPathfinding()->RemoveObstacle(action_executor_->box_obstacles_[side_]->GetId());
@@ -159,15 +132,12 @@ namespace Modelec {
         default:
             break;
         }
+
+        return true;
     }
 
     void TakeMission::Clear()
     {
-    }
-
-    MissionStatus TakeMission::GetStatus() const
-    {
-        return status_;
     }
 
 }

@@ -6,6 +6,8 @@ Modelec::ThermoAction::ThermoAction(const std::shared_ptr<ActionExecutor>& actio
 {
     steps_.push(ActionExec::THERMO_STEP);
     steps_.push(ActionExec::DONE_STEP);
+
+    InitConfig();
 }
 
 Modelec::ThermoAction::ThermoAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, bool deploy) : ThermoAction(action_executor)
@@ -31,22 +33,26 @@ void Modelec::ThermoAction::Next()
         {
             modelec_interfaces::msg::ActionServoTimedArray msg;
 
-            msg.items.resize(side_ == BOTH ? 2 : 1);
-
             if (side_ == LEFT || side_ == BOTH)
             {
-                msg.items[0].id = 16;
-                msg.items[0].start_angle = deploy_ ? 1 : 2;
-                msg.items[0].end_angle = deploy_ ? 2 : 1;
-                msg.items[0].duration_s = 0.5;
+                if (deploy_)
+                {
+                    msg.items.insert(msg.items.end(), left_deploy_msg_.begin(), left_deploy_msg_.end());
+                } else
+                {
+                    msg.items.insert(msg.items.end(), left_undeploy_msg_.begin(), left_undeploy_msg_.end());
+                }
             }
 
             if (side_ == RIGHT || side_ == BOTH)
             {
-                msg.items[side_ == BOTH ? 1 : 0].id = 17;
-                msg.items[side_ == BOTH ? 1 : 0].start_angle = deploy_ ? 1 : 2;
-                msg.items[side_ == BOTH ? 1 : 0].end_angle = deploy_ ? 2 : 1;
-                msg.items[side_ == BOTH ? 1 : 0].duration_s = 0.5;
+                if (deploy_)
+                {
+                    msg.items.insert(msg.items.end(), right_deploy_msg_.begin(), right_deploy_msg_.end());
+                } else
+                {
+                    msg.items.insert(msg.items.end(), right_undeploy_msg_.begin(), right_undeploy_msg_.end());
+                }
             }
 
             action_executor_->MoveServoTimed(msg);
@@ -79,6 +85,17 @@ void Modelec::ThermoAction::SetSide(Side side)
 void Modelec::ThermoAction::SetDeploy(bool deploy)
 {
     deploy_ = deploy;
+}
+
+void Modelec::ThermoAction::InitConfig()
+{
+    if (isConfigInit_) return;
+    isConfigInit_ = true;
+
+    left_deploy_msg_ = Config::get<std::vector<ActionServoTimed>>("action.thermo.left.deploy");
+    left_undeploy_msg_ = Config::get<std::vector<ActionServoTimed>>("action.thermo.left.undeploy");
+    right_deploy_msg_ = Config::get<std::vector<ActionServoTimed>>("action.thermo.right.deploy");
+    right_undeploy_msg_ = Config::get<std::vector<ActionServoTimed>>("action.thermo.right.undeploy");
 }
 
 void Modelec::ThermoAction::End()

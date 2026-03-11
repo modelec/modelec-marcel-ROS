@@ -2,13 +2,17 @@
 
 #include "modelec_strat/action_executor.hpp"
 
-Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor), side_(BOTH), inverted_(false)
+Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor) : BaseAction(action_executor),
+    side_(BOTH), inverted_(false)
 {
     steps_.push(ActionExec::DOWN_STEP);
     steps_.push(ActionExec::DONE_STEP);
+
+    InitConfig();
 }
 
-Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, bool inverted) : DownAction(action_executor)
+Modelec::DownAction::DownAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side,
+                                bool inverted) : DownAction(action_executor)
 {
     side_ = side;
     inverted_ = inverted;
@@ -30,53 +34,27 @@ void Modelec::DownAction::Next()
     case ActionExec::DOWN_STEP:
         {
             ActionServoTimedArray msg;
-            msg.items.resize(side_ == BOTH ? 8 : 4);
 
             if (side_ == FRONT || side_ == BOTH)
             {
-                msg.items[0].id = 0;
-                msg.items[0].start_angle = 1.76;
-                msg.items[0].end_angle = 2.93;
-                msg.items[0].duration_s = 2;
-
-                msg.items[1].id = 1;
-                msg.items[1].start_angle = 2.06;
-                msg.items[1].end_angle = 0.91;
-                msg.items[1].duration_s = 2;
-
-                msg.items[2].id = 2;
-                msg.items[2].start_angle = 0.5;
-                msg.items[2].end_angle = inverted_ ? 0 : 3.05;
-                msg.items[2].duration_s = 1.7;
-
-                msg.items[3].id = 3;
-                msg.items[3].start_angle = 2.6;
-                msg.items[3].end_angle = inverted_ ? 3.1 : 0.3;
-                msg.items[3].duration_s = 1.7;
+                if (inverted_)
+                {
+                    msg.items.insert(msg.items.end(), front_rotated_msg_.begin(), front_rotated_msg_.end());
+                } else
+                {
+                    msg.items.insert(msg.items.end(), front_unrotated_msg_.begin(), front_unrotated_msg_.end());
+                }
             }
 
             if (side_ == BACK || side_ == BOTH)
             {
-                int i = side_ == BOTH ? 4 : 0;
-                msg.items[i].id = 8;
-                msg.items[i].start_angle = 0;
-                msg.items[i].end_angle = 0;
-                msg.items[i].duration_s = 0.5;
-
-                msg.items[i+1].id = 9;
-                msg.items[i+1].start_angle = 0;
-                msg.items[i+1].end_angle = 0;
-                msg.items[i+1].duration_s = 0.5;
-
-                msg.items[i+2].id = 10;
-                msg.items[i+2].start_angle = 0;
-                msg.items[i+2].end_angle = 0;
-                msg.items[i+2].duration_s = 0.5;
-
-                msg.items[i+3].id = 11;
-                msg.items[i+3].start_angle = 0;
-                msg.items[i+3].end_angle = 0;
-                msg.items[i+3].duration_s = 0.5;
+                if (inverted_)
+                {
+                    msg.items.insert(msg.items.end(), back_rotated_msg_.begin(), back_rotated_msg_.end());
+                } else
+                {
+                    msg.items.insert(msg.items.end(), back_unrotated_msg_.begin(), back_unrotated_msg_.end());
+                }
             }
 
             action_executor_->MoveServoTimed(msg);
@@ -109,6 +87,17 @@ void Modelec::DownAction::SetSide(Side side)
 void Modelec::DownAction::SetInverted(bool inverted)
 {
     inverted_ = inverted;
+}
+
+void Modelec::DownAction::InitConfig()
+{
+    if (isConfigInit_) return;
+    isConfigInit_ = true;
+
+    front_unrotated_msg_ = Config::get<std::vector<ActionServoTimed>>("action.down.front.unrotated.msg");
+    front_rotated_msg_ = Config::get<std::vector<ActionServoTimed>>("action.down.front.rotated.msg");
+    back_unrotated_msg_ = Config::get<std::vector<ActionServoTimed>>("action.down.back.unrotated.msg");
+    back_rotated_msg_ = Config::get<std::vector<ActionServoTimed>>("action.down.back.rotated.msg");
 }
 
 void Modelec::DownAction::End()

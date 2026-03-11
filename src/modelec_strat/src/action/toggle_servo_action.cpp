@@ -6,6 +6,8 @@ Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecut
 {
     steps_.push(ActionExec::TOGGLE_SERVO_STEP);
     steps_.push(ActionExec::DONE_STEP);
+
+    InitConfig();
 }
 
 Modelec::ToggleServoAction::ToggleServoAction(const std::shared_ptr<ActionExecutor>& action_executor, Side side, int n) : ToggleServoAction(action_executor)
@@ -44,10 +46,10 @@ void Modelec::ToggleServoAction::Next()
 
             for (size_t i = 0; i < servos_.size(); i++)
             {
-                msg.items[i].id = servos_[i].first + (servos_[i].second ? 4 : 12);
-                msg.items[i].start_angle = action_executor_->servo_pos_[servos_[i].first + (servos_[i].second ? 0 : 4)] ? 1 : 3;
-                msg.items[i].end_angle = action_executor_->servo_pos_[servos_[i].first + (servos_[i].second ? 0 : 4)] ? 3 : 1;
-                msg.items[i].duration_s = 0.5;
+                msg.items[i].id = servos_[i].first + (servos_[i].second ? first_servo_ : second_servo_);
+                msg.items[i].start_angle = action_executor_->servo_pos_[servos_[i].first + (servos_[i].second ? 0 : 4)] ? start_angle_ : end_angle_;
+                msg.items[i].end_angle = action_executor_->servo_pos_[servos_[i].first + (servos_[i].second ? 0 : 4)] ? end_angle_ : start_angle_;
+                msg.items[i].duration_s = duration_s_;
             }
 
             action_executor_->MoveServoTimed(msg);
@@ -89,6 +91,18 @@ void Modelec::ToggleServoAction::AddServo(std::pair<int, Side> servo)
 void Modelec::ToggleServoAction::AddServos(const std::vector<std::pair<int, Side>>& servos)
 {
     servos_.insert(servos_.end(), servos.begin(), servos.end());
+}
+
+void Modelec::ToggleServoAction::InitConfig()
+{
+    if (isConfigInit_) return;
+    isConfigInit_ = true;
+
+    first_servo_ = Config::get<int>("action.toggle.id@first", 0);
+    second_servo_ = Config::get<int>("action.toggle.id@second", 0);
+    start_angle_ = Config::get<double>("action.toggle.msg@start_angle", 3);
+    end_angle_ = Config::get<double>("action.toggle.msg@end_angle", 1);
+    duration_s_ = Config::get<double>("action.toggle.msg@duration_s", 0.5);
 }
 
 void Modelec::ToggleServoAction::End()

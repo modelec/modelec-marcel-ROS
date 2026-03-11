@@ -1,48 +1,42 @@
 #include <modelec_com/color_detector.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_utils/utils.hpp>
+#include <mutex>
+
+#ifdef RPI_BUILD
+#include <libcam2opencv.h>
+#endif
 
 namespace Modelec
 {
+#ifdef RPI_BUILD
+    struct CamCallback : Libcam2OpenCV::Callback {
+        cv::Mat* target_frame;
+        std::mutex* frame_mutex;
+        CamCallback(cv::Mat& frame, std::mutex& mtx) : target_frame(&frame), frame_mutex(&mtx) {}
+        void hasFrame(const cv::Mat &frame, const libcamera::ControlList &) override {
+            std::lock_guard<std::mutex> lock(*frame_mutex);
+            frame.copyTo(*target_frame);
+        }
+    };
+#endif
     ColorDetector::ColorDetector()
-        : Node("color_detector")
+    : Node("color_detector")
     {
-        this->declare_parameter("enabled", true);
-        this->declare_parameter("link", "");
-        this->declare_parameter("headless", true);
-        this->declare_parameter("save_to_file.enabled", true);
-        this->declare_parameter("save_to_file.path", "./");
-        this->declare_parameter("rois", rclcpp::PARAMETER_INTEGER_ARRAY);
-        this->declare_parameter("colors.blue", rclcpp::PARAMETER_INTEGER_ARRAY);
-        this->declare_parameter("colors.yellow", rclcpp::PARAMETER_INTEGER_ARRAY);
+        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
+         if (!Config::load(config_path))
+         {
+             RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
+         }
 
-        enable_ = this->get_parameter("enabled").as_bool();
-        link_ = this->get_parameter("link").as_string();
-        headless_ = this->get_parameter("headless").as_bool();
-        save_to_file_ = this->get_parameter("save_to_file.enabled").as_bool();
-        save_directory_ = this->get_parameter("save_to_file.path").as_string();
+        enable_ = Config::get<bool>("config.cam.enabled", false);
+        link_ = Config::get<std::string>("config.cam.link", "/dev/video0");
+        headless_ = Config::get<bool>("config.cam.headless", true);
+        save_to_file_ = Config::get<bool>("config.cam.save_to_file.enabled", false);
+        save_directory_ = Config::get<std::string>("config.cam.save_to_file.directory", "./");
 
-        auto rois_param = this->get_parameter("rois").as_integer_array();
-        for (size_t i = 0; i + 3 < rois_param.size(); i += 4)
-        {
-            rois_.emplace_back(rois_param[i], rois_param[i + 1], rois_param[i + 2], rois_param[i + 3]);
-        }
-
-        auto blue_param = this->get_parameter("colors.blue").as_integer_array();
-        if (blue_param.size() >= 2)
-        {
-            color_configs_.push_back({
-                "blue", static_cast<double>(blue_param[0]), static_cast<double>(blue_param[1])
-            });
-        }
-
-        auto yellow_param = this->get_parameter("colors.yellow").as_integer_array();
-        if (yellow_param.size() >= 2)
-        {
-            color_configs_.push_back({
-                "yellow", static_cast<double>(yellow_param[0]), static_cast<double>(yellow_param[1])
-            });
-        }
+        rois_ = Config::get<std::vector<cv::Rect>>("config.cam.rois.roi", {});
+        color_configs_ = Config::get<std::vector<ColorSetting>>("config.cam.colors.color", {});
 
         if (!enable_)
         {
@@ -50,6 +44,22 @@ namespace Modelec
             rclcpp::shutdown();
             return;
         }
+
+#ifdef RPI_BUILD
+        RCLCPP_INFO(get_logger(), "Starting RPi Libcamera (Full FOV mode)...");
+        Libcam2OpenCVSettings settings;
+        settings.width = 2304;
+        settings.height = 1296;
+        settings.framerate = 30;
+        settings.cameraIndex = 0;
+
+        my_callback_ = std::make_unique<CamCallback>(latest_frame_, frame_mutex_);
+        camera_.registerCallback(my_callback_.get());
+        camera_.start(settings);
+#else
+        RCLCPP_INFO(get_logger(), "Starting PC Webcam (OpenCV)...");
+        pc_cap_.open(link_);
+#endif
 
         service_ = create_service<std_srvs::srv::Trigger>(
             "action/detect_color",
@@ -85,6 +95,8 @@ namespace Modelec
         if (!headless_)
         {
             cv::namedWindow("color_detector", cv::WINDOW_NORMAL);
+
+            cv::setWindowProperty("color_detector", cv::WND_PROP_AUTOSIZE, cv::WINDOW_GUI_EXPANDED);
         }
 
         RCLCPP_INFO(get_logger(), "Color detector service ready");
@@ -92,6 +104,12 @@ namespace Modelec
 
     ColorDetector::~ColorDetector()
     {
+#ifdef RPI_BUILD
+        camera_.stop();
+#else
+        if(pc_cap_.isOpened()) pc_cap_.release();
+#endif
+
         if (!headless_)
         {
             cv::destroyAllWindows();
@@ -100,21 +118,21 @@ namespace Modelec
 
     bool ColorDetector::processSnapshot(std::vector<std::string>& colors, std::string& error)
     {
-        cv::VideoCapture cap(link_);
-
-        if (!cap.isOpened())
-        {
-            RCLCPP_ERROR(get_logger(), "Failed to open camera at %s", link_.c_str());
-            error = "Failed to open camera";
-            return false;
-        }
-
-        cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
-
         cv::Mat frame;
-
-        for (int i = 0; i < 3; ++i)
-            cap >> frame;
+#ifdef RPI_BUILD
+        {
+            std::lock_guard<std::mutex> lock(frame_mutex_);
+            if (latest_frame_.empty()) {
+                RCLCPP_WARN(get_logger(), "No frame received from libcamera yet");
+                error = "Empty frame";
+                return false;
+            }
+            latest_frame_.copyTo(frame);
+        }
+#else
+if(!pc_cap_.isOpened()) { error = "PC Cam not open"; return false; }
+pc_cap_ >> frame;
+#endif
 
         if (frame.empty())
         {
@@ -139,10 +157,8 @@ namespace Modelec
         {
             std::string path = save_directory_ + generateImagePath();
             cv::imwrite(path, frame);
-            RCLCPP_DEBUG(get_logger(), "Saved snapshot to %s", path.c_str());
+            RCLCPP_INFO(get_logger(), "Saved snapshot to %s", path.c_str());
         }
-
-        cap.release();
 
         return true;
     }

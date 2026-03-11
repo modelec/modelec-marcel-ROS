@@ -14,7 +14,6 @@ from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    pkg_name = 'modelec_core'
     # -------------------------------------------------
     # Launch arguments
     # -------------------------------------------------
@@ -50,12 +49,6 @@ def generate_launch_description():
     angle_compensate = LaunchConfiguration('angle_compensate', default='false')
     scan_mode = LaunchConfiguration('scan_mode', default='Standard')
 
-    param_file = os.path.join(
-        get_package_share_directory(pkg_name),
-        'config',
-        'config.yml'
-    )
-
     # -------------------------------------------------
     # RPLIDAR with auto-restart
     # -------------------------------------------------
@@ -64,7 +57,7 @@ def generate_launch_description():
             package='rplidar_ros',
             executable='rplidar_node',
             name='rplidar_node',
-            parameters=[param_file, {
+            parameters=[{
                 'channel_type': channel_type,
                 'serial_port': serial_port,
                 'serial_baudrate': serial_baudrate,
@@ -113,7 +106,6 @@ def generate_launch_description():
                 package='modelec_gui',
                 executable='modelec_gui',
                 name='modelec_gui',
-                parameters=[param_file],
             )
 
             shutdown = RegisterEventHandler(
@@ -135,19 +127,17 @@ def generate_launch_description():
                     package='modelec_com',
                     executable='pcb_odo_interface',
                     name='pcb_odo_interface',
-                    parameters=[param_file],
                 ),
                 Node(
                     package='modelec_com',
                     executable='pcb_action_interface',
                     name='pcb_action_interface',
-                    parameters=[param_file],
                 ),
             ]
         return []
 
     # -------------------------------------------------
-    # Strategy nodes (WITHOUT enemy_manager)
+    # Strategy nodes
     # -------------------------------------------------
     def launch_strat(context, *args, **kwargs):
         if context.launch_configurations.get('with_strat') == 'true':
@@ -156,20 +146,18 @@ def generate_launch_description():
                     package='modelec_strat',
                     executable='strat_fsm',
                     name='strat_fsm',
-                    parameters=[param_file],
                     # prefix=['xterm -e gdb -ex run --args'],
                 ),
                 Node(
                     package='modelec_strat',
                     executable='pami_manager',
                     name='pami_manager',
-                    parameters=[param_file],
                 ),
             ]
         return []
 
     # -------------------------------------------------
-    # Enemy manager (standalone)
+    # Enemy manager
     # -------------------------------------------------
     def launch_enemy_manager(context, *args, **kwargs):
         if context.launch_configurations.get('with_enemy_manager') == 'true':
@@ -178,7 +166,6 @@ def generate_launch_description():
                     package='modelec_strat',
                     executable='enemy_manager',
                     name='enemy_manager',
-                    parameters=[param_file],
                 )
             ]
         return []
@@ -193,7 +180,6 @@ def generate_launch_description():
                     package='joy',
                     executable='joy_node',
                     name='joy_node',
-                    parameters=[param_file],
                 )
             ]
         return []
@@ -205,7 +191,6 @@ def generate_launch_description():
                     package='modelec_com',
                     executable='color_detector',
                     name='color_detector',
-                    parameters=[param_file],
                 )
             ]
         return []

@@ -34,6 +34,9 @@ TEST(ConfigTest, LoadValidXML)
 
     // Deep nested node
     EXPECT_EQ(Modelec::Config::get<std::string>("root.nested.deep", ""), "hello");
+
+    EXPECT_TRUE(Modelec::Config::has("root.child1"));
+    EXPECT_FALSE(Modelec::Config::has("root.child11T1435TRERGFSRVSPKRMGHJNIUSRJOGFH"));
 }
 
 TEST(ConfigTest, LoadInvalidXML)
@@ -113,4 +116,33 @@ TEST(ConfigTest, GetArray)
     EXPECT_EQ(array2[1].attr, "c");
     EXPECT_EQ(array2[2].value, 3);
     EXPECT_EQ(array2[2].attr, "d");
+}
+
+TEST(ConfigTest, Clear)
+{
+    // Create temporary XML file
+    const std::string filepath = "test_array_config.xml";
+
+    std::ofstream file(filepath);
+    file <<
+        "<root>"
+        "   <item a=\"b\">1</item>"
+        "   <item a=\"c\">2</item>"
+        "   <item a=\"d\">3</item>"
+        "   <test a=\"d\">3</test>"
+        "</root>";
+    file.close();
+
+    EXPECT_TRUE(Modelec::Config::load(filepath));
+
+    EXPECT_TRUE(Modelec::Config::has("root.test"));
+    Modelec::Config::clear("root.test");
+    EXPECT_FALSE(Modelec::Config::has("root.test"));
+
+    EXPECT_EQ(Modelec::Config::count("root.item"), 3);
+    Modelec::Config::clear("root.item");
+    EXPECT_EQ(Modelec::Config::count("root.item"), 0);
+
+    Modelec::Config::clear("");
+    EXPECT_FALSE(Modelec::Config::has("root"));
 }

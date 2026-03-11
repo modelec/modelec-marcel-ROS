@@ -5,6 +5,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+option(BUILD_FOR_RPI "Build with Raspberry Pi libcamera support" OFF)
+
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -16,6 +18,18 @@ find_package(ament_index_cpp REQUIRED)
 find_package(fmt)
 
 find_package(OpenCV REQUIRED)
+find_package(PkgConfig REQUIRED)
+
+if(BUILD_FOR_RPI)
+  message(STATUS "Configuring for Raspberry Pi Hardware...")
+  add_definitions(-DRPI_BUILD)
+  pkg_check_modules(LIBCAMERA REQUIRED libcamera libcamera-base)
+  include_directories(${LIBCAMERA_INCLUDE_DIRS})
+  link_directories(${LIBCAMERA_LIBRARY_DIRS} /usr/local/lib/aarch64-linux-gnu)
+  add_definitions(${LIBCAMERA_CFLAGS_OTHER})
+else()
+  message(STATUS "Configuring for PC (standard OpenCV)...")
+endif()
 
 find_package(modelec_interfaces REQUIRED)
 find_package(modelec_utils REQUIRED)
@@ -56,6 +70,16 @@ target_link_libraries(color_detector
   modelec_utils::utils
   modelec_utils::config
 )
+
+if(BUILD_FOR_RPI)
+  target_link_libraries(color_detector
+          -Wl,--no-as-needed
+          "/usr/local/lib/aarch64-linux-gnu/libcamera.so"
+          "/usr/local/lib/aarch64-linux-gnu/libcamera-base.so"
+          -Wl,--as-needed
+          cam2opencv
+  )
+endif()
 
 target_include_directories(color_detector PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

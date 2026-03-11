@@ -12,6 +12,8 @@
 #include <modelec_interfaces/msg/action_servo_timed_array.hpp>
 #include <modelec_interfaces/msg/action_servo_timed.hpp>
 
+#include "modelec_utils/config.hpp"
+
 #define TIMER_SERVO_TIMED_MS 10 // 100 Hz
 
 namespace Modelec
@@ -37,10 +39,10 @@ namespace Modelec
         std::map<int, int> asc_value_mapper_;
 
         int asc_state_ = 0;
-        std::map<int, double> servo_value_;
-        std::map<int, bool> relay_value_;
+        std::unordered_map<int, double> servo_value_;
+        std::unordered_map<int, bool> relay_value_;
 
-        std::map<int, ServoTimedSet> servo_timed_buffer_;
+        std::vector<ServoTimedSet> servo_timed_buffer_;
 
         rclcpp::TimerBase::SharedPtr servo_timed_timer_;
 
@@ -82,10 +84,29 @@ namespace Modelec
         void SendToPCB(const std::string& order, const std::string& elem,
                        const std::vector<std::string>& data = {});
 
-        // TODO redo thos func to accept arrays, poc without them atm
         void GetData(const std::string& elem, const std::vector<std::string>& data = {});
         void SendOrder(const std::string& elem, const std::vector<std::string>& data = {});
         void SendMove(const std::string& elem, const std::vector<std::string>& data = {});
         void RespondEvent(const std::string& elem, const std::vector<std::string>& data = {});
     };
+
+    template<>
+    inline std::unordered_map<int, double>
+    Config::get<std::unordered_map<int, double>>(
+        const std::string& prefix,
+        const std::unordered_map<int, double>& default_value, bool)
+    {
+        auto result = Config::getMap<int, double>(
+            prefix,
+            [](const std::string& base)
+            {
+                return std::make_pair(
+                    Config::get<int>(base + "@id"),
+                    Config::get<double>(base + "@angle")
+                );
+            });
+
+        return result.empty() ? default_value : result;
+    }
+
 }

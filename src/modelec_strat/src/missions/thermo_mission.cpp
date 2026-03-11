@@ -7,18 +7,15 @@ namespace Modelec {
     bool ThermoMission::IsThermoDone = false;
 
     ThermoMission::ThermoMission(const std::shared_ptr<NavigationHelper>& nav,
-        const std::shared_ptr<ActionExecutor>& action_executor)
-     : status_(MissionStatus::READY), nav_(nav), action_executor_(action_executor)
+        const std::shared_ptr<ActionExecutor>& action_executor) :
+        Mission(MissionStatus::READY), ActionMission(action_executor), MoveMission(nav)
     {
     }
 
-    void ThermoMission::Start(rclcpp::Node::SharedPtr node)
+    void ThermoMission::Start(const rclcpp::Node::SharedPtr& node)
     {
-        node_ = node;
-
-        go_timeout_ = node_->now();
-        deploy_time_ = node_->now();
-        last_ask_waypoint_time_ = node_->now();
+        ActionMission::Start(node);
+        MoveMission::Start(node);
 
         status_ = MissionStatus::RUNNING;
 
@@ -35,37 +32,11 @@ namespace Modelec {
         steps_.push(DONE);
     }
 
-    void ThermoMission::Update()
+    bool ThermoMission::Update()
     {
-        if (!action_executor_->IsActionDone())
+        if (!ActionMission::Update() || !MoveMission::Update())
         {
-            return;
-        }
-
-        if (!nav_->HasArrived())
-        {
-            if ((node_->now() - go_timeout_).seconds() < 2 && (node_->now() - last_ask_waypoint_time_).seconds() > 1)
-            {
-                nav_->AskWaypoint();
-                last_ask_waypoint_time_ = node_->now();
-                return;
-            }
-            if ((node_->now() - go_timeout_).seconds() < 10)
-            {
-                return;
-            }
-        }
-
-        if (min_time_.has_value())
-        {
-            if ((node_->now() - min_time_.value()).seconds() < 0.1)
-            {
-                return;
-            }
-            else
-            {
-                min_time_.reset();
-            }
+            return false;
         }
 
         auto step_ = steps_.front();
@@ -80,7 +51,7 @@ namespace Modelec {
                 if (nav_->GoToRotateFirst(start, true, Pathfinding::FREE | Pathfinding::WALL, true) != Pathfinding::FREE)
                 {
                     status_ = MissionStatus::FAILED;
-                    break;
+                    return false;
                 }
 
                 go_timeout_ = node_->now();
@@ -93,7 +64,7 @@ namespace Modelec {
                 if (nav_->GoToRotateFirst(start, true, Pathfinding::FREE | Pathfinding::WALL, true) != Pathfinding::FREE)
                 {
                     status_ = MissionStatus::FAILED;
-                    break;
+                    return false;
                 }
 
                 go_timeout_ = node_->now();
@@ -101,7 +72,6 @@ namespace Modelec {
             break;
         case ACTIVATE_THERMO:
             {
-                RCLCPP_INFO(node_->get_logger(), "Activating thermo");
                 action_executor_->ActivateThermo(nav_->GetTeamId() == NavigationHelper::YELLOW ? BaseAction::RIGHT : BaseAction::LEFT, true);
                 deploy_time_ = node_->now();
             }
@@ -113,13 +83,12 @@ namespace Modelec {
                 if (nav_->GoToRotateFirst(pos, true, Pathfinding::FREE | Pathfinding::WALL, true) != Pathfinding::FREE)
                 {
                     status_ = MissionStatus::FAILED;
-                    break;
+                    return false;
                 }
             }
             break;
         case DEACTIVATE_THERMO:
             {
-                RCLCPP_INFO(node_->get_logger(), "Deactivating thermo");
                 action_executor_->ActivateThermo(nav_->GetTeamId() == NavigationHelper::YELLOW ? BaseAction::RIGHT : BaseAction::LEFT, false);
                 deploy_time_ = node_->now();
             }
@@ -135,15 +104,12 @@ namespace Modelec {
         default:
             break;
         }
+
+        return true;
     }
 
     void ThermoMission::Clear()
     {
-    }
-
-    MissionStatus ThermoMission::GetStatus() const
-    {
-        return status_;
     }
 
 }

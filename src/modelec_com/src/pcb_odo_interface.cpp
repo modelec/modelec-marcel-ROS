@@ -1,17 +1,22 @@
 #include <modelec_com/pcb_odo_interface.hpp>
 #include <modelec_utils/utils.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <modelec_utils/config.hpp>
 
 namespace Modelec
 {
     PCBOdoInterface::PCBOdoInterface() : Node("pcb_odo_interface")
     {
-        declare_parameter<std::string>("serial_port", "/dev/USB_ODO");
-        declare_parameter<int>("baudrate", 115200);
+        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
+        if (!Config::load(config_path))
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
+        }
 
-        auto serial_port = get_parameter("serial_port").as_string();
-        auto baudrate = get_parameter("baudrate").as_int();
+        auto serial_port = Config::get<std::string>("config.usb.odo.port", "/dev/ttyUSB0");
+        auto baudrate = Config::get<int>("config.usb.odo.baudrate", 115200);
 
-        RCLCPP_INFO(this->get_logger(), "Starting PCB Odometry Interface on port %s with baudrate %ld", serial_port.c_str(), baudrate);
+        RCLCPP_INFO(this->get_logger(), "Starting PCB Odometry Interface on port %s with baudrate %d", serial_port.c_str(), baudrate);
 
         odo_pos_publisher_ = this->create_publisher<modelec_interfaces::msg::OdometryPos>(
             "odometry/position", 10);
@@ -104,10 +109,10 @@ namespace Modelec
 
         this->open(baudrate, serial_port, MAX_MESSAGE_LEN);
 
-        SetPID("THETA", 14, 0, 0);
-        SetPID("POS", 5, 0, 0);
-        SetPID("LEFT", 5, 0, 0);
-        SetPID("RIGHT", 5, 0, 0);
+        SetPID("THETA", Config::get<PIDData>("config.odo.pid.theta"));
+        SetPID("POS", Config::get<PIDData>("config.odo.pid.pos"));
+        SetPID("LEFT", Config::get<PIDData>("config.odo.pid.left"));
+        SetPID("RIGHT", Config::get<PIDData>("config.odo.pid.right"));
     }
 
     PCBOdoInterface::~PCBOdoInterface()
@@ -429,6 +434,11 @@ namespace Modelec
         }
 
         SendOrder("PID", data);
+    }
+
+    void PCBOdoInterface::SetPID(std::string name, const PIDData& pid_data)
+    {
+        SetPID(name, pid_data.p, pid_data.i, pid_data.d, pid_data.min, pid_data.max);
     }
 
     void PCBOdoInterface::SetMotor(int left, int right)

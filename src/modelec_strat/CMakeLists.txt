@@ -26,13 +26,16 @@ set(strat_fsm_sources
         src/action/free_action.cpp
         src/action/take_action.cpp
         src/action/toggle_servo_action.cpp
-        src/action/look_on_action.cpp
         src/action/thermo_action.cpp
 
         src/missions/go_home_mission.cpp
         src/missions/take_mission.cpp
         src/missions/free_mission.cpp
         src/missions/thermo_mission.cpp
+        src/missions/action_mission.cpp
+        src/missions/move_mission.cpp
+        src/missions/mine_time_mission.cpp
+        src/missions/mission_base.cpp
 
         src/obstacle/obstacle.cpp
         src/obstacle/box.cpp

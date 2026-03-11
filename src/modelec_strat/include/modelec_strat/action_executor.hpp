@@ -9,11 +9,11 @@
 
 #include <sensor_msgs/msg/joy.hpp>
 #include <std_msgs/msg/int64.hpp>
+#include <std_msgs/msg/empty.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <std_srvs/srv/trigger.hpp>
 
 #include "action/base_action.hpp"
-#include "missions/thermo_mission.hpp"
 #include "obstacle/box.hpp"
 
 namespace Modelec
@@ -55,8 +55,6 @@ namespace Modelec
 
         void ActivateThermo(BaseAction::Side side, bool deploy, bool force = false);
 
-        void LookOn(BaseAction::Side side, bool force = false);
-
         void ActionFinished(const std::shared_ptr<BaseAction>& action);
 
         std::array<std::shared_ptr<BoxObstacle>, 2> box_obstacles_;
@@ -68,7 +66,10 @@ namespace Modelec
             bool down;
             bool rotated;
         };
-        std::array<ArmState, 2> arm_pos_;
+        std::array<ArmState, 2> arm_pos_ = {
+            ArmState{false, false},
+            ArmState{false, false},
+        };
 
         std::array<float, 16> servo_value_ = {
             2.91,
@@ -85,10 +86,6 @@ namespace Modelec
             {BaseAction::LEFT, false},
             {BaseAction::RIGHT, false},
         };
-
-        BaseAction::Side cam_side_ = BaseAction::Side::CENTER;
-
-        bool looking_on_front_ = true;
 
         bool IsEmpty() const;
 
@@ -142,6 +139,9 @@ namespace Modelec
 
         float last_left_trig = 1.0f;
         float last_right_trig = 1.0f;
+
+        bool last_l3 = false;
+        bool last_r3 = false;
 
     private:
         rclcpp::Node::SharedPtr node_;

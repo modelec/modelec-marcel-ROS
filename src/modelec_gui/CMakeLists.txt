@@ -25,6 +25,7 @@ find_package(Qt6 COMPONENTS
         Gui
         Widgets
         Svg
+        Multimedia
         REQUIRED)
 
 # Add the executable
@@ -63,6 +64,7 @@ target_link_libraries(modelec_gui
         Qt6::Gui
         Qt6::Widgets
         Qt6::Svg
+        Qt6::Multimedia
         modelec_utils::utils
         modelec_utils::config
 )

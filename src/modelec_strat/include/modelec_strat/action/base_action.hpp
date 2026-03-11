@@ -12,6 +12,8 @@
 #include <modelec_interfaces/msg/action_servo_pos_array.hpp>
 #include <modelec_interfaces/msg/action_servo_pos.hpp>
 
+#include <modelec_utils/config.hpp>
+
 namespace Modelec
 {
     class ActionExecutor;
@@ -78,5 +80,31 @@ namespace Modelec
         }
 
         return nullptr;
+    }
+
+    template<>
+    inline ActionServoTimed
+    Config::get<ActionServoTimed>(
+        const std::string& prefix,
+        const ActionServoTimed&, bool)
+    {
+        ActionServoTimed msg;
+        msg.id = get<int>(prefix + "@id", 0);
+        msg.start_angle = get<double>(prefix + "@start_angle", 0);
+        msg.end_angle = get<double>(prefix + "@end_angle", 0);
+        msg.duration_s = get<double>(prefix + "@duration_s", 0);
+        msg.delay_s = get<double>(prefix + "@delay_s", 0, true);
+        return msg;
+    }
+
+    template<>
+    inline std::vector<ActionServoTimed>
+    Config::get<std::vector<ActionServoTimed>>(
+        const std::string& prefix,
+        const std::vector<ActionServoTimed>& default_value, bool)
+    {
+        auto result = getArray<ActionServoTimed>(prefix);
+
+        return result.empty() ? default_value : result;
     }
 }

@@ -9,15 +9,17 @@ namespace Modelec
     {
     }
 
-    BoxObstacle::BoxObstacle(tinyxml2::XMLElement* obstacleElem)
-        : Obstacle(obstacleElem)
+    BoxObstacle::BoxObstacle(int id) : Obstacle(id)
     {
-        possible_angles_.push_back(theta_);
-        for (auto elem = obstacleElem->FirstChildElement("possible-angle");
-             elem;
-             elem = elem->NextSiblingElement("possible-angle"))
+        if (Config::count("Obstacles.Obstacle[" + std::to_string(id) + "].possible-angle") > 0)
         {
-            possible_angles_.push_back(elem->DoubleAttribute("theta"));
+            possible_angles_ = Config::getArray<double>("Obstacles.Obstacle[" + std::to_string(id) + "].possible-angle", [](const std::string& base)
+            {
+                return Config::get<double>(base + "@theta");
+            });
+            possible_angles_.push_back(theta_);
+        } else {
+            possible_angles_ = {theta_};
         }
     }
 

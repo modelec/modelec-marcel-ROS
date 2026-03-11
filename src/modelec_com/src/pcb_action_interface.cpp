@@ -1,19 +1,31 @@
 #include <modelec_com/pcb_action_interface.hpp>
 #include <modelec_utils/utils.hpp>
 #include <fmt/core.h>
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <modelec_utils/config.hpp>
+#include <algorithm>
 
 namespace Modelec
 {
     PCBActionInterface::PCBActionInterface() : Node("pcb_action_interface")
     {
-        // Service to create a new serial listener
-        declare_parameter<std::string>("serial_port", "/dev/USB_ACTION");
-        declare_parameter<int>("baudrate", 115200);
+        std::string config_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/config.xml";
+        if (!Config::load(config_path))
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", config_path.c_str());
+        }
 
-        auto serial_port = get_parameter("serial_port").as_string();
-        auto baudrate = get_parameter("baudrate").as_int();
+        std::string action_path = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/action.xml";
+        if (!Config::load(action_path))
+        {
+            RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", action_path.c_str());
+        }
 
-        RCLCPP_INFO(this->get_logger(), "Starting PCB Odometry Interface on port %s with baudrate %ld", serial_port.c_str(), baudrate);
+        auto serial_port = Config::get<std::string>("config.usb.action.port", "/dev/ttyUSB0");
+        auto baudrate = Config::get<int>("config.usb.action.baudrate", 115200);
+        auto timed_servo_timer_ms = Config::get<int>("config.timer.action.timed_servo.ms", TIMER_SERVO_TIMED_MS);
+
+        RCLCPP_INFO(this->get_logger(), "Starting PCB Odometry Interface on port %s with baudrate %d", serial_port.c_str(), baudrate);
 
         asc_get_sub_ = this->create_subscription<modelec_interfaces::msg::ActionAscPos>(
             "action/get/asc", 10,
@@ -157,14 +169,14 @@ namespace Modelec
                 {
                     ServoTimedSet servo_timed_set;
                     servo_timed_set.servo_timed = item;
-                    servo_timed_set.start_time = now;
-                    servo_timed_set.end_time = now + rclcpp::Duration::from_seconds(item.duration_s);
+                    servo_timed_set.start_time = now + rclcpp::Duration::from_seconds(item.delay_s);
+                    servo_timed_set.end_time = now + rclcpp::Duration::from_seconds(item.duration_s + item.delay_s);
                     servo_timed_set.active = true;
 
                     RCLCPP_DEBUG(this->get_logger(), "Scheduled timed move for Servo ID %d from %.3f to %.3f over %.3f seconds",
                                  item.id, item.start_angle, item.end_angle, item.duration_s);
 
-                    servo_timed_buffer_[item.id] = servo_timed_set;
+                    servo_timed_buffer_.push_back(servo_timed_set);
                 }
             });
 
@@ -172,23 +184,32 @@ namespace Modelec
             "action/move/servo/timed/res", 10);
 
 		servo_timed_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(TIMER_SERVO_TIMED_MS),
+            std::chrono::milliseconds(timed_servo_timer_ms),
             [this]()
             {
+                if (servo_timed_buffer_.empty()) {
+                    return;
+                }
+
                 rclcpp::Time now = this->now();
 
                 modelec_interfaces::msg::ActionServoTimedArray servo_timed_msg;
 
-				std::map<int, double> to_send;
+				std::vector<std::pair<int, double>> to_send;
 
-                for (auto& [id, servo_timed_set] : servo_timed_buffer_)
+                for (auto& servo_timed_set : servo_timed_buffer_)
                 {
+                    if (servo_timed_set.active && now.nanoseconds() < servo_timed_set.start_time.nanoseconds())
+                    {
+                        continue;
+                    }
                     if (servo_timed_set.active && now.nanoseconds() >= servo_timed_set.end_time.nanoseconds())
                     {
                         RCLCPP_DEBUG(this->get_logger(), "Timed move for Servo ID %d completed. Setting to final angle %.3f",
-                                     id, servo_timed_set.servo_timed.end_angle);
+                                     servo_timed_set.servo_timed.id, servo_timed_set.servo_timed.end_angle);
 
-                        to_send[id] = servo_timed_set.servo_timed.end_angle;
+                        to_send.emplace_back(servo_timed_set.servo_timed.id, servo_timed_set.servo_timed.end_angle);
+
                         servo_timed_set.active = false;
 
                         servo_timed_msg.items.push_back(servo_timed_set.servo_timed);
@@ -199,12 +220,13 @@ namespace Modelec
                         double duration = (servo_timed_set.end_time - servo_timed_set.start_time).seconds();
                         double progress = elapsed / duration;
 
-                        RCLCPP_DEBUG(this->get_logger(), "Servo ID %d progress: %.3f | %.3f %.3f", id, progress, elapsed, duration);
+                        RCLCPP_DEBUG(this->get_logger(), "Servo ID %d progress: %.3f | %.3f %.3f",
+                            servo_timed_set.servo_timed.id, progress, elapsed, duration);
 
                         double intermediate_angle = servo_timed_set.servo_timed.start_angle +
-                                                    progress * (servo_timed_set.servo_timed.end_angle - servo_timed_set.servo_timed.start_angle);
+                            progress * (servo_timed_set.servo_timed.end_angle - servo_timed_set.servo_timed.start_angle);
 
-						to_send[id] = intermediate_angle;
+						to_send.emplace_back(servo_timed_set.servo_timed.id, intermediate_angle);
                     }
                 }
 
@@ -228,47 +250,22 @@ namespace Modelec
                     servo_move_timed_res_pub_->publish(servo_timed_msg);
                 }
 
+                servo_timed_buffer_.erase(
+                std::remove_if(
+                    servo_timed_buffer_.begin(),
+                    servo_timed_buffer_.end(),
+                    [&](const ServoTimedSet& s)
+                    {
+                        return s.active == false;
+                    }),
+                servo_timed_buffer_.end());
+
+
 			});
 
         this->open(baudrate, serial_port, MAX_MESSAGE_LEN);
 
-        // TODO : check for real value there
-        /*asc_value_mapper_ = {
-            {0, 0},
-            {1, 100},
-            {2, 200},
-            {3, 300}
-        };*/
-        /*for (auto & [id, v] : asc_value_mapper_)
-        {
-            SendOrder("ASC", {std::to_string(id), std::to_string(v)});
-        }*/
-
-        // asc_state_ = 3;
-
-        // SendMove("ASC", {std::to_string(asc_state_)});
-
-        // rclcpp::sleep_for(std::chrono::milliseconds(100));
-
-        /*servo_value_ = {
-            {0, 1},
-            {1, 1},
-            {2, 0},
-            {3, 0},
-            {4, 1},
-            {5, 0}
-        };*/
-
-        servo_value_ = {
-            {0, 2.93},
-            {1, 0.91},
-            {2, 3.05},
-            {3, 0.3},
-            {4, 1},
-            {5, 1},
-            {6, 1},
-            {7, 1},
-        };
+        servo_value_ = Config::get<std::unordered_map<int, double>>("action.init.servo");
 
         std::string data = "MOV;SERVO;" + std::to_string(servo_value_.size()) + ";";
 
@@ -280,31 +277,6 @@ namespace Modelec
 		data += "\n";
 
         SendToPCB(data);
-
-        /*relay_value_ = {
-            {1, false},
-            {2, false},
-            {3, false},
-        };*/
-
-        /*rclcpp::sleep_for(std::chrono::milliseconds(100));
-
-        data = "SET;RELAY;STATE;";
-        data += std::to_string(relay_value_.size()) + ";";
-
-        for (auto & [id, v] : relay_value_)
-        {
-            data += std::to_string(id) + ";" + std::to_string(v) + ";";
-        }
-
-        SendToPCB(data);*/
-
-        /*for (auto & [id, v] : relay_value_)
-        {
-            rclcpp::sleep_for(std::chrono::milliseconds(100));
-
-            SendMove("RELAY" + std::to_string(id), {std::to_string(v)});
-        }*/
     }
 
     PCBActionInterface::~PCBActionInterface()
@@ -533,7 +505,6 @@ namespace Modelec
         SendToPCB(command);
     }
 
-    // TODO CHANGE TO AAA;BBB;N;X;Y;X;Y;X;Y where N is number of elem you want to send
     void PCBActionInterface::GetData(const std::string& elem, const std::vector<std::string>& data)
     {
         SendToPCB("GET", elem, data);

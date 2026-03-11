@@ -18,8 +18,8 @@ namespace Modelec
         }
 
         Obstacle(int id, int x, int y, double theta, int w, int h, const std::string& type);
-        Obstacle(tinyxml2::XMLElement* obstacleElem);
         Obstacle(const modelec_interfaces::msg::Obstacle& msg);
+        Obstacle(int id);
         Obstacle(const Obstacle& other) = default;
 
         virtual ~Obstacle() = default;
@@ -32,7 +32,7 @@ namespace Modelec
         double GetTheta() const;
         int GetWidth() const;
         int GetHeight() const;
-        const std::string& Type() const;
+        const std::string& GetType() const;
         Point GetPosition() const;
 
         void SetId(int id);
@@ -52,11 +52,15 @@ namespace Modelec
         bool IsAtObjective() const;
         void SetAtObjective(bool atObjective);
 
+        bool ShouldTakeCountInPathfinding() const;
+        void SetTakeCountInPathfinding(bool takeCount);
+
     protected:
         int id_, x_, y_, w_, h_;
         double theta_;
         std::string type_;
 
         bool isAtObjective = false;
+        bool takeCountInPathfinding = true;
     };
 }

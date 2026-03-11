@@ -2,6 +2,7 @@
 
 #include "obstacle.hpp"
 #include <modelec_interfaces/msg/odometry_pos.hpp>
+#include <modelec_utils/config.hpp>
 
 namespace Modelec
 {
@@ -18,7 +19,7 @@ namespace Modelec
         BoxObstacle(const BoxObstacle&) = default;
 
         BoxObstacle(int id, int x, int y, double theta, int w, int h, const std::string& type);
-        BoxObstacle(tinyxml2::XMLElement* obstacleElem);
+        BoxObstacle(int id);
         BoxObstacle(const modelec_interfaces::msg::Obstacle& msg);
 
         Point GetOptimizedGetPos(const modelec_interfaces::msg::OdometryPos::SharedPtr& msg) const;
@@ -42,8 +43,8 @@ namespace Modelec
         std::array<Team, 4> colors_ = {
             BLUE,
             BLUE,
-            BLUE,
-            BLUE
+            YELLOW,
+            YELLOW
         };
     };
 }

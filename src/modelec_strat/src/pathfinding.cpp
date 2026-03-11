@@ -1,5 +1,6 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <modelec_strat/pathfinding.hpp>
+#include <modelec_utils/config.hpp>
 
 namespace Modelec {
     struct AStarNode {
@@ -22,39 +23,22 @@ namespace Modelec {
     }
 
     Pathfinding::Pathfinding(const rclcpp::Node::SharedPtr &node) : node_(node) {
-        node_->declare_parameter("map.size.map_width_mm", 3000);
-        node_->declare_parameter("map.size.map_height_mm", 2000);
-        node_->declare_parameter("map.size.grid_width", 300);
-        node_->declare_parameter("map.size.grid_height", 200);
 
-        map_width_mm_ = node_->get_parameter("map.size.map_width_mm").as_int();
-        map_height_mm_ = node_->get_parameter("map.size.map_height_mm").as_int();
-        grid_width_ = node_->get_parameter("map.size.grid_width").as_int();
-        grid_height_ = node_->get_parameter("map.size.grid_height").as_int();
+        map_width_mm_ = Config::get<int>("config.map.size.map_width_mm", 3000);
+        map_height_mm_ = Config::get<int>("config.map.size.map_height_mm", 2000);
+        grid_width_ = Config::get<int>("config.map.size.grid_width", 300);
+        grid_height_ = Config::get<int>("config.map.size.grid_height", 200);
 
-        node_->declare_parameter("robot.size.length_mm", 300);
-        node_->declare_parameter("robot.size.width_mm", 300);
-        node_->declare_parameter("robot.size.margin_mm", 100);
+        robot_length_mm_ = Config::get<int>("config.robot.size.length_mm", 300);
+        robot_width_mm_ = Config::get<int>("config.robot.size.width_mm", 200);
+        margin_mm_ = Config::get<int>("config.robot.size.margin_mm", 50);
 
-        robot_length_mm_ = node_->get_parameter("robot.size.length_mm").as_int();
-        robot_width_mm_ = node_->get_parameter("robot.size.width_mm").as_int();
-        margin_mm_ = node_->get_parameter("robot.size.margin_mm").as_int();
+        enemy_length_mm_ = Config::get<int>("config.enemy.size.length_mm", 300);
+        enemy_width_mm_ = Config::get<int>("config.enemy.size.width_mm", 300);
+        enemy_margin_mm_ = Config::get<int>("config.enemy.size.margin_mm", 0);
+        factor_close_enemy_ = Config::get<float>("config.factor.close_enemy", 1.0f);
 
-        node_->declare_parameter("enemy.size.length_mm", 300);
-        node_->declare_parameter("enemy.size.width_mm", 300);
-        node_->declare_parameter("enemy.size.margin_mm", 50);
-        node_->declare_parameter("enemy.factor_close_enemy", -0.5);
-
-        enemy_length_mm_ = node_->get_parameter("enemy.size.length_mm").as_int();
-        enemy_width_mm_ = node_->get_parameter("enemy.size.width_mm").as_int();
-        enemy_margin_mm_ = node_->get_parameter("enemy.size.margin_mm").as_int();
-        factor_close_enemy_ = node_->get_parameter("enemy.factor_close_enemy").as_double();
-
-        std::string obstacles_path = ament_index_cpp::get_package_share_directory("modelec_strat") +
-                                     "/data/obstacles.xml";
-        if (!LoadObstaclesFromXML(obstacles_path)) {
-            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacles from XML");
-        }
+        LoadObstaclesFromXML();
 
         obstacle_add_sub_ = node_->create_subscription<modelec_interfaces::msg::Obstacle>(
             "obstacle/add", 10,
@@ -201,7 +185,11 @@ namespace Modelec {
 
         // 2. Fill obstacles with inflation
         // TODO some bug exist with the inflate
-        for (const auto &[id, obstacle]: obstacle_map_) {
+        for (const auto &obstacle: obstacles_) {
+            if (!obstacle->ShouldTakeCountInPathfinding())
+            {
+                continue;
+            }
             float cx = obstacle->GetX();
             float cy = obstacle->GetY();
             float width = obstacle->GetWidth() + inflate_x * 2 * cell_size_mm_x;
@@ -286,10 +274,10 @@ namespace Modelec {
 
         if (!TestCollision(start_x, start_y, collisionMask) || !TestCollision(goal_x, goal_y, collisionMask)) {
             if (!TestCollision(start_x, start_y, collisionMask)) {
-                RCLCPP_WARN(node_->get_logger(), "Start inside an obstacle");
+                RCLCPP_WARN(node_->get_logger(), "Start inside an obstacle x=%d y=%d mask=%d | %d", start_x, start_y, collisionMask, grid_[start_y][start_x]);
                 return {grid_[start_y][start_x], waypoints};
             } else {
-                RCLCPP_WARN(node_->get_logger(), "Goal inside an obstacle");
+                RCLCPP_WARN(node_->get_logger(), "Goal inside an obstacle x=%d y=%d mask=%d | %d", goal_x, goal_y, collisionMask, grid_[goal_y][goal_x]);
                 return {grid_[goal_y][goal_x], waypoints};
             }
         }
@@ -505,11 +493,13 @@ namespace Modelec {
     }
 
     std::shared_ptr<Obstacle> Pathfinding::GetObstacle(int id) const {
-        return obstacle_map_.at(id);
+        return obstacles_.at(id);
     }
 
     void Pathfinding::RemoveObstacle(int id) {
-        obstacle_map_.erase(id);
+        obstacles_.erase(std::remove_if(obstacles_.begin(), obstacles_.end(),
+                                           [id](const std::shared_ptr<Obstacle> &obs) { return obs->GetId() == id; }),
+                            obstacles_.end());
 
         modelec_interfaces::msg::Obstacle msg;
         msg.id = id;
@@ -517,7 +507,7 @@ namespace Modelec {
     }
 
     void Pathfinding::AddObstacle(const std::shared_ptr<Obstacle> &obstacle) {
-        obstacle_map_[obstacle->GetId()] = obstacle;
+        obstacles_.push_back(obstacle);
         modelec_interfaces::msg::Obstacle msg = obstacle->toMsg();
         obstacle_add_pub_->publish(msg);
     }
@@ -542,7 +532,7 @@ namespace Modelec {
 
     void Pathfinding::HandleAskObstacleRequest(const std::shared_ptr<std_srvs::srv::Empty::Request>,
                                                const std::shared_ptr<std_srvs::srv::Empty::Response>) {
-        for (auto &[index, obs]: obstacle_map_) {
+        for (auto &obs: obstacles_) {
             obstacle_add_pub_->publish(obs->toMsg());
         }
     }
@@ -554,7 +544,7 @@ namespace Modelec {
 
     void Pathfinding::OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg) {
         Point enemyPos(msg->x, msg->y, msg->theta);
-        for (auto &[index, obs]: obstacle_map_) {
+        for (auto &obs: obstacles_) {
             if (auto column = std::dynamic_pointer_cast<BoxObstacle>(obs)) {
                 if (Point::distance(enemyPos, column->GetPosition()) < enemy_width_mm_ + (column->GetWidth() / 2) +
                     enemy_margin_mm_) {
@@ -568,41 +558,29 @@ namespace Modelec {
         if (y < 0 || y >= static_cast<int>(grid_.size()) ||
             x < 0 || x >= static_cast<int>(grid_[y].size())) {
             RCLCPP_WARN(node_->get_logger(), "TestCollision: access out of bounds x=%d y=%d", x, y);
-            return false; // ou true, selon ce que tu veux (false = pas de collision)
+            return false;
         }
 
         return (grid_[y][x] & collisionMask) && !(grid_[y][x] & ~collisionMask);
     }
 
-    bool Pathfinding::LoadObstaclesFromXML(const std::string &filename) {
-        tinyxml2::XMLDocument doc;
-        if (doc.LoadFile(filename.c_str()) != tinyxml2::XML_SUCCESS) {
-            RCLCPP_ERROR(node_->get_logger(), "Failed to load obstacle XML file: %s", filename.c_str());
-            return false;
+    void Pathfinding::LoadObstaclesFromXML() {
+        auto obs = Config::getArray<std::string>("Obstacles.Obstacle", [](const std::string& prefix)
+        {
+            return Config::get<std::string>(prefix + "@type", "box");
+        });
+        for (size_t i = 0; i < obs.size(); ++i)
+        {
+            if (obs[i] == "box")
+            {
+                obstacles_.push_back(std::make_shared<BoxObstacle>(i));
+            } else
+            {
+                obstacles_.push_back(std::make_shared<Obstacle>(i));
+            }
         }
 
-        tinyxml2::XMLElement *root = doc.FirstChildElement("Obstacles");
-        if (!root) {
-            RCLCPP_ERROR(node_->get_logger(), "No <Obstacles> root element in file");
-            return false;
-        }
-
-        for (tinyxml2::XMLElement *obstacleElem = root->FirstChildElement("Obstacle");
-             obstacleElem != nullptr;
-             obstacleElem = obstacleElem->NextSiblingElement("Obstacle")) {
-            std::shared_ptr<Obstacle> obs = std::make_shared<Obstacle>(obstacleElem);
-            obstacle_map_[obs->GetId()] = obs;
-        }
-
-        for (tinyxml2::XMLElement *obstacleElem = root->FirstChildElement("Box");
-             obstacleElem != nullptr;
-             obstacleElem = obstacleElem->NextSiblingElement("Box")) {
-            std::shared_ptr<BoxObstacle> obs = std::make_shared<BoxObstacle>(obstacleElem);
-            obstacle_map_[obs->GetId()] = obs;
-        }
-
-        RCLCPP_INFO(node_->get_logger(), "Loaded %zu obstacles from XML", obstacle_map_.size());
-        return true;
+        RCLCPP_INFO(node_->get_logger(), "Loaded %zu obstacles from XML", obstacles_.size());
     }
 
     Waypoint::Waypoint(const modelec_interfaces::msg::OdometryPos &pos, int index, bool isLast) {

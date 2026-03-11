@@ -5,7 +5,6 @@
 #include "modelec_strat/action/free_action.hpp"
 #include "modelec_strat/action/take_action.hpp"
 #include "modelec_strat/action/toggle_servo_action.hpp"
-#include "modelec_strat/action/look_on_action.hpp"
 #include "modelec_strat/action/thermo_action.hpp"
 #include "modelec_utils/utils.hpp"
 
@@ -87,7 +86,6 @@ namespace Modelec
         joy_sub_ = node_->create_subscription<sensor_msgs::msg::Joy>(
             "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg)
             {
-                // use game controller to manually control all the action. make it carefully
                 if (msg->buttons.size() >= 15)
                 {
                     if (msg->buttons[0] == 1) // A button
@@ -132,13 +130,19 @@ namespace Modelec
                             RotateArm(BaseAction::FRONT, false, !arm_pos_[BaseAction::FRONT].rotated);
                         }
                     }
-                    else if (msg->buttons[14] == 1) // LT button
+                    else if (msg->buttons[13] == 1) // LT button
                     {
-                        ActivateThermo(BaseAction::Side::LEFT, !thermo_state_[BaseAction::Side::LEFT]);
+                        if (action_done_)
+                        {
+                            ActivateThermo(BaseAction::Side::LEFT, !thermo_state_[BaseAction::Side::LEFT]);
+                        }
                     }
-                    else if (msg->buttons[15] == 1) // LR button
+                    else if (msg->buttons[14] == 1) // LR button
                     {
-                        ActivateThermo(BaseAction::Side::RIGHT, !thermo_state_[BaseAction::Side::RIGHT]);
+                        if (action_done_)
+                        {
+                            ActivateThermo(BaseAction::Side::RIGHT, !thermo_state_[BaseAction::Side::RIGHT]);
+                        }
                     }
                 }
                 if (msg->axes.size() == 8)
@@ -223,10 +227,18 @@ namespace Modelec
 
                 RCLCPP_DEBUG(node_->get_logger(), "Color detection succeeded: %s", res[1].c_str());
 
-                if (box_obstacles_[cam_side_] != nullptr) {
-                    box_obstacles_[cam_side_]->ParseColor(res[1]);
+                auto color = split(res[1], ';');
+
+                if (box_obstacles_[BaseAction::FRONT] != nullptr) {
+                    box_obstacles_[BaseAction::FRONT]->ParseColor(std::vector(color.begin(), color.begin() + 4));
                 } else {
-                    RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box in the cam side");
+                    RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box obstacle found to update");
+                }
+
+                if (box_obstacles_[BaseAction::BACK] != nullptr) {
+                    box_obstacles_[BaseAction::BACK]->ParseColor(std::vector(color.begin() + 4, color.begin() + 8));
+                } else {
+                    RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box obstacle found to update");
                 }
             });
 
@@ -476,22 +488,6 @@ namespace Modelec
         }
     }
 
-    void ActionExecutor::LookOn(BaseAction::Side side, bool force)
-    {
-        if (cam_side_ != side || force)
-        {
-            auto action = std::make_shared<LookOnAction>(shared_from_this(), side);
-            action_.push(action);
-            if (action_done_)
-            {
-                step_running_ = 0;
-            }
-            action_done_ = false;
-
-            Update();
-        }
-    }
-
     void ActionExecutor::ActionFinished(const std::shared_ptr<BaseAction>& action)
     {
         RCLCPP_DEBUG(
@@ -539,27 +535,6 @@ namespace Modelec
 
     void ActionExecutor::AskColor() const
     {
-        /*if (!ask_color_client_->service_is_ready()) {
-            RCLCPP_ERROR(node_->get_logger(), "Color detection service not ready");
-            return;
-        }
-
-        auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
-
-        ask_color_client_->async_send_request(request,
-            [this](rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture future) {
-                auto response = future.get();
-                if (response->success) {
-                    RCLCPP_INFO(node_->get_logger(), "Color detection succeeded: %s", response->message.c_str());
-                    if (box_obstacles_[cam_side_] != nullptr) {
-                        box_obstacles_[cam_side_]->ParseColor(response->message);
-                    } else {
-                        RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box in the cam side");
-                    }
-                } else {
-                    RCLCPP_ERROR(node_->get_logger(), "Color detection failed: %s", response->message.c_str());
-                }
-            });*/
         ask_pub_->publish(std_msgs::msg::Empty());
     }
 }

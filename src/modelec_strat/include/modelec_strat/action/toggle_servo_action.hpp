@@ -18,6 +18,7 @@ namespace Modelec
         void AddServo(int id, Side side);
         void AddServo(std::pair<int, Side> servo);
         void AddServos(const std::vector<std::pair<int, Side>>& servos);
+        static void InitConfig();
 
         void End() override;
 
@@ -27,6 +28,14 @@ namespace Modelec
         std::vector<std::pair<int, Side>> servos_;
 
         std::queue<int> steps_;
+
+        static inline int first_servo_;
+        static inline int second_servo_;
+        static inline double start_angle_;
+        static inline double end_angle_;
+        static inline double duration_s_;
+
+        static inline bool isConfigInit_ = false;
 
         inline static const bool registered_ =
         []()

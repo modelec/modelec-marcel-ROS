@@ -85,26 +85,26 @@ namespace Modelec
 
         PosMsg::SharedPtr GetCurrentPos() const;
 
-        bool LoadDepositeZoneFromXML(const std::string& filename);
+        void LoadDepositeZoneFromXML();
 
         std::shared_ptr<DepositeZone> GetClosestDepositeZone(const PosMsg::SharedPtr& pos,
                                                              const std::vector<int>& blacklistedId = {}, bool only_free = false);
 
         template <typename T,
           typename = std::enable_if_t<std::is_base_of<Obstacle, T>::value>>
-        std::shared_ptr<T> GetClosestObstacle(const PosMsg::SharedPtr& pos) const;
+        std::shared_ptr<T> GetClosestObstacle(const PosMsg::SharedPtr& pos, bool countObjective = false) const;
 
         PosMsg::SharedPtr GetHomePosition();
         std::array<Point, 2> GetThermoPositions();
 
-        void OnEnemyPosition(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
+        void OnEnemyPosition(modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
-        void OnEnemyPositionLongTime(const modelec_interfaces::msg::OdometryPos::SharedPtr msg);
+        void OnEnemyPositionLongTime(modelec_interfaces::msg::OdometryPos::SharedPtr msg);
 
         bool DoesLineIntersectCircle(const Point& start, const Point& end,
                                      const Point& center, float radius);
 
-        bool EnemyOnPath(const modelec_interfaces::msg::OdometryPos msg);
+        bool EnemyOnPath(modelec_interfaces::msg::OdometryPos msg);
 
         bool Replan(bool force = false);
 
@@ -152,7 +152,7 @@ namespace Modelec
 
         PosMsg::SharedPtr current_pos_;
 
-        std::map<int, std::shared_ptr<DepositeZone>> deposite_zones_;
+        std::vector<std::shared_ptr<DepositeZone>> deposite_zones_;
 
         rclcpp::Subscription<WaypointMsg>::SharedPtr waypoint_reach_sub_;
         rclcpp::Publisher<WaypointMsg>::SharedPtr waypoint_pub_;
@@ -181,7 +181,7 @@ namespace Modelec
     };
 
     template <typename T, typename>
-    std::shared_ptr<T> NavigationHelper::GetClosestObstacle(const PosMsg::SharedPtr& pos) const
+    std::shared_ptr<T> NavigationHelper::GetClosestObstacle(const PosMsg::SharedPtr& pos, bool countObjective) const
     {
         std::shared_ptr<T> closest_obstacle = nullptr;
         auto robotPos = Point(pos->x, pos->y, pos->theta);
@@ -190,9 +190,9 @@ namespace Modelec
 
         for (const auto& obstacle : GetPathfinding()->GetObstacles())
         {
-            if (auto obs = std::dynamic_pointer_cast<T>(obstacle.second))
+            if (auto obs = std::dynamic_pointer_cast<T>(obstacle))
             {
-                if (!obs->IsAtObjective())
+                if (!obs->IsAtObjective() || countObjective)
                 {
                     auto obsPoint = obs->GetPosition();
                     double distance = Point::distance(robotPos, obsPoint);

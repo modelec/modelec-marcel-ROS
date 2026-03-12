@@ -1,23 +1,23 @@
 <Map>
-    <epositeZone id="0">
+    <!--<DepositeZone id="0">
         <Pos x="1250" y="1450" theta="0" w="200" h="200" />
         <TakeAngle>
             <Angle>-1.5708</Angle>
         </TakeAngle>
-    </epositeZone>
+    </DepositeZone>-->
     <DepositeZone id="1">
         <Pos x="1750" y="1450" theta="0" w="200" h="200" />
         <TakeAngle>
             <Angle>-1.5708</Angle>
         </TakeAngle>
     </DepositeZone>
-    <epositeZone id="2">
+    <!--<DepositeZone id="2">
         <Pos x="100" y="800" theta="0" w="200" h="200" />
         <TakeAngle>
             <Angle>0</Angle>
         </TakeAngle>
-    </epositeZone>
-    <epositeZone id="3">
+    </DepositeZone>-->
+    <!--<DepositeZone id="3">
         <Pos x="800" y="800" theta="0" w="200" h="200" />
         <TakeAngle>
             <Angle>0</Angle>
@@ -25,8 +25,8 @@
             <Angle>-1.5708</Angle>
             <Angle>3.1415</Angle>
         </TakeAngle>
-    </epositeZone>
-    <DepositeZone id="4">
+    </DepositeZone>-->
+    <!--<DepositeZone id="4">
         <Pos x="1500" y="800" theta="0" w="200" h="200" />
         <TakeAngle>
             <Angle>0</Angle>
@@ -34,7 +34,7 @@
             <Angle>-1.5708</Angle>
             <Angle>3.1415</Angle>
         </TakeAngle>
-    </DepositeZone>
+    </DepositeZone>-->
     <DepositeZone id="5">
         <Pos x="2200" y="800" theta="0" w="200" h="200" />
         <TakeAngle>
@@ -50,18 +50,18 @@
             <Angle>3.1415</Angle>
         </TakeAngle>
     </DepositeZone>
-    <epositeZone id="7">
+    <!--<DepositeZone id="7">
         <Pos x="700" y="100" theta="0" w="200" h="200" />
         <TakeAngle>
             <Angle>1.5708</Angle>
         </TakeAngle>
-    </epositeZone>
-    <DepositeZone id="8">
+    </DepositeZone>-->
+    <!--<DepositeZone id="8">
         <Pos x="1500" y="100" theta="0" w="200" h="200" />
         <TakeAngle>
             <Angle>1.5708</Angle>
         </TakeAngle>
-    </DepositeZone>
+    </DepositeZone>-->
     <DepositeZone id="9">
         <Pos x="2300" y="100" theta="0" w="200" h="200" />
         <TakeAngle>

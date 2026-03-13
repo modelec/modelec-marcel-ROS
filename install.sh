@@ -19,7 +19,7 @@ sudo apt update -y
 
 sudo apt upgrade -y
 
-sudo apt install ros-dev-tools ros-jazzy-desktop -y
+sudo apt install ros-dev-tools ros-jazzy-ros-base -y
 
 sudo apt install qt6-base-dev qt6-svg-dev qt6-multimedia-dev libxml2-dev socat libboost-all-dev libopencv-dev -y
 

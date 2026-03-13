@@ -213,4 +213,4 @@ if __name__ == "__main__":
 # socat -d -d pty,raw,echo=0,link=/tmp/SIM_ACTION pty,raw,echo=0,link=/tmp/USB_ACTION
 # python3 simulated_pcb/action.py --port /tmp/SIM_ACTION
 # socat -d -d pty,raw,echo=0,link=/tmp/SIM_ODO pty,raw,echo=0,link=/tmp/USB_ODO
-# python3 simulated_pcb/action.py --port /tmp/SIM_ODO
+# python3 simulated_pcb/odo.py --port /tmp/SIM_ODO

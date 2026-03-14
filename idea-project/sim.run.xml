@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="sim" type="CompoundRunConfigurationType">
+    <toRun name="sim action" type="ShConfigurationType" />
+    <toRun name="sim odo" type="ShConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>

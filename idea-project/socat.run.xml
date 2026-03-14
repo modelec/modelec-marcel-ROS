@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="socat" type="CompoundRunConfigurationType">
+    <toRun name="socat action" type="ShConfigurationType" />
+    <toRun name="socat odo" type="ShConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>

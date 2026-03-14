@@ -19,9 +19,9 @@ sudo apt update -y
 
 sudo apt upgrade -y
 
-sudo apt install ros-dev-tools ros-jazzy-desktop -y
+sudo apt install ros-dev-tools ros-jazzy-ros-base -y
 
-sudo apt-get install qt6-base-dev qt6-svg-dev qt6-multimedia-dev libxml2-dev socat -y
+sudo apt install qt6-base-dev qt6-svg-dev qt6-multimedia-dev libxml2-dev socat libboost-all-dev libopencv-dev python3-serial -y
 
 git submodule init
 git submodule update

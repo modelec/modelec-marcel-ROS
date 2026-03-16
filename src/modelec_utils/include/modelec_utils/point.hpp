@@ -1,7 +1,7 @@
 #pragma once
 
-#define CLOSE_DISTANCE 150
-#define BASE_DISTANCE 270
+#define CLOSE_DISTANCE 160
+#define BASE_DISTANCE 280
 
 namespace Modelec
 {

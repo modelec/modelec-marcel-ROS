@@ -106,12 +106,12 @@
     </timer>
     <thermo>
         <yellow>
-            <start x="200" y="200" theta="0" />
-            <finish x="700" y="200" theta="0" />
+            <start x="200" y="250" theta="0" />
+            <finish x="700" y="250" theta="0" />
         </yellow>
         <blue>
-            <start x="2800" y="175" theta="3.14" />
-            <finish x="2300" y="175" theta="3.14" />
+            <start x="2800" y="250" theta="3.14" />
+            <finish x="2300" y="250" theta="3.14" />
         </blue>
     </thermo>
     <cam>

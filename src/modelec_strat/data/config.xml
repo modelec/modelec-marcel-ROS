@@ -94,7 +94,7 @@
     </factor>
     <timer>
         <strat>
-            <ms>20</ms>
+            <ms>10</ms>
         </strat>
         <action>
             <timed_servo>

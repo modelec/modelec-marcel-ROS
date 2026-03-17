@@ -155,7 +155,6 @@ namespace Modelec
                 arm_msg.data = true;
                 tir_arm_set_pub_->publish(arm_msg);
 
-                action_executor_->Up(BaseAction::Side::BOTH, true);
                 action_executor_->Free({
                     {0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT},
                     {0, BaseAction::BACK}, {1, BaseAction::BACK}, {2, BaseAction::BACK}, {3, BaseAction::BACK},

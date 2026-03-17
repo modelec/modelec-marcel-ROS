@@ -1,9 +1,17 @@
 <action>
     <init>
-        <servo id="0" angle="3.12" />
+        <!--<servo id="0" angle="3.12" />
         <servo id="1" angle="0.91" />
         <servo id="2" angle="3.45" />
         <servo id="3" angle="0" />
+        <servo id="4" angle="1" />
+        <servo id="5" angle="1" />
+        <servo id="6" angle="1" />
+        <servo id="7" angle="1" />-->
+        <servo id="0" angle="1.84" />
+        <servo id="1" angle="2.15" />
+        <servo id="2" angle="0.5" />
+        <servo id="3" angle="2.9" />
         <servo id="4" angle="1" />
         <servo id="5" angle="1" />
         <servo id="6" angle="1" />

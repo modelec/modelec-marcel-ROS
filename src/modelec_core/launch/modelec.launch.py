@@ -30,9 +30,8 @@ def generate_launch_description():
     serial_baudrate = LaunchConfiguration('serial_baudrate', default='115200')
     frame_id = LaunchConfiguration('frame_id', default='laser')
     inverted = LaunchConfiguration('inverted', default='false')
-    angle_compensate = LaunchConfiguration('angle_compensate', default='false')
-    # Changed to 'Standard' to help with the timeout issues we discussed
-    scan_mode = LaunchConfiguration('scan_mode', default='Standard')
+    angle_compensate = LaunchConfiguration('angle_compensate', default='true')
+    scan_mode = LaunchConfiguration('scan_mode', default='Sensitivity')
 
     # -------------------------------------------------
     # RPLIDAR logic (Starts Immediately)

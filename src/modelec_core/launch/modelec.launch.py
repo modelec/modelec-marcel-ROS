@@ -65,7 +65,6 @@ def generate_launch_description():
 
     def launch_rplidar_now(context, *args, **kwargs):
         if context.launch_configurations.get('with_rplidar') == 'true':
-            # Removed TimerAction here so it starts at T+0s
             return create_lidar_with_restart()
         return []
 
@@ -75,7 +74,7 @@ def generate_launch_description():
     def delay_launch(context, function_to_call):
         return [
             TimerAction(
-                period=15.0,
+                period=8.0,
                 actions=function_to_call(context)
             )
         ]

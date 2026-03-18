@@ -59,10 +59,10 @@
             <unrotated>
                 <msg id="0" start_angle="3.12" end_angle="1.84" duration_s="1" />
                 <msg id="1" start_angle="0.91" end_angle="2.15" duration_s="1" />
-                <msg id="2" start_angle="3.45" end_angle="2.95" duration_s="0.4" />
-                <msg id="2" start_angle="2.95" end_angle="0.5" duration_s="0.4" delay_s="0.4" />
-                <msg id="3" start_angle="0" end_angle="0.6" duration_s="0.4" />
-                <msg id="3" start_angle="0.6" end_angle="2.9" duration_s="0.4" delay_s="0.4" />
+                <msg id="2" start_angle="3.45" end_angle="2.95" duration_s="0.5" />
+                <msg id="2" start_angle="2.95" end_angle="0.5" duration_s="0.3" delay_s="0.5" />
+                <msg id="3" start_angle="0" end_angle="0.6" duration_s="0.3" />
+                <msg id="3" start_angle="0.6" end_angle="2.9" duration_s="0.3" delay_s="0.5" />
             </unrotated>
             <rotated>
                 <msg id="0" start_angle="2.98" end_angle="1.84" duration_s="1" />

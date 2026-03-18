@@ -5,7 +5,7 @@
 #include <modelec_strat/missions/move_mission.hpp>
 
 namespace Modelec {
-    class TakeMission : public MinTimeMission, public ActionMission, public MoveMission {
+    class TakeMission : public ActionMission, public MoveMission {
     public:
         TakeMission(const std::shared_ptr<NavigationHelper>& nav,
                       const std::shared_ptr<ActionExecutor>& action_executor,

@@ -14,7 +14,6 @@ namespace Modelec {
     {
         ActionMission::Start(node);
         MoveMission::Start(node);
-        MinTimeMission::Start(node);
 
         status_ = MissionStatus::RUNNING;
 
@@ -31,7 +30,7 @@ namespace Modelec {
 
     bool TakeMission::Update()
     {
-        if (!ActionMission::Update() || !MoveMission::Update() || !MinTimeMission::Update())
+        if (!ActionMission::Update() || !MoveMission::Update())
         {
             return false;
         }
@@ -56,8 +55,6 @@ namespace Modelec {
 
                 auto pos = closestBox->GetOptimizedGetPos(nav_->GetCurrentPos()).GetTakeBasePosition();
                 pos.theta = Point::normalizeAngle(pos.theta + (side_ == BaseAction::FRONT ? 0 : M_PI));
-
-                // TODO the robot do not go to the exact position i would like it to go to the exact so he can go forward after to take the box in a good way
 
                 if (nav_->GoToRotateFirst(pos, false, Pathfinding::FREE, side_ == BaseAction::FRONT) != Pathfinding::FREE)
                 {
@@ -105,7 +102,6 @@ namespace Modelec {
             {
                 action_executor_->Take({{0, side_}, {1, side_}, {2, side_}, {3, side_}});
                 deploy_time_ = node_->now();
-                min_time_ = node_->now() + rclcpp::Duration::from_seconds(0.5);
             }
             break;
         case UP:

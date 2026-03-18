@@ -14,7 +14,6 @@ namespace Modelec {
     {
         ActionMission::Start(node);
         MoveMission::Start(node);
-        MinTimeMission::Start(node);
 
         status_ = MissionStatus::RUNNING;
 
@@ -34,7 +33,7 @@ namespace Modelec {
 
     bool FreeMission::Update()
     {
-        if (!ActionMission::Update() || !MoveMission::Update() || !MinTimeMission::Update())
+        if (!ActionMission::Update() || !MoveMission::Update())
         {
             return false;
         }
@@ -128,8 +127,6 @@ namespace Modelec {
                 action_executor_->Free(servo);
 
                 deploy_time_ = node_->now();
-
-                min_time_ = node_->now() + rclcpp::Duration::from_seconds(1);
             }
             break;
         case ROTATE_ARM:
@@ -142,8 +139,6 @@ namespace Modelec {
             {
                 action_executor_->Free({{0, side_}, {1, side_}, {2, side_}, {3, side_}});
                 deploy_time_ = node_->now();
-
-                min_time_ = node_->now() + rclcpp::Duration::from_seconds(1);
             }
             break;
         case UP:

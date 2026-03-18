@@ -5,7 +5,7 @@
 #include <modelec_strat/missions/min_time_mission.hpp>
 
 namespace Modelec {
-    class FreeMission : public ActionMission, public MoveMission, public MinTimeMission {
+    class FreeMission : public ActionMission, public MoveMission {
     public:
         FreeMission(const std::shared_ptr<NavigationHelper>& nav,
                       const std::shared_ptr<ActionExecutor>& action_executor,

@@ -17,29 +17,13 @@ def generate_launch_description():
     # -------------------------------------------------
     # Launch arguments
     # -------------------------------------------------
-    with_gui_arg = DeclareLaunchArgument(
-        'with_gui', default_value='true', description='Launch GUI?'
-    )
-    with_rplidar_arg = DeclareLaunchArgument(
-        'with_rplidar', default_value='true', description='Launch RPLIDAR?'
-    )
-    with_com_arg = DeclareLaunchArgument(
-        'with_com', default_value='true', description='Launch COM nodes?'
-    )
-    with_strat_arg = DeclareLaunchArgument(
-        'with_strat', default_value='true', description='Launch strategy nodes (except enemy_manager)?'
-    )
-    with_enemy_manager_arg = DeclareLaunchArgument(
-        'with_enemy_manager',
-        default_value='true',
-        description='Launch enemy_manager node?',
-    )
-    with_joy_arg = DeclareLaunchArgument(
-        'with_joy', default_value='true', description='Launch joystick node?'
-    )
-    with_color_detector_arg = DeclareLaunchArgument(
-        'with_color_detector', default_value='true', description='Launch color detector node?'
-    )
+    with_gui_arg = DeclareLaunchArgument('with_gui', default_value='true')
+    with_rplidar_arg = DeclareLaunchArgument('with_rplidar', default_value='true')
+    with_com_arg = DeclareLaunchArgument('with_com', default_value='true')
+    with_strat_arg = DeclareLaunchArgument('with_strat', default_value='true')
+    with_enemy_manager_arg = DeclareLaunchArgument('with_enemy_manager', default_value='true')
+    with_joy_arg = DeclareLaunchArgument('with_joy', default_value='true')
+    with_color_detector_arg = DeclareLaunchArgument('with_color_detector', default_value='true')
 
     channel_type = LaunchConfiguration('channel_type', default='serial')
     serial_port = LaunchConfiguration('serial_port', default='/dev/rplidar')
@@ -47,10 +31,11 @@ def generate_launch_description():
     frame_id = LaunchConfiguration('frame_id', default='laser')
     inverted = LaunchConfiguration('inverted', default='false')
     angle_compensate = LaunchConfiguration('angle_compensate', default='false')
-    scan_mode = LaunchConfiguration('scan_mode', default='Sensitivity')
+    # Changed to 'Standard' to help with the timeout issues we discussed
+    scan_mode = LaunchConfiguration('scan_mode', default='Standard')
 
     # -------------------------------------------------
-    # RPLIDAR with auto-restart
+    # RPLIDAR logic (Starts Immediately)
     # -------------------------------------------------
     def create_lidar_with_restart():
         lidar_node = Node(
@@ -75,153 +60,86 @@ def generate_launch_description():
                     LogInfo(msg='[Launch] RPLIDAR crashed — restarting in 5s...'),
                     TimerAction(
                         period=5.0,
-                        actions=[
-                            OpaqueFunction(
-                                function=lambda *_: create_lidar_with_restart()
-                            )
-                        ],
+                        actions=[OpaqueFunction(function=lambda *_: create_lidar_with_restart())],
                     ),
                 ],
             )
         )
-
         return [lidar_node, restart_handler]
 
-    def launch_rplidar_restart_if_needed(context, *args, **kwargs):
+    def launch_rplidar_now(context, *args, **kwargs):
         if context.launch_configurations.get('with_rplidar') == 'true':
-            return [
-                TimerAction(
-                    period=3.0,
-                    actions=create_lidar_with_restart(),
-                )
-            ]
+            # Removed TimerAction here so it starts at T+0s
+            return create_lidar_with_restart()
         return []
 
     # -------------------------------------------------
-    # GUI
+    # Helper to delay other nodes
+    # -------------------------------------------------
+    def delay_launch(context, function_to_call):
+        return [
+            TimerAction(
+                period=3.0,
+                actions=function_to_call(context)
+            )
+        ]
+
+    # -------------------------------------------------
+    # Node Launch Functions
     # -------------------------------------------------
     def launch_gui(context, *args, **kwargs):
         if context.launch_configurations.get('with_gui') == 'true':
-            gui = Node(
-                package='modelec_gui',
-                executable='modelec_gui',
-                name='modelec_gui',
-            )
-
-            shutdown = RegisterEventHandler(
-                OnProcessExit(
-                    target_action=gui,
-                    on_exit=[Shutdown()],
-                )
-            )
-            return [gui, shutdown]
+            gui = Node(package='modelec_gui', executable='modelec_gui', name='modelec_gui')
+            return [gui, RegisterEventHandler(OnProcessExit(target_action=gui, on_exit=[Shutdown()]))]
         return []
 
-    # -------------------------------------------------
-    # COM nodes
-    # -------------------------------------------------
     def launch_com(context, *args, **kwargs):
         if context.launch_configurations.get('with_com') == 'true':
             return [
-                Node(
-                    package='modelec_com',
-                    executable='pcb_odo_interface',
-                    name='pcb_odo_interface',
-                ),
-                Node(
-                    package='modelec_com',
-                    executable='pcb_action_interface',
-                    name='pcb_action_interface',
-                ),
+                Node(package='modelec_com', executable='pcb_odo_interface', name='pcb_odo_interface'),
+                Node(package='modelec_com', executable='pcb_action_interface', name='pcb_action_interface'),
             ]
         return []
 
-    # -------------------------------------------------
-    # Strategy nodes
-    # -------------------------------------------------
     def launch_strat(context, *args, **kwargs):
         if context.launch_configurations.get('with_strat') == 'true':
             return [
-                Node(
-                    package='modelec_strat',
-                    executable='strat_fsm',
-                    name='strat_fsm',
-                    # prefix=['xterm -e gdb -ex run --args'],
-                ),
-                Node(
-                    package='modelec_strat',
-                    executable='pami_manager',
-                    name='pami_manager',
-                ),
+                Node(package='modelec_strat', executable='strat_fsm', name='strat_fsm'),
+                Node(package='modelec_strat', executable='pami_manager', name='pami_manager'),
             ]
         return []
 
-    # -------------------------------------------------
-    # Enemy manager
-    # -------------------------------------------------
     def launch_enemy_manager(context, *args, **kwargs):
         if context.launch_configurations.get('with_enemy_manager') == 'true':
-            return [
-                Node(
-                    package='modelec_strat',
-                    executable='enemy_manager',
-                    name='enemy_manager',
-                )
-            ]
+            return [Node(package='modelec_strat', executable='enemy_manager', name='enemy_manager')]
         return []
 
-    # -------------------------------------------------
-    # Joystick
-    # -------------------------------------------------
     def launch_joy(context, *args, **kwargs):
         if context.launch_configurations.get('with_joy') == 'true':
-            return [
-                Node(
-                    package='joy',
-                    executable='joy_node',
-                    name='joy_node',
-                )
-            ]
+            return [Node(package='joy', executable='joy_node', name='joy_node')]
         return []
 
     def launch_color_detector(context, *args, **kwargs):
         if context.launch_configurations.get('with_color_detector') == 'true':
-            return [
-                Node(
-                    package='modelec_com',
-                    executable='color_detector',
-                    name='color_detector',
-                )
-            ]
+            return [Node(package='modelec_com', executable='color_detector', name='color_detector')]
         return []
 
     # -------------------------------------------------
     # Final LaunchDescription
     # -------------------------------------------------
     return LaunchDescription([
-        DeclareLaunchArgument('channel_type', default_value=channel_type),
-        DeclareLaunchArgument('serial_port', default_value=serial_port),
-        DeclareLaunchArgument('serial_baudrate', default_value=serial_baudrate),
-        DeclareLaunchArgument('frame_id', default_value=frame_id),
-        DeclareLaunchArgument('inverted', default_value=inverted),
-        DeclareLaunchArgument('angle_compensate', default_value=angle_compensate),
-        DeclareLaunchArgument('scan_mode', default_value=scan_mode),
+        # Arguments
+        with_gui_arg, with_rplidar_arg, with_com_arg, with_strat_arg,
+        with_enemy_manager_arg, with_joy_arg, with_color_detector_arg,
 
-        with_gui_arg,
-        with_rplidar_arg,
-        with_com_arg,
-        with_strat_arg,
-        with_enemy_manager_arg,
-        with_joy_arg,
-        with_color_detector_arg,
+        # Start Lidar Immediately
+        OpaqueFunction(function=launch_rplidar_now),
 
-        OpaqueFunction(function=launch_rplidar_restart_if_needed),
-        OpaqueFunction(function=launch_gui),
-        OpaqueFunction(function=launch_com),
-        OpaqueFunction(function=launch_strat),
-        OpaqueFunction(function=launch_enemy_manager),
-        OpaqueFunction(function=launch_joy),
-        OpaqueFunction(function=launch_color_detector),
+        # Start everything else after 3 seconds
+        OpaqueFunction(function=lambda context: delay_launch(context, launch_gui)),
+        OpaqueFunction(function=lambda context: delay_launch(context, launch_com)),
+        OpaqueFunction(function=lambda context: delay_launch(context, launch_strat)),
+        OpaqueFunction(function=lambda context: delay_launch(context, launch_enemy_manager)),
+        OpaqueFunction(function=lambda context: delay_launch(context, launch_joy)),
+        OpaqueFunction(function=lambda context: delay_launch(context, launch_color_detector)),
     ])
-
-#  prefix = ['xterm -e gdb -ex run --args']

@@ -69,6 +69,8 @@ namespace Modelec
         float factor_thermo_;
         int timer_period_ms_ = 100;
 
+        bool two_sided_;
+
         std::shared_ptr<NavigationHelper> nav_;
         std::shared_ptr<ActionExecutor> action_executor_;
 

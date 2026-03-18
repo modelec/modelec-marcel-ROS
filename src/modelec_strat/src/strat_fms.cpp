@@ -33,10 +33,11 @@ namespace Modelec
             RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", (data_dir + "/action.xml").c_str());
         }
 
-        static_strat_ = Config::get<bool>("config.static_strat.enabled", false);
+        static_strat_ = Config::get<bool>("config.strat.static.enabled", false);
         factor_obs_ = Config::get<float>("config.factor.obs", 1.0);
         factor_thermo_ = Config::get<float>("config.factor.thermo", 1.0);
         timer_period_ms_ = Config::get<int>("config.timer.strat.ms", 100);
+        two_sided_ = Config::get<bool>("config.strat.two_sided", false);
 
         tir_sub_ = create_subscription<std_msgs::msg::Empty>(
             "/action/tir/start", 10, [this](const std_msgs::msg::Empty::SharedPtr)
@@ -213,110 +214,78 @@ namespace Modelec
             }
         case State::SELECT_GAME_ACTION:
             {
-
-				if (static_strat_) {
-					if (game_action_sequence_.empty()) {
-						Transition(State::DO_GO_HOME, "No more game actions in sequence");
-						return;
-					}
-
-					auto next_action = game_action_sequence_.front();
-					game_action_sequence_.pop();
-
-					Transition(next_action, "Selecting next game action from sequence");
-					return;
-				}
+                if (static_strat_) {
+                    if (game_action_sequence_.empty()) {
+                        Transition(State::DO_GO_HOME, "No more game actions in sequence");
+                        return;
+                    }
+                    auto next_action = game_action_sequence_.front();
+                    game_action_sequence_.pop();
+                    Transition(next_action, "Selecting next game action from sequence");
+                    return;
+                }
 
                 auto pos = nav_->GetCurrentPos();
                 auto closestBox = nav_->GetClosestObstacle<BoxObstacle>(pos);
                 auto closestDeposite = nav_->GetClosestDepositeZone(pos);
-
                 auto thermoPos = nav_->GetThermoPositions()[0];
 
-                double distToBox = Point::distance(Point(pos->x, pos->y, pos->theta),
-                                            closestBox->GetPosition()) * factor_obs_;
-                double distToDeposite = Point::distance(Point(pos->x, pos->y, pos->theta),
-                                            closestDeposite->GetPosition());
-                double distToThermo = Point::distance(Point(pos->x, pos->y, pos->theta),
-                                            thermoPos) * factor_thermo_;
+                // Calculate weighted distances
+                double distToBox = closestBox ? Point::distance(Point(pos->x, pos->y, pos->theta), closestBox->GetPosition()) * factor_obs_ : std::numeric_limits<double>::max();
+                double distToDeposite = closestDeposite ? Point::distance(Point(pos->x, pos->y, pos->theta), closestDeposite->GetPosition()) : std::numeric_limits<double>::max();
+                double distToThermo = Point::distance(Point(pos->x, pos->y, pos->theta), thermoPos) * factor_thermo_;
 
-                if (distToThermo < distToBox && distToThermo < distToDeposite && !ThermoMission::IsThermoDone)
+                // 1. High Priority: Thermo Mission (if not done and closest)
+                if (!ThermoMission::IsThermoDone && distToThermo < distToBox && distToThermo < distToDeposite)
                 {
-                    RCLCPP_INFO(get_logger(), "Choosing THERMO mission (dist to thermo: %.2f < dist to box: %.2f, dist to deposite: %.2f)",
-                                distToThermo, distToBox, distToDeposite);
-                    Transition(State::THERMO_MISSION, "Selecting THERMO mission");
-                } else
-                {
-                    if (action_executor_->IsFull())
-                    {
-                        RCLCPP_INFO(get_logger(), "All box are present on robot, selecting FREE mission");
-                        Transition(State::FREE_MISSION, "Selecting FREE mission");
-                    }
-                    else if (action_executor_->IsEmpty())
-                    {
-                        RCLCPP_INFO(get_logger(), "No box present on robot, selecting TAKE mission");
-                        Transition(State::TAKE_MISSION, "Selecting TAKE mission");
-                    }
-                    else
-                    {
+                    Transition(State::THERMO_MISSION, "Thermo is closest and not done");
+                    break;
+                }
 
-                        if (closestBox && closestDeposite)
-                        {
-                            if (distToBox < distToDeposite)
-                            {
-                                RCLCPP_INFO(get_logger(), "Choosing TAKE mission (dist to box: %.2f < dist to deposite: %.2f)",
-                                            distToBox, distToDeposite);
-                                Transition(State::TAKE_MISSION, "Selecting TAKE mission");
-                            }
-                            else
-                            {
-                                RCLCPP_INFO(get_logger(), "Choosing FREE mission (dist to deposite: %.2f < dist to box: %.2f)",
-                                            distToDeposite, distToBox);
-                                Transition(State::FREE_MISSION, "Selecting FREE mission");
-                            }
-                        }
-                        else if (closestBox)
-                        {
-                            RCLCPP_INFO(get_logger(), "Only box available, selecting TAKE mission");
-                            Transition(State::TAKE_MISSION, "Selecting TAKE mission");
-                        }
-                        else if (closestDeposite)
-                        {
-                            RCLCPP_INFO(get_logger(), "Only deposite available, selecting FREE mission");
-                            Transition(State::FREE_MISSION, "Selecting FREE mission");
-                        }
-                        else
-                        {
-                            RCLCPP_WARN(get_logger(), "No box or deposite available, cannot select mission!");
-                            Transition(State::STOP, "No missions available");
-                        }
+                // 2. Capacity Check
+                bool canTake = !action_executor_->IsFull();
+                bool canFree = !action_executor_->IsEmpty();
+
+                // If one-sided, we might be "full" with just one box
+                if (!two_sided_) {
+                    canTake = !action_executor_->HasFrontBox();
+                    canFree = action_executor_->HasFrontBox();
+                }
+
+                // 3. Decision Tree based on availability and distance
+                if (canTake && canFree) {
+                    if (distToBox < distToDeposite) {
+                        Transition(State::TAKE_MISSION, "Taking: Box is closer");
+                    } else {
+                        Transition(State::FREE_MISSION, "Freeing: Deposit is closer");
                     }
                 }
-            }
+                else if (canTake && closestBox) {
+                    Transition(State::TAKE_MISSION, "Taking: Robot has space and boxes exist");
+                }
+                else if (canFree && closestDeposite) {
+                    Transition(State::FREE_MISSION, "Freeing: Robot has items to drop");
+                }
+                else {
+                    Transition(State::DO_GO_HOME, "No viable game actions left");
+                }
 
-            break;
+                break;
+            }
         case State::TAKE_MISSION:
             if (!current_mission_)
             {
-                if (action_executor_->HasFrontBox())
-                {
-                    if (action_executor_->HasBackBox())
-                    {
-                        RCLCPP_WARN(get_logger(), "Both front and back box obstacles are occupied!");
-                        current_mission_.reset();
-                        Transition(State::SELECT_MISSION, "Cannot take box, both sides occupied");
-                        break;
-                    }
+                BaseAction::Side side_to_use = BaseAction::FRONT;
 
-                    RCLCPP_INFO(get_logger(), "Front box obstacle is occupied, taking from back");
-                    current_mission_ = std::make_unique<TakeMission>(nav_, action_executor_, BaseAction::BACK);
-                    current_mission_->Start(shared_from_this());
+                if (two_sided_) {
+                    side_to_use = action_executor_->HasFrontBox() ? BaseAction::BACK : BaseAction::FRONT;
+                } else if (action_executor_->HasFrontBox()) {
+                    Transition(State::SELECT_MISSION, "Front full (One-sided mode)");
+                    break;
                 }
-                else
-                {
-                    current_mission_ = std::make_unique<TakeMission>(nav_, action_executor_, BaseAction::FRONT);
-                    current_mission_->Start(shared_from_this());
-                }
+
+                current_mission_ = std::make_unique<TakeMission>(nav_, action_executor_, side_to_use);
+                current_mission_->Start(shared_from_this());
             }
             current_mission_->Update();
             if (current_mission_->GetStatus() == MissionStatus::DONE)
@@ -335,24 +304,18 @@ namespace Modelec
         case State::FREE_MISSION:
             if (!current_mission_)
             {
-                if (!action_executor_->HasFrontBox())
-                {
-                    if (!action_executor_->HasBackBox())
-                    {
-                        RCLCPP_WARN(get_logger(), "Both front and back box obstacles are free!");
-                        Transition(State::SELECT_MISSION, "Cannot free box, both sides empty");
-                        break;
-                    }
+                BaseAction::Side side_to_use = BaseAction::FRONT;
 
-                    RCLCPP_INFO(get_logger(), "Front box obstacle is occupied, taking from back");
-                    current_mission_ = std::make_unique<FreeMission>(nav_, action_executor_, BaseAction::BACK);
-                    current_mission_->Start(shared_from_this());
+                if (two_sided_) {
+                    // In two-sided mode, drop front first, then back
+                    side_to_use = action_executor_->HasFrontBox() ? BaseAction::FRONT : BaseAction::BACK;
+                } else if (!action_executor_->HasFrontBox()) {
+                    Transition(State::SELECT_MISSION, "Front empty (One-sided mode)");
+                    break;
                 }
-                else
-                {
-                    current_mission_ = std::make_unique<FreeMission>(nav_, action_executor_, BaseAction::FRONT);
-                    current_mission_->Start(shared_from_this());
-                }
+
+                current_mission_ = std::make_unique<FreeMission>(nav_, action_executor_, side_to_use);
+                current_mission_->Start(shared_from_this());
             }
             current_mission_->Update();
             if (current_mission_->GetStatus() == MissionStatus::DONE)

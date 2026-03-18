@@ -78,14 +78,17 @@
         <time_to_put_zone>77</time_to_put_zone>
         <time_to_remove_top_pot>65</time_to_remove_top_pot>
     </pami>
-    <static_strat>
-        <enabled>false</enabled>
-        <missions>
-            <mission name="TAKE_MISSION" />
-            <mission name="FREE_MISSION" />
-            <mission name="THERMO_MISSION" />
-        </missions>
-    </static_strat>
+    <strat>
+        <static>
+            <enabled>false</enabled>
+            <missions>
+                <mission name="TAKE_MISSION" />
+                <mission name="FREE_MISSION" />
+                <mission name="THERMO_MISSION" />
+            </missions>
+        </static>
+        <two-sided>false</two-sided>
+    </strat>
     <factor>
         <theta>20</theta>
         <obs>0.6</obs>

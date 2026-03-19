@@ -230,29 +230,24 @@ namespace Modelec
                 auto closestDeposite = nav_->GetClosestDepositeZone(pos);
                 auto thermoPos = nav_->GetThermoPositions()[0];
 
-                // Calculate weighted distances
                 double distToBox = closestBox ? Point::distance(Point(pos->x, pos->y, pos->theta), closestBox->GetPosition()) * factor_obs_ : std::numeric_limits<double>::max();
                 double distToDeposite = closestDeposite ? Point::distance(Point(pos->x, pos->y, pos->theta), closestDeposite->GetPosition()) : std::numeric_limits<double>::max();
                 double distToThermo = Point::distance(Point(pos->x, pos->y, pos->theta), thermoPos) * factor_thermo_;
 
-                // 1. High Priority: Thermo Mission (if not done and closest)
                 if (!ThermoMission::IsThermoDone && distToThermo < distToBox && distToThermo < distToDeposite)
                 {
                     Transition(State::THERMO_MISSION, "Thermo is closest and not done");
                     break;
                 }
 
-                // 2. Capacity Check
                 bool canTake = !action_executor_->IsFull();
                 bool canFree = !action_executor_->IsEmpty();
 
-                // If one-sided, we might be "full" with just one box
                 if (!two_sided_) {
                     canTake = !action_executor_->HasFrontBox();
                     canFree = action_executor_->HasFrontBox();
                 }
 
-                // 3. Decision Tree based on availability and distance
                 if (canTake && canFree) {
                     if (distToBox < distToDeposite) {
                         Transition(State::TAKE_MISSION, "Taking: Box is closer");
@@ -307,7 +302,6 @@ namespace Modelec
                 BaseAction::Side side_to_use = BaseAction::FRONT;
 
                 if (two_sided_) {
-                    // In two-sided mode, drop front first, then back
                     side_to_use = action_executor_->HasFrontBox() ? BaseAction::FRONT : BaseAction::BACK;
                 } else if (!action_executor_->HasFrontBox()) {
                     Transition(State::SELECT_MISSION, "Front empty (One-sided mode)");

@@ -36,49 +36,22 @@ def generate_launch_description():
     # -------------------------------------------------
     # RPLIDAR logic (Starts Immediately)
     # -------------------------------------------------
-    def create_lidar_with_restart():
-        lidar_node = Node(
-            package='rplidar_ros',
-            executable='rplidar_node',
-            name='rplidar_node',
-            parameters=[{'channel_type':channel_type,
-                         'serial_port': serial_port,
-                         'serial_baudrate': serial_baudrate,
-                         'frame_id': frame_id,
-                         'inverted': inverted,
-                         'angle_compensate': angle_compensate,
-                         'scan_mode': scan_mode}]
-        )
-
-        restart_handler = RegisterEventHandler(
-            OnProcessExit(
-                target_action=lidar_node,
-                on_exit=[
-                    LogInfo(msg='[Launch] RPLIDAR crashed — restarting in 5s...'),
-                    TimerAction(
-                        period=2.0,
-                        actions=[OpaqueFunction(function=lambda *_: create_lidar_with_restart())],
-                    ),
-                ],
-            )
-        )
-        return [lidar_node, restart_handler]
-
-    def launch_rplidar_now(context, *args, **kwargs):
+    def launch_lidar(context, *args, **kwargs):
         if context.launch_configurations.get('with_rplidar') == 'true':
-            return create_lidar_with_restart()
-        return []
-
-    # -------------------------------------------------
-    # Helper to delay other nodes
-    # -------------------------------------------------
-    def delay_launch(context, function_to_call):
-        return [
-            TimerAction(
-                period=15.0,
-                actions=function_to_call(context)
+            lidar_node = Node(
+                package='rplidar_ros',
+                executable='rplidar_node',
+                name='rplidar_node',
+                parameters=[{'channel_type':channel_type,
+                             'serial_port': serial_port,
+                             'serial_baudrate': serial_baudrate,
+                             'frame_id': frame_id,
+                             'inverted': inverted,
+                             'angle_compensate': angle_compensate,
+                             'scan_mode': scan_mode}]
             )
-        ]
+            return [lidar_node]
+        return []
 
     # -------------------------------------------------
     # Node Launch Functions
@@ -124,18 +97,14 @@ def generate_launch_description():
     # Final LaunchDescription
     # -------------------------------------------------
     return LaunchDescription([
-        # Arguments
         with_gui_arg, with_rplidar_arg, with_com_arg, with_strat_arg,
         with_enemy_manager_arg, with_joy_arg, with_color_detector_arg,
 
-        # Start Lidar Immediately
-        OpaqueFunction(function=launch_rplidar_now),
-
-        # Start everything else after 3 seconds
-        OpaqueFunction(function=lambda context: delay_launch(context, launch_gui)),
-        OpaqueFunction(function=lambda context: delay_launch(context, launch_com)),
-        OpaqueFunction(function=lambda context: delay_launch(context, launch_strat)),
-        OpaqueFunction(function=lambda context: delay_launch(context, launch_enemy_manager)),
-        OpaqueFunction(function=lambda context: delay_launch(context, launch_joy)),
-        OpaqueFunction(function=lambda context: delay_launch(context, launch_color_detector)),
+        OpaqueFunction(function=launch_lidar),
+        OpaqueFunction(function=launch_gui),
+        OpaqueFunction(function=launch_com),
+        OpaqueFunction(function=launch_strat),
+        OpaqueFunction(function=launch_enemy_manager),
+        OpaqueFunction(function=launch_joy),
+        OpaqueFunction(function=launch_color_detector),
     ])

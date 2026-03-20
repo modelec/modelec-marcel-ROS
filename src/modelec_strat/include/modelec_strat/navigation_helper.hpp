@@ -106,6 +106,10 @@ namespace Modelec
 
         bool EnemyOnPath(modelec_interfaces::msg::OdometryPos msg);
 
+        bool HasEnemy() const;
+
+        bool IsEnemyClose() const;
+
         bool Replan(bool force = false);
 
         void SetTeamId(Team id);

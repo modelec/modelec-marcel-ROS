@@ -611,6 +611,16 @@ namespace Modelec
         }
     }
 
+    bool NavigationHelper::DoesLineIntersectCircle(const Point& start, const Point& end, const Point& center,
+                                               float radius)
+    {
+        float num = std::abs(
+            (end.y - start.y) * center.x - (end.x - start.x) * center.y + end.x * start.y - end.y * start.x);
+        float den = std::sqrt((end.y - start.y) * (end.y - start.y) + (end.x - start.x) * (end.x - start.x));
+        float dist = num / den;
+        return dist < radius;
+    }
+
     bool NavigationHelper::EnemyOnPath(const modelec_interfaces::msg::OdometryPos msg)
     {
         if (!current_pos_)
@@ -649,14 +659,14 @@ namespace Modelec
         return false;
     }
 
-    bool NavigationHelper::DoesLineIntersectCircle(const Point& start, const Point& end, const Point& center,
-                                                   float radius)
+    bool NavigationHelper::HasEnemy() const
     {
-        float num = std::abs(
-            (end.y - start.y) * center.x - (end.x - start.x) * center.y + end.x * start.y - end.y * start.x);
-        float den = std::sqrt((end.y - start.y) * (end.y - start.y) + (end.x - start.x) * (end.x - start.x));
-        float dist = num / den;
-        return dist < radius;
+        return has_enemy_;
+    }
+
+    bool NavigationHelper::IsEnemyClose() const
+    {
+        return last_was_close_enemy_;
     }
 
     bool NavigationHelper::Replan(bool force)

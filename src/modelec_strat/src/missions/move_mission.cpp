@@ -40,6 +40,11 @@ namespace Modelec {
     {
         if (!nav_->HasArrived())
         {
+            if (nav_->IsEnemyClose())
+            {
+                return false;
+            }
+
             auto now = node_->now();
             double elapsed_total = (now - go_timeout_).seconds();
             double elapsed_since_last_ask = (now - last_ask_waypoint_time_).seconds();

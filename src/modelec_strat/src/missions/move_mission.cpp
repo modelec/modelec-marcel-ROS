@@ -42,6 +42,7 @@ namespace Modelec {
         {
             if (nav_->IsEnemyClose())
             {
+                RCLCPP_INFO(node_->get_logger(), "Enemy is close, stopping move mission...");
                 return false;
             }
 

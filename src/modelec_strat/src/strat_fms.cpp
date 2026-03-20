@@ -369,7 +369,7 @@ namespace Modelec
             {
                 current_mission_.reset();
                 RCLCPP_ERROR(get_logger(), "Go Home mission failed!");
-                Transition(State::STOP, "Go Home mission failed");
+                Transition(State::DO_GO_HOME, "Go Home mission failed");
             }
             break;
 

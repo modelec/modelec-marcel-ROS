@@ -163,10 +163,18 @@ namespace Modelec
 
                 auto empty_queue_ = std::queue<State>();
                 std::swap(game_action_sequence_, empty_queue_);
-                game_action_sequence_.push(State::TAKE_MISSION);
-                game_action_sequence_.push(State::FREE_MISSION);
-                game_action_sequence_.push(State::TAKE_MISSION);
-                game_action_sequence_.push(State::FREE_MISSION);
+
+                auto actions = Config::getArray<int>("config.strat.static.missions.mission",
+                    [](const std::string& base)
+                {
+                    return Config::get<int>(base + "@id");
+                });
+
+                for (const auto id : actions)
+                {
+                    RCLCPP_INFO(get_logger(), "Adding game action with id %d to sequence", id);
+                    game_action_sequence_.push(static_cast<State>(id));
+                }
 
                 Transition(State::WAIT_START, "System ready");
             }

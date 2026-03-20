@@ -82,9 +82,8 @@
         <static>
             <enabled>true</enabled>
             <missions>
-                <mission name="TAKE_MISSION" />
-                <mission name="FREE_MISSION" />
-                <mission name="THERMO_MISSION" />
+                <mission id="10" />
+                <mission id="11" />
             </missions>
         </static>
         <two-sided>false</two-sided>

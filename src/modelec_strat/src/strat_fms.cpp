@@ -172,7 +172,6 @@ namespace Modelec
 
                 for (const auto id : actions)
                 {
-                    RCLCPP_INFO(get_logger(), "Adding game action with id %d to sequence", id);
                     game_action_sequence_.push(static_cast<State>(id));
                 }
 

@@ -15,7 +15,7 @@
         <!--<servo id="12" angle="1" />-->
         <!--<servo id="13" angle="1" />-->
         <!--<servo id="14" angle="1" />-->
-        <servo id="15" angle="1" />
+        <servo id="15" angle="0" />
         <!--<servo id="16" angle="1" />-->
         <!--<servo id="17" angle="1" />-->
         <!--<servo id="18" angle="1" />-->

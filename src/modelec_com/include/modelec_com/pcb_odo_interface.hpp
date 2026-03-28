@@ -74,6 +74,8 @@ namespace Modelec
         int timeout_ms = 1000;
         int attempt = 5;
 
+        int last_button_11 = 0;
+
     public:
         void SendToPCB(const std::string& data);
         void SendToPCB(const std::string& order, const std::string& elem,

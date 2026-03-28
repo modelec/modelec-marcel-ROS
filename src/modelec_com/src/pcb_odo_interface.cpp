@@ -81,6 +81,16 @@ namespace Modelec
             "joy", 30,
             [this](const sensor_msgs::msg::Joy::SharedPtr msg)
             {
+                if (msg->buttons.size() > 12)
+                {
+                    if (msg->buttons[11] == 1 && last_button_11 == 0)
+                    {
+                        SetStart(!start_odo_);
+                    }
+
+                    last_button_11 = msg->buttons[11];
+                }
+
                 double left_axis = msg->axes[1];
                 double right_axis = msg->axes[2];
 

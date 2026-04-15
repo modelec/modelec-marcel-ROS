@@ -35,7 +35,10 @@ namespace Modelec
         save_to_file_ = Config::get<bool>("config.cam.save_to_file.enabled", false);
         save_directory_ = Config::get<std::string>("config.cam.save_to_file.directory", "./");
 
-        rois_ = Config::get<std::vector<cv::Rect>>("config.cam.rois.roi", {});
+        rois_ = Config::get<bool>("config.strat.two-sided")
+            ? Config::get<std::vector<cv::Rect>>("config.cam.rois.two-sided-roi", {})
+            : Config::get<std::vector<cv::Rect>>("config.cam.rois.one-sided.roi", {});
+
         color_configs_ = Config::get<std::vector<ColorSetting>>("config.cam.colors.color", {});
 
         if (!enable_)

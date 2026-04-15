@@ -16,6 +16,8 @@ namespace Modelec
 
     ActionExecutor::ActionExecutor(const rclcpp::Node::SharedPtr& node) : node_(node)
     {
+        two_sided_ = Config::get<bool>("config.strat.two_sided", false);
+
         asc_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionAscPos>("/action/move/asc", 10);
         servo_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionServoPosArray>("/action/move/servo", 10);
         relay_move_pub_ = node_->create_publisher<modelec_interfaces::msg::ActionRelayStateArray>("/action/move/relay", 10);
@@ -235,10 +237,13 @@ namespace Modelec
                     RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box obstacle found to update");
                 }
 
-                if (box_obstacles_[BaseAction::BACK] != nullptr) {
-                    box_obstacles_[BaseAction::BACK]->ParseColor(std::vector(color.begin() + 4, color.begin() + 8));
-                } else {
-                    RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box obstacle found to update");
+                if (two_sided_)
+                {
+                    if (box_obstacles_[BaseAction::BACK] != nullptr) {
+                        box_obstacles_[BaseAction::BACK]->ParseColor(std::vector(color.begin() + 4, color.begin() + 8));
+                    } else {
+                        RCLCPP_WARN(node_->get_logger(), "Color detection succeeded but no box obstacle found to update");
+                    }
                 }
             });
 

@@ -60,6 +60,7 @@ namespace Modelec
         std::array<std::shared_ptr<BoxObstacle>, 2> box_obstacles_;
 
         std::array<bool, 8> servo_pos_;
+        bool two_sided_;
 
         struct ArmState
         {

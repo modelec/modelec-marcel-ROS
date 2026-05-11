@@ -23,12 +23,12 @@
                     <!-- End repeat -->
                     <locator>
                         <udpv4>
-                            <address>100.84.205.108</address> <!-- ackimixs -->
+                            <address>100.102.111.13</address> <!-- ackimixs -->
                         </udpv4>
                     </locator>
                     <locator>
                         <udpv4>
-                            <address>100.91.204.77</address>
+                            <address>100.98.198.75</address>
                         </udpv4>
                     </locator>
                 </initialPeersList>

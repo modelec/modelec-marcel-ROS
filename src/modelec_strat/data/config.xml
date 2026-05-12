@@ -50,6 +50,8 @@
     </spawn>
     <mission_score>
         <go_home>10</go_home>
+        <box>25</box>
+        <thermo>10</thermo>
     </mission_score>
     <mission>
         <action>

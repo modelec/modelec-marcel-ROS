@@ -35,5 +35,7 @@ namespace Modelec {
         std::shared_ptr<DepositeZone> target_deposite_zone_;
 
         double angle_;
+
+        int mission_score_ = 0;
     };
 }

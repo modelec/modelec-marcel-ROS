@@ -30,5 +30,7 @@ namespace Modelec {
         std::array<Point, 2> thermo_positions_;
 
         std::shared_ptr<BoxObstacle> closestBox;
+
+        int mission_score_ = 0;
     };
 }

@@ -17,6 +17,8 @@ namespace Modelec {
 
         status_ = MissionStatus::RUNNING;
 
+        mission_score_ = Config::get<int>("config.mission_score.box", 0);
+
         std::queue<int> empty;
         std::swap(steps_, empty);
 
@@ -172,6 +174,8 @@ namespace Modelec {
                 action_executor_->box_obstacles_[side_] = nullptr;
 
                 auto pos = nav_->GetCurrentPos();
+
+                action_executor_->SendPoint(mission_score_);
 
                 obs->SetPosition(
                     target_deposite_zone_->GetPosition().x,

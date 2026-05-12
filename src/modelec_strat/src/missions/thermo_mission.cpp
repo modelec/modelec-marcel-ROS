@@ -19,6 +19,8 @@ namespace Modelec {
 
         status_ = MissionStatus::RUNNING;
 
+        mission_score_ = Config::get<int>("config.mission_score.thermo", 0);
+
         thermo_positions_ = nav_->GetThermoPositions();
 
         std::queue<int> empty;
@@ -95,7 +97,7 @@ namespace Modelec {
             break;
         case DONE:
             {
-                action_executor_->SendPoint(10);
+                action_executor_->SendPoint(mission_score_);
                 IsThermoDone = true;
             }
 

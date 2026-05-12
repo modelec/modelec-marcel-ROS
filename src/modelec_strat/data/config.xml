@@ -80,7 +80,7 @@
     </pami>
     <strat>
         <static>
-            <enabled>false</enabled>
+            <enabled>true</enabled>
             <missions>
                 <mission id="10" />
                 <mission id="11" />

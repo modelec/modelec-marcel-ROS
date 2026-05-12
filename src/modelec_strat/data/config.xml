@@ -92,7 +92,7 @@
         <theta>20</theta>
         <obs>0.6</obs>
         <thermo>0.7</thermo>
-        <close_enemy>-2</close_enemy>
+        <close_enemy>-0.4</close_enemy>
     </factor>
     <timer>
         <strat>

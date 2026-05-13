@@ -217,6 +217,15 @@ namespace Modelec
         else
         {
             // RCLCPP_INFO(this->get_logger(), "No enemy detected in Lidar scan");
+            modelec_interfaces::msg::OdometryPos enemy_pos;
+            enemy_pos.x = -256;
+            enemy_pos.y = -256;
+            enemy_pos.theta = -256;
+
+            last_enemy_pos_ = enemy_pos;
+            last_publish_time_ = this->now();
+            last_movement_time_ = this->now(); // Mise à jour du dernier vrai mouvement
+            enemy_pos_pub_->publish(enemy_pos);
         }
     }
 

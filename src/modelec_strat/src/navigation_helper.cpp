@@ -548,7 +548,13 @@ namespace Modelec
         pathfinding_->OnEnemyPosition(msg);
         last_enemy_pos_ = *msg;
 
-        if (Point::distance(Point(msg->x, msg->y, msg->theta),
+        if (msg->x == -256 && msg->y == -256 && msg->theta == -256)
+        {
+            // NO ENEMIES
+            has_enemy_ = false;
+            last_enemy_pos_ = *msg;
+        }
+        else if (Point::distance(Point(msg->x, msg->y, msg->theta),
                             Point(current_pos_->x, current_pos_->y, current_pos_->theta)) < enemy_emergency_distance_)
         {
             RCLCPP_INFO(node_->get_logger(), "Enemy is close, stopping odometry...");

@@ -25,7 +25,7 @@ namespace Modelec
         std::swap(steps_, empty);
 
         steps_.push(ROTATE_TO_HOME);
-        steps_.push(AWAIT_91);
+        steps_.push(AWAIT_88);
         steps_.push(GO_HOME);
         steps_.push(GO_CLOSE);
         steps_.push(DONE);
@@ -60,9 +60,9 @@ namespace Modelec
                 go_timeout_ = node_->now();
             }
             break;
-        case AWAIT_92:
+        case AWAIT_88:
             {
-                min_time_ = start_time_ + rclcpp::Duration(92, 0);
+                min_time_ = start_time_ + rclcpp::Duration(88, 0);
             }
 
             break;

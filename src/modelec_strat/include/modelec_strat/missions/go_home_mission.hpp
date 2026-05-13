@@ -21,7 +21,7 @@ namespace Modelec
         enum Step
         {
             ROTATE_TO_HOME,
-            AWAIT_88,
+            AWAIT_90,
             GO_HOME,
             GO_CLOSE,
             DONE,

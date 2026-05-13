@@ -3,9 +3,11 @@
 #include <modelec_strat/missions/move_mission.hpp>
 #include <std_msgs/msg/int64.hpp>
 
+#include "min_time_mission.hpp"
+
 namespace Modelec
 {
-    class GoHomeMission : public MoveMission
+    class GoHomeMission : public MoveMission, public MinTimeMission
     {
     public:
         GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const rclcpp::Time& start_time);
@@ -19,6 +21,7 @@ namespace Modelec
         enum Step
         {
             ROTATE_TO_HOME,
+            AWAIT_92,
             GO_HOME,
             GO_CLOSE,
             DONE,

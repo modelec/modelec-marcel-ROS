@@ -5,7 +5,7 @@
 namespace Modelec
 {
     GoHomeMission::GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const rclcpp::Time& start_time) :
-        Mission(MissionStatus::READY), MoveMission(nav),
+        Mission(MissionStatus::READY), MoveMission(nav), MinTimeMission(),
         start_time_(start_time)
     {
     }
@@ -13,6 +13,7 @@ namespace Modelec
     void GoHomeMission::Start(const rclcpp::Node::SharedPtr& node)
     {
         MoveMission::Start(node);
+        MinTimeMission::Start(node);
 
         mission_score_ = Config::get<int>("config.mission_score.go_home", 0);
 
@@ -24,6 +25,7 @@ namespace Modelec
         std::swap(steps_, empty);
 
         steps_.push(ROTATE_TO_HOME);
+        steps_.push(AWAIT_91);
         steps_.push(GO_HOME);
         steps_.push(GO_CLOSE);
         steps_.push(DONE);
@@ -31,7 +33,7 @@ namespace Modelec
 
     bool GoHomeMission::Update()
     {
-        if (!MoveMission::Update())
+        if (!MoveMission::Update() || !MinTimeMission::Update())
         {
             return false;
         }
@@ -57,6 +59,12 @@ namespace Modelec
 
                 go_timeout_ = node_->now();
             }
+            break;
+        case AWAIT_92:
+            {
+                min_time_ = start_time_ + rclcpp::Duration(92, 0);
+            }
+
             break;
         case GO_HOME:
             {

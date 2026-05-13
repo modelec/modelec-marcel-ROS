@@ -19,7 +19,7 @@
     <Obstacle id="23" x="1900" y="175" theta="1.5708" width="200" height="150" type="box"/>
 
     <!-- PAMI Start -->
-    <Obstacle id="30" x="75" y="1750" theta="1.5708" width="150" height="450" type="pami-start"/>
-    <Obstacle id="31" x="2925" y="1750" theta="1.5708" width="150" height="450" type="pami-start"/>
+    <!--<Obstacle id="30" x="75" y="1750" theta="1.5708" width="150" height="450" type="pami-start"/>
+    <Obstacle id="31" x="2925" y="1750" theta="1.5708" width="150" height="450" type="pami-start"/>-->
 
 </Obstacles>

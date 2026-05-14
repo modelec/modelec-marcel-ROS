@@ -39,6 +39,9 @@ namespace Modelec
         odo_waypoint_reach_publisher_ = this->create_publisher<modelec_interfaces::msg::OdometryWaypoint>(
             "odometry/waypoint_reach", 10);
 
+        odo_waypoint_reach_err_publisher_ = this->create_publisher<modelec_interfaces::msg::OdometryWaypoint>(
+            "odometry/waypoint_reach/stall", 10);
+
         odo_pid_publisher_ = this->create_publisher<modelec_interfaces::msg::OdometryPid>(
             "odometry/get_pid", 10);
 
@@ -194,7 +197,14 @@ namespace Modelec
                     auto message = modelec_interfaces::msg::OdometryWaypoint();
                     message.id = id;
 
-                    odo_waypoint_reach_publisher_->publish(message);
+                    if (tokens.size() > 4 && tokens[4] == "1")
+                    {
+                        odo_waypoint_reach_err_publisher_->publish(message);
+                    }
+                    else
+                    {
+                        odo_waypoint_reach_publisher_->publish(message);
+                    }
                 }
                 else if (tokens.size() >= 7)
                 {

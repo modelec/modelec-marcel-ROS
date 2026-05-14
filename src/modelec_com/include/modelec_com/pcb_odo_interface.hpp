@@ -54,6 +54,7 @@ namespace Modelec
         rclcpp::Publisher<modelec_interfaces::msg::OdometrySpeed>::SharedPtr odo_speed_publisher_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryToF>::SharedPtr odo_tof_publisher_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryWaypoint>::SharedPtr odo_waypoint_reach_publisher_;
+        rclcpp::Publisher<modelec_interfaces::msg::OdometryWaypoint>::SharedPtr odo_waypoint_reach_err_publisher_;
         rclcpp::Publisher<modelec_interfaces::msg::OdometryPid>::SharedPtr odo_pid_publisher_;
 
         rclcpp::Subscription<modelec_interfaces::msg::OdometryWaypoint>::SharedPtr odo_add_waypoint_subscriber_;

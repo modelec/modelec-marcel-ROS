@@ -122,6 +122,7 @@ namespace Modelec
 
     protected:
         void OnWaypointReach(const WaypointMsg::SharedPtr msg);
+        void OnWaypointErrReach(const WaypointMsg::SharedPtr msg);
 
         void OnPos(const PosMsg::SharedPtr msg);
 
@@ -159,6 +160,7 @@ namespace Modelec
         std::vector<std::shared_ptr<DepositeZone>> deposite_zones_;
 
         rclcpp::Subscription<WaypointMsg>::SharedPtr waypoint_reach_sub_;
+        rclcpp::Subscription<WaypointMsg>::SharedPtr waypoint_reach_err_sub_;
         rclcpp::Publisher<WaypointMsg>::SharedPtr waypoint_pub_;
         rclcpp::Publisher<WaypointsMsg>::SharedPtr waypoints_pub_;
 

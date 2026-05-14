@@ -25,6 +25,13 @@ namespace Modelec
                 OnWaypointReach(msg);
             });
 
+        waypoint_reach_err_sub_ = node_->create_subscription<WaypointMsg>(
+            "odometry/waypoint_reach/stall", 10,
+            [this](const WaypointMsg::SharedPtr msg)
+            {
+                OnWaypointReachErr(msg);
+            });
+
         waypoint_pub_ = node_->create_publisher<WaypointMsg>("odometry/add_waypoint", 30);
         waypoints_pub_ = node_->create_publisher<WaypointsMsg>("odometry/add_waypoints",  30);
 
@@ -755,6 +762,12 @@ namespace Modelec
                 }
             }
         }
+    }
+
+    void NavigationHelper::OnWaypointErrReach(const WaypointMsg::SharedPtr msg)
+    {
+        // resend last waypoints
+        SendGoTo();
     }
 
     void NavigationHelper::OnPos(const PosMsg::SharedPtr msg)

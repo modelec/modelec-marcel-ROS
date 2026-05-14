@@ -764,7 +764,7 @@ namespace Modelec
         }
     }
 
-    void NavigationHelper::OnWaypointReachErr(const WaypointMsg::SharedPtr msg)
+    void NavigationHelper::OnWaypointReachErr(const WaypointMsg::SharedPtr)
     {
         if (!Replan())
         {

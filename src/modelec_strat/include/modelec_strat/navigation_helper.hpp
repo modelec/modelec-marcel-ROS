@@ -122,7 +122,7 @@ namespace Modelec
 
     protected:
         void OnWaypointReach(const WaypointMsg::SharedPtr msg);
-        void OnWaypointErrReach(const WaypointMsg::SharedPtr msg);
+        void OnWaypointReachErr(const WaypointMsg::SharedPtr msg);
 
         void OnPos(const PosMsg::SharedPtr msg);
 

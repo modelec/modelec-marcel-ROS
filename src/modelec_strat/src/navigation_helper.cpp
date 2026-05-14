@@ -764,7 +764,7 @@ namespace Modelec
         }
     }
 
-    void NavigationHelper::OnWaypointErrReach(const WaypointMsg::SharedPtr msg)
+    void NavigationHelper::OnWaypointReachErr(const WaypointMsg::SharedPtr msg)
     {
         // resend last waypoints
         SendGoTo();

@@ -86,9 +86,9 @@
             <missions>
                 <mission id="10" />
                 <mission id="11" />
-                <!--<mission id="10" />
-                <mission id="12" />
-                <mission id="11" />-->
+                <mission id="10" />
+                <!--<mission id="12" />-->
+                <mission id="11" />
             </missions>
         </static>
         <two-sided>false</two-sided>

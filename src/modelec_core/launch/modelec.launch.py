@@ -75,7 +75,7 @@ def generate_launch_description():
     def delay_launch(context, function_to_call):
         return [
             TimerAction(
-                period=10.0,
+                period=2.0,
                 actions=function_to_call(context)
             )
         ]

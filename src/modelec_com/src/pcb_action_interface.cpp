@@ -163,6 +163,10 @@ namespace Modelec
             "action/move/servo/timed", 10,
             [this](const modelec_interfaces::msg::ActionServoTimedArray::SharedPtr msg)
             {
+                if (servo_timed_timer_->is_canceled()) {
+                    servo_timed_timer_->reset();
+                }
+
                 rclcpp::Time now = this->now();
 
                 for (const auto& item : msg->items)
@@ -260,8 +264,13 @@ namespace Modelec
                     }),
                 servo_timed_buffer_.end());
 
-
+                if (servo_timed_buffer_.empty()) {
+                    servo_timed_timer_->cancel();
+                    RCLCPP_DEBUG(this->get_logger(), "No more timed servos. Stopping timer.");
+                }
 			});
+
+        servo_timed_timer_->cancel();
 
         this->open(baudrate, serial_port, MAX_MESSAGE_LEN);
 

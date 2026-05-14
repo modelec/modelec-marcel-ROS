@@ -204,7 +204,7 @@ namespace Modelec
                     Transition(State::STOP, "All missions done");
                 }
 
-                else if (duration > 60 && !action_executor_->IsEmpty() && duration < 90)
+                else if (duration > 60 && !action_executor_->IsEmpty() && duration < 80)
                 {
                     Transition(State::FREE_MISSION, "No Time left, freeing boxes");
                 }

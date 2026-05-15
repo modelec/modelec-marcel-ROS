@@ -380,6 +380,8 @@ namespace Modelec
         auto p = Point(wl[0].x, wl[0].y, wl[0].theta);
         if (RotateTo(p, front))
         {
+
+            RCLCPP_INFO(node_->get_logger(), "Rotating to first waypoint before going to destination");
             await_rotate_ = true;
 
             send_back_waypoints_.clear();
@@ -751,6 +753,8 @@ namespace Modelec
 
                 if (await_rotate_)
                 {
+                    RCLCPP_INFO(node_->get_logger(), "Finished rotating to first waypoint, sending path to destination");
+
                     await_rotate_ = false;
 
                     waypoints_.clear();

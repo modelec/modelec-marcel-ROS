@@ -35,8 +35,8 @@
     <home>
         <!--<blue x="2650" y="1600" theta="-1.5708"/>
         <yellow x="350" y="1600" theta="-1.5708"/>-->
-        <blue x="2650" y="1750" theta="1.5708"/>
-        <yellow x="350" y="1750" theta="1.5708"/>
+        <blue x="2650" y="1750" theta="-1.5708"/>
+        <yellow x="350" y="1750" theta="-1.5708"/>
     </home>
     <spawn>
         <yellow>

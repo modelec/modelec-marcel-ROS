@@ -322,6 +322,7 @@ namespace Modelec
         startAngle.theta = angle;
         startAngle.id = 0;
         startAngle.is_end = true;
+        startAngle.only_rotate = true;
 
         waypoints_.emplace_back(startAngle);
         // SendWaypoint();

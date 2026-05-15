@@ -384,6 +384,7 @@ namespace Modelec
             data.push_back(std::to_string(wp.x));
             data.push_back(std::to_string(wp.y));
             data.push_back(std::to_string(wp.theta));
+            data.push_back(std::to_string(wp.only_rotate));
        }
 
         SendOrder("WAYPOINT", data);
@@ -392,11 +393,11 @@ namespace Modelec
     void PCBOdoInterface::AddWaypoint(
         const modelec_interfaces::msg::OdometryWaypoint::SharedPtr msg)
     {
-        AddWaypoint(msg->id, msg->is_end, msg->x, msg->y, msg->theta);
+        AddWaypoint(msg->id, msg->is_end, msg->x, msg->y, msg->theta, msg->only_rotate);
     }
 
     void PCBOdoInterface::AddWaypoint(const int index, const bool IsStopPoint, const long x, const long y,
-                                      const double theta)
+                                      const double theta, const bool only_rotate)
     {
         if (!start_odo_)
         {
@@ -408,7 +409,8 @@ namespace Modelec
             std::to_string(IsStopPoint),
             std::to_string(x),
             std::to_string(y),
-            std::to_string(theta)
+            std::to_string(theta),
+            std::to_string(only_rotate),
         };
 
         SendOrder("WAYPOINT", data);

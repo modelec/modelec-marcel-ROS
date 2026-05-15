@@ -94,7 +94,7 @@ namespace Modelec
 
         void AddWaypoints(modelec_interfaces::msg::OdometryWaypoints::SharedPtr msg);
         void AddWaypoint(modelec_interfaces::msg::OdometryWaypoint::SharedPtr msg);
-        void AddWaypoint(int index, bool IsStopPoint, long x, long y, double theta);
+        void AddWaypoint(int index, bool IsStopPoint, long x, long y, double theta, bool only_rotate);
 
         void SetStart(const modelec_interfaces::msg::OdometryStart::SharedPtr msg);
         void SetStart(bool start);

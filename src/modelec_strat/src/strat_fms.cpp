@@ -15,7 +15,7 @@ namespace Modelec
 
     StratFMS::StratFMS() : Node("start_fms")
     {
-        std::string data_dir = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data/";
+        std::string data_dir = ament_index_cpp::get_package_share_directory("modelec_strat") + "/data";
         if (!Config::load(data_dir + "/config.xml"))
         {
             RCLCPP_ERROR(get_logger(), "Failed to load config file: %s", (data_dir + "/config.xml").c_str());

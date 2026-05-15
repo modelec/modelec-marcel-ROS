@@ -32,7 +32,7 @@
             </unrotated>
             <rotated>
                 <msg id="0" start_angle="1.88" end_angle="2.98" duration_s="1" />
-                <msg id="1" start_angle="22.1" end_angle="1.07" duration_s="1" />
+                <msg id="1" start_angle="2.1" end_angle="1.07" duration_s="1" />
                 <msg id="2" start_angle="0.5" end_angle="0" duration_s="0.7" />
                 <msg id="3" start_angle="2.9" end_angle="3.3" duration_s="0.7" />
             </rotated>

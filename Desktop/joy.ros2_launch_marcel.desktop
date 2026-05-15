@@ -3,6 +3,7 @@ Type=Application
 Name=Joy
 Comment=Lance le système ROS 2 avec GUI
 Exec=/home/modelec/Modelec-ROS2/start_ros2.sh
+Path=/home/modelec/Modelec-ROS2/
 Icon=utilities-terminal
 Terminal=true
 Categories=Utility;

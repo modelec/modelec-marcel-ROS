@@ -3,6 +3,7 @@ Type=Application
 Name=No GUI
 Comment=Lance le système ROS 2 Sans GUI
 Exec=/home/modelec/Modelec-ROS2/start_ros2.sh with_rplidar:=false with_gui:=false
+Path=/home/modelec/Modelec-ROS2/
 Icon=utilities-terminal
 Terminal=true
 Categories=Utility;

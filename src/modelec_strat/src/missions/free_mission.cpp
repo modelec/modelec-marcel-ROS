@@ -155,7 +155,7 @@ namespace Modelec {
 
                 auto depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
 
-                auto pos = depoPoint.GetTakePosition(300);
+                auto pos = depoPoint.GetTakePosition(400);
                 pos.theta = Point::normalizeAngle(pos.theta + (side_ == BaseAction::FRONT ? 0 : M_PI));
 
                 if (nav_->GoTo(pos, true, Pathfinding::FREE | Pathfinding::OBSTACLE) != Pathfinding::FREE)

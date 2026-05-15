@@ -4,8 +4,8 @@
 
 namespace Modelec
 {
-    GoHomeMission::GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const rclcpp::Time& start_time) :
-        Mission(MissionStatus::READY), MoveMission(nav), MinTimeMission(),
+    GoHomeMission::GoHomeMission(const std::shared_ptr<NavigationHelper>& nav, const std::shared_ptr<ActionExecutor>& action_executor, const rclcpp::Time& start_time) :
+        Mission(MissionStatus::READY), MoveMission(nav), MinTimeMission(), ActionMission(action_executor),
         start_time_(start_time)
     {
     }
@@ -14,6 +14,7 @@ namespace Modelec
     {
         MoveMission::Start(node);
         MinTimeMission::Start(node);
+        ActionMission::Start(node);
 
         mission_score_ = Config::get<int>("config.mission_score.go_home", 0);
 
@@ -28,12 +29,13 @@ namespace Modelec
         steps_.push(AWAIT_90);
         steps_.push(GO_HOME);
         steps_.push(GO_CLOSE);
+        steps_.push(RELEASE_BLOCK_IF_NOT_EMPTY);
         steps_.push(DONE);
     }
 
     bool GoHomeMission::Update()
     {
-        if (!MoveMission::Update() || !MinTimeMission::Update())
+        if (!MoveMission::Update() || !MinTimeMission::Update() || !ActionMission::Update())
         {
             return false;
         }
@@ -86,6 +88,18 @@ namespace Modelec
 
                 go_timeout_ = node_->now();
             }
+            break;
+        case RELEASE_BLOCK_IF_NOT_EMPTY:
+            {
+                if (action_executor_->HasOneBox())
+                {
+                    action_executor_->Down(BaseAction::BOTH);
+                    action_executor_->Free({{0, BaseAction::FRONT}, {1, BaseAction::FRONT}, {2, BaseAction::FRONT}, {3, BaseAction::FRONT},
+                        {0, BaseAction::BACK}, {1, BaseAction::BACK}, {2, BaseAction::BACK}, {3, BaseAction::BACK}});
+                    deploy_time_ = node_->now();
+                }
+            }
+
             break;
         case DONE:
             {

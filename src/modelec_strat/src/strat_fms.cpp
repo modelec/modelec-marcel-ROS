@@ -204,9 +204,9 @@ namespace Modelec
                     Transition(State::STOP, "All missions done");
                 }
 
-                else if (duration > 60 && !action_executor_->IsEmpty() && duration < 80)
+                else if (duration > 60 && action_executor_->IsEmpty() && duration < 80)
                 {
-                    Transition(State::FREE_MISSION, "No Time left, freeing boxes");
+                    Transition(State::TAKE_MISSION, "No Time left, freeing boxes");
                 }
                 else if (duration < 80)
                 {
@@ -356,7 +356,7 @@ namespace Modelec
         case State::DO_GO_HOME:
             if (!current_mission_)
             {
-                current_mission_ = std::make_unique<GoHomeMission>(nav_, match_start_time_);
+                current_mission_ = std::make_unique<GoHomeMission>(nav_, action_executor_, match_start_time_);
                 current_mission_->Start(shared_from_this());
             }
             current_mission_->Update();

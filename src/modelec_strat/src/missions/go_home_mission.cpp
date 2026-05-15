@@ -49,9 +49,9 @@ namespace Modelec
             {
                 auto pos = nav_->GetHomePosition();
                 home_point_ = Point(pos->x, pos->y, pos->theta);
-                if (nav_->CanGoTo(home_point_.GetTakeBasePosition()) != Pathfinding::FREE)
+                if (nav_->CanGoTo(home_point_.GetTakePosition(BASE_DISTANCE, home_point_.theta - M_PI)) != Pathfinding::FREE)
                 {
-                    if (nav_->CanGoTo(home_point_.GetTakeBasePosition(), true) != Pathfinding::FREE)
+                    if (nav_->CanGoTo(home_point_.GetTakePosition(BASE_DISTANCE, home_point_.theta - M_PI), true) != Pathfinding::FREE)
                     {
                         status_ = MissionStatus::FAILED;
                         return false;
@@ -70,9 +70,9 @@ namespace Modelec
             break;
         case GO_HOME:
             {
-                if (nav_->GoTo(home_point_.GetTakeBasePosition()) != Pathfinding::FREE)
+                if (nav_->GoTo(home_point_.GetTakePosition(BASE_DISTANCE, home_point_.theta - M_PI)) != Pathfinding::FREE)
                 {
-                    if (nav_->GoTo(home_point_.GetTakeBasePosition(), true) != Pathfinding::FREE)
+                    if (nav_->GoTo(home_point_.GetTakePosition(BASE_DISTANCE, home_point_.theta - M_PI), true) != Pathfinding::FREE)
                     {
                         status_ = MissionStatus::FAILED;
                         return false;

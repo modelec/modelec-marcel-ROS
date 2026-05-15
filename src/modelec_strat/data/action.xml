@@ -14,8 +14,8 @@
         <!--<servo id="11" angle="1" />-->
         <!--<servo id="12" angle="1" />-->
         <!--<servo id="13" angle="1" />-->
-        <servo id="14" angle="1.57" />
-        <servo id="15" angle="0" />
+        <servo id="14" angle="1.8" />
+        <servo id="15" angle="0.2" />
         <!--<servo id="16" angle="1" />-->
         <!--<servo id="17" angle="1" />-->
         <!--<servo id="18" angle="1" />-->
@@ -107,12 +107,12 @@
     </look_on>
     <thermo>
         <left>
-            <deploy id="15" start_angle="0" end_angle="1.57" duration_s="0.5" />
-            <undeploy id="15" start_angle="1.57" end_angle="0" duration_s="0.5" />
+            <deploy id="15" start_angle="0.2" end_angle="1.75" duration_s="0.5" />
+            <undeploy id="15" start_angle="1.75" end_angle="0.2" duration_s="0.5" />
         </left>
         <right>
-            <deploy id="14" start_angle="1.57" end_angle="0" duration_s="0.5" />
-            <undeploy id="14" start_angle="0" end_angle="1.57" duration_s="0.5" />
+            <deploy id="14" start_angle="1.8" end_angle="0" duration_s="0.5" />
+            <undeploy id="14" start_angle="0" end_angle="1.8" duration_s="0.5" />
         </right>
     </thermo>
 </action>

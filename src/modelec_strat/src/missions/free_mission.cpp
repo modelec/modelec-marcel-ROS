@@ -57,9 +57,9 @@ namespace Modelec {
                     return false;
                 }
 
-                auto depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
+                depoPoint = target_deposite_zone_->GetBestTakePosition(Point(currPos->x, currPos->y, currPos->theta));
 
-                auto pos = depoPoint.GetTakePosition(200.0);
+                auto pos = depoPoint.GetTakePosition(250.0);
 
                 pos.theta = Point::normalizeAngle(pos.theta + (side_ == BaseAction::FRONT ? 0 : M_PI));
 
@@ -177,9 +177,11 @@ namespace Modelec {
 
                 action_executor_->SendPoint(mission_score_);
 
+                auto p = depoPoint.GetTakePosition(50.0);
+
                 obs->SetPosition(
-                    target_deposite_zone_->GetPosition().x,
-                    target_deposite_zone_->GetPosition().y,
+                    p.x,
+                    p.y,
                     pos->theta);
 
                 obs->SetAtObjective(true);

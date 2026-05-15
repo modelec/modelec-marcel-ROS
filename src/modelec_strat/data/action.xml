@@ -60,9 +60,9 @@
                 <msg id="0" start_angle="3.17" end_angle="1.97" duration_s="1" />
                 <msg id="1" start_angle="1" end_angle="2.22" duration_s="1" />
                 <msg id="2" start_angle="3.45" end_angle="2.95" duration_s="0.3" />
-                <msg id="2" start_angle="2.95" end_angle="0.5" duration_s="0.3" delay_s="0.3" />
+                <msg id="2" start_angle="2.95" end_angle="0.5" duration_s="0.2" delay_s="0.3" />
                 <msg id="3" start_angle="0" end_angle="0.6" duration_s="0.3" />
-                <msg id="3" start_angle="0.6" end_angle="2.9" duration_s="0.3" delay_s="0.3" />
+                <msg id="3" start_angle="0.6" end_angle="2.9" duration_s="0.2" delay_s="0.3" />
             </unrotated>
             <rotated>
                 <msg id="0" start_angle="3.03" end_angle="1.97" duration_s="1" />

@@ -117,11 +117,11 @@ namespace Modelec
     {
         for (size_t i = 0; i < colorVec.size() && i < colors_.size(); ++i)
         {
-            if (colorVec[i] == "yellow")
+            if (colorVec[i] == "blue")
             {
                 colors_[i] = YELLOW;
             }
-            else if (colorVec[i] == "blue")
+            else if (colorVec[i] == "yellow")
             {
                 colors_[i] = BLUE;
             }

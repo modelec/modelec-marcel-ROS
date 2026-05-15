@@ -1,7 +1,7 @@
 <action>
     <init>
-        <servo id="0" angle="1.88" />
-        <servo id="1" angle="2.1" />
+        <servo id="0" angle="1.97" />
+        <servo id="1" angle="2.22" />
         <servo id="2" angle="0.5" />
         <servo id="3" angle="2.9" />
         <servo id="4" angle="1" />
@@ -23,23 +23,23 @@
     <down>
         <front>
             <unrotated>
-                <msg id="0" start_angle="1.88" end_angle="3.12" duration_s="1" />
-                <msg id="1" start_angle="2.1" end_angle="0.91" duration_s="1" />
+                <msg id="0" start_angle="1.97" end_angle="3.17" duration_s="1" />
+                <msg id="1" start_angle="2.22" end_angle="1" duration_s="1" />
                 <msg id="2" start_angle="0.5" end_angle="2.85" duration_s="0.5" />
                 <msg id="2" start_angle="2.85" end_angle="3.45" duration_s="0.4" delay_s="0.5" />
                 <msg id="3" start_angle="2.9" end_angle="0.9" duration_s="0.5" />
                 <msg id="3" start_angle="0.9" end_angle="0" duration_s="0.4" delay_s="0.5" />
             </unrotated>
             <rotated>
-                <msg id="0" start_angle="1.88" end_angle="2.98" duration_s="1" />
-                <msg id="1" start_angle="2.1" end_angle="1.07" duration_s="1" />
+                <msg id="0" start_angle="1.97" end_angle="2.98" duration_s="1" />
+                <msg id="1" start_angle="2.22" end_angle="1.07" duration_s="1" />
                 <msg id="2" start_angle="0.5" end_angle="0" duration_s="0.7" />
                 <msg id="3" start_angle="2.9" end_angle="3.3" duration_s="0.7" />
             </rotated>
         </front>
         <back>
             <unrotated>
-                <msg id="8" start_angle="1.88" end_angle="2.93" duration_s="1" />
+                <msg id="8" start_angle="1.97" end_angle="2.93" duration_s="1" />
                 <msg id="9" start_angle="2.2" end_angle="0.91" duration_s="1" />
                 <msg id="10" start_angle="0.5" end_angle="2.45" duration_s="0.6" />
                 <msg id="10" start_angle="2.45" end_angle="3.05" duration_s="0.3" delay_s="0.6" />
@@ -47,7 +47,7 @@
                 <msg id="11" start_angle="0.9" end_angle="0.3" duration_s="0.3" delay_s="0.6" />
             </unrotated>
             <rotated>
-                <msg id="8" start_angle="1.88" end_angle="2.93" duration_s="2" />
+                <msg id="8" start_angle="1.97" end_angle="2.93" duration_s="2" />
                 <msg id="9" start_angle="2.2" end_angle="0.91" duration_s="2" />
                 <msg id="10" start_angle="0.5" end_angle="0" duration_s="2" />
                 <msg id="11" start_angle="2.6" end_angle="3.4" duration_s="2" />
@@ -57,16 +57,16 @@
     <up>
         <front>
             <unrotated>
-                <msg id="0" start_angle="3.12" end_angle="1.88" duration_s="1" />
-                <msg id="1" start_angle="0.91" end_angle="2.1" duration_s="1" />
+                <msg id="0" start_angle="3.17" end_angle="1.97" duration_s="1" />
+                <msg id="1" start_angle="1" end_angle="2.22" duration_s="1" />
                 <msg id="2" start_angle="3.45" end_angle="2.95" duration_s="0.3" />
                 <msg id="2" start_angle="2.95" end_angle="0.5" duration_s="0.3" delay_s="0.3" />
                 <msg id="3" start_angle="0" end_angle="0.6" duration_s="0.3" />
                 <msg id="3" start_angle="0.6" end_angle="2.9" duration_s="0.3" delay_s="0.3" />
             </unrotated>
             <rotated>
-                <msg id="0" start_angle="2.98" end_angle="1.88" duration_s="1" />
-                <msg id="1" start_angle="1.07" end_angle="2.1" duration_s="1" />
+                <msg id="0" start_angle="2.98" end_angle="1.97" duration_s="1" />
+                <msg id="1" start_angle="1.07" end_angle="2.22" duration_s="1" />
                 <msg id="2" start_angle="0" end_angle="0.5" duration_s="1" />
                 <msg id="3" start_angle="3.3" end_angle="2.9" duration_s="1" />
             </rotated>

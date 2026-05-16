@@ -89,6 +89,8 @@
                 <mission id="10" />
                 <mission id="12" />
                 <mission id="11" />
+                <mission id="10" />
+                <mission id="11" />
             </missions>
         </static>
         <two-sided>false</two-sided>
@@ -183,9 +185,9 @@
             <pos p="10" i="0.0" d="0.0" />
             <theta p="14" i="0.0" d="0.2" />-->
 
-            <left p="16" i="0.0" d="0.0" />
-            <right p="16" i="0.0" d="0.0" />
-            <pos p="14" i="0.0" d="0.0" />
+            <left p="15" i="0.0" d="0.0" />
+            <right p="15" i="0.0" d="0.0" />
+            <pos p="12" i="0.0" d="0.0" />
             <theta p="20" i="0.0" d="0.2" />
         </pid>
     </odo>
